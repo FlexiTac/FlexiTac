@@ -1,0 +1,616 @@
+{
+  "review_date": "2026-10-11",
+  "timezone": "America/New_York",
+  "python": "3.9.6",
+  "source_commit": "045b737c8c0a93be4518dd53f5b65158fc8e6989",
+  "default_manifest": {
+    "format": "tactile-fpc-manifest/v1",
+    "generator": "deterministic-sensor-core/0.2.0",
+    "deterministic": true,
+    "design_sha256": "42b62b43330294185606c70bef41bda6b2e4f4b5ccbae739c39f5c16d29d7779",
+    "build_id": "tactile-fpc-12x32-42b62b433302",
+    "slug": "tactile-fpc-12x32",
+    "profile_sha256": "3f753e4c4f2183da677e3749cf1db64547c7c292a4c4da9c8695bbc2f87aca3d",
+    "profile": {
+      "id": "jlc-fpc-standard-v1",
+      "revision": "2026-09-13"
+    },
+    "geometry_valid": true,
+    "production_ready": false,
+    "output_status": "phase1_geometry_only",
+    "requires_final_jlc_review": true,
+    "board_summary": {
+      "row": {
+        "id": "top_rows_fpc",
+        "role": "rows",
+        "physical_side": "top",
+        "outline_width_mm": 72.2,
+        "outline_height_mm": 36.9,
+        "outline_bbox_mm": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 72.2,
+          "height": 36.9
+        },
+        "channel_count": 12,
+        "electrode_count": 12,
+        "route_count": 12,
+        "stiffener_count": 1,
+        "routed_cutout_count": 0
+      },
+      "column": {
+        "id": "bottom_columns_fpc",
+        "role": "columns",
+        "physical_side": "bottom",
+        "outline_width_mm": 64.9,
+        "outline_height_mm": 70.9,
+        "outline_bbox_mm": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 64.9,
+          "height": 70.9
+        },
+        "channel_count": 32,
+        "electrode_count": 32,
+        "route_count": 32,
+        "stiffener_count": 1,
+        "routed_cutout_count": 1
+      }
+    },
+    "checks": {
+      "error_count": 0,
+      "warning_count": 0,
+      "single_copper_fpc": true,
+      "polyimide_stiffener_thickness_mm": 0.2,
+      "source_independent": true
+    }
+  },
+  "default_boards": {
+    "row": {
+      "metrics": {
+        "outline_width_mm": 72.2,
+        "outline_height_mm": 36.9,
+        "outline_bbox_mm": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 72.2,
+          "height": 36.9
+        },
+        "channel_count": 12,
+        "electrode_count": 12,
+        "route_count": 12,
+        "stiffener_count": 1,
+        "routed_cutout_count": 0
+      },
+      "verification": {
+        "drc_version": "route-envelope-v1",
+        "route_segment_count": 24,
+        "minimum_inter_net_center_distance_mm": 0.5,
+        "minimum_inter_net_copper_clearance_mm": 0.246,
+        "minimum_required_inter_net_copper_clearance_mm": 0.246,
+        "closest_inter_net_route_pair": {
+          "nets": [
+            "ROW_02",
+            "ROW_01"
+          ],
+          "segment_indices": [
+            0,
+            0
+          ]
+        },
+        "inter_net_copper_overlap_segment_pair_count": 0,
+        "inter_net_clearance_violation_segment_pair_count": 0,
+        "minimum_route_to_outline_center_distance_mm": 0.9,
+        "minimum_route_to_outline_copper_clearance_mm": 0.773,
+        "minimum_required_outline_center_clearance_mm": 0.75,
+        "minimum_route_to_cutout_center_distance_mm": null,
+        "minimum_route_to_cutout_copper_clearance_mm": null,
+        "route_clearance_passed": true,
+        "outline_containment_passed": true,
+        "cutout_clearance_passed": true
+      },
+      "active_region": {
+        "x": 8.05,
+        "y": 12.75,
+        "width": 63.4,
+        "height": 23.4
+      }
+    },
+    "column": {
+      "metrics": {
+        "outline_width_mm": 64.9,
+        "outline_height_mm": 70.9,
+        "outline_bbox_mm": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 64.9,
+          "height": 70.9
+        },
+        "channel_count": 32,
+        "electrode_count": 32,
+        "route_count": 32,
+        "stiffener_count": 1,
+        "routed_cutout_count": 1
+      },
+      "verification": {
+        "drc_version": "route-envelope-v1",
+        "route_segment_count": 1088,
+        "minimum_inter_net_center_distance_mm": 0.450332,
+        "minimum_inter_net_copper_clearance_mm": 0.196332,
+        "minimum_required_inter_net_copper_clearance_mm": 0.17,
+        "closest_inter_net_route_pair": {
+          "nets": [
+            "COL_01",
+            "COL_02"
+          ],
+          "segment_indices": [
+            0,
+            1
+          ]
+        },
+        "inter_net_copper_overlap_segment_pair_count": 0,
+        "inter_net_clearance_violation_segment_pair_count": 0,
+        "minimum_route_to_outline_center_distance_mm": 0.332897,
+        "minimum_route_to_outline_copper_clearance_mm": 0.205897,
+        "minimum_required_outline_center_clearance_mm": 0.327,
+        "minimum_route_to_cutout_center_distance_mm": 0.75,
+        "minimum_route_to_cutout_copper_clearance_mm": 0.623,
+        "route_clearance_passed": true,
+        "outline_containment_passed": true,
+        "cutout_clearance_passed": true
+      },
+      "active_region": {
+        "x": 0.75,
+        "y": 46.75,
+        "width": 63.4,
+        "height": 23.4
+      }
+    }
+  },
+  "exports": {
+    "top_fpc_gerber_zip": {
+      "bytes": 2524,
+      "sha256": "5a11cffa7436777d664c10ce3e93bf5031b0dc345872941a6a60bae0ee1cbc27",
+      "members": [
+        "Gerber_BoardOutlineLayer.GKO",
+        "Gerber_BottomStiffenerLayer_pib_0.2.GBSL",
+        "Gerber_TopLayer.GTL",
+        "Gerber_TopSolderMaskLayer.GTS",
+        "jlcpcb.json"
+      ]
+    },
+    "bottom_fpc_gerber_zip": {
+      "bytes": 9066,
+      "sha256": "fe38e863f2481f32c9306763b8e045521a6f9cb1b3922bafd338138a9f91a256",
+      "members": [
+        "Gerber_BoardOutlineLayer.GKO",
+        "Gerber_BottomStiffenerLayer_pib_0.2.GBSL",
+        "Gerber_TopLayer.GTL",
+        "Gerber_TopSolderMaskLayer.GTS",
+        "jlcpcb.json"
+      ]
+    },
+    "project_review_bundle_zip": {
+      "bytes": 25440,
+      "sha256": "bf286483817910405dce37fd0b9090e9bdaa1f11175302468f00291bf5fe4b28",
+      "members": [
+        "derived-layout.json",
+        "design.json",
+        "manifest.json",
+        "previews/bottom_fpc.svg",
+        "previews/top_fpc.svg"
+      ]
+    }
+  },
+  "connector_pad_audit": {
+    "row": {
+      "pad_center": [
+        6.4,
+        1.45
+      ],
+      "expected_lower_left_mm": [
+        6.25,
+        0.75
+      ],
+      "emitted_lower_left_mm": [
+        6.4,
+        1.45
+      ],
+      "offset_mm": [
+        0.15,
+        0.7
+      ]
+    },
+    "column": {
+      "pad_center": [
+        24.7,
+        1.45
+      ],
+      "expected_lower_left_mm": [
+        24.55,
+        0.75
+      ],
+      "emitted_lower_left_mm": [
+        24.7,
+        1.45
+      ],
+      "offset_mm": [
+        0.15,
+        0.7
+      ]
+    }
+  },
+  "stack_placement_audit": {
+    "column_active_x_mm": 0.75,
+    "current_flipped_left_mm": -1.0,
+    "expected_flipped_left_mm": -1.75,
+    "offset_mm": 0.75,
+    "method": "Algebraic placement check against common active-region origin; no visual browser test."
+  },
+  "representative_variants": [
+    {
+      "input": {
+        "columns": 1
+      },
+      "ok": true,
+      "error_codes": [],
+      "boards": {
+        "row": {
+          "outline_width_mm": 10.2,
+          "outline_height_mm": 36.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 10.2,
+            "height": 36.9
+          },
+          "channel_count": 12,
+          "electrode_count": 12,
+          "route_count": 12,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        },
+        "column": {
+          "outline_width_mm": 2.9,
+          "outline_height_mm": 50.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 2.9,
+            "height": 50.9
+          },
+          "channel_count": 1,
+          "electrode_count": 1,
+          "route_count": 1,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        }
+      }
+    },
+    {
+      "input": {
+        "columns": 16
+      },
+      "ok": true,
+      "error_codes": [],
+      "boards": {
+        "row": {
+          "outline_width_mm": 40.2,
+          "outline_height_mm": 36.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 40.2,
+            "height": 36.9
+          },
+          "channel_count": 12,
+          "electrode_count": 12,
+          "route_count": 12,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        },
+        "column": {
+          "outline_width_mm": 32.9,
+          "outline_height_mm": 50.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 32.9,
+            "height": 50.9
+          },
+          "channel_count": 16,
+          "electrode_count": 16,
+          "route_count": 16,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        }
+      }
+    },
+    {
+      "input": {
+        "columns": 17
+      },
+      "ok": true,
+      "error_codes": [],
+      "boards": {
+        "row": {
+          "outline_width_mm": 42.2,
+          "outline_height_mm": 36.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 42.2,
+            "height": 36.9
+          },
+          "channel_count": 12,
+          "electrode_count": 12,
+          "route_count": 12,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        },
+        "column": {
+          "outline_width_mm": 34.9,
+          "outline_height_mm": 70.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 34.9,
+            "height": 70.9
+          },
+          "channel_count": 17,
+          "electrode_count": 17,
+          "route_count": 17,
+          "stiffener_count": 1,
+          "routed_cutout_count": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "columns": 20
+      },
+      "ok": true,
+      "error_codes": [],
+      "boards": {
+        "row": {
+          "outline_width_mm": 48.2,
+          "outline_height_mm": 36.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 48.2,
+            "height": 36.9
+          },
+          "channel_count": 12,
+          "electrode_count": 12,
+          "route_count": 12,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        },
+        "column": {
+          "outline_width_mm": 40.9,
+          "outline_height_mm": 70.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 40.9,
+            "height": 70.9
+          },
+          "channel_count": 20,
+          "electrode_count": 20,
+          "route_count": 20,
+          "stiffener_count": 1,
+          "routed_cutout_count": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "columns": 32
+      },
+      "ok": true,
+      "error_codes": [],
+      "boards": {
+        "row": {
+          "outline_width_mm": 72.2,
+          "outline_height_mm": 36.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 72.2,
+            "height": 36.9
+          },
+          "channel_count": 12,
+          "electrode_count": 12,
+          "route_count": 12,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        },
+        "column": {
+          "outline_width_mm": 64.9,
+          "outline_height_mm": 70.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 64.9,
+            "height": 70.9
+          },
+          "channel_count": 32,
+          "electrode_count": 32,
+          "route_count": 32,
+          "stiffener_count": 1,
+          "routed_cutout_count": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "connector_side": "left"
+      },
+      "ok": true,
+      "error_codes": [],
+      "boards": {
+        "row": {
+          "outline_width_mm": 36.9,
+          "outline_height_mm": 72.2,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 36.9,
+            "height": 72.2
+          },
+          "channel_count": 12,
+          "electrode_count": 12,
+          "route_count": 12,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        },
+        "column": {
+          "outline_width_mm": 70.9,
+          "outline_height_mm": 64.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 70.9,
+            "height": 64.9
+          },
+          "channel_count": 32,
+          "electrode_count": 32,
+          "route_count": 32,
+          "stiffener_count": 1,
+          "routed_cutout_count": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "role_mapping": {
+          "top": "columns",
+          "bottom": "rows"
+        }
+      },
+      "ok": true,
+      "error_codes": [],
+      "boards": {
+        "row": {
+          "outline_width_mm": 72.2,
+          "outline_height_mm": 31.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 72.2,
+            "height": 31.9
+          },
+          "channel_count": 12,
+          "electrode_count": 12,
+          "route_count": 12,
+          "stiffener_count": 1,
+          "routed_cutout_count": 0
+        },
+        "column": {
+          "outline_width_mm": 64.9,
+          "outline_height_mm": 75.9,
+          "outline_bbox_mm": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 64.9,
+            "height": 75.9
+          },
+          "channel_count": 32,
+          "electrode_count": 32,
+          "route_count": 32,
+          "stiffener_count": 1,
+          "routed_cutout_count": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "pitch_x_mm": 0.6,
+        "taxel_width_mm": 0.3
+      },
+      "ok": false,
+      "error_codes": [
+        "E_DUAL_LANE_WIDTH"
+      ],
+      "boards": {}
+    }
+  ],
+  "http_smoke_checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "bytes": 6755
+    },
+    {
+      "path": "/static/app.js",
+      "status": 200,
+      "bytes": 11378
+    },
+    {
+      "path": "/static/styles.css",
+      "status": 200,
+      "bytes": 8988
+    },
+    {
+      "path": "/api/default",
+      "status": 200,
+      "bytes": 850
+    },
+    {
+      "path": "/api/generate",
+      "status": 200,
+      "bytes": 182669
+    },
+    {
+      "path": "/api/export/project",
+      "status": 200,
+      "bytes": 25440
+    },
+    {
+      "path": "/api/export/top-gerber",
+      "status": 200,
+      "bytes": 2524
+    },
+    {
+      "path": "/api/export/bottom-gerber",
+      "status": 200,
+      "bytes": 9066
+    },
+    {
+      "path": "/api/generate",
+      "status": 200,
+      "bytes": 2899
+    },
+    {
+      "path": "/api/export/top-gerber",
+      "status": 422,
+      "bytes": 235
+    },
+    {
+      "path": "/api/generate",
+      "status": 400,
+      "bytes": 43
+    },
+    {
+      "path": "/static/../app.py",
+      "status": 404,
+      "bytes": 33
+    },
+    {
+      "path": "/no-such-route",
+      "status": 404,
+      "bytes": 27
+    }
+  ],
+  "regression_suite": {
+    "command": "PYTHONPATH=. python3 -m unittest discover -s tests -v",
+    "tests": 24,
+    "duration_seconds": 21.788,
+    "result": "OK"
+  },
+  "javascript_syntax_check": {
+    "command": "node --check web/app.js",
+    "exit_code": 0
+  }
+}

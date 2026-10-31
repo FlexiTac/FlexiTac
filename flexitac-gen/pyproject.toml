@@ -1,0 +1,19 @@
+# Project metadata only: the application runs from this source tree
+# (python3 app.py / cli.py) and is not packaged for installation; the engine
+# reads profiles/ next to its sources.  The version follows the generator
+# (engine.GENERATOR_VERSION); the exporter has its own (exporters.EXPORTER_VERSION).
+
+[project]
+name = "tactile-fpc-customizer"
+version = "0.4.0"
+description = "Local deterministic generator of paired Row/Column tactile-sensor FPCs with Direct Gerber review candidates"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+dependencies = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Private :: Do Not Upload",
+]

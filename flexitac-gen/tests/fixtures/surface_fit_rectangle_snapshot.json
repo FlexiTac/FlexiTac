@@ -1,0 +1,2300 @@
+{
+ "cases": {
+  "crank_tip_pad": [
+   {
+    "build_id": "surface-17x18-b4476fbe2f96",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.694,
+     "columns": 18,
+     "field_coverage": 0.399808,
+     "field_mm": [
+      35.4,
+      33.4
+     ],
+     "min_clearance_mm": 0.15693,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.896,
+     "rows": 17,
+     "stack_width_mm": 40.003801,
+     "taxels": 306
+    },
+    "outlines_uv_sha256": "d39f8c49dd45f0154576b4f48a9ab43aa47f03201d3a730a16f1154b6c89c67e",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 7,
+     "bottom_board": "columns",
+     "exit_edges": [
+      9,
+      10,
+      11
+     ],
+     "field_origin_base": [
+      0.674638,
+      3.598869
+     ],
+     "field_origin_uv": [
+      25.667929,
+      21.424295
+     ],
+     "field_x_uv": [
+      -0.999999927,
+      -0.000381475
+     ],
+     "field_y_uv": [
+      0.000381475,
+      -0.999999927
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-18x17-cfd7562f2065",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.9,
+     "columns": 17,
+     "field_coverage": 0.399808,
+     "field_mm": [
+      33.4,
+      35.4
+     ],
+     "min_clearance_mm": 0.034056,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.857,
+     "rows": 18,
+     "stack_width_mm": 38.207001,
+     "taxels": 306
+    },
+    "outlines_uv_sha256": "cb3629164922e9df5ae4e96a34a920d36f922f0d43f3ecd52f47dd53c1c70305",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 6,
+     "bottom_board": "columns",
+     "exit_edges": [
+      8
+     ],
+     "field_origin_base": [
+      32.258951,
+      3.711214
+     ],
+     "field_origin_uv": [
+      22.626555,
+      -12.717299
+     ],
+     "field_x_uv": [
+      9.0774e-05,
+      0.999999996
+     ],
+     "field_y_uv": [
+      -0.999999996,
+      9.0774e-05
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-16x19-152f7f052c52",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 21.045,
+     "columns": 19,
+     "field_coverage": 0.397103,
+     "field_mm": [
+      37.4,
+      31.4
+     ],
+     "min_clearance_mm": 0.157671,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.458,
+     "rows": 16,
+     "stack_width_mm": 41.800601,
+     "taxels": 304
+    },
+    "outlines_uv_sha256": "5b74eb375c4ed9bac28532b4ccfaca83a379843213ac2b342efbb717e82c38fc",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 7,
+     "bottom_board": "columns",
+     "exit_edges": [
+      9,
+      10,
+      11
+     ],
+     "field_origin_base": [
+      0.674638,
+      4.028023
+     ],
+     "field_origin_uv": [
+      25.668092,
+      20.995141
+     ],
+     "field_x_uv": [
+      -0.999999927,
+      -0.000381475
+     ],
+     "field_y_uv": [
+      0.000381475,
+      -0.999999927
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-19x16-0349ca18b2aa",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.898,
+     "columns": 16,
+     "field_coverage": 0.397103,
+     "field_mm": [
+      31.4,
+      37.4
+     ],
+     "min_clearance_mm": 0.059034,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.644,
+     "rows": 19,
+     "stack_width_mm": 36.410201,
+     "taxels": 304
+    },
+    "outlines_uv_sha256": "3011fe323f8d1b81887b0c11a4d80addea8ba0b604ccde04d07c8bce12791a67",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 6,
+     "bottom_board": "columns",
+     "exit_edges": [
+      8
+     ],
+     "field_origin_base": [
+      34.003943,
+      3.630705
+     ],
+     "field_origin_uv": [
+      22.707222,
+      -10.972315
+     ],
+     "field_x_uv": [
+      9.0774e-05,
+      0.999999996
+     ],
+     "field_y_uv": [
+      -0.999999996,
+      9.0774e-05
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-15x20-436d77e60df2",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.309,
+     "columns": 20,
+     "field_coverage": 0.391693,
+     "field_mm": [
+      39.4,
+      29.4
+     ],
+     "min_clearance_mm": 0.158743,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "default",
+     "row_tail_mm": 21.12,
+     "rows": 15,
+     "stack_width_mm": 44.334001,
+     "taxels": 300
+    },
+    "outlines_uv_sha256": "cab4329448166174c1d4f7be5d403859179d7fe27c5d45dd44a01300d107d09f",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 7,
+     "bottom_board": "columns",
+     "exit_edges": [
+      9,
+      10,
+      11
+     ],
+     "field_origin_base": [
+      0.674638,
+      3.759023
+     ],
+     "field_origin_uv": [
+      25.66799,
+      21.26414
+     ],
+     "field_x_uv": [
+      -0.999999927,
+      -0.000381475
+     ],
+     "field_y_uv": [
+      0.000381475,
+      -0.999999927
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "disk_plate": [
+   {
+    "build_id": "surface-19x12-fd3c866aee25",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 25.233,
+     "columns": 12,
+     "field_coverage": 0.446282,
+     "field_mm": [
+      23.4,
+      37.4
+     ],
+     "min_clearance_mm": 0.0303,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 24.258,
+     "rows": 19,
+     "stack_width_mm": 28.410201,
+     "taxels": 228
+    },
+    "outlines_uv_sha256": "14ded58b37e9b26a60199c97eeccd0c7378557d559dfefdcfa8b5b5e34f0d91f",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "arc",
+     "base_side": "arc0",
+     "bottom_board": "columns",
+     "exit_edges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+     ],
+     "field_origin_base": [
+      0.589511,
+      3.078702
+     ],
+     "field_origin_uv": [
+      -13.7499,
+      -17.4001
+     ],
+     "field_x_uv": [
+      1.0,
+      0.0
+     ],
+     "field_y_uv": [
+      -0.0,
+      1.0
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-18x12-839dd57f01ea",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 27.233,
+     "columns": 12,
+     "field_coverage": 0.422416,
+     "field_mm": [
+      23.4,
+      35.4
+     ],
+     "min_clearance_mm": 0.097462,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 26.313,
+     "rows": 18,
+     "stack_width_mm": 28.207001,
+     "taxels": 216
+    },
+    "outlines_uv_sha256": "1f55bf50bba163fff134b931b116eb36e6885c122e7144cd032f2ff84c2e43e4",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "arc",
+     "base_side": "arc0",
+     "bottom_board": "columns",
+     "exit_edges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+     ],
+     "field_origin_base": [
+      0.714511,
+      5.078702
+     ],
+     "field_origin_uv": [
+      -13.6249,
+      -15.4001
+     ],
+     "field_x_uv": [
+      1.0,
+      0.0
+     ],
+     "field_y_uv": [
+      -0.0,
+      1.0
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-19x11-881a9d3e9657",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 25.394,
+     "columns": 11,
+     "field_coverage": 0.408138,
+     "field_mm": [
+      21.4,
+      37.4
+     ],
+     "min_clearance_mm": 0.088102,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "default",
+     "row_tail_mm": 24.321,
+     "rows": 19,
+     "stack_width_mm": 27.350001,
+     "taxels": 209
+    },
+    "outlines_uv_sha256": "2ce91d8fc42df419516aef5db33260492ab73add95959c533f9b0ac9807cc47e",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "arc",
+     "base_side": "arc0",
+     "bottom_board": "columns",
+     "exit_edges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+     ],
+     "field_origin_base": [
+      1.089511,
+      3.328702
+     ],
+     "field_origin_uv": [
+      -13.2499,
+      -17.1501
+     ],
+     "field_x_uv": [
+      1.0,
+      0.0
+     ],
+     "field_y_uv": [
+      -0.0,
+      1.0
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-17x12-5348eb9d783d",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 29.233,
+     "columns": 12,
+     "field_coverage": 0.398551,
+     "field_mm": [
+      23.4,
+      33.4
+     ],
+     "min_clearance_mm": 0.097462,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 28.379,
+     "rows": 17,
+     "stack_width_mm": 28.003801,
+     "taxels": 204
+    },
+    "outlines_uv_sha256": "d54d5bc5637ccf7a7385d5bbd73f6f184267d1da7ed0e446d0e97fc46de2b427",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "arc",
+     "base_side": "arc0",
+     "bottom_board": "columns",
+     "exit_edges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+     ],
+     "field_origin_base": [
+      0.714511,
+      7.078702
+     ],
+     "field_origin_uv": [
+      -13.6249,
+      -13.4001
+     ],
+     "field_x_uv": [
+      1.0,
+      0.0
+     ],
+     "field_y_uv": [
+      -0.0,
+      1.0
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-20x10-ae575be77eca",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 24.541,
+     "columns": 10,
+     "field_coverage": 0.38978,
+     "field_mm": [
+      19.4,
+      39.4
+     ],
+     "min_clearance_mm": 0.080592,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 23.531,
+     "rows": 20,
+     "stack_width_mm": 24.613401,
+     "taxels": 200
+    },
+    "outlines_uv_sha256": "9f1d426353d1833584f30f4b9d257e9fb876cfdb8eefa2034a305bf2dd40fd78",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "arc",
+     "base_side": "arc0",
+     "bottom_board": "columns",
+     "exit_edges": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+     ],
+     "field_origin_base": [
+      2.464511,
+      2.203702
+     ],
+     "field_origin_uv": [
+      -11.8749,
+      -18.2751
+     ],
+     "field_x_uv": [
+      1.0,
+      0.0
+     ],
+     "field_y_uv": [
+      -0.0,
+      1.0
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "equilateral_plate": [
+   {
+    "build_id": "surface-12x13-4a12e44faaeb",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.318,
+     "columns": 13,
+     "field_coverage": 0.381282,
+     "field_mm": [
+      25.4,
+      23.4
+     ],
+     "min_clearance_mm": 0.087907,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.7,
+     "rows": 12,
+     "stack_width_mm": 28.987801,
+     "taxels": 156
+    },
+    "outlines_uv_sha256": "26d6c8a70d418908c57356337c9eb06c93379d3ec528e06fe8bc4a3d5ae7acb2",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      15.994667,
+      2.761722
+     ],
+     "field_origin_uv": [
+      -14.558777,
+      14.005333
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-13x12-77f1a15c6d5a",
+    "metrics": {
+     "angle_deg": 30.0,
+     "column_tail_mm": 29.168,
+     "columns": 12,
+     "field_coverage": 0.381282,
+     "field_mm": [
+      23.4,
+      25.4
+     ],
+     "min_clearance_mm": 0.012827,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 36.12,
+     "rows": 13,
+     "stack_width_mm": 27.191001,
+     "taxels": 156
+    },
+    "outlines_uv_sha256": "05b47f192c65635749d8f1f276c6e546bb609faa0206553c55b3486ba15c4eb7",
+    "placement": {
+     "base_angle_deg": 30.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      25.207654,
+      -11.649848
+     ],
+     "field_origin_uv": [
+      -14.805736,
+      2.344607
+     ],
+     "field_x_uv": [
+      0.5,
+      -0.866025404
+     ],
+     "field_y_uv": [
+      0.866025404,
+      0.5
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-11x14-241f52b2a67c",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.677,
+     "columns": 14,
+     "field_coverage": 0.37615,
+     "field_mm": [
+      27.4,
+      21.4
+     ],
+     "min_clearance_mm": 0.009433,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.297,
+     "rows": 11,
+     "stack_width_mm": 30.784601,
+     "taxels": 154
+    },
+    "outlines_uv_sha256": "134b78c0b3e1abaf9f8beb0838895320040906628b93009472884920fa87a4cf",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      15.017532,
+      3.226224
+     ],
+     "field_origin_uv": [
+      -14.094275,
+      14.982468
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-14x11-8d175fe185b4",
+    "metrics": {
+     "angle_deg": 30.0,
+     "column_tail_mm": 28.501,
+     "columns": 11,
+     "field_coverage": 0.37615,
+     "field_mm": [
+      21.4,
+      27.4
+     ],
+     "min_clearance_mm": 0.004147,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 34.895,
+     "rows": 14,
+     "stack_width_mm": 25.394201,
+     "taxels": 154
+    },
+    "outlines_uv_sha256": "2c09425a856d06fde44397e73e0a689fa0b9547a08c446655e08b7a5e7aedfb4",
+    "placement": {
+     "base_angle_deg": 30.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      26.882743,
+      -12.672713
+     ],
+     "field_origin_uv": [
+      -14.854019,
+      0.382506
+     ],
+     "field_x_uv": [
+      0.5,
+      -0.866025404
+     ],
+     "field_y_uv": [
+      0.866025404,
+      0.5
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-10x15-46d59e2505b1",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.366,
+     "columns": 15,
+     "field_coverage": 0.365886,
+     "field_mm": [
+      29.4,
+      19.4
+     ],
+     "min_clearance_mm": 0.019456,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "default",
+     "row_tail_mm": 21.346,
+     "rows": 10,
+     "stack_width_mm": 33.064001,
+     "taxels": 150
+    },
+    "outlines_uv_sha256": "abdfc4b2bfcb2fab59759c90453edf8545c0f2dce2224d0711729add595db30a",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      13.900807,
+      3.271955
+     ],
+     "field_origin_uv": [
+      -14.048544,
+      16.099193
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "right_triangle_plate": [
+   {
+    "build_id": "surface-13x14-570e71061a69",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.35,
+     "columns": 14,
+     "field_coverage": 0.386644,
+     "field_mm": [
+      27.4,
+      25.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.707,
+     "rows": 13,
+     "stack_width_mm": 31.191001,
+     "taxels": 182
+    },
+    "outlines_uv_sha256": "b61fa3c64c761ab1339634c49dedae31606d4eec3c37488cbf3d4abc82321cc3",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      0.5001,
+      2.8999
+     ],
+     "field_origin_uv": [
+      -17.1001,
+      19.4999
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-14x13-e0d74734ef82",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.256,
+     "columns": 13,
+     "field_coverage": 0.386644,
+     "field_mm": [
+      25.4,
+      27.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.374,
+     "rows": 14,
+     "stack_width_mm": 29.394201,
+     "taxels": 182
+    },
+    "outlines_uv_sha256": "43967624e8a488b2ec330b62f8ee7d4bbe6f1820bc1a507525cde7f4f50beda4",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      0.5001,
+      2.6999
+     ],
+     "field_origin_uv": [
+      -17.3001,
+      19.4999
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-10x18-f9ad3d58ec9a",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.134,
+     "columns": 18,
+     "field_coverage": 0.381533,
+     "field_mm": [
+      35.4,
+      19.4
+     ],
+     "min_clearance_mm": 0.000141,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.253,
+     "rows": 10,
+     "stack_width_mm": 38.581401,
+     "taxels": 180
+    },
+    "outlines_uv_sha256": "62912fe1c79decd8f1c17c793816d48dd7303d3a97026369346b018f8f0e4500",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 1,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      23.4501,
+      3.0499
+     ],
+     "field_origin_uv": [
+      -5.57488,
+      -21.26167
+     ],
+     "field_x_uv": [
+      0.707106781,
+      0.707106781
+     ],
+     "field_y_uv": [
+      -0.707106781,
+      0.707106781
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-9x20-6c0783f9c25c",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.151,
+     "columns": 20,
+     "field_coverage": 0.380867,
+     "field_mm": [
+      39.4,
+      17.4
+     ],
+     "min_clearance_mm": 0.000141,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.585,
+     "rows": 9,
+     "stack_width_mm": 42.378201,
+     "taxels": 180
+    },
+    "outlines_uv_sha256": "eb8c6611b6f5bcc732f96a2a5cf531c7fac60598d643f0bc7c82940ed680c61d",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 1,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      21.6501,
+      3.2499
+     ],
+     "field_origin_uv": [
+      -6.989094,
+      -22.393041
+     ],
+     "field_x_uv": [
+      0.707106781,
+      0.707106781
+     ],
+     "field_y_uv": [
+      -0.707106781,
+      0.707106781
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-12x15-e9cb9e4c34e6",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.471,
+     "columns": 15,
+     "field_coverage": 0.3822,
+     "field_mm": [
+      29.4,
+      23.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.039,
+     "rows": 12,
+     "stack_width_mm": 32.987801,
+     "taxels": 180
+    },
+    "outlines_uv_sha256": "a8db08234bcba676e21dbfa5c2c40088e4dc3f640fb811ca0634b3361b5f18c5",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      0
+     ],
+     "field_origin_base": [
+      0.5001,
+      3.0999
+     ],
+     "field_origin_uv": [
+      -16.9001,
+      19.4999
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "right_triangle_plate_max_taxels": [
+   {
+    "build_id": "surface-18x35-75c3febd94f7",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.08,
+     "columns": 35,
+     "field_coverage": 0.348075,
+     "field_mm": [
+      35.047,
+      17.877
+     ],
+     "min_clearance_mm": 0.000141,
+     "pitch_x_mm": 1.01,
+     "pitch_y_mm": 1.01,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.119,
+     "rows": 18,
+     "stack_width_mm": 39.928501,
+     "taxels": 630
+    },
+    "outlines_uv_sha256": "53a7d25b0ca9a7025440fce2378cd10a0b2780560c2150c24053a53f83a1a118",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 1,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      22.9246,
+      3.9729
+     ],
+     "field_origin_uv": [
+      -6.599124,
+      -20.980595
+     ],
+     "field_x_uv": [
+      0.707106781,
+      0.707106781
+     ],
+     "field_y_uv": [
+      -0.707106781,
+      0.707106781
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-21x30-b45e7622dba7",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.043,
+     "columns": 30,
+     "field_coverage": 0.34155,
+     "field_mm": [
+      29.7,
+      20.7
+     ],
+     "min_clearance_mm": 0.000141,
+     "pitch_x_mm": 1.0,
+     "pitch_y_mm": 1.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.299,
+     "rows": 21,
+     "stack_width_mm": 35.194601,
+     "taxels": 630
+    },
+    "outlines_uv_sha256": "98ca3d11200cf393297f49ab7f74b11043aca8650e4a85295ff04d3f8f652232",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 1,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      25.3281,
+      3.5499
+     ],
+     "field_origin_uv": [
+      -4.600487,
+      -19.58017
+     ],
+     "field_x_uv": [
+      0.707106781,
+      0.707106781
+     ],
+     "field_y_uv": [
+      -0.707106781,
+      0.707106781
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-17x37-93c1cf7a5e96",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.037,
+     "columns": 37,
+     "field_coverage": 0.347338,
+     "field_mm": [
+      37.067,
+      16.867
+     ],
+     "min_clearance_mm": 0.000141,
+     "pitch_x_mm": 1.01,
+     "pitch_y_mm": 1.01,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.361,
+     "rows": 17,
+     "stack_width_mm": 41.745301,
+     "taxels": 629
+    },
+    "outlines_uv_sha256": "34aa0535054b18a46035be151c11c6bcfc7bf16fdf8d8e568148200463904945",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 1,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      22.0246,
+      4.0829
+     ],
+     "field_origin_uv": [
+      -7.313302,
+      -21.53921
+     ],
+     "field_x_uv": [
+      0.707106781,
+      0.707106781
+     ],
+     "field_y_uv": [
+      -0.707106781,
+      0.707106781
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-19x33-42de258b7737",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.123,
+     "columns": 33,
+     "field_coverage": 0.346545,
+     "field_mm": [
+      33.027,
+      18.887
+     ],
+     "min_clearance_mm": 0.000141,
+     "pitch_x_mm": 1.01,
+     "pitch_y_mm": 1.01,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 20.877,
+     "rows": 19,
+     "stack_width_mm": 38.111701,
+     "taxels": 627
+    },
+    "outlines_uv_sha256": "cd5fad68ea1534a84250ff03b5bbf896c53c2ae3584767b37b6694d43105cf8b",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 1,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      23.8246,
+      3.8629
+     ],
+     "field_origin_uv": [
+      -5.884947,
+      -20.421981
+     ],
+     "field_x_uv": [
+      0.707106781,
+      0.707106781
+     ],
+     "field_y_uv": [
+      -0.707106781,
+      0.707106781
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-16x39-9a5a68b41c9c",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 20.306,
+     "columns": 39,
+     "field_coverage": 0.33755,
+     "field_mm": [
+      38.7,
+      15.7
+     ],
+     "min_clearance_mm": 0.000141,
+     "pitch_x_mm": 1.0,
+     "pitch_y_mm": 1.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 21.91,
+     "rows": 16,
+     "stack_width_mm": 43.178601,
+     "taxels": 624
+    },
+    "outlines_uv_sha256": "c31957057d5978ced8706ca728265e8290213f199ce666715a70fe069bb3b99e",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 1,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      21.2781,
+      4.4999
+     ],
+     "field_origin_uv": [
+      -8.136021,
+      -21.772201
+     ],
+     "field_x_uv": [
+      0.707106781,
+      0.707106781
+     ],
+     "field_y_uv": [
+      -0.707106781,
+      0.707106781
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "soft_finger_asset_mount_end": [
+   {
+    "build_id": "surface-44x8-81635c0115dd",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 49.412,
+     "columns": 8,
+     "field_coverage": 0.437056,
+     "field_mm": [
+      15.4,
+      87.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 45.122,
+     "rows": 44,
+     "stack_width_mm": 25.490201,
+     "taxels": 352
+    },
+    "outlines_uv_sha256": "4ac4eb5cb549e1ac49bc6aa07fa1c437b36c4f84fc991029d23233f12a93f170",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      0.5001,
+      31.412476
+     ],
+     "field_origin_uv": [
+      -28.269859,
+      12.3999
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-50x7-e8798c3ba815",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 37.528,
+     "columns": 7,
+     "field_coverage": 0.43251,
+     "field_mm": [
+      13.4,
+      99.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 32.33,
+     "rows": 50,
+     "stack_width_mm": 25.5,
+     "taxels": 350
+    },
+    "outlines_uv_sha256": "111b00671d67c840e484df6302ab3442463886e41b60251dd5f999b9d09b2bee",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      1.290699,
+      19.412476
+     ],
+     "field_origin_uv": [
+      -40.269859,
+      11.609301
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-43x8-4ec47321d5cc",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 51.412,
+     "columns": 8,
+     "field_coverage": 0.427054,
+     "field_mm": [
+      15.4,
+      85.4
+     ],
+     "min_clearance_mm": 0.052194,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 47.255,
+     "rows": 43,
+     "stack_width_mm": 25.287001,
+     "taxels": 344
+    },
+    "outlines_uv_sha256": "f0388a4a25ba54da2dca441ff84fc46b3953fdb115bd8a67dca312ba5de54859",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      0.638835,
+      33.412476
+     ],
+     "field_origin_uv": [
+      -26.269859,
+      12.261165
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-49x7-b7de8f7e4235",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 39.528,
+     "columns": 7,
+     "field_coverage": 0.423807,
+     "field_mm": [
+      13.4,
+      97.4
+     ],
+     "min_clearance_mm": 0.052194,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 34.462,
+     "rows": 49,
+     "stack_width_mm": 25.0,
+     "taxels": 343
+    },
+    "outlines_uv_sha256": "4d367c0d7aff95d139c74b82d540c69dc0a63155bcc0cf56ac26bb44f02de097",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      1.27137,
+      21.412476
+     ],
+     "field_origin_uv": [
+      -38.269859,
+      11.62863
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-48x7-64cac5f65a98",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 41.528,
+     "columns": 7,
+     "field_coverage": 0.415105,
+     "field_mm": [
+      13.4,
+      95.4
+     ],
+     "min_clearance_mm": 0.052194,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 36.594,
+     "rows": 48,
+     "stack_width_mm": 24.5,
+     "taxels": 336
+    },
+    "outlines_uv_sha256": "b7e6c6225443349cbd587a581cc54e121a1598a0b44ec94265b01d935eb48ce1",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      1.252041,
+      23.412476
+     ],
+     "field_origin_uv": [
+      -36.269859,
+      11.647959
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "soft_finger_asset_mount_end_generic": [
+   {
+    "build_id": "surface-49x7-cd15e8dd7eef",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 35.883,
+     "columns": 7,
+     "field_coverage": 0.423807,
+     "field_mm": [
+      13.4,
+      97.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 31.987,
+     "rows": 49,
+     "stack_width_mm": 25.6536,
+     "taxels": 343
+    },
+    "outlines_uv_sha256": "5183f2b759a5ca63e72ec4a9920ed80d7556fbbc9aa97ac9f70b50b939fbe4aa",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      0.7501,
+      21.162476
+     ],
+     "field_origin_uv": [
+      -38.519859,
+      12.1499
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-48x7-951d1cf52383",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 37.883,
+     "columns": 7,
+     "field_coverage": 0.415105,
+     "field_mm": [
+      13.4,
+      95.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 34.158,
+     "rows": 48,
+     "stack_width_mm": 25.4504,
+     "taxels": 336
+    },
+    "outlines_uv_sha256": "2b1128fb54bd08eafaf250fde411491ce578e7e27dfaca935c826706a78206b5",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      0.7501,
+      23.162476
+     ],
+     "field_origin_uv": [
+      -36.519859,
+      12.1499
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-47x7-055425f22794",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 39.883,
+     "columns": 7,
+     "field_coverage": 0.406402,
+     "field_mm": [
+      13.4,
+      93.4
+     ],
+     "min_clearance_mm": 0.052194,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 36.329,
+     "rows": 47,
+     "stack_width_mm": 25.2472,
+     "taxels": 329
+    },
+    "outlines_uv_sha256": "05d2763dd2916c4feaa4b9530cbb24154ed028d04f12ebd2c9feedbcd9a53f4f",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      0.888835,
+      25.162476
+     ],
+     "field_origin_uv": [
+      -34.519859,
+      12.011165
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-46x7-1d42b9f518ab",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 41.883,
+     "columns": 7,
+     "field_coverage": 0.3977,
+     "field_mm": [
+      13.4,
+      91.4
+     ],
+     "min_clearance_mm": 0.052194,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 38.501,
+     "rows": 46,
+     "stack_width_mm": 25.044,
+     "taxels": 322
+    },
+    "outlines_uv_sha256": "ab6871a594a95e28dcdf955377ffd772ed46d19821c82fc485c1e14938f2ae34",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      1.027571,
+      27.162476
+     ],
+     "field_origin_uv": [
+      -32.519859,
+      11.872429
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-45x7-8d62cf1b9244",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 43.883,
+     "columns": 7,
+     "field_coverage": 0.388997,
+     "field_mm": [
+      13.4,
+      89.4
+     ],
+     "min_clearance_mm": 0.052194,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 40.672,
+     "rows": 45,
+     "stack_width_mm": 24.8408,
+     "taxels": 315
+    },
+    "outlines_uv_sha256": "284ee38688cbdf0a6134408e6a478bc4c4dc0d0293acbfb0de3d489d5990f534",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 0,
+     "bottom_board": "columns",
+     "exit_edges": [
+      1
+     ],
+     "field_origin_base": [
+      1.027571,
+      29.162476
+     ],
+     "field_origin_uv": [
+      -30.519859,
+      11.872429
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "soft_finger_mount_end": [
+   {
+    "build_id": "surface-44x8-6bd1c5396ff8",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 49.412,
+     "columns": 8,
+     "field_coverage": 0.437054,
+     "field_mm": [
+      15.4,
+      87.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 45.123,
+     "rows": 44,
+     "stack_width_mm": 25.490201,
+     "taxels": 352
+    },
+    "outlines_uv_sha256": "c45adf2f2a37cbc1ffbf917de1fe667307bdf380a1064f8cd97b6fadcf7229ce",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      0.5001,
+      31.412636
+     ],
+     "field_origin_uv": [
+      -28.269863,
+      12.3999
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-50x7-e8798c3ba815",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 37.528,
+     "columns": 7,
+     "field_coverage": 0.432508,
+     "field_mm": [
+      13.4,
+      99.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 32.33,
+     "rows": 50,
+     "stack_width_mm": 25.5,
+     "taxels": 350
+    },
+    "outlines_uv_sha256": "7b1d6f341663f9005bc874106e5b09a25411a4918bdaa53d6a24a7d8a10fdee4",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      1.290699,
+      19.412636
+     ],
+     "field_origin_uv": [
+      -40.269863,
+      11.609301
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-43x8-4ec47321d5cc",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 51.412,
+     "columns": 8,
+     "field_coverage": 0.427053,
+     "field_mm": [
+      15.4,
+      85.4
+     ],
+     "min_clearance_mm": 0.052362,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 47.255,
+     "rows": 43,
+     "stack_width_mm": 25.287001,
+     "taxels": 344
+    },
+    "outlines_uv_sha256": "90ff12d50c702b3f8dd8f0ab6360d266f19a47f8be095f177c50969840904b0a",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      0.638836,
+      33.412636
+     ],
+     "field_origin_uv": [
+      -26.269863,
+      12.261164
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-49x7-b7de8f7e4235",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 39.528,
+     "columns": 7,
+     "field_coverage": 0.423806,
+     "field_mm": [
+      13.4,
+      97.4
+     ],
+     "min_clearance_mm": 0.052362,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 34.462,
+     "rows": 49,
+     "stack_width_mm": 25.0,
+     "taxels": 343
+    },
+    "outlines_uv_sha256": "a5b528c39e27d31f14572dd13a90636a03d6a88eeca6180fe8e23e2a9d6feca1",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      1.271371,
+      21.412636
+     ],
+     "field_origin_uv": [
+      -38.269863,
+      11.628629
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-48x7-64cac5f65a98",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 41.528,
+     "columns": 7,
+     "field_coverage": 0.415104,
+     "field_mm": [
+      13.4,
+      95.4
+     ],
+     "min_clearance_mm": 0.052362,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 36.594,
+     "rows": 48,
+     "stack_width_mm": 24.5,
+     "taxels": 336
+    },
+    "outlines_uv_sha256": "9e4d592bf5effeaa4ed457475e5e1649809da4537ccfa087166f26375a87e841",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      1.252042,
+      23.412636
+     ],
+     "field_origin_uv": [
+      -36.269863,
+      11.647958
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 5
+   }
+  ],
+  "soft_finger_mount_end_generic": [
+   {
+    "build_id": "surface-49x7-cd15e8dd7eef",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 35.883,
+     "columns": 7,
+     "field_coverage": 0.423806,
+     "field_mm": [
+      13.4,
+      97.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 31.987,
+     "rows": 49,
+     "stack_width_mm": 25.6536,
+     "taxels": 343
+    },
+    "outlines_uv_sha256": "330b15cdf897004711eed28527698c38302cc9d073fa143652db933ada89022c",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      0.7501,
+      21.162636
+     ],
+     "field_origin_uv": [
+      -38.519863,
+      12.1499
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "build_id": "surface-48x7-951d1cf52383",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 37.883,
+     "columns": 7,
+     "field_coverage": 0.415104,
+     "field_mm": [
+      13.4,
+      95.4
+     ],
+     "min_clearance_mm": 0.0001,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 34.158,
+     "rows": 48,
+     "stack_width_mm": 25.4504,
+     "taxels": 336
+    },
+    "outlines_uv_sha256": "ec8b21840a24939530b20bc8cd1c384a2d00ff70e33559093668b347b16e996a",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      0.7501,
+      23.162636
+     ],
+     "field_origin_uv": [
+      -36.519863,
+      12.1499
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "build_id": "surface-47x7-30264d0571d3",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 39.883,
+     "columns": 7,
+     "field_coverage": 0.406401,
+     "field_mm": [
+      13.4,
+      93.4
+     ],
+     "min_clearance_mm": 0.052362,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 36.33,
+     "rows": 47,
+     "stack_width_mm": 25.2472,
+     "taxels": 329
+    },
+    "outlines_uv_sha256": "bdb4e92e7d0bb0bafb9f832363de4b49ceebe5e42c2b4d60faba1041fd719ca8",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      0.888836,
+      25.162636
+     ],
+     "field_origin_uv": [
+      -34.519863,
+      12.011164
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 3
+   },
+   {
+    "build_id": "surface-46x7-1d42b9f518ab",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 41.883,
+     "columns": 7,
+     "field_coverage": 0.397699,
+     "field_mm": [
+      13.4,
+      91.4
+     ],
+     "min_clearance_mm": 0.052362,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 38.501,
+     "rows": 46,
+     "stack_width_mm": 25.044,
+     "taxels": 322
+    },
+    "outlines_uv_sha256": "b23b530951f3fc10c9e754ce1f963e5c3443d31f091a9a3bbbe04087ddbe6cb9",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      1.027572,
+      27.162636
+     ],
+     "field_origin_uv": [
+      -32.519863,
+      11.872428
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 4
+   },
+   {
+    "build_id": "surface-45x7-8d62cf1b9244",
+    "metrics": {
+     "angle_deg": 0.0,
+     "column_tail_mm": 43.883,
+     "columns": 7,
+     "field_coverage": 0.388996,
+     "field_mm": [
+      13.4,
+      89.4
+     ],
+     "min_clearance_mm": 0.052362,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "role_mapping": "rows_top",
+     "routing": "tight",
+     "row_tail_mm": 40.672,
+     "rows": 45,
+     "stack_width_mm": 24.8408,
+     "taxels": 315
+    },
+    "outlines_uv_sha256": "5244ca345036b49f36b2740077350bc6f73be49b78b54926a698eaac72b70844",
+    "placement": {
+     "base_angle_deg": 0.0,
+     "base_kind": "side",
+     "base_side": 3,
+     "bottom_board": "columns",
+     "exit_edges": [
+      3
+     ],
+     "field_origin_base": [
+      1.027572,
+      29.162636
+     ],
+     "field_origin_uv": [
+      -30.519863,
+      11.872428
+     ],
+     "field_x_uv": [
+      0.0,
+      -1.0
+     ],
+     "field_y_uv": [
+      1.0,
+      0.0
+     ]
+    },
+    "rank": 5
+   }
+  ]
+ },
+ "format": "tactile-surface-fit-snapshot/v1",
+ "written_from": "working tree of 2026-10-21 (858064a plus the uncommitted CAD-mode work), before the masked field; the generic-template and real-mesh soft-finger cases from the frozen copy of that tree, which reproduced the other cases byte for byte"
+}

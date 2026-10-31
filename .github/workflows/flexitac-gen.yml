@@ -1,0 +1,73 @@
+# FlexiTac/FlexiTac: .github/workflows/flexitac-gen.yml, written by flexitac-gen/tools/export_public.py.
+#
+# On every push that changes flexitac-gen/, run the generator's tests, build the static site
+# (flexitac-gen/tools/build_static_site.py) and publish it to https://flexitac.github.io/flexitac-gen/:
+# the site is committed to the flexitac-gen/ folder of FlexiTac/FlexiTac.github.io, whose Pages serve it.
+#
+# One-time setup: a deploy key with write access on FlexiTac/FlexiTac.github.io (Settings > Deploy keys),
+# its private key in this repository's secret FLEXITAC_GEN_DEPLOY_KEY (Settings > Secrets and variables > Actions).
+name: FlexiTac-Gen site
+
+on:
+  push:
+    branches: [main]
+    paths: ["flexitac-gen/**", ".github/workflows/flexitac-gen.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flexitac-gen-site
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        working-directory: flexitac-gen
+        run: PYTHONPATH=. python -B -m unittest discover -s tests
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DEPLOY_KEY: ${{ secrets.FLEXITAC_GEN_DEPLOY_KEY }}
+    steps:
+      - name: Check the deploy key
+        id: key
+        run: |
+          if [ -n "$DEPLOY_KEY" ]; then echo "ready=true" >> "$GITHUB_OUTPUT"
+          else echo "::warning::FLEXITAC_GEN_DEPLOY_KEY is not set: the site is not published (see the setup note at the top of this file)."; fi
+      - uses: actions/checkout@v4
+        if: steps.key.outputs.ready == 'true'
+      - uses: actions/setup-python@v5
+        if: steps.key.outputs.ready == 'true'
+        with:
+          python-version: "3.12"
+      - name: Build the site (Pyodide checked by its SHA-256)
+        if: steps.key.outputs.ready == 'true'
+        run: python -B flexitac-gen/tools/build_static_site.py --out site
+      - uses: actions/checkout@v4
+        if: steps.key.outputs.ready == 'true'
+        with:
+          repository: FlexiTac/FlexiTac.github.io
+          ssh-key: ${{ secrets.FLEXITAC_GEN_DEPLOY_KEY }}
+          path: pages
+      - name: Publish to flexitac.github.io/flexitac-gen/
+        if: steps.key.outputs.ready == 'true'
+        working-directory: pages
+        run: |
+          rsync -a --delete ../site/ flexitac-gen/
+          git add -A flexitac-gen
+          if git diff --cached --quiet; then echo "The site is unchanged."; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "flexitac-gen: the site of FlexiTac/FlexiTac@${GITHUB_SHA::12}"
+          git push

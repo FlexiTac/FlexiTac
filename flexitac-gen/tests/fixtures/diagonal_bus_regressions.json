@@ -1,0 +1,828 @@
+{
+ "_note": "The regression designs of diagonal-bus/2 and /3 (claude/specs/masked-field/P5-diagonal-bus.md, sections 12 and 13): the design workflow judge's (row_root_prototypes_mm: the prototypes' Row roots, A: one contact level, B: a tail under the band, C: one-turn fans) and the reviews' (source review, why: what went wrong).  row_root_v1_mm is diagonal-bus/1's Row root below the field; every Row root stays within 1.0 mm of it, or row_root_allowance_mm where noted.  row_root_v2_mm is diagonal-bus/2's (its tails side by side); diagonal-bus/3's never lies deeper, or by row_root_v2_allowance_mm where noted (the straight Column fan-out entering at a smaller angle than diagonal-bus/2's moved one, the entry-angle guard leaves the fans a smaller cap).",
+ "edge:035": {
+  "design": {
+   "channel_order": {
+    "columns": "ascending",
+    "rows": "descending"
+   },
+   "connector": {
+    "column_pins": 64,
+    "row_pins": 64
+   },
+   "matrix": {
+    "columns": 1,
+    "pitch_x_mm": 4.0,
+    "pitch_y_mm": 4.0,
+    "rows": 1,
+    "taxel_height_mm": 2.4,
+    "taxel_width_mm": 2.4
+   },
+   "project_name": "edge",
+   "role_mapping": {
+    "bottom": "rows",
+    "top": "columns"
+   },
+   "routing": {
+    "row_sides": "right",
+    "trace_space_mm": 0.2,
+    "trace_width_mm": 0.2
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "column_side": "left",
+    "row_side": "left",
+    "top_length_mm": 7.5
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 4.8653,
+  "row_root_v2_mm": 1.8201,
+  "source": "review",
+  "why": "1 x 1 at 4 mm, 64-pin reader tail, right with columns on top (mirrored): one lane ran 31 mm across the tail"
+ },
+ "fine:028": {
+  "design": {
+   "connector": {
+    "column_pins": null,
+    "row_pins": null
+   },
+   "matrix": {
+    "columns": 21,
+    "mask": [
+     [
+      1,
+      21
+     ],
+     [
+      1,
+      21
+     ]
+    ],
+    "pitch_x_mm": 0.6,
+    "pitch_y_mm": 0.6,
+    "rows": 2,
+    "taxel_height_mm": 0.24,
+    "taxel_width_mm": 0.24
+   },
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "left",
+    "trace_space_mm": 0.2,
+    "trace_width_mm": 0.127
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 3.9718,
+  "row_root_v2_mm": 4.826,
+  "source": "review",
+  "why": "2 x 21 at 0.6 mm, left: the raised corner changed the tip by 0.0275 mm"
+ },
+ "fine:048": {
+  "design": {
+   "connector": {
+    "column_pins": null,
+    "row_pins": null
+   },
+   "matrix": {
+    "columns": 6,
+    "pitch_x_mm": 0.9,
+    "pitch_y_mm": 0.9,
+    "rows": 29,
+    "taxel_height_mm": 0.36,
+    "taxel_width_mm": 0.36
+   },
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "both",
+    "trace_space_mm": 0.1016,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_prototypes_mm": {
+   "A": 4.019,
+   "B": 112.83,
+   "C": 5.343
+  },
+  "row_root_v1_mm": 11.927,
+  "row_root_v2_mm": 4.0289
+ },
+ "fine:052": {
+  "design": {
+   "connector": {
+    "column_pins": null,
+    "row_pins": null
+   },
+   "matrix": {
+    "columns": 26,
+    "mask": [
+     [
+      1,
+      25
+     ],
+     [
+      1,
+      25
+     ],
+     [
+      4,
+      26
+     ]
+    ],
+    "pitch_x_mm": 0.6,
+    "pitch_y_mm": 0.6,
+    "rows": 3,
+    "taxel_height_mm": 0.24,
+    "taxel_width_mm": 0.24
+   },
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "both",
+    "trace_space_mm": 0.2,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 4.7098,
+  "row_root_v2_mm": 3.9013,
+  "source": "review",
+  "why": "3 x 26 at 0.6 mm, both: the centred funnel roots 5 mm deeper than diagonal-bus/1 under the moved Column fan-out, so diagonal-bus/2 took the Row tail beside the Column tail; diagonal-bus/3 (stacked tails, the Column fan-out where it is) keeps the funnel"
+ },
+ "rand:034": {
+  "design": {
+   "connector": {
+    "column_pins": null,
+    "row_pins": null
+   },
+   "matrix": {
+    "columns": 2,
+    "pitch_x_mm": 2.0,
+    "pitch_y_mm": 2.0,
+    "rows": 29,
+    "taxel_height_mm": 1.2,
+    "taxel_width_mm": 1.2
+   },
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "both",
+    "trace_space_mm": 0.127,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_prototypes_mm": {
+   "A": 3.233,
+   "B": 50.789,
+   "C": 5.643
+  },
+  "row_root_v1_mm": 12.836,
+  "row_root_v2_mm": 3.2379
+ },
+ "rand:087": {
+  "design": {
+   "connector": {
+    "column_pins": null,
+    "row_pins": null
+   },
+   "matrix": {
+    "columns": 31,
+    "mask": [
+     [
+      8,
+      17
+     ],
+     [
+      5,
+      20
+     ],
+     [
+      4,
+      20
+     ],
+     [
+      1,
+      22
+     ],
+     [
+      1,
+      25
+     ],
+     [
+      1,
+      26
+     ],
+     [
+      1,
+      26
+     ],
+     [
+      1,
+      29
+     ],
+     [
+      2,
+      29
+     ],
+     [
+      2,
+      30
+     ],
+     [
+      2,
+      31
+     ],
+     [
+      3,
+      31
+     ]
+    ],
+    "pitch_x_mm": 4.0,
+    "pitch_y_mm": 4.0,
+    "rows": 12,
+    "taxel_height_mm": 2.8,
+    "taxel_width_mm": 2.8
+   },
+   "role_mapping": {
+    "bottom": "rows",
+    "top": "columns"
+   },
+   "routing": {
+    "row_sides": "both",
+    "trace_space_mm": 0.2,
+    "trace_width_mm": 0.2
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_prototypes_mm": {
+   "A": 82.293,
+   "B": 13.387,
+   "C": 9.104
+  },
+  "row_root_v1_mm": 20.085,
+  "row_root_v2_mm": 14.3288
+ },
+ "reader:011": {
+  "design": {
+   "connector": {
+    "column_pins": 32,
+    "row_pins": 32
+   },
+   "matrix": {
+    "columns": 16,
+    "pitch_x_mm": 1.25,
+    "pitch_y_mm": 1.25,
+    "rows": 13,
+    "taxel_height_mm": 0.75,
+    "taxel_width_mm": 0.75
+   },
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "both",
+    "trace_space_mm": 0.127,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 10.0804,
+  "row_root_v2_mm": 5.6608,
+  "source": "review",
+  "why": "13 x 16 reader, both: the beside fallback was taken for a 1.7 mm gain at 13 mm more board width; the funnel stays centred"
+ },
+ "reader:014": {
+  "design": {
+   "connector": {
+    "column_pins": 64,
+    "row_pins": 64
+   },
+   "matrix": {
+    "columns": 62,
+    "mask": [
+     [
+      8,
+      41
+     ],
+     [
+      8,
+      41
+     ],
+     [
+      8,
+      42
+     ],
+     [
+      5,
+      43
+     ],
+     [
+      5,
+      43
+     ],
+     [
+      4,
+      45
+     ],
+     [
+      1,
+      47
+     ],
+     [
+      1,
+      49
+     ],
+     [
+      2,
+      49
+     ],
+     [
+      5,
+      50
+     ],
+     [
+      5,
+      50
+     ],
+     [
+      7,
+      53
+     ],
+     [
+      10,
+      53
+     ],
+     [
+      11,
+      55
+     ],
+     [
+      11,
+      55
+     ],
+     [
+      12,
+      56
+     ],
+     [
+      12,
+      56
+     ],
+     [
+      12,
+      56
+     ],
+     [
+      13,
+      57
+     ],
+     [
+      15,
+      57
+     ],
+     [
+      16,
+      60
+     ],
+     [
+      18,
+      61
+     ],
+     [
+      21,
+      62
+     ],
+     [
+      22,
+      62
+     ],
+     [
+      24,
+      62
+     ],
+     [
+      24,
+      61
+     ],
+     [
+      26,
+      61
+     ],
+     [
+      27,
+      60
+     ],
+     [
+      27,
+      60
+     ],
+     [
+      28,
+      59
+     ],
+     [
+      31,
+      56
+     ],
+     [
+      34,
+      53
+     ]
+    ],
+    "pitch_x_mm": 2.0,
+    "pitch_y_mm": 2.0,
+    "rows": 32,
+    "taxel_height_mm": 1.2,
+    "taxel_width_mm": 1.2
+   },
+   "role_mapping": {
+    "bottom": "rows",
+    "top": "columns"
+   },
+   "routing": {
+    "row_sides": "both",
+    "trace_space_mm": 0.2,
+    "trace_width_mm": 0.2
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_prototypes_mm": {
+   "A": 83.497,
+   "B": 16.916,
+   "C": 15.329
+  },
+  "row_root_v1_mm": 38.111,
+  "row_root_v2_mm": 17.4181
+ },
+ "reader:015": {
+  "design": {
+   "connector": {
+    "column_pins": 16,
+    "row_pins": 16
+   },
+   "matrix": {
+    "columns": 5,
+    "mask": [
+     [
+      1,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      2,
+      5
+     ],
+     [
+      3,
+      5
+     ]
+    ],
+    "pitch_x_mm": 2.0,
+    "pitch_y_mm": 2.0,
+    "rows": 4,
+    "taxel_height_mm": 1.2,
+    "taxel_width_mm": 1.2
+   },
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "left",
+    "trace_space_mm": 0.127,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 3.672,
+  "row_root_v2_mm": 2.5672,
+  "source": "review",
+  "why": "4 x 5 masked, 64-pin reader tail, left (mirrored): the same, 4.4 mm"
+ },
+ "reader:029": {
+  "design": {
+   "connector": {
+    "column_pins": 64,
+    "row_pins": 64
+   },
+   "matrix": {
+    "columns": 27,
+    "mask": [
+     [
+      11,
+      27
+     ],
+     [
+      8,
+      25
+     ],
+     [
+      5,
+      24
+     ],
+     [
+      3,
+      21
+     ],
+     [
+      3,
+      21
+     ],
+     [
+      1,
+      20
+     ],
+     [
+      1,
+      19
+     ],
+     [
+      3,
+      19
+     ]
+    ],
+    "pitch_x_mm": 1.25,
+    "pitch_y_mm": 1.25,
+    "rows": 8,
+    "taxel_height_mm": 0.75,
+    "taxel_width_mm": 0.75
+   },
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "left",
+    "trace_space_mm": 0.1016,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 7.5,
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 8.0439,
+  "row_root_v2_mm": 2.8853,
+  "source": "review",
+  "why": "8 x 27 masked, 64-pin reader tail, left (mirrored): the lanes crossed the whole tail to its far end"
+ },
+ "rv:063": {
+  "design": {
+   "channel_order": {
+    "columns": "ascending",
+    "rows": "ascending"
+   },
+   "connector": {
+    "column_pins": null,
+    "row_pins": 16
+   },
+   "matrix": {
+    "columns": 13,
+    "mask": [
+     [
+      4,
+      8
+     ],
+     [
+      3,
+      9
+     ],
+     [
+      2,
+      10
+     ],
+     [
+      1,
+      11
+     ],
+     [
+      2,
+      12
+     ],
+     [
+      3,
+      13
+     ],
+     [
+      4,
+      12
+     ]
+    ],
+    "pitch_x_mm": 3.45,
+    "pitch_y_mm": 3.45,
+    "rows": 7,
+    "taxel_height_mm": 1.999,
+    "taxel_width_mm": 1.974
+   },
+   "project_name": "review",
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "left",
+    "trace_space_mm": 0.1016,
+    "trace_width_mm": 0.2
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 40.0,
+    "column_side": "bottom",
+    "row_side": "bottom",
+    "top_length_mm": 20.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 6.8861,
+  "row_root_v2_mm": 2.6173,
+  "source": "review",
+  "why": "7 x 13 masked at 3.45 mm, 0.2 / 0.1016 mm traces, left: a tail side slanting out to the tail from above the field moved the band beside the bottom rows 3.8 mm"
+ },
+ "rv:186": {
+  "design": {
+   "channel_order": {
+    "columns": "ascending",
+    "rows": "descending"
+   },
+   "connector": {
+    "column_pins": null,
+    "row_pins": null
+   },
+   "matrix": {
+    "columns": 10,
+    "pitch_x_mm": 0.65,
+    "pitch_y_mm": 0.65,
+    "rows": 26,
+    "taxel_height_mm": 0.302,
+    "taxel_width_mm": 0.379
+   },
+   "project_name": "review",
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "right",
+    "trace_space_mm": 0.2,
+    "trace_width_mm": 0.127
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 12.0,
+    "column_side": "top",
+    "row_side": "top",
+    "top_length_mm": 35.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 12.233,
+  "row_root_v2_allowance_mm": 0.4,
+  "row_root_v2_mm": 5.3728,
+  "source": "review",
+  "why": "26 x 10 at 0.65 mm, 0.127 / 0.2 mm traces, right, rows on top: with the bottom row's corner raised onto the field's edge the onion moved ROW_01's band up to 0.48 mm; diagonal-bus/3: the straight Column fan-out enters at 60 degrees (the moved one at 85), so the fan takes 65, not 60"
+ },
+ "wide:071": {
+  "design": {
+   "channel_order": {
+    "columns": "ascending",
+    "rows": "ascending"
+   },
+   "connector": {
+    "column_pins": 48,
+    "row_pins": 48
+   },
+   "matrix": {
+    "columns": 27,
+    "pitch_x_mm": 3.5,
+    "pitch_y_mm": 3.5,
+    "rows": 3,
+    "taxel_height_mm": 2.1,
+    "taxel_width_mm": 2.1
+   },
+   "project_name": "wide",
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "both",
+    "trace_space_mm": 0.1016,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 20.0,
+    "column_side": "top",
+    "row_side": "top",
+    "top_length_mm": 7.5
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_allowance_mm": 3.0,
+  "row_root_v1_mm": 7.2349,
+  "row_root_v2_mm": 10.0358,
+  "source": "review",
+  "why": "3 x 27 at 3.5 mm, 48-pin tails, both: a 94 mm wide field of 3 rows; the entry-angle guard keeps the fans at 79 degrees (the Column fan-out enters at 85), 2.8 mm deeper than diagonal-bus/1's corridor"
+ },
+ "wide:138": {
+  "design": {
+   "channel_order": {
+    "columns": "ascending",
+    "rows": "ascending"
+   },
+   "connector": {
+    "column_pins": null,
+    "row_pins": 64
+   },
+   "matrix": {
+    "columns": 10,
+    "pitch_x_mm": 1.5,
+    "pitch_y_mm": 1.5,
+    "rows": 5,
+    "taxel_height_mm": 0.9,
+    "taxel_width_mm": 0.9
+   },
+   "project_name": "wide",
+   "role_mapping": {
+    "bottom": "columns",
+    "top": "rows"
+   },
+   "routing": {
+    "row_sides": "left",
+    "trace_space_mm": 0.127,
+    "trace_width_mm": 0.1016
+   },
+   "schema_version": "tactile-fpc-design/v1",
+   "tail": {
+    "bottom_length_mm": 12.0,
+    "column_side": "left",
+    "row_side": "left",
+    "top_length_mm": 12.0
+   },
+   "template_id": "surface_matrix_v1"
+  },
+  "row_root_v1_mm": 3.9759,
+  "row_root_v2_mm": 2.6294,
+  "source": "review",
+  "why": "5 x 10 at 1.5 mm, 64-pin reader tail, left (mirrored): 3.35 mm deeper than diagonal-bus/1"
+ }
+}

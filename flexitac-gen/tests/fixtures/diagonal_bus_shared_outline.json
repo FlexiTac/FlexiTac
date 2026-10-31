@@ -1,0 +1,1706 @@
+{
+ "_note": "The boards of diagonal-bus/10 (claude/specs/masked-field/P5-diagonal-bus.md, sections 14, 15, 20 and 27: the Row tail centred on the field) each with its own outline (made regular and filleted; tests/test_diagonal_bus.py _own_outlines, written by write_shared_fixture): per design, the digests of each board's copper, coverlay openings and stiffeners in the stack frame (half layout-grid steps) and of its outline's vertices more than 1.0 mm below the shared level (the tails' roots, tails down); the shared outline keeps all of them. Named designs are built by tests/test_diagonal_bus.py (_named); the others carry their design: regressions of the design workflow judge's corpus and the user's CAD fits (the soft finger 59 x 12 and the crank 32 x 32).",
+ "cases": {
+  "crank_32x32_masked|both": {
+   "below": {
+    "column": "377ce2a7ddd5c118488313ceda012b62ff699e1341d37066722685367c120c62",
+    "row": "377ce2a7ddd5c118488313ceda012b62ff699e1341d37066722685367c120c62"
+   },
+   "copper": {
+    "column": "ed7b121e42ab74acb5a04e38659d3ea5701c3cf981e86dd409da8d771efca570",
+    "row": "800a67f0069310c84667c5a1ee60b529c5ac28609c2201e378843c9f2c5aa7c9"
+   },
+   "design": {
+    "channel_order": {
+     "columns": "ascending",
+     "rows": "ascending"
+    },
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 32,
+     "mask": [
+      [
+       26,
+       32
+      ],
+      [
+       25,
+       32
+      ],
+      [
+       24,
+       32
+      ],
+      [
+       23,
+       32
+      ],
+      [
+       22,
+       32
+      ],
+      [
+       21,
+       32
+      ],
+      [
+       21,
+       32
+      ],
+      [
+       20,
+       32
+      ],
+      [
+       19,
+       32
+      ],
+      [
+       18,
+       32
+      ],
+      [
+       17,
+       32
+      ],
+      [
+       16,
+       32
+      ],
+      [
+       15,
+       32
+      ],
+      [
+       14,
+       32
+      ],
+      [
+       13,
+       32
+      ],
+      [
+       12,
+       32
+      ],
+      [
+       12,
+       32
+      ],
+      [
+       11,
+       32
+      ],
+      [
+       10,
+       32
+      ],
+      [
+       9,
+       32
+      ],
+      [
+       8,
+       32
+      ],
+      [
+       7,
+       32
+      ],
+      [
+       6,
+       32
+      ],
+      [
+       5,
+       32
+      ],
+      [
+       4,
+       32
+      ],
+      [
+       3,
+       32
+      ],
+      [
+       3,
+       32
+      ],
+      [
+       2,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ]
+     ],
+     "pitch_x_mm": 2,
+     "pitch_y_mm": 2,
+     "rows": 32,
+     "taxel_height_mm": 1.4,
+     "taxel_width_mm": 1.4
+    },
+    "project_name": "Surface 32x32",
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "both",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 20,
+     "column_side": "bottom",
+     "row_side": "bottom",
+     "top_length_mm": 20
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "crank_32x32_masked|left": {
+   "below": {
+    "column": "8e1e8e9ef2048a523010844bc1dc59bf55689e8c72f2361dba46484aed52553b",
+    "row": "8e1e8e9ef2048a523010844bc1dc59bf55689e8c72f2361dba46484aed52553b"
+   },
+   "copper": {
+    "column": "a41d7d3bcfdb1895f8b84c6ef33d2be8d2e3d4ca762acce1646d96ad33b03029",
+    "row": "f65ff1a0d4aa96d26ced4a12b388cf0c44d26c12ce24f38884b6a2a1d3047c6c"
+   },
+   "design": {
+    "channel_order": {
+     "columns": "ascending",
+     "rows": "ascending"
+    },
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 32,
+     "mask": [
+      [
+       26,
+       32
+      ],
+      [
+       25,
+       32
+      ],
+      [
+       24,
+       32
+      ],
+      [
+       23,
+       32
+      ],
+      [
+       22,
+       32
+      ],
+      [
+       21,
+       32
+      ],
+      [
+       21,
+       32
+      ],
+      [
+       20,
+       32
+      ],
+      [
+       19,
+       32
+      ],
+      [
+       18,
+       32
+      ],
+      [
+       17,
+       32
+      ],
+      [
+       16,
+       32
+      ],
+      [
+       15,
+       32
+      ],
+      [
+       14,
+       32
+      ],
+      [
+       13,
+       32
+      ],
+      [
+       12,
+       32
+      ],
+      [
+       12,
+       32
+      ],
+      [
+       11,
+       32
+      ],
+      [
+       10,
+       32
+      ],
+      [
+       9,
+       32
+      ],
+      [
+       8,
+       32
+      ],
+      [
+       7,
+       32
+      ],
+      [
+       6,
+       32
+      ],
+      [
+       5,
+       32
+      ],
+      [
+       4,
+       32
+      ],
+      [
+       3,
+       32
+      ],
+      [
+       3,
+       32
+      ],
+      [
+       2,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ]
+     ],
+     "pitch_x_mm": 2,
+     "pitch_y_mm": 2,
+     "rows": 32,
+     "taxel_height_mm": 1.4,
+     "taxel_width_mm": 1.4
+    },
+    "project_name": "Surface 32x32",
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 20,
+     "column_side": "bottom",
+     "row_side": "bottom",
+     "top_length_mm": 20
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "crank_32x32_masked|right": {
+   "below": {
+    "column": "8e1e8e9ef2048a523010844bc1dc59bf55689e8c72f2361dba46484aed52553b",
+    "row": "8e1e8e9ef2048a523010844bc1dc59bf55689e8c72f2361dba46484aed52553b"
+   },
+   "copper": {
+    "column": "a41d7d3bcfdb1895f8b84c6ef33d2be8d2e3d4ca762acce1646d96ad33b03029",
+    "row": "1c1dd4e30dc9948252968d13eac3101a82a43c613dc6961bd93fe08d763abad3"
+   },
+   "design": {
+    "channel_order": {
+     "columns": "ascending",
+     "rows": "ascending"
+    },
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 32,
+     "mask": [
+      [
+       26,
+       32
+      ],
+      [
+       25,
+       32
+      ],
+      [
+       24,
+       32
+      ],
+      [
+       23,
+       32
+      ],
+      [
+       22,
+       32
+      ],
+      [
+       21,
+       32
+      ],
+      [
+       21,
+       32
+      ],
+      [
+       20,
+       32
+      ],
+      [
+       19,
+       32
+      ],
+      [
+       18,
+       32
+      ],
+      [
+       17,
+       32
+      ],
+      [
+       16,
+       32
+      ],
+      [
+       15,
+       32
+      ],
+      [
+       14,
+       32
+      ],
+      [
+       13,
+       32
+      ],
+      [
+       12,
+       32
+      ],
+      [
+       12,
+       32
+      ],
+      [
+       11,
+       32
+      ],
+      [
+       10,
+       32
+      ],
+      [
+       9,
+       32
+      ],
+      [
+       8,
+       32
+      ],
+      [
+       7,
+       32
+      ],
+      [
+       6,
+       32
+      ],
+      [
+       5,
+       32
+      ],
+      [
+       4,
+       32
+      ],
+      [
+       3,
+       32
+      ],
+      [
+       3,
+       32
+      ],
+      [
+       2,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ],
+      [
+       1,
+       32
+      ]
+     ],
+     "pitch_x_mm": 2,
+     "pitch_y_mm": 2,
+     "rows": 32,
+     "taxel_height_mm": 1.4,
+     "taxel_width_mm": 1.4
+    },
+    "project_name": "Surface 32x32",
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 20,
+     "column_side": "bottom",
+     "row_side": "bottom",
+     "top_length_mm": 20
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "crank|both": {
+   "below": {
+    "column": "04823caa408603e221009b8485abc5aea7fd92e18417df96b06ec5bc56a51fe4",
+    "row": "5c13f23830af7e4f508aa94e9161cd910bc528ecc3520e563b28965b1af5516d"
+   },
+   "copper": {
+    "column": "4226c2746f49ada28572c6eb09afd83869ec0b0672eaad50b41f8a4eda6ffc1f",
+    "row": "f4839a8fb104a3faab07633178130a789131808474f75e715d487696933137c1"
+   }
+  },
+  "crank|left": {
+   "below": {
+    "column": "a551cf337222c03f508a5232f7dda1d91ae114e769f215c32b023a43f4614dd8",
+    "row": "2b5e429826d00c9b49d973a83db7b66cfbd0c0d9b8b3a75b1cb4456750fdde81"
+   },
+   "copper": {
+    "column": "6aa95b15850301c4d68e13358e4215ddcb3aa95cc9c4402e88335305682d820b",
+    "row": "357a69f65c89916920771fc6a3d232ffc008fe7e2f933afeadc9c6def2aea3e8"
+   }
+  },
+  "crank|right": {
+   "below": {
+    "column": "a551cf337222c03f508a5232f7dda1d91ae114e769f215c32b023a43f4614dd8",
+    "row": "2b5e429826d00c9b49d973a83db7b66cfbd0c0d9b8b3a75b1cb4456750fdde81"
+   },
+   "copper": {
+    "column": "6aa95b15850301c4d68e13358e4215ddcb3aa95cc9c4402e88335305682d820b",
+    "row": "1b55fa2b8d2da4d2fc903b40558deb4f027394b14f3276258a6a6c2610910dad"
+   }
+  },
+  "disk|both": {
+   "below": {
+    "column": "3a316ccb678ce13e44b1423c47e43ad812860c437c41a5e0d17f9c20da53f482",
+    "row": "ecb81149698c5b3d932673652eb66043b411dfef957d24be1f53a3b6026679f8"
+   },
+   "copper": {
+    "column": "0b8a7afeac34c1d3026ed88ade684d935232c0db6aa9f446e40d845ae96ab0dd",
+    "row": "31b806f95399c070c6c62f96e52eeeff653da8e9a1174014390735a15b7d5509"
+   }
+  },
+  "disk|left": {
+   "below": {
+    "column": "90799dd5a6dd801be7f098a173fe2c7784a08092154638c22cf8bc9eeea4d569",
+    "row": "7de9268f05a85a23ddb7383be9f7b6e78fd705543b7d872904abad60e4efe37a"
+   },
+   "copper": {
+    "column": "5081d92e3f091a77ecc4f0869babd72704b9fe6e864f63a8c9219a4c592251a0",
+    "row": "09ceff73481c2376a89eee7afdc036fcbc19e9d299e61e01ba60765f1d818386"
+   }
+  },
+  "disk|right": {
+   "below": {
+    "column": "8d87d77055ec09cd656b03a922f1cba8f63e4838ff1a235d646a19302fbb3a3e",
+    "row": "dca6eec00bb8b80fda19f7428f5d200f9a0d199e1e40d59cc4ae9fcf12151e5e"
+   },
+   "copper": {
+    "column": "f4c0a51a7a3b39a79044198812e4c19ccc2b69b75b8a8ea0b915d347890f85ca",
+    "row": "244d5be8f33ef51d9983cd144343fc304e6f0f10b1234dada9b1731b12557184"
+   }
+  },
+  "equilateral|both": {
+   "below": {
+    "column": "fcb7b66fb4b727afbeb16131e4dfe768c65fa4670fb7c1511b51b74d96d00377",
+    "row": "f7139bc048f1bc169428febb2b4982ce447df8eaab8b3a95be7a78e402cf88fa"
+   },
+   "copper": {
+    "column": "b1d4fe627cab13d3886446e6555ba44fbee6e5132d6113c4231eeb72dba6a823",
+    "row": "a6c47406e04b9c567c97bacd7aeb32fdc086e4fc60d66b2461469c3439d17235"
+   }
+  },
+  "equilateral|left": {
+   "below": {
+    "column": "f3789a68cc704f30fc4ab13b2ebdb1085826039b6d7d3bda7b4e2e1e15511257",
+    "row": "828f9dc69ec5f06d8f64080d04d5403300fd2166d930f34c8e4126eba3052ddb"
+   },
+   "copper": {
+    "column": "192e5a2b7e64a8ef360e293e244668bea0c677a7cb4d978ed3b35e615cd227b1",
+    "row": "65e844bbe42300b8c6aa55a11cc340f8616d9d05ee4aefa8b797a37bc8e02c2a"
+   }
+  },
+  "equilateral|right": {
+   "below": {
+    "column": "f3789a68cc704f30fc4ab13b2ebdb1085826039b6d7d3bda7b4e2e1e15511257",
+    "row": "828f9dc69ec5f06d8f64080d04d5403300fd2166d930f34c8e4126eba3052ddb"
+   },
+   "copper": {
+    "column": "192e5a2b7e64a8ef360e293e244668bea0c677a7cb4d978ed3b35e615cd227b1",
+    "row": "a708372a098fd81a729b26a544789bbb2fb53e9302ee54ca13832474fe587e47"
+   }
+  },
+  "fine:014": {
+   "below": {
+    "column": "8f06bfbd13f471f1b580abccbc2a4321ae35a4cd629bb94c33804b8aa3c13079",
+    "row": "5d6c4d4c66a139d1b45463d7db4874c2bed3863607af8fca31372f7e81a4d324"
+   },
+   "copper": {
+    "column": "911f71934ffca0d0a13c5222bd0f5093f5a17a9cf38119346681ee847b1dba0d",
+    "row": "a02f5ad4c6308de6e5f824c0fee22e95cafa0534c110912be7b7f27c63ccdbb5"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 14,
+     "mask": [
+      [
+       4,
+       14
+      ],
+      [
+       1,
+       14
+      ],
+      [
+       1,
+       14
+      ]
+     ],
+     "pitch_x_mm": 0.7,
+     "pitch_y_mm": 0.7,
+     "rows": 3,
+     "taxel_height_mm": 0.28,
+     "taxel_width_mm": 0.28
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "fine:017": {
+   "below": {
+    "column": "bcb97e145417719018bc776bf3f6a41be900a9926faf0dded7a94a88ed173594",
+    "row": "2ff26fed198cb470d07fb8d5c4a49eec998191ec76a1344763ffc81f39b3286f"
+   },
+   "copper": {
+    "column": "146335649938158ed4c5914a976c3860614f5bef40e63c6e4e0dda7af47674a4",
+    "row": "a7f3ba65cffd58c1a6cce493e235de42d6fe4235b6043b05507de011c766f358"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 18,
+     "mask": [
+      [
+       2,
+       8
+      ],
+      [
+       1,
+       9
+      ],
+      [
+       2,
+       12
+      ],
+      [
+       4,
+       12
+      ],
+      [
+       5,
+       13
+      ],
+      [
+       6,
+       15
+      ],
+      [
+       9,
+       15
+      ],
+      [
+       10,
+       15
+      ],
+      [
+       10,
+       15
+      ],
+      [
+       10,
+       15
+      ],
+      [
+       12,
+       15
+      ],
+      [
+       12,
+       16
+      ],
+      [
+       12,
+       17
+      ],
+      [
+       12,
+       17
+      ],
+      [
+       13,
+       18
+      ],
+      [
+       14,
+       18
+      ],
+      [
+       14,
+       18
+      ],
+      [
+       14,
+       18
+      ],
+      [
+       15,
+       17
+      ]
+     ],
+     "pitch_x_mm": 0.6,
+     "pitch_y_mm": 0.6,
+     "rows": 19,
+     "taxel_height_mm": 0.24,
+     "taxel_width_mm": 0.24
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "fine:030": {
+   "below": {
+    "column": "8304746a3d848a8959a96a6abffce5b4ea0ab7df8c3366ffbf8b297bc9725a00",
+    "row": "feeac5e23e898336bad1a1647710b9501748972bd84dc1316c33ec890c3b318b"
+   },
+   "copper": {
+    "column": "1848dcc9f12ae9228c9e25dac273ca2b18d25f619507546e84c8554bc5acbeed",
+    "row": "d4cc55a28dfd9f0e9c2d80c590736a8ce6e1fbecc4c31fa08c5f9f25e42d6212"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 7,
+     "pitch_x_mm": 0.9,
+     "pitch_y_mm": 0.9,
+     "rows": 28,
+     "taxel_height_mm": 0.495,
+     "taxel_width_mm": 0.495
+    },
+    "role_mapping": {
+     "bottom": "rows",
+     "top": "columns"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:013": {
+   "below": {
+    "column": "e7d04f8dd925576b9002ae36d06a1f8e775ec7ff63420c29de77f4cf13c17ff3",
+    "row": "d1e910fedb7cce40c4d8933723d7543b459583b15434f6b1894ea4463028e717"
+   },
+   "copper": {
+    "column": "47f4f07c81d46fd47150f5bf3c6d7c67cfdc7a455a27ceea30e5e37c771be061",
+    "row": "db909e0f62093796a354e305f0ab2217237db1812dc775c894297266a25a8c62"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 17,
+     "mask": [
+      [
+       1,
+       17
+      ],
+      [
+       1,
+       17
+      ]
+     ],
+     "pitch_x_mm": 2.5,
+     "pitch_y_mm": 2.5,
+     "rows": 2,
+     "taxel_height_mm": 1.75,
+     "taxel_width_mm": 1.75
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:019": {
+   "below": {
+    "column": "179810bdfdb0f53c78073e0b88c72668853c0c86abe13917f7293b649213e0fc",
+    "row": "96cda0eecd6d50299669834ba32f52de8e4c64414654cd0374bc7980ca0ac5df"
+   },
+   "copper": {
+    "column": "37ee14da33952ee2e469a45d6fb1f0c4884edeedc1c898873fbc2eafd399c22a",
+    "row": "c634cf232ae28109762752b800338b7206e22dd71cad9143d719379e03164584"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 25,
+     "mask": [
+      [
+       1,
+       25
+      ],
+      [
+       4,
+       24
+      ]
+     ],
+     "pitch_x_mm": 2.5,
+     "pitch_y_mm": 2.5,
+     "rows": 2,
+     "taxel_height_mm": 1.75,
+     "taxel_width_mm": 1.75
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.2
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:034": {
+   "below": {
+    "column": "b235a0d01c38933c73172cfaf0101c2128ac71591002c0b560d90bddfb64ed00",
+    "row": "1223d86cfdc8aec9d307e8146c32f895192f038a02e1be337f95e4e1c3536348"
+   },
+   "copper": {
+    "column": "f34a16e26443b302da6737f3de76e3a99d38733e9138783b6063a552980d4214",
+    "row": "17908ce9a53de65d0afdd6c02a53c290ec337ad9ce4f5c82b1e23972a4f4c9df"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 2,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "rows": 29,
+     "taxel_height_mm": 1.2,
+     "taxel_width_mm": 1.2
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "both",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:055": {
+   "below": {
+    "column": "438a3fcf7d41f10d69086e448d8760038d27be3156ba951c37703fc6e425ec83",
+    "row": "f1d82c7b4ed64bac612ef97b34642ea8451aedb6bc2c440c263c6e0b41ea173f"
+   },
+   "copper": {
+    "column": "36d9a174dc53ba7ff4779540a0e006c0a8eab62cdd879275dabf523ea907f270",
+    "row": "da5b683fe020ca4195ca21984688c163d4942f8c147d936392d2004ba9d59c25"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 8,
+     "pitch_x_mm": 1.5,
+     "pitch_y_mm": 1.5,
+     "rows": 3,
+     "taxel_height_mm": 1.2,
+     "taxel_width_mm": 1.2
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:067": {
+   "below": {
+    "column": "74e49679c6f91e2796fd9c5cfbc13b63faf81d95da28f79880ff96723649a093",
+    "row": "f07e9ac0895695a51a647b92b6cdfe7566fbea219e22087fe384e7db4f55ba8a"
+   },
+   "copper": {
+    "column": "fcc9b729aafbef52522b76263b7d2a57a0ef56d20413cfeac551178c76c099cf",
+    "row": "419215d0fdc3ccb951efc91f5c80b4cf0b5f17f941df5b4008fcb151ecb93706"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 4,
+     "pitch_x_mm": 1.0,
+     "pitch_y_mm": 1.0,
+     "rows": 23,
+     "taxel_height_mm": 0.5,
+     "taxel_width_mm": 0.5
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "both",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:112": {
+   "below": {
+    "column": "46910b7de658ec7cf764ed691efcc368b8852156088c8f8993025871792230a5",
+    "row": "f5b01bf0e23456209729d4e794cfe58341e744738c50fad62e01afe45f3c6b62"
+   },
+   "copper": {
+    "column": "bb173558db88863ee0f4675d4888e87eb3fd6f83cb8a0c54a774ae051b863952",
+    "row": "22b6ae984f054613d7d5308f19f96af0676ae3fa9c8352c172e414cb45587896"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 2,
+     "pitch_x_mm": 1.25,
+     "pitch_y_mm": 1.25,
+     "rows": 13,
+     "taxel_height_mm": 0.875,
+     "taxel_width_mm": 0.875
+    },
+    "role_mapping": {
+     "bottom": "rows",
+     "top": "columns"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:168": {
+   "below": {
+    "column": "2a9334cc54383f1868e0452be3236be827a82b00ed1463676af6a4b835783851",
+    "row": "f2812d4372fed422acb619f7c9a892e1c240e1871885b672e006733c379c1ee0"
+   },
+   "copper": {
+    "column": "15cccd2d26b391f9900b349f5750a4a628179f16959a885859d1801284a5e2ee",
+    "row": "d8679420820aa91b8351550ef4cb5deb84d828602ec3891d174f2f9008ef7113"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 2,
+     "pitch_x_mm": 1.5,
+     "pitch_y_mm": 1.5,
+     "rows": 12,
+     "taxel_height_mm": 0.9,
+     "taxel_width_mm": 0.9
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "both",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:181": {
+   "below": {
+    "column": "2340b36fc587f00b6bc4c195b1c23be7b9f95b9032e421170af7e29aaa361d6b",
+    "row": "9585db323205ee673b722bbf28cda1edbda11eee7302dad0797c5fca151348a5"
+   },
+   "copper": {
+    "column": "0ab5f3beef8689744c4f910438c27440043fb6e2b3ae4f644f9c0f4e47df7f2c",
+    "row": "b60d9cddbae5d79878ebf74f9eb85150606b1e7d826a5dcab378de755b2f638a"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 3,
+     "pitch_x_mm": 1.25,
+     "pitch_y_mm": 1.25,
+     "rows": 23,
+     "taxel_height_mm": 1.0,
+     "taxel_width_mm": 1.0
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rand:234": {
+   "below": {
+    "column": "7bb8e2ce518e2a6419c7dbc5bf1aa66ed186e1302a767f0054271d6c53af0d6c",
+    "row": "edaa8703c9c71ab609f9b88df80edd09825d1fb52c88d865c458c0bbfe039a83"
+   },
+   "copper": {
+    "column": "779914828ba14603f228233a1e4c53cada833da69c3abc3eb8bd291dbac9f7ab",
+    "row": "fa0a53cc68f0b8ac09c5a19982f3e36f0cfb3d0b519254962e4bd5b9343991d9"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 2,
+     "pitch_x_mm": 0.8,
+     "pitch_y_mm": 0.8,
+     "rows": 24,
+     "taxel_height_mm": 0.4,
+     "taxel_width_mm": 0.4
+    },
+    "role_mapping": {
+     "bottom": "rows",
+     "top": "columns"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "reader:004": {
+   "below": {
+    "column": "30b1d31afbe1bddb118b72bf8fe8978b60614bab6c7ded6c2ccb2c9008ee8b30",
+    "row": "c108754440ddd1e72f3d8a14df138bb57d3afda0ea97b1a358e435433319192d"
+   },
+   "copper": {
+    "column": "238769af37398fe3f85912f62b104417814cbcc3114259db8bbdd3ca22ef422f",
+    "row": "a724a960252a9a6233f3aba7b77837520a80f6541157b5c85db45994e7528e19"
+   },
+   "design": {
+    "connector": {
+     "column_pins": 16,
+     "row_pins": 16
+    },
+    "matrix": {
+     "columns": 4,
+     "pitch_x_mm": 1.25,
+     "pitch_y_mm": 1.25,
+     "rows": 15,
+     "taxel_height_mm": 0.75,
+     "taxel_width_mm": 0.75
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.2,
+     "trace_width_mm": 0.2
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "reader:008": {
+   "below": {
+    "column": "2a90cd3fb7a8a8df4b5ea3ff8eaf7063091cf0e11dc27ebcdb62a3de8038200f",
+    "row": "95fe1052e84a594e24e00840398d925229f59466750343f019c46e9cc35b6a08"
+   },
+   "copper": {
+    "column": "75b80d6393df133105ec1615f6a20b2307836212396b2cc0307d52283102d4e9",
+    "row": "74776498cb4efb136c91f74482140dc166d3a4a083a56f119856b5147b6d4422"
+   },
+   "design": {
+    "connector": {
+     "column_pins": 16,
+     "row_pins": 16
+    },
+    "matrix": {
+     "columns": 2,
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "rows": 9,
+     "taxel_height_mm": 1.2,
+     "taxel_width_mm": 1.2
+    },
+    "role_mapping": {
+     "bottom": "rows",
+     "top": "columns"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.2
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "reader:013": {
+   "below": {
+    "column": "85d49d64d84c6fe559ab820b18a7d052e41e55f1640396e28efd0be4d23899d5",
+    "row": "ea93bb3ad1620d6a94f77250a044e686b3f3b67c90caf8b9726206e90c897e2e"
+   },
+   "copper": {
+    "column": "132ac80abedbed4d8c4fa5d8d6e31d8f02b5974a6c1775d24a6bbc4325b84ee8",
+    "row": "0e1b1785b8d45a6ccaba891d0d23f983839e193378a99a0b2513ab22a2bab07d"
+   },
+   "design": {
+    "connector": {
+     "column_pins": 16,
+     "row_pins": 16
+    },
+    "matrix": {
+     "columns": 2,
+     "pitch_x_mm": 1.5,
+     "pitch_y_mm": 1.5,
+     "rows": 14,
+     "taxel_height_mm": 0.9,
+     "taxel_width_mm": 0.9
+    },
+    "role_mapping": {
+     "bottom": "rows",
+     "top": "columns"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.2,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "reader:015": {
+   "below": {
+    "column": "38fc4fab474f8a97b8bf682da792f6904da3b2922b40e79771dcce0a865ab71a",
+    "row": "482102df08f7b5b2734d652f83704b30e80dac03a8f6fb96bf6d2d69c83a6d95"
+   },
+   "copper": {
+    "column": "5f3010f79900496d2fdb79f56e1d2b70ce76495ef07e89f7070a4357e79ac6d5",
+    "row": "cfd64641a7a66ab456db6511d1897e4d0387bc2f808a5365189f09c5d5953ccc"
+   },
+   "design": {
+    "connector": {
+     "column_pins": 16,
+     "row_pins": 16
+    },
+    "matrix": {
+     "columns": 5,
+     "mask": [
+      [
+       1,
+       5
+      ],
+      [
+       2,
+       5
+      ],
+      [
+       2,
+       5
+      ],
+      [
+       3,
+       5
+      ]
+     ],
+     "pitch_x_mm": 2.0,
+     "pitch_y_mm": 2.0,
+     "rows": 4,
+     "taxel_height_mm": 1.2,
+     "taxel_width_mm": 1.2
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "reader:036": {
+   "below": {
+    "column": "9522c4530953c3f0ce618eb79a706f30948fe28592f0c4a57b6d30a005731fc1",
+    "row": "48855d749cc6b4d72c0bc44a2e8b662a9acb3d181233c24a7171292509b38e78"
+   },
+   "copper": {
+    "column": "93c878feb1a2d277ea4482e51761020a7dc5b14505020c9035b6f051f46d673a",
+    "row": "d727ba2b4b448d2496f8b05c32a50886e15d06a4c202a3f167b3e448e1733b34"
+   },
+   "design": {
+    "connector": {
+     "column_pins": 16,
+     "row_pins": 16
+    },
+    "matrix": {
+     "columns": 2,
+     "pitch_x_mm": 1.25,
+     "pitch_y_mm": 1.25,
+     "rows": 12,
+     "taxel_height_mm": 0.75,
+     "taxel_width_mm": 0.75
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "both",
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "rectangle|both": {
+   "below": {
+    "column": "a9fe9bdcc08896545173fd37ee010f0c500bd038aa7de60f1341da2f699518e0",
+    "row": "b5313a05ef50880dee1f91988a33c5822bc65d2f0f7aeae0f51b84364b7fe989"
+   },
+   "copper": {
+    "column": "2374996eae855127d4a87f7c09e747a2ddaa0c993665bae5f97d07be76e95723",
+    "row": "4da0887b076335004cc94499af6840bf9844b7e1f99c308a2f929232a34cd153"
+   }
+  },
+  "rectangle|left": {
+   "below": {
+    "column": "f1350bc02497125d9ae3f031ca3e81e15d76165143764d94abef4f1241eb44ec",
+    "row": "97e67ae96798c69ec311e908d4269e7ecabba7601c69173dbdab0f5c0efca7c9"
+   },
+   "copper": {
+    "column": "b4eb5695034a355d7646976022acccedbf2c6c446cc8202eba0234a4c2345983",
+    "row": "61c46d2af1bb2e40413ab23c54f6459b70ce1d11bbd4e35e7632099b47668cc1"
+   }
+  },
+  "rectangle|right": {
+   "below": {
+    "column": "f1350bc02497125d9ae3f031ca3e81e15d76165143764d94abef4f1241eb44ec",
+    "row": "97e67ae96798c69ec311e908d4269e7ecabba7601c69173dbdab0f5c0efca7c9"
+   },
+   "copper": {
+    "column": "b4eb5695034a355d7646976022acccedbf2c6c446cc8202eba0234a4c2345983",
+    "row": "44e6270857181081a6b7f382041f8da5bfa2113034c35b5a2bc9a00e41cac94c"
+   }
+  },
+  "soft finger|both": {
+   "below": {
+    "column": "0ab81411f4c8fe1add9e82364d348a6706b520a546659ec8be15fec8f6c661c5",
+    "row": "afc78ccea20d3a2914d89b868dbda704e28b4e97efc26de877929d485b5eab0d"
+   },
+   "copper": {
+    "column": "cf1effc85ba01d5817e84623bce55b7dc29e716678468aa1eb7b2c059c2aa2fe",
+    "row": "fc538fcf439435bf7da1d7c36c63f4872c85ce426c390911f447551d3966ed05"
+   }
+  },
+  "soft finger|left": {
+   "below": {
+    "column": "53c741d86af0d882855012a7891d932df0838f3cb779aa9c3c7a174494874710",
+    "row": "5e0f91c46d702640b40c1b4b46482fc5f5c798dd993e3cf41831f092bcaa8ae0"
+   },
+   "copper": {
+    "column": "198a9b73e9896d7bbf874bf552ddec49c45bf40676f7d2e9f510ad458b014956",
+    "row": "c0cff339658bb975a00428004ed4357b251b7ec968cb673f3a3a0065e5536a1c"
+   }
+  },
+  "soft finger|right": {
+   "below": {
+    "column": "53c741d86af0d882855012a7891d932df0838f3cb779aa9c3c7a174494874710",
+    "row": "5e0f91c46d702640b40c1b4b46482fc5f5c798dd993e3cf41831f092bcaa8ae0"
+   },
+   "copper": {
+    "column": "198a9b73e9896d7bbf874bf552ddec49c45bf40676f7d2e9f510ad458b014956",
+    "row": "48bc4b8172f1aa4372a7bc3b4a4da73d2a90bb6c89c8062c945c08151345075b"
+   }
+  },
+  "soft_59x12|both": {
+   "below": {
+    "column": "f2ef47c9cf8e2e252e8d33779376ce9310a9a0cbe0794ed93ce4c34d4a1bddbc",
+    "row": "fe28fcefe6ec5634737e07a1e2ccc8ab1a0156882ff5c5e6474b7cb2d71c1c93"
+   },
+   "copper": {
+    "column": "a5bcabda6f89fca2074ab41109e1cc7ba6863418793b7c163a1b767f821f7d6a",
+    "row": "1aa410baf02adac38c92ac8eab5252a377f5271365274975c6ee928dd80f16fe"
+   },
+   "design": {
+    "channel_order": {
+     "columns": "ascending",
+     "rows": "ascending"
+    },
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 12,
+     "pitch_x_mm": 2,
+     "pitch_y_mm": 2,
+     "rows": 59,
+     "taxel_height_mm": 1.4,
+     "taxel_width_mm": 1.4
+    },
+    "project_name": "Surface 59x12",
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "both",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 20,
+     "column_side": "bottom",
+     "row_side": "bottom",
+     "top_length_mm": 20
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "soft_59x12|left": {
+   "below": {
+    "column": "28acc51618d8249a4a64f4908e9b522873e61232445468579606e2070996ca5b",
+    "row": "97b2203301b4178c61bbebd1a1937149f7c2b3572a769aa4188ba88c186945ee"
+   },
+   "copper": {
+    "column": "d87da4fca1c142d7da38038947a686cda7884ea031e2bcad6f70b5ef79c7c794",
+    "row": "174a5f506a65264bbdc95fe2d65127c0223b2c2811b26890b0a13b197f5d1cb0"
+   },
+   "design": {
+    "channel_order": {
+     "columns": "ascending",
+     "rows": "ascending"
+    },
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 12,
+     "pitch_x_mm": 2,
+     "pitch_y_mm": 2,
+     "rows": 59,
+     "taxel_height_mm": 1.4,
+     "taxel_width_mm": 1.4
+    },
+    "project_name": "Surface 59x12",
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "left",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 20,
+     "column_side": "bottom",
+     "row_side": "bottom",
+     "top_length_mm": 20
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "soft_59x12|right": {
+   "below": {
+    "column": "28acc51618d8249a4a64f4908e9b522873e61232445468579606e2070996ca5b",
+    "row": "97b2203301b4178c61bbebd1a1937149f7c2b3572a769aa4188ba88c186945ee"
+   },
+   "copper": {
+    "column": "d87da4fca1c142d7da38038947a686cda7884ea031e2bcad6f70b5ef79c7c794",
+    "row": "05d800f87bc8db23fac4da1007e40f6e031229a583804f1ce267d7b501ece4fb"
+   },
+   "design": {
+    "channel_order": {
+     "columns": "ascending",
+     "rows": "ascending"
+    },
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 12,
+     "pitch_x_mm": 2,
+     "pitch_y_mm": 2,
+     "rows": 59,
+     "taxel_height_mm": 1.4,
+     "taxel_width_mm": 1.4
+    },
+    "project_name": "Surface 59x12",
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 20,
+     "column_side": "bottom",
+     "row_side": "bottom",
+     "top_length_mm": 20
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "tailside:002": {
+   "below": {
+    "column": "0126b3e4f4b0684e0eb3b28ab28ad5774a46d45489fa21189f3928b7140d984e",
+    "row": "bdee9ee3fd82394556c74a999d1e063655b81186f12ca3c886980ddfbf0908fb"
+   },
+   "copper": {
+    "column": "a501c1e0ed339d8f5b4dea7e878c7d6ac16c45d4c8296d080f2f9937ed126e58",
+    "row": "a8422e907d00705fa92149ffdf72feea6ad5de20edf3162691f76e17dc678e1d"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 3,
+     "pitch_x_mm": 1.25,
+     "pitch_y_mm": 1.25,
+     "rows": 26,
+     "taxel_height_mm": 1.0,
+     "taxel_width_mm": 1.0
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "both",
+     "trace_space_mm": 0.127,
+     "trace_width_mm": 0.1016
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "column_side": "top",
+     "row_side": "top",
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  },
+  "tailside:027": {
+   "below": {
+    "column": "530efe49ef99333a705e66c7cb1dde61487e94d507a438e8f1a618e68a15813f",
+    "row": "df238593bc1756c528b677288612aab3b6afa7409636a57d6ad069e8275f8bcd"
+   },
+   "copper": {
+    "column": "8c81fc697d77954a1f1fef8ee6e151fec85f5158af8061064be80d22288dba6a",
+    "row": "e211962379e3693d146dd69a50d96a46829eafa939a5d9800d9028e7fd7f3990"
+   },
+   "design": {
+    "connector": {
+     "column_pins": null,
+     "row_pins": null
+    },
+    "matrix": {
+     "columns": 14,
+     "mask": [
+      [
+       1,
+       14
+      ],
+      [
+       1,
+       11
+      ]
+     ],
+     "pitch_x_mm": 2.5,
+     "pitch_y_mm": 2.5,
+     "rows": 2,
+     "taxel_height_mm": 1.5,
+     "taxel_width_mm": 1.5
+    },
+    "role_mapping": {
+     "bottom": "columns",
+     "top": "rows"
+    },
+    "routing": {
+     "row_sides": "right",
+     "trace_space_mm": 0.2,
+     "trace_width_mm": 0.127
+    },
+    "schema_version": "tactile-fpc-design/v1",
+    "tail": {
+     "bottom_length_mm": 7.5,
+     "column_side": "right",
+     "row_side": "right",
+     "top_length_mm": 12.0
+    },
+    "template_id": "surface_matrix_v1"
+   }
+  }
+ }
+}

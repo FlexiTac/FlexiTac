@@ -1,0 +1,312 @@
+{
+ "entries": [
+  {
+   "expected": {
+    "layout_sha256": "b445ed4509f0261fc9042c93ce9d6ce1ffe81e9c345ac3fefd56395682a2993c",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "9699210a70730f281366c4fee8812c94daa13070c2613b0ced9b23b5558925ee",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "025e90c907955a27afc6f6a6969ebeb1448e244478af59ccdcb1c66f8af963e3",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "d480d6581cae9debbba163db50668f1a0875300147de3638ff246e378da1f316",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "6fae5095fd58bb6025f3d2bc6914f0235f7da8e058465830eee1715c7cf6b4e2",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "250fe9ae98df4d9b3341c309e7d90f5a34ef1f1bccbc91dcbbb3947663c47cf6",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "b46d2b49b2ac2d77da971f54aa7c545e8d78741d83831b182f79c8646633893c",
+     "bottom_fpc_gerber_zip/netlist.ipc": "f1020b960e37be45cc98943297523cb1837f3779afa7a86a5fc113d869f46b73",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "4abcb44e10dc8b31c3cb6fcc54d3bc82e45c7fcdc551146e2b305852ccf96e9b",
+     "project_review_bundle_zip/derived-layout.json": "b1d76743702b0850d2bf2e0c4d9923834b05e1762313421f8559aafe18cc4c45",
+     "project_review_bundle_zip/pinout.csv": "ccb6d77633194d40abdf29ba6f7f3526f5c55d0a0ada4d3ad736405b91ed0d79",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "7694132297f2c81724c7ca778a13ce00a423661799f669a0822c64b4c651bf32",
+     "project_review_bundle_zip/previews/top_fpc.svg": "448dd3d6c98f6c5e1ec5f9303eb1dd19c1333d882ac4ea25b8d363a95b852f6d",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "f69598a1fae61b22fe9fdd28c597e69bb936e8ed69e8bab23646012785e8c5ea",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "49ca480183a89f711bdcd32a4c8a682066cf17cb06af4e313678cb8976ca2b70",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "8b641428ca89a9bfbd5739a97f9c9656b1890a3f7abf231761824b2c4232d3a4",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "78621c1e0fcd3a6b7b571444654e542252da3c88afa3d5f4ba74bd0513a1896a",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "809edcd0ca9ed19be4bf018369640edee80e761a9dcb25641d893e050a6deef0",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "ce65d897519f822ce36541cf9ce2d3e28769b473ddd7612177b665ccc4d347c5",
+     "top_fpc_gerber_zip/jlcpcb.json": "54ef2eb4c750d2ee14754c72f1d703a4f5f319ccb4a5d4dfb44fe729fd07e4e8",
+     "top_fpc_gerber_zip/netlist.ipc": "02dfbc4c4ae5d633c794c9032b13a0afc186b037562a068a801818d8e94608a6"
+    },
+    "ok": true,
+    "validation_sha256": "5e9ad41805af8b7e3744b710ca0679ad6cee45369bf3a065dd55a65b433c06a1"
+   },
+   "request": {}
+  },
+  {
+   "expected": {
+    "layout_sha256": "8129678df73113dadebcfb314decfd2d26096c71cc684bbae82827e543c1cc63",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "35f09044c5dd3ef1c7b943b9daf2965872b8e8e01ecf8c6624a86bc108ff3b57",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "11fcd848023d60d8aa2bd6fdb6eb8fb73c83b8e82df217195f43aa7d0a05822c",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "b494c38659f6556dc6831191cba50105ae7081e4b0e3797fa0feb6a8fc1c4b6d",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "d7525bad1b05cdcc07badf26ff882e5fd9cc87c229f8689309521f14e5adc2bd",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "54891dcf4af4dbed6ead96f5ee54ed016fe3db82f4df873968fc2cfd59aa6d5f",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "4a3a4ce060726aaa6251e17da19e5e4fdb0a099ba9be000f622bd8a43fc833c9",
+     "bottom_fpc_gerber_zip/netlist.ipc": "54bcceba0d2e2a77e7195727c924ee225723a0df66418d10621c6dedf0b2b016",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "bdfb48c9434b5a3fb26c8e63bfcefc041b6ea6724bddc779ff05f115a9b8c721",
+     "project_review_bundle_zip/derived-layout.json": "9e0bcead037e0ec773aa1e13ecc4fda94895ba27f02a9f4c2f3a9b9d92608ab7",
+     "project_review_bundle_zip/pinout.csv": "b1e07fa76d82da66024942ead300ba52fedc8c31355be324289b763f9fcc73b7",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "a5ec27d16e75853d64ee1ebef8c12305ebb10f0d54a0b36188649c6c7e689183",
+     "project_review_bundle_zip/previews/top_fpc.svg": "cbf563acf1ebb1385b97ab1357e1b07635c40c408802d2b07dc79d0748c32e66",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "3ffba618722c7b1c37bf1a7032a956607629581b41f2ddd3978bf33f93049ae6",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "e5fc56c77fad89830d00eb14ef8cd5666ea3a363a06d45cbc16e05059e47f0c9",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "27cad14dfebd4d6e6704811bcb778028a755f8faddd8d5776dc6715969803115",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "80bbdd4f9433e1be7b0dd2427d9319e2eccd01541c619850d3d9e9007cf4d6d5",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "0992e2294a36a8cc842999aeeac07448b2f0bb73895dbf945e21ed00ff0421f8",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "cb3b17cf973a441dbc6cb08171138628b8cc998007c6093def3b96edbfeadd1c",
+     "top_fpc_gerber_zip/jlcpcb.json": "52aa4527c19313dcf4061252dd6e28473dfab33d0968b6d80ff0f3155d06379e",
+     "top_fpc_gerber_zip/netlist.ipc": "9e629a3d71dfe96d8126c1ce68823a42276120d5bbaf87c91e547e8440d9ffcd"
+    },
+    "ok": true,
+    "validation_sha256": "f0b5187f4fef451d2f4b4a60469c48614696f85c978ff6b1222c97d359dcdd60"
+   },
+   "request": {
+    "matrix": {
+     "columns": 16,
+     "rows": 16
+    }
+   }
+  },
+  {
+   "expected": {
+    "layout_sha256": "facd1f41f9898014dc76b74728df2dbe1b61e105b7f57a0b9c928eacffbab549",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "1e7fc961a83bada65b564d940fa2dbd8aa457871e66bae7afdfb62727a92df7c",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "025e90c907955a27afc6f6a6969ebeb1448e244478af59ccdcb1c66f8af963e3",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "0db719496f40aecfd5a5a0c3394d265609f01f8ef419be81224ac7883327853a",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "fb6558078d82a528645b9873216dc7d09b2a6840d4eb697341b1678c20298a42",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "06789057dbe383a5ef5d352fb39def3b03d8ef18c4ae1e954253e1df3cd2567d",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "b46d2b49b2ac2d77da971f54aa7c545e8d78741d83831b182f79c8646633893c",
+     "bottom_fpc_gerber_zip/netlist.ipc": "f87fe0d11c394ad623516e000952625293c0e311fa7601076bd9e052dc5a4ed7",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "22d2260887cbfb34a9e04bea86ebac66aaeb976919c57ec374f8b75ad8ea24c9",
+     "project_review_bundle_zip/derived-layout.json": "1caea84bf87b09e887da87c8f17ba7c6c23524caa23549714d4904c71a0e3271",
+     "project_review_bundle_zip/pinout.csv": "055fbf3e876b0cccd226bf3b4dd459a53ee762cb39e8f55724b01d943c83172b",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "2cf0478e3be4419de38226ad0d3c6b6941c15579417a69c45484b61d383560f2",
+     "project_review_bundle_zip/previews/top_fpc.svg": "c4e6daf8c7099919b6c6f86fbeb431ad6946d763e65b1342ab6642660f7cf236",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "3ffba618722c7b1c37bf1a7032a956607629581b41f2ddd3978bf33f93049ae6",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "0d29c11b2eda7aa34df7eb976df4e9d735c3dca0bcb5b069983685f64ade603a",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "655a4274ae22efceede89362f86d169d3e97ecfe0fcef426a1b2808b99b52eaf",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "6cee0e42e3286c27f95f790360368d2160c133e16c2ad5eebfae1768e9d9568a",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "9cbad4ed11a4afaf88dd53fbd8cdd605e974db238f88b5d898328c7efdd1190d",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "f4cf2e4c524f39520726e82cf955670eee95661499cb1e9eba8f0154906f3f7e",
+     "top_fpc_gerber_zip/jlcpcb.json": "2b9caecbe945e6c997147c8ec3cf36eea07617ea4ec38ad9b1137f0d82d881ab",
+     "top_fpc_gerber_zip/netlist.ipc": "5df3c7e033463d322047247c90535a671c69d19d909c1729414297f6d5786cec"
+    },
+    "ok": true,
+    "validation_sha256": "f0b5187f4fef451d2f4b4a60469c48614696f85c978ff6b1222c97d359dcdd60"
+   },
+   "request": {
+    "matrix": {
+     "columns": 32,
+     "rows": 32
+    }
+   }
+  },
+  {
+   "expected": {
+    "layout_sha256": "86dc0fb5359ce0ed3d53057908e8d4e3dc769882cecd5ad328454e75ef98b3bb",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "ae1ae02b5fc7f4d1159854562143168ac63231c8ee71d2e75622e8cef3dcedd4",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "4a3bc50798280b52cf2f1eaf3bd054292e90e37fbde3af6903ec66d9cb8cdbb4",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "ce7e834d16fd7da38170dbbc65e01d9dbe1e9ecc68cba404adaa7f3f9c4f1091",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "92679429cd580fa8d903a3d04f0e5ceeb49c4fc9dd428e87e1f8d0b396c1400f",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "f9da5b344f39b00b7ff07976d85b23d10a5931f8076749a5681988f50aba2311",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "c2ef825c8bb2bd67c44ee0f84c0e899ff1f5aa87bc94c5a06fd3ebd91edb0b70",
+     "bottom_fpc_gerber_zip/netlist.ipc": "91cec51f93759e98ba2db7cb173827a841892792f99c3c440c9777bd5ef3c61b",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "4cea46f276f0944da4ca408db196ad8c961cb55dbb1227bdc1506c333550104e",
+     "project_review_bundle_zip/derived-layout.json": "76df8eaee4ca357836077a81163ada8e85bc0355240fa423fd8ae7b393ddbbe6",
+     "project_review_bundle_zip/pinout.csv": "91b1a3e545378307a92b712d3eb9a444858d5aba5287eed8c3777d48b28ecefd",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "059086f35f441b3d75dc239f7f8818184a4376db8b16548ab46fb74daac04785",
+     "project_review_bundle_zip/previews/top_fpc.svg": "124d40c6380ae6f6f1b8dd3f813e95bbe4aab50f924bb927f860efaab3bf9109",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "ae4f1bbcaf17794d0149a8fe2f96a30a7c9ca30e0a8b375b88c9aafc69ccbf08",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "7657bb370824a066811982e491229f2453bdb450fa38ef911d24341e14bf7123",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "655a4274ae22efceede89362f86d169d3e97ecfe0fcef426a1b2808b99b52eaf",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "d2f29d9a91507a46a69e5d30e0bbc86d3c11d1cfbad766f82f294032c86d5dd8",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "fa22de285c598d04abf48ecef10bd48465255b7cbb119e3df7704b91f0cbbb0a",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "0a6fcd2b8bdc71a8f145bd7360e868b3049a9b4e29e0f31303e86d431e48a4f9",
+     "top_fpc_gerber_zip/jlcpcb.json": "2b9caecbe945e6c997147c8ec3cf36eea07617ea4ec38ad9b1137f0d82d881ab",
+     "top_fpc_gerber_zip/netlist.ipc": "248366abb5abfefd317af30e081b8c3633aa0199a22c4ab2bef4e24f98e78670"
+    },
+    "ok": true,
+    "validation_sha256": "1c1c8852de6cf8830492dd7a454595028501c392a7bd0638f44bca7008e6377d"
+   },
+   "request": {
+    "connector": {
+     "column_pins": 64,
+     "row_pins": 32
+    }
+   }
+  },
+  {
+   "expected": {
+    "layout_sha256": "0dfea3bfa33c05e0070797e8d77a41e1e93f84c1fae25566285a029ac55aa51e",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "caa138ed4549bc5f58a15192874447d728feac4a43145e61b9bf310256ef5ae5",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "f391df9a761dac41cf6e5af5cf550766f058d40b61605fc2c1eb8a21f5e14486",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "e284f5faadee6decf41ff314d44972d7760a55a4b342d1bd5b0c6956ab6449f6",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "4b35ea9a23ecd56d9ba5140cbd31ad9075c5639c6f369a4908813e4725fe0f4a",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "2939e53562c95ff3adce37d0e81dbf838b84919cda08bba07e895b18fdfa5100",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "7c60607a547b5a7f646b3f1b50afd53543e4f788062ee13c7ae463e842c40c83",
+     "bottom_fpc_gerber_zip/netlist.ipc": "1bf9358a7ce139d7afac42e318686755313d080bc79f26ca189aa9c51788d523",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "602cd746dc0b8d6f91baf6eed40a180377576f4c4aa00e412b4c78af30ffe851",
+     "project_review_bundle_zip/derived-layout.json": "4aa13247a020d7ce4e65f686d9e34ca4800f124e8a3c4f5a1099560c257048c6",
+     "project_review_bundle_zip/pinout.csv": "ee9049cdead7c326bef307b5ef7c9b988f55ae0014c1765a901f33d4e53871cd",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "b37fe0d72384450c0ab3d25714b2a3d1d58066f4e97265b02e0d562aa7513e85",
+     "project_review_bundle_zip/previews/top_fpc.svg": "49c6294e5c2635e35f2575294885a19f718a3c6d76fd16e6f6d83d2242d179a1",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "196115346e2d85c2d5edd83a5f19446dd52d3ef998a191c295881bbf619f92d3",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "b974454be54414cbfc1f2e4fd6fa17c23c072959c632840ae95e5f3da6a65c42",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "0c59afc1d79daf3551ece6948fdd590df8d1a2081c7150cf7f4cd1827fcb6851",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "139193e4ac828888036affbf804c93d95b27dd2191633f828fff482e542332e7",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "5263420e005dcbd51ddea099c821141dbfa73b7d0f5b66e1e173bf629bcd72a9",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "f2dc20b0924958393ebf4cffc8782a377232d2c1b9b3f71bbfd1cdfe5f87a9f3",
+     "top_fpc_gerber_zip/jlcpcb.json": "6ab0da11d28555ae593a5177600e22e70328100e2a1bfbe2352270e2d5db8df3",
+     "top_fpc_gerber_zip/netlist.ipc": "c6c72e9146df1e13a2c220c19593dab4bb879c9991cbd439ef53ba8c722e944c"
+    },
+    "ok": true,
+    "validation_sha256": "add4589e0bf938dda200b46744906dfecdb0a91394243510e04b9b34c077ade1"
+   },
+   "request": {
+    "role_mapping": {
+     "bottom": "rows",
+     "top": "columns"
+    },
+    "tail": {
+     "column_side": "left",
+     "row_side": "left"
+    }
+   }
+  },
+  {
+   "expected": {
+    "layout_sha256": "69410c092f819d3c4cc3d68eddead26c0b254fe0aedb808e4f38bfe97ce5f310",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "9699210a70730f281366c4fee8812c94daa13070c2613b0ced9b23b5558925ee",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "025e90c907955a27afc6f6a6969ebeb1448e244478af59ccdcb1c66f8af963e3",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "d480d6581cae9debbba163db50668f1a0875300147de3638ff246e378da1f316",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "6fae5095fd58bb6025f3d2bc6914f0235f7da8e058465830eee1715c7cf6b4e2",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "250fe9ae98df4d9b3341c309e7d90f5a34ef1f1bccbc91dcbbb3947663c47cf6",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "b46d2b49b2ac2d77da971f54aa7c545e8d78741d83831b182f79c8646633893c",
+     "bottom_fpc_gerber_zip/netlist.ipc": "907be46f77b7f4ad15e45c0f7da82bf3c410452bb191fd250e9705c1a0b6c549",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "da67ae11b5ddcfd68b20c04aa6a046f2e6640a038441a062db3ae9328f89f0d1",
+     "project_review_bundle_zip/derived-layout.json": "09d231141f8cf659a2031d641285d35f3207c70bd42fc5d5e022a72d695c567c",
+     "project_review_bundle_zip/pinout.csv": "05cec792f49150e4ee55fd54e276bfa3394a516c8e605d4edb0590e783ac8a20",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "8c438d1f0d84db80d225d82a59d9168bc9129ea2b678125494b4fe0db9b1b643",
+     "project_review_bundle_zip/previews/top_fpc.svg": "0f3def0b3da03e067912a334c5cf7b8d420cdc48c0f9bac8f92b791023aecd0f",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "e3ac5468413e42c98ed8f610e8c2d0633b4b61a7b286805740e7ac6ee72834fa",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "fa55cad11a85c051eece344d0ef9d39b974f019c5bfa08412a6551f26c4b5cb5",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "5fdbbb3825e1298858441d95c701c108d31e9838c8d08fbfca842c37aea5c660",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "6b8de039d598f237db48ee49818b18f98c09c959359a98eda6ce832940b8ef47",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "296627ea0b2b9604adea35fa0e0df618b432209690fd6307c0e291cfc1f0326a",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "4fcfec8375e1193f5c7489f05c45602b21d2fd3f449d49350a158a79bd971bb2",
+     "top_fpc_gerber_zip/jlcpcb.json": "c64c057eb67deba47d73f174e5d9de4a1e1ad691340b0e8287b6e51bc60c5bfb",
+     "top_fpc_gerber_zip/netlist.ipc": "0bab8e1fc288d6bd25158b4800e1d26c55257d3affec8c0accd68a72d18da934"
+    },
+    "ok": true,
+    "validation_sha256": "03577f771abe765075bee40d97af2cc064a0b2b4d4d35408a220539aa7ce69ab"
+   },
+   "request": {
+    "channel_order": {
+     "columns": "descending",
+     "rows": "descending"
+    },
+    "tail": {
+     "column_side": "bottom",
+     "row_side": "top"
+    }
+   }
+  },
+  {
+   "expected": {
+    "layout_sha256": "0672a80cde84f62124f21e3dbf366035942d40aa5af5bf0ab4ad5974d5710ce5",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "47dc039b698bb196d91df0c4d08071cfb9c7ae7c9c698292670340ce3e3f44c5",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "24624c912ef8dff1af49239c9b340118116fa979148c53bcd528d1f2e7d13c9f",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "a1b621b47883556b9db2fd41b83fa612609d0387a8ca7f77f8a38d19669a17a8",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "251fa2727ff0499c96049d43bea3dbe35a7413d041aee681f5b303963ba86ec2",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "ae8b26edbfa118ab0eaa362a1aeb645a2a4911d8417c10005a5b2f07ca11a7fc",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "c221d3a73e07d166737400a20f4f10ac79ab8c9f62dd89613f8e444d25d38e45",
+     "bottom_fpc_gerber_zip/netlist.ipc": "8748fe3ca32d47f10b7c5c8e14e2478a634156dadbda326e656732072571b27b",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "f38e7f3f95db6cb44b477cff17e2f16be3e97d001f0e7dbe3b91da7d5dce4fca",
+     "project_review_bundle_zip/derived-layout.json": "fc8a5fd52b90bfa511dcca2b9eed2e38f231f3a6e5c0ae3a8f0cd1282bec427a",
+     "project_review_bundle_zip/pinout.csv": "3f0c81f6b5ad8ae3f88bb9ba8e1cc1cbc8d5b59bcac19c0bb3e9213ff6c0ebcb",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "d27dc1d34cdcf0002d02ebe630161caec56ed3704d48269a8cbae7c9eb5d4998",
+     "project_review_bundle_zip/previews/top_fpc.svg": "297b703fc7cbfa7f53449a2fd33be1aaaf526335b41e2b48c9824482798310ed",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "a696c35201c7cdc0794efb23af156e0954fc6c9a9f94a93891eaabf18f3de1dd",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "df377650d724b2fa92516bdaa9b4a7db13924026674c0481721b44e2b2280d00",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "25aa2e1091f38f7df5f38d347d9b16d10db09ace32fdf2b1c55fa6a2923bb69a",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "106d5e31cb0fe455b34931615d19b7a79366c6ba158aed84251a6eedc2008eb7",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "c91d804fa7d0843298307d708a36220af7ca0856627f51c32fc6bd9494ad7897",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "7da699bb71acf6161f9654de2bb9f62417faaeeaa3aa071a943a39ac39e75ab0",
+     "top_fpc_gerber_zip/jlcpcb.json": "2ca7e1ccf596b401d166fcdfab73eeeb6b67aad89d1396c6adadea988efbab73",
+     "top_fpc_gerber_zip/netlist.ipc": "46cc57be51520af0ee17900834ba2316cce062388dc4e05e967a35c7fdbf1c23"
+    },
+    "ok": true,
+    "validation_sha256": "90eb9d36ed46cbef82f8d0f2ef6bf2e3f891b985560e12d9541337d81feb0981"
+   },
+   "request": {
+    "matrix": {
+     "columns": 32,
+     "pitch_x_mm": 0.6,
+     "pitch_y_mm": 0.6,
+     "rows": 64,
+     "taxel_height_mm": 0.35,
+     "taxel_width_mm": 0.35
+    },
+    "routing": {
+     "trace_space_mm": 0.1016,
+     "trace_width_mm": 0.1016
+    }
+   }
+  },
+  {
+   "expected": {
+    "layout_sha256": "5263c3e5d59109041e9f054eb69de4a11d7a74e47e365d79969079e96aa4fc8f",
+    "members": {
+     "bottom_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "34be45d0bcb5fda8cbde3724d526872b3137194f1969a883917801ebb8f761f3",
+     "bottom_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "8571ff0a5900e463fc6b40e3e18e62909b186dab9e2898402732fbeef9d8d99b",
+     "bottom_fpc_gerber_zip/Gerber_TopLayer.GTL": "10a991b49651932fc72a82b116e35b3b89850f7630a0c0590e0fd755b5f73694",
+     "bottom_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "6225269f56d9ee53d4ffc6e33d2efb36d72c97b2228a6496c7f2de11124a5c0b",
+     "bottom_fpc_gerber_zip/ORDER_NOTES.txt": "e25f338a1e700f622c0fbf5cb10e6a85b1aca03830b4d18c2281132140841238",
+     "bottom_fpc_gerber_zip/jlcpcb.json": "69ed8a4df50d1b4918d48cce3298808542c9623f5c8139b2ccf47bf0ed3deed1",
+     "bottom_fpc_gerber_zip/netlist.ipc": "4e1c0b7df8c7e35021867a2d182e1f502ef8ada53373c9ef87e38159bbf7c344",
+     "project_review_bundle_zip/ORDER_NOTES.txt": "47ac935afa34be1013cf9a30c74b45604872fddd2be083bfe974e79e083c28fd",
+     "project_review_bundle_zip/derived-layout.json": "1ba527f61924c2d08acd177dd7efe89efee1d3356b62a0c3be821dec55f830fe",
+     "project_review_bundle_zip/pinout.csv": "56d12317897b88c4f5dc8f539f9a17b09803ddc7ce9fda09eaad1dc5e78d237e",
+     "project_review_bundle_zip/previews/bottom_fpc.svg": "25ed2b37fb16a8d7efd4f59b67b17e929f52e04f7bbf6136f08053b8dc15d52c",
+     "project_review_bundle_zip/previews/top_fpc.svg": "319a798ae04129e4c51763bf77a52414e86a97d15e725012981e9f84f3a4c253",
+     "project_review_bundle_zip/profile.json": "697f14d1f3fc3b0090bc2dfdd96cc6f033cd4df8d21b7bbd3f3228e83004d5d6",
+     "project_review_bundle_zip/validation.json": "8d45d16742076c2703f61990ca0d6c9b0b5ea5ce199d89064213d2e582590b9b",
+     "top_fpc_gerber_zip/Gerber_BoardOutlineLayer.GKO": "6c208a369d3ea46e9e575e4f98207199aedc98581a583bbd5043a4fa8a3a552b",
+     "top_fpc_gerber_zip/Gerber_BottomStiffenerLayer_pib_0.225.GBSL": "1c6bd372c8b308b505c6661dfb9c788031850edae96defc35b5c85da3267141c",
+     "top_fpc_gerber_zip/Gerber_TopLayer.GTL": "b0b79782cffb6c9ccbfdd3449f8896a8dda0e9088797c3cb85f3afe42d53c885",
+     "top_fpc_gerber_zip/Gerber_TopSolderMaskLayer.GTS": "b2ec707a456025640b52e7d95eaa244398a3324904a5682c854f1745ebff09c6",
+     "top_fpc_gerber_zip/ORDER_NOTES.txt": "db0a19d096b5cc289312773469f069c5f039aad0419f1995bf48e559cd1c7019",
+     "top_fpc_gerber_zip/jlcpcb.json": "9ebc36b98d96d2f0ff05a83ce505f661cb31eb44c62d25596252e23d2ee173c7",
+     "top_fpc_gerber_zip/netlist.ipc": "df2f0ffb0134a6ce59b1ff3feaf57d3f45f43c0273211f6c309a8298e8425670"
+    },
+    "ok": true,
+    "validation_sha256": "28971c1a08e9b634c02fd3df52c0b5958efb3c08a18e8202af20888cda643578"
+   },
+   "request": {
+    "matrix": {
+     "columns": 5,
+     "rows": 3
+    },
+    "tail": {
+     "bottom_length_mm": 7,
+     "column_side": "right",
+     "row_side": "right",
+     "top_length_mm": 20
+    }
+   }
+  }
+ ],
+ "format": "tactile-fpc-generic-channel-exports/v1",
+ "masked": "build_id, build_sha256 and design_sha256 replaced by <build_id>, <build_sha256>, <design_sha256> in every member; manifest.json, design.json and the nested archives left out",
+ "written_from": "engine and exporter at commit 8a4b2f1 (before P5-diagonal-bus.md section 18: the straight Row channel the only generic construction), 2026-10-24; ORDER_NOTES.txt and profile.json rewritten 2026-10-29 for the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes), every other member as written"
+}

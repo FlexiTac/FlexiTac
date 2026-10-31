@@ -1,0 +1,181 @@
+{
+  "id": "jlc-fpc-surface-v1",
+  "revision": "2026-10-29",
+  "template_id": "surface_matrix_v1",
+  "units": "mm",
+  "description": "Locked manufacturing profile of the surface_matrix_v1 template (CAD mode: a sensor laid on a selected CAD surface). It is jlc-fpc-standard-v1 with the tight geometry rules for the smallest margins (research of 2026-10-20, rules 'V4'): a 0.5 mm field margin (the 0.2 mm electrode overhang plus JLC's 0.3 mm copper to edge), a tight Row channel and expansion (routing.row_channel), a bus angle chosen per transition among whole-degree caps of 60-85 degrees (fanout.bus_angle), one Column fan-out lane converging straight into the contact columns for up to 64 columns (fanout.column_convergence), and 7.5 mm minimum tails (the tail check at an 85 degree cap needs 7.344 mm). These are process rules, not ordinary UI controls. Every rule value used by the engine lives in this file; design rules must not be looser than the fabrication capabilities below (the trace minimums apply per single-sided copper thickness, for stackup.copper_thickness_mm). The order section holds the JLCPCB order options every exported board needs (ORDER_NOTES.txt).",
+  "sources": {
+    "jlcpcb_flex_capabilities": {
+      "url": "https://jlcpcb.com/capabilities/flex-pcb-capabilities",
+      "fetched": "2026-10-12",
+      "quoted": [
+        "Laser outline: copper to board edge >= 0.3 mm; copper to slots >= 0.3 mm; outline tolerance +/-0.1 mm (+/-0.05 mm upon request)",
+        "Gold finger pad to board edge clearance 0.2 mm (closer gold fingers are cut back)",
+        "Minimum solder bridge width 0.5 mm (narrower coverlay bridges are removed)",
+        "Coverlay expansion (one-sided) 0.1 mm; coverlay opening to trace clearance >= 0.15 mm",
+        "Exposed pad to trace >= 0.15 mm",
+        "Minimum trace width/spacing: 18 um (0.5 oz) copper 3.5/3.5 mil; 35 um (1 oz) copper 4/4 mil",
+        "Single-sided copper: 18 um (0.5 oz), 35 um (1 oz); 12 um (0.33 oz) only on double-sided and four-layer FPCs",
+        "Trace width tolerance +/-20%",
+        "Maximum dimensions (regular) 234 x 490 mm",
+        "FPC finished thickness, excluding stiffeners: 1-layer 0.07 / 0.11 mm (25 um dielectric), 0.12 mm (50 um dielectric)",
+        "1-layer FPC (25 um dielectric): inner PI thickness 25 um; outer copper weight, single-sided: 18 um (0.5 oz), 35 um (1 oz)",
+        "Coverlay thickness, 25 um dielectric FPC: PI 12.5 um + adhesive 15 um on 1/3 oz or 0.5 oz copper; PI 25 um + adhesive 25 um on 1 oz copper",
+        "FPC thickness tolerance: gold finger area +/-0.03 mm",
+        "Surface finish: ENIG",
+        "Thickness with stiffener = FPC thickness + stiffener thickness; where an area has no copper or coverlay, the finished thickness is reduced",
+        "PI stiffener thickness options 0.1, 0.15, 0.20, 0.225, 0.25 mm; if the connector needs to be 0.3 mm thick on a 0.11 mm FPC, a 0.225 mm stiffener is most suitable"
+      ],
+      "trace_rules_rechecked": "2026-10-15: minimum trace width/spacing 3.5/3.5 mil for 18 um and 4/4 mil for 35 um copper, single-sided copper 18 or 35 um, trace width tolerance +/-20%, exposed pad and coverlay opening to trace >= 0.15 mm, copper to board edge and slots >= 0.3 mm, gold finger to edge 0.2 mm; the page sets no rule on necking or on trace width near bends or stiffener edges"
+    },
+    "jlcpcb_gold_finger_stiffeners": {
+      "url": "https://jlcpcb.com/help/article/fpc-gold-finger-stiffeners-ordering-guide",
+      "fetched": "2026-10-29",
+      "quoted": [
+        "The critical parameter for proper connector operation is therefore the total thickness of the stiffened gold finger region, measured from the plated contact surface to the outer surface of the stiffener beneath it.",
+        "After selecting \u201cYes\u201d under \u201cGold Fingers,\u201d enter the required total thickness in the \u201cGold Fingers Thickness\u201d field.",
+        "To further ensure proper connector fit, we give the total thickness you specify the highest priority when selecting the stiffener thickness beneath the gold fingers.",
+        "Q1: 0.3 mm for the total thickness of the stiffened gold finger region and 0.225 mm for the PI stiffeners in the component region; answer: select \u201cYes\u201d under \u201cGold Fingers\u201d and enter the required total gold finger thickness, then select both 0.225 mm and 0.2 mm (the value calculated using \u201cthe PI Calculator\u201d) under \u201cPolyimide Thickness.\u201d",
+        "Last updated on Oct 19, 2026; the page states no tolerance and does not say whether the PI thickness includes its adhesive"
+      ]
+    },
+    "jlcpcb_fpc_design_clearance": {
+      "url": "https://jlcpcb.com/help/article/fpc-design-clearance",
+      "fetched": "2026-10-29",
+      "quoted": [
+        "I. Solder Mask Design, 3. Solder-mask opening length: The solder-mask opening length should generally not exceed 20 mm, and large-area openings should be avoided. If the solder-mask opening is too large, it can be stretched and deformed during lamination, making bonding difficult or causing misalignment.",
+        "Last updated on Oct 19, 2026"
+      ]
+    },
+    "reader_connectors": {
+      "rows": "TXGA FFC05001-16SBB124W5M (FlexiTac reader FPC1): 0.5 mm pitch, bottom contact, FPC width 0.50*(n+1), contacts 0.30 +/-0.05 mm, exposed contact >= 3.00 mm, 0.30 +/-0.03 mm thick",
+      "columns": "THD THD0515-32CL-SN (FlexiTac reader FPC2): 0.5 mm pitch, bottom contact, FPC width 0.5*(N+1) +/-0.07, contact span 0.5*(N-1) +/-0.05, 0.30 mm contacts over 4.00 mm from the tip, 2-R0.30 tip corners, 0.30 mm thick zone 6.00 mm long"
+    },
+    "surface_template": "Research of 2026-10-20 (CAD mode, engine extensions): the V4 rules of this profile built DRC-clean on 140 targeted and 1367 random designs (rows and columns 1-64, pitch 0.6-10 mm, all tail sides, both role mappings); 85 degrees is the steepest cap (89 degrees broke the slot clearance of two-lane fan-outs).",
+    "reference_design": "fpc_design/source/original_jlcpcb_gerbers (JLC-accepted): 12-pin tail 6.500 mm and 32-pin tail 16.500 mm wide, 0.3 x 3.0 mm contacts with coverlay openings 0.051 mm beyond each contact, electrodes overhang the crossing field by 0.2 mm, one coverlay window over the electrode field (TopSolderMask Gerbers, measured 2026-10-29: the 12-pin board's field window 23.368 x 63.373 mm, the 32-pin board's two 23.876 x 31.242 and 23.749 x 31.242 mm)"
+  },
+  "fabrication": {
+    "source": "jlcpcb_flex_capabilities",
+    "copper_to_board_edge_mm": 0.3,
+    "copper_to_slot_mm": 0.3,
+    "outline_tolerance_mm": 0.1,
+    "outline_tolerance_on_request_mm": 0.05,
+    "gold_finger_to_board_edge_mm": 0.2,
+    "trace_width_tolerance_fraction": 0.2,
+    "exposed_pad_to_trace_mm": 0.15,
+    "coverlay_expansion_mm": 0.1,
+    "coverlay_min_bridge_mm": 0.5,
+    "coverlay_opening_to_trace_mm": 0.15,
+    "maximum_outline_short_side_mm": 234.0,
+    "maximum_outline_long_side_mm": 490.0,
+    "single_layer_fpc_thickness_options_mm": [0.07, 0.11, 0.12],
+    "single_sided_copper_thicknesses_mm": [0.018, 0.035],
+    "single_sided_copper_weights_oz": [0.5, 1],
+    "single_sided_min_trace_width_mm": [0.0889, 0.1016],
+    "single_sided_min_trace_space_mm": [0.0889, 0.1016],
+    "gold_finger_thickness_tolerance_mm": 0.03,
+    "surface_finish": "ENIG",
+    "pi_stiffener_thickness_options_mm": [0.1, 0.15, 0.2, 0.225, 0.25],
+    "recommended_pi_stiffener_mm": 0.225,
+    "recommended_pi_stiffener_fpc_thickness_mm": 0.11,
+    "recommended_pi_stiffener_connector_thickness_mm": 0.3
+  },
+  "stackup": {
+    "construction": "single_copper_flexible",
+    "copper_layer": "top_copper",
+    "coverlay": "polyimide",
+    "coverlay_thickness_mm": 0.025,
+    "coverlay_adhesive_thickness_mm": 0.025,
+    "copper_thickness_mm": 0.035,
+    "core_polyimide_thickness_mm": 0.025,
+    "bottom_copper_placeholder_thickness_mm": 0.001,
+    "stiffener_side": "bottom",
+    "stiffener_material": "polyimide",
+    "stiffener_thickness_mm": 0.225
+  },
+  "routing": {
+    "finger_trace_width_mm": 0.254,
+    "min_pad_space_mm": 0.2,
+    "min_pad_to_trace_mm": 0.2,
+    "min_electrode_gap_mm": 0.25,
+    "min_electrode_width_mm": 0.1016,
+    "copper_to_edge_mm": 0.3,
+    "copper_to_cutout_mm": 0.3,
+    "active_edge_clearance_mm": 0.5,
+    "electrode_overhang_mm": 0.2,
+    "row_channel": "tight"
+  },
+  "connector": {
+    "pad_pitch_mm": 0.5,
+    "pad_width_mm": 0.3,
+    "contact_length_mm": 4.0,
+    "contact_tip_clearance_mm": 0.3,
+    "contact_center_to_side_edge_mm": 0.5,
+    "tail_tip_corner_radius_mm": 0.3,
+    "tail_width_tolerance_mm": 0.07,
+    "contact_width_tolerance_mm": 0.05,
+    "contact_zone_thickness_mm": 0.3,
+    "contact_zone_thickness_tolerance_mm": 0.03,
+    "maximum_pins": 64
+  },
+  "coverlay": {
+    "coverlay_expansion_mm": 0.1,
+    "coverlay_min_bridge_mm": 0.5,
+    "coverlay_opening_to_trace_mm": 0.15,
+    "coverlay_opening_general_max_length_mm": 20.0
+  },
+  "tail": {
+    "minimum_length_mm": 7.5,
+    "stiffener_length_mm": 6.0,
+    "stiffener_end_clearance_mm": 0.5
+  },
+  "outline": {
+    "outline_fillet_radius_mm": 0.5,
+    "arc_segment_max_angle_deg": 10.0,
+    "maximum_unfilleted_concave_turn_deg": 15.0,
+    "offset_allowance_mm": 0.001
+  },
+  "fanout": {
+    "maximum_channels_per_lane": 64,
+    "maximum_lanes": 1,
+    "slot_width_mm": 12.0,
+    "minimum_slot_width_mm": 4.0,
+    "slot_height_fraction": 0.3,
+    "minimum_slot_height_mm": 1.5,
+    "maximum_slot_height_mm": 4.0,
+    "lane_to_slot_clearance_mm": 0.75,
+    "maximum_taper_angle_deg": 85.0,
+    "minimum_taper_angle_deg": 60.0,
+    "bus_angle": "shortest",
+    "column_convergence": "direct"
+  },
+  "drc": {
+    "numeric_epsilon_mm": 0.000001
+  },
+  "limits": {
+    "minimum_rows": 1,
+    "maximum_rows": 64,
+    "minimum_columns": 1,
+    "maximum_columns": 64,
+    "minimum_pitch_mm": 0.6,
+    "maximum_pitch_mm": 10.0,
+    "minimum_trace_width_mm": 0.1016,
+    "maximum_trace_width_mm": 0.254,
+    "minimum_trace_space_mm": 0.1016,
+    "maximum_trace_space_mm": 0.246,
+    "maximum_tail_length_mm": 200.0,
+    "maximum_outline_short_side_mm": 234.0,
+    "maximum_outline_long_side_mm": 490.0,
+    "high_fill_factor_warning": 0.8,
+    "large_matrix_warning_taxels": 1024,
+    "maximum_project_name_length": 80
+  },
+  "order": {
+    "fpc_layers": 1,
+    "fpc_thickness_mm": 0.11,
+    "outline_tolerance_mm": 0.05,
+    "surface_finish": "ENIG",
+    "reference_contact_window_margin_mm": 0.051,
+    "reference_field_window_length_mm": 63.373
+  }
+}

@@ -7,6 +7,8 @@ Binghao Huang¹, Yunzhu Li¹
 FlexiTac is an open-source, scalable tactile sensing platform designed to make touch sensing more accessible for robotics. It supports flexible sensor fabrication, real-time tactile readout, and integration into manipulation systems such as grippers, robot arms, and tactile skins. The broader FlexiTac project also includes hardware tutorials, simulation support, and system design examples for robotic applications. 
 Project website: https://flexitac.github.io/
 
+Sensor generator: [FlexiTac-Gen](https://flexitac.github.io/flexitac-gen/) designs the two FPCs of a FlexiTac sensor for your own gripper, in the browser (source and documentation in [flexitac-gen/](flexitac-gen/)).
+
 ![Alt text](image.png)
 
 
