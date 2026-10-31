@@ -1679,7 +1679,9 @@ class ReviewFixTests(unittest.TestCase):
         # The review: on a 60 x 40 plate with a round hole at 1.5 mm the DP ran on almost every window (1704 runs,
         # 29-35 s against the board fit's 1-2 s).  The windows of a lattice larger than the caps now wait for the whole
         # lattice's DP, the DP stops once no state can still beat the threshold, and a deterministic count of its work
-        # bounds the search: the plate keeps its fields at about twice the board fit's cost.
+        # bounds the search (the meter below, exact): the plate keeps its fields at about 3 times the board fit's cost
+        # (3.1 here, 3.6 on a GitHub runner 2.2 times slower, 2026-10-30, where 3 x the board + 1 s was too tight).  The
+        # bound of 5 x + 1 s leaves the machines their spread and still fails the review's 15-25 times.
         # Section 26's tip passes (about 7 % of this fit) have their own meter, TIP_WORK_BUDGET cells per pass, and
         # complete here within it (deterministic): the bound is on the search, their time measured apart.  CPU time, the
         # least of two interleaved fits each (_timed_fits: once over the bound in wall-clock time at a load of about 40).
@@ -1692,7 +1694,7 @@ class ReviewFixTests(unittest.TestCase):
         _Fits.get(self, "round_hole", dict(BOARD, pitch_mm=1.5))
         seconds, passes, results = _timed_fits(data, selection, {"board": dict(BOARD, pitch_mm=1.5), "field": options})
         timed = results["field"]
-        self.assertLess(seconds["field"] - passes["field"], 3.0 * seconds["board"] + 1.0, (seconds, passes))
+        self.assertLess(seconds["field"] - passes["field"], 5.0 * seconds["board"] + 1.0, (seconds, passes))
         self.assertEqual(passes["board"], 0.0)
         self.assertTrue(all(base["tip_complete"] for base in timed["bases"] if "tip_complete" in base))
         self.assertTrue(any("tip_work" in base for base in timed["bases"]))
