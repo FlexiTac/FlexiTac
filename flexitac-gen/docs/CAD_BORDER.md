@@ -106,8 +106,9 @@ While it is on:
   gaps where it leaves them.  The parts beyond the surface are dashed in
   grey (`border.outsideParts`).
 - An exit edge beyond the surface is dashed in magenta.
-- The status line and the step-3 note give the border's corners, its area
-  and its share on the surface.
+- The note under the 3D view (with the base edges) gives the border's
+  corners, its area and its share on the surface; the status at the view's
+  bottom right repeats it on hover.
 
 **Fit, proposals, map.**
 

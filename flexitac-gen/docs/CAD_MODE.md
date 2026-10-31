@@ -1068,8 +1068,15 @@ camera (Fit, Selection, the six axes); the camera frames the part, the
 selection and the sensor clear of these tools (viewer.js `setClearance`:
 the bands they cover at the view's top and sides; farther than before by as
 much); on the view's left, a column of tools: Select a surface,
-Base edge, Edit border, Undo and Clear; under the view, the base edge's
-choices across it.  There is no candidate list since 2026-10-30 (the
+Base edge, Edit border, Undo, Clear and Remove model (the model off the
+view with its selection, border, proposals and map; a build already
+generated stays, the default part does not come back); under the view, the
+base edge's choices across it.  The file step hints that an STL can also
+be dragged onto the view.  While a model loads, a veil over the view says
+"Loading name…"; CAD mode's status sits at the view's bottom right (the
+user's requests of 2026-10-31; the workspace's header has none): "name
+loaded" after a success (its full report on hover), a warning, an error or
+the work under way in full (main.js `setStatus`, `setLoading`).  There is no candidate list since 2026-10-30 (the
 server's candidates stay in the inspect reply; the default part's sensor
 uses its first flat one, and the Diagnostics fold's "Select a surface by its
 seed facet" picks one for the browser checks), and no Clean up.  The steps:

@@ -147,6 +147,7 @@ def settle(page, timeout=90):
 
 
 DEFAULT_PART_PATH = "/static/vendor/umi/UMI-Soft-Gripper-Finger.stl"
+DEFAULT_PART_FILE = ROOT / "web" / "vendor" / "umi" / "UMI-Soft-Gripper-Finger.stl"
 DEFAULT_PART = "**" + DEFAULT_PART_PATH
 # The default part loaded (or not) and its sensor built (or stopped), nothing in flight.
 DEFAULT_SETTLED = """() => { const s = JSON.parse(document.getElementById('cadState').textContent);
@@ -174,6 +175,78 @@ def open_cad(page, caps=64, default_part=False):
     wait_until(page, DEFAULT_SETTLED, 120)
     if caps is not None:
         set_caps(page, caps)
+
+
+# The 3D view's status and loading veil (index.html #cadStatus, #cadLoading): the status's text (None when hidden),
+# whether it lies in the view's bottom-right corner (within 20 px of its right and bottom edges), the veil and its text,
+# and whether the workspace's header holds a status.
+STATUS_PLACE = """() => { const status = document.getElementById('cadStatus'); const veil = document.getElementById('cadLoading');
+    const view = document.getElementById('cadView').getBoundingClientRect(); const box = status.getBoundingClientRect();
+    return {text: status.hidden ? null : status.textContent, corner: !status.hidden && view.right - box.right >= 0 && view.right - box.right <= 20
+              && view.bottom - box.bottom >= 0 && view.bottom - box.bottom <= 20,
+            veil: !veil.hidden, veilText: document.getElementById('cadLoadingText').textContent,
+            inHeader: document.querySelector('#cadWorkspace > header .cad-status') !== null}; }"""
+
+
+def part_remove_model(browser):
+    """Remove model, in the 3D view's tools (the user's request of 2026-10-31): the model, its selection, border, base edge,
+    proposals and map leave (the drop zone back, the button and the tools that need a model disabled, the status says
+    which file went); a build already generated stays below; the default part does not come back (not on a mode switch
+    either); a file chosen then loads as before.  Pressed while the default part is still on its way, the load stops and
+    the part is dropped when it arrives."""
+    page = new_page(browser, folded=True)
+    page.goto(URL)
+    wait_until(page, DONE, 60)
+    wait_until(page, DEFAULT_SETTLED, 120)
+    page.wait_for_timeout(300)
+    s = state(page)
+    built = s["generated_build_id"]
+    check("remove: enabled with the default part and its sensor (a build generated)", not page.is_disabled("#cadRemove") and s["mesh"] is not None and built, (s["mesh"], built))
+    page.click("#cadRemove")
+    page.wait_for_timeout(300)
+    s = state(page)
+    status = page.evaluate(STATUS_PLACE)
+    check("remove: the model and everything on it leave (mesh, selection, border, proposals, map, overlay), the drop zone is back",
+          s["mesh"] is None and s["selection"] is None and s["border"] is None and s["proposals"] == 0 and s["overlay"] is None
+          and s["verification"] is None and s["side"] == "auto" and page.is_visible("#cadDrop"), s)
+    check("remove: the status says which file went; Remove model, Edit border, Undo and Clear are disabled",
+          status["text"] == "UMI-Soft-Gripper-Finger.stl removed." and all(page.is_disabled(f"#{name}") for name in ("cadRemove", "cadEditBorder", "cadUndo", "cadClear")), status)
+    shown = page.evaluate("() => !document.body.classList.contains('cad-no-build')")
+    check("remove: the build already generated stays below (its results shown)", s["generated_build_id"] == built and shown, (s["generated_build_id"], shown))
+    page.click("label:has(#modeRect)")
+    page.wait_for_timeout(200)
+    page.click("label:has(#modeCad)")
+    page.wait_for_timeout(1500)
+    s = state(page)
+    check("remove: the default part does not come back (Rectangular and back)", s["mesh"] is None and s["loading"] is None, (s["mesh"], s["loading"], s["default_part"]))
+    load(page, DEFAULT_PART_FILE)
+    s = state(page)
+    check("remove: a file chosen afterwards loads as before (\"... loaded\", Remove model enabled again)",
+          s["mesh"]["name"] == DEFAULT_PART_FILE.name and s["status"]["shown"] == f"{DEFAULT_PART_FILE.name} loaded" and not page.is_disabled("#cadRemove"), s["status"])
+    check("remove: no console errors", not errors_of(page), errors_of(page))
+    page.close()
+    # Pressed while the default part is on its way.
+    page = new_page(browser, folded=True)
+    page.held = []
+    page.route(DEFAULT_PART, lambda route: page.held.append(route))
+    page.goto(URL)
+    wait_until(page, DONE, 60)
+    end = time.monotonic() + 30
+    while not page.held and time.monotonic() < end:
+        page.wait_for_timeout(40)
+    enabled = not page.is_disabled("#cadRemove")
+    page.click("#cadRemove")
+    page.wait_for_timeout(200)
+    veil = page.evaluate(STATUS_PLACE)
+    page.held[0].continue_()
+    wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).default_part === 'skipped'", 30)
+    page.wait_for_timeout(500)
+    s = state(page)
+    check("remove while loading: enabled during the load; the veil goes, the status says the load stopped and the part, when "
+          "it arrives, is dropped (no mesh, no sensor)", enabled and not veil["veil"] and veil["text"] == "Loading stopped." and s["mesh"] is None
+          and s["default_build"] == "stopped" and page.is_visible("#cadDrop"), (enabled, veil, s["mesh"], s["default_build"], s["default_part"]))
+    check("remove while loading: no console errors", not errors_of(page), errors_of(page))
+    page.close()
 
 
 def load(page, path):
@@ -276,7 +349,9 @@ NO_CAD = """() => [document.title, document.body.innerText, ...[...document.quer
 
 def part_default_cad(browser):
     """The app opens in Gen by Surface (CAD mode; the user's defaults of 2026-10-30): no hash, the workspace shown, the UMI
-    fin-ray finger loaded (web/vendor/umi: 3624 facets, mm) and named in the file step, and its sensor already generated:
+    fin-ray finger loaded (web/vendor/umi: 3624 facets, mm) and named in the 3D view's status ("... loaded", at its bottom
+    right; the workspace's header holds none since 2026-10-31, the file step hints at dragging a file in), and its sensor
+    already generated:
     the first flat candidate (the contact face, 3088.6 mm2) selected, fitted within Max rows and Max columns 32 (the
     template allows 64) and the first proposal generated (32 x 12) and mapped onto the part, its results shown; the page
     never says "CAD"; Rectangular at #rect, kept across a reload; a file chosen before the default part arrives is kept
@@ -292,8 +367,13 @@ def part_default_cad(browser):
     check("default: the UMI fin-ray finger is loaded (UMI-Soft-Gripper-Finger.stl, 3624 facets, mm, watertight)",
           s["default_part"] == "loaded" and s["mesh"] is not None and s["mesh"]["name"] == "UMI-Soft-Gripper-Finger.stl"
           and s["mesh"]["facets"] == 3624 and s["mesh"]["unit"] == "mm" and s["mesh"]["watertight"], (s["default_part"], s["mesh"]))
+    status = page.evaluate(STATUS_PLACE)
+    check("default: the 3D view's status says the model is loaded (\"UMI-Soft-Gripper-Finger.stl loaded\") at the view's bottom "
+          "right, no loading veil, no status in the workspace's header",
+          status["text"] == "UMI-Soft-Gripper-Finger.stl loaded" and status["corner"] and not status["veil"] and not status["inHeader"]
+          and s["status"]["kind"] == "ok" and s["loading"] is None, (status, s["status"], s["loading"]))
     note = page.inner_text("#cadFileNote")
-    check("default: the file step names it as the default part", "UMI fin-ray finger" in note and "the default part" in note, note)
+    check("default: the file step hints that an STL can also be dragged onto the view", note == "or drag an STL file onto the 3D view below", note)
     caps = page.evaluate("() => ['cadMaxRows', 'cadMaxColumns'].map(id => [document.getElementById(id).value, document.getElementById(id).max])")
     check("default: Max rows and Max columns are 32 (within the template's limits)",
           caps == [["32", "64"], ["32", "64" if SERVED else "32"]], caps)
@@ -410,14 +490,18 @@ def part_default_cad(browser):
         end = time.monotonic() + 30
         while not page.held and time.monotonic() < end:
             page.wait_for_timeout(40)
+        veil = page.evaluate(STATUS_PLACE)
+        check("default: while the default part is on its way the 3D view shows \"Loading UMI-Soft-Gripper-Finger.stl…\" over it "
+              "(the drop zone hidden, no status)", veil["veil"] and veil["veilText"] == "Loading UMI-Soft-Gripper-Finger.stl…"
+              and not page.is_visible("#cadDrop") and veil["text"] is None, veil)
         load(page, SOFT)
         page.held[0].continue_()
         wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).default_part === 'skipped'", 30)
         page.wait_for_timeout(300)
         s = state(page)
         check("default: a file chosen before the default part arrives is kept (the default part and its sensor dropped)",
-              s["mesh"]["name"] == SOFT.name and page.inner_text("#cadFileNote") == f"Loaded: {SOFT.name}." and s["default_build"] == "stopped"
-              and s["selection"] is None and len(page.generate) == 1, (s["mesh"], page.inner_text("#cadFileNote"), s["default_build"], len(page.generate)))
+              s["mesh"]["name"] == SOFT.name and s["status"]["shown"] == f"{SOFT.name} loaded" and s["loading"] is None and s["default_build"] == "stopped"
+              and s["selection"] is None and len(page.generate) == 1, (s["mesh"], s["status"], s["loading"], s["default_build"], len(page.generate)))
         check("default part (a file first): no console errors", not errors_of(page), errors_of(page))
         page.close()
 
@@ -441,15 +525,15 @@ def part_soft(browser):
     check("soft: candidate #1 selects the 3087.7 mm2 planar face (34 facets)",
           s["selection"] and abs(s["selection"]["area_mm2"] - 3087.7) < 0.05 and s["selection"]["kind"] == "planar" and s["selection"]["facets"] == 34, s["selection"])
     # The tools in the 3D view's window, on its left, larger than before (the user's requests of 2026-10-30): Select a
-    # surface, Base edge, Edit border, Undo and Clear in a column over the view; no Add / Subtract switch, no Disk tool, no
-    # Clean up and no candidate list.
+    # surface, Base edge, Edit border, Undo and Clear in a column over the view, Remove model under them (2026-10-31); no
+    # Add / Subtract switch, no Disk tool, no Clean up and no candidate list.
     tools = page.evaluate("""() => { const view = document.getElementById('cadView').getBoundingClientRect();
         return [...document.querySelectorAll('#cadViewTools label span, #cadViewTools button')].map(node => { const r = node.getBoundingClientRect();
           return [node.textContent.trim(), Math.round(r.left - view.left), Math.round(r.top - view.top), Math.round(r.height),
                   r.right <= view.left + view.width / 3 && r.bottom <= view.bottom]; }); }""")
-    check("soft: Select a surface, Base edge, Edit border, Undo and Clear stand in a column on the 3D view's left, at least 32 px tall "
-          "(no Disk, no Clean up, no candidate list)",
-          [name for name, *_ in tools] == ["Select a surface", "Base edge", "Edit border", "Undo", "Clear"]
+    check("soft: Select a surface, Base edge, Edit border, Undo, Clear and Remove model stand in a column on the 3D view's left, "
+          "at least 32 px tall (no Disk, no Clean up, no candidate list)",
+          [name for name, *_ in tools] == ["Select a surface", "Base edge", "Edit border", "Undo", "Clear", "Remove model"]
           and page.locator("#cadDiskRadius, #cadCleanup, #cadCandidates, #cadCandidateKind").count() == 0
           and all(0 <= left < 30 and inside and height >= 32 for _, left, _, height, inside in tools)
           and [top for _, _, top, _, _ in tools] == sorted(top for _, _, top, _, _ in tools) and page.locator("#cadOpMode").count() == 0, tools)
@@ -1737,7 +1821,7 @@ def main():
     print(f"/api/default?template= {'served' if SERVED else 'not served (app.js keeps the default limits)'}", flush=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(args=WEBGL_ARGS)
-        parts = (part_rect_unchanged, part_default_cad, part_clean_cad, part_soft, part_crank, part_crank_fill, part_no_rectangle_controls, part_field_soft, part_row_sides, part_review_fixes, part_tail_card, part_wrap_flexitac,
+        parts = (part_rect_unchanged, part_default_cad, part_remove_model, part_clean_cad, part_soft, part_crank, part_crank_fill, part_no_rectangle_controls, part_field_soft, part_row_sides, part_review_fixes, part_tail_card, part_wrap_flexitac,
                  part_ascii_and_narrow, part_drop, part_template_roundtrip, part_columns, part_presets, part_tail_edit, part_rounded_base,
                  part_rounded_corners, part_files)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
