@@ -211,8 +211,9 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   copper seen through it and the stiffener outermost, each board as thick
   as its stack-up (0.11 mm, the PI stiffener 0.225 mm more; drawn at least
   2 px thick, the stiffener in proportion); the plan view shows
-  the registration.  Every view has a coin for scale beside the board at its
-  bottom right, clear of it: a US quarter (24.26 mm) drawn to scale, its face
+  the registration.  Every view has a coin for scale beside the board, clear
+  of it (in a board's 2D view at the window's bottom right, the board
+  centred): a US quarter (24.26 mm) drawn to scale, its face
   the US Mint's photo (`web/vendor/coin`, public domain), with its shadow; in
   the 3D views it lies on the table below the boards, as thick as a quarter
   (1.75 mm, its reeded side), with a gleam that keeps to the light as the

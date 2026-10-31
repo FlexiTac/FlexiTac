@@ -130,8 +130,10 @@ top board stays see-through over the field.  A coin for
 scale (a US quarter, 24.26 mm and 1.75 mm thick, drawn to scale, its face the
 US Mint's photo) lies on the table 56 px below the bottom board, right of the
 stack and level with its bottom, so no board covers it; each board card has
-one beside its board, at least 2 mm clear of the outline (the 2D view grows
-to hold it; the oblique view lays it 28 px below the board).  Seen from
+one beside its board, at least 2 mm clear of the outline (the 2D view puts
+it at its window's bottom right, the board centred, and shrinks the board a
+little where it would be under the coin there; the oblique view lays it 28 px
+below the board).  Seen from
 above, through the top board:
 
 - the bottom board looks exactly like its own top view;

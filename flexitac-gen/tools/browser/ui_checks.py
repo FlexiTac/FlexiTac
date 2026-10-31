@@ -1014,6 +1014,16 @@ COIN_2D = r"""(selector) => { const svg = document.querySelector(selector); cons
     return {r: +r.toFixed(3), right: +(x + w - cx - r).toFixed(3), bottom: +(y + h - cy - r).toFixed(3), under: kids.indexOf(coin) < kids.indexOf(board), placed: coin.querySelectorAll('[transform]').length,
             clear: +clear.toFixed(3), inside, href: photo.getAttribute('href'), clip: photo.getAttribute('clip-path'),
             ratio: photo.getBoundingClientRect().width / outline.getBoundingClientRect().width, outlineMm: outline.getBBox().width * Math.hypot(m.a, m.b)}; }"""
+# Where a 2D view's coin and board lie in their window (CSS px): the coin's gaps to the window's right and bottom edges,
+# the board's centre from the window's, the SVG's padding and its scale (px per mm).
+COIN_WINDOW = r"""(id) => { const pane = document.getElementById(id); const svg = pane.querySelector('svg');
+    const photo = svg.querySelector(':scope > .coin-ref image.coin-photo'); const outline = svg.querySelector(':scope > g[transform] > .outline');
+    if (!photo || !outline) return null;
+    const [p, c, o] = [pane.getBoundingClientRect(), photo.getBoundingClientRect(), outline.getBoundingClientRect()];
+    const style = getComputedStyle(svg); const box = svg.getAttribute('viewBox').trim().split(/\s+/).map(Number);
+    const inner = svg.getBoundingClientRect().height - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+    return {right: +(p.right - c.right).toFixed(2), bottom: +(p.bottom - c.bottom).toFixed(2), padding: parseFloat(style.paddingRight),
+            scale: inner / box[3], centre: +((o.left + o.right) / 2 - (p.left + p.right) / 2).toFixed(2), coinPx: +c.width.toFixed(2)}; }"""
 # A 3D view's coin: its layers, how far below the boards its plane lies and its face above it (CSS px, from the computed
 # transforms' m43), its gleam's angle and the view's spin, and what lies on top at its face's centre and at eight points
 # half way to its projected edge.
@@ -1039,8 +1049,9 @@ COIN_PHOTO = """async (href) => { const reply = await fetch(href); const bytes =
 def part_coin(browser):
     """A coin for scale in every view of a board (the user's requests of 2026-10-30): a US quarter (24.26 mm) whose face
     is the US Mint's photo (web/vendor/coin), drawn to scale in the board's millimetres.  In the 2D views it lies under the
-    board (drawn before it) at the bottom right of the view, 0.6 mm in from its edges, at least 2 mm clear of the outline
-    (the view grows to hold it).  In the oblique and stacked 3D views it lies on a plane of its own below the boards
+    board (drawn before it) at the bottom right of its window (2026-10-31: the view's box takes the window's shape, the
+    board centred at its scale), 0.6 mm in from its edges, at least 2 mm clear of the outline (the view grows to hold it),
+    there again after a resize, and moving with the scene when zoomed.  In the oblique and stacked 3D views it lies on a plane of its own below the boards
     (28 / 56 px), as thick as a quarter (1.75 mm: its shadow, eight disks of its reeded side, its face, its gleam that
     keeps to the room as the view turns), the boards covering none of it; the plan view lays it flat; the legends name
     it."""
@@ -1056,6 +1067,24 @@ def part_coin(browser):
               coin is not None and coin["clear"] >= 2 - 1e-6 and not coin["inside"], coin)
         check(f"coin: the {name} 2D view's quarter is drawn to scale with the board (on screen, its width over the outline's "
               "= 24.26 mm over the outline's mm)", coin is not None and abs(coin["ratio"] - 24.26 / coin["outlineMm"]) < 0.01, coin)
+    # The user's correction of 2026-10-31: at the bottom right of the window, not of the board's own box (beside the tail).
+    def in_corner(spot):
+        return spot is not None and all(abs(spot[edge] - spot["padding"] - 0.6 * spot["scale"]) < 1.0 for edge in ("right", "bottom")) and abs(spot["centre"]) < 1.0
+    for width in (1440, 1000, 390):
+        page.set_viewport_size({"width": width, "height": 1000}); page.wait_for_timeout(300)
+        spots = {name: page.evaluate(COIN_WINDOW, f"{name}Preview") for name in ("row", "column")}
+        check(f"coin: at {width} px wide each 2D view's quarter lies at the bottom right of its window (its padding and "
+              "0.6 mm in), the board centred in the window at its scale", all(in_corner(spot) for spot in spots.values()), spots)
+    page.set_viewport_size({"width": 1440, "height": 1000}); page.wait_for_timeout(300)
+    page.evaluate("() => document.querySelector('#rowCard').scrollIntoView({block: 'center'})")
+    before = page.evaluate(COIN_WINDOW, "rowPreview")
+    page.click("#rowZoomTools [data-zoom='in']"); page.wait_for_timeout(150)
+    zoomed = page.evaluate(COIN_WINDOW, "rowPreview")
+    page.click("#rowZoomTools [data-zoom='reset']"); page.wait_for_timeout(150)
+    after = page.evaluate(COIN_WINDOW, "rowPreview")
+    check("coin: zoomed in, the quarter grows with the board and moves with the scene (out of the corner); Reset brings "
+          "it back to the corner", zoomed is not None and zoomed["coinPx"] > before["coinPx"] + 1 and zoomed["right"] < before["right"] - 1
+          and in_corner(after) and after["coinPx"] == before["coinPx"], [before, zoomed, after])
     status_code, kind, size = page.evaluate(COIN_PHOTO, COIN_HREF)
     check("coin: the photo is served from the app (offline, inside its CSP)", status_code == 200 and kind == "image/jpeg" and size > 10000, (status_code, kind, size))
     page.click("#rowTab3d"); page.wait_for_timeout(300)
