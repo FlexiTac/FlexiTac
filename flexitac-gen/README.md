@@ -218,14 +218,21 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   the 3D views it lies on the table below the boards, as thick as a quarter
   (1.75 mm, its reeded side), with a gleam that keeps to the light as the
   view turns.
-- **Interface**: the basic controls in sight (the sensor's rows, columns,
-  pitches and electrodes, the tails and the connector side; in CAD mode
-  the file, the surface, the base edge, the pitch, the electrode fill, the
-  Row traces and the tail length), the rest folded under **Advanced** or
-  **More options**; the design checks are one line ("all N checks pass"),
-  opening on a failure with only the failing rules listed; the ordering
-  notes and the stacked view's notes are folded.  CAD mode hides the
-  rectangular form and shows the results once it has generated a build.
+- **Interface**: one step to a sensor.  In CAD mode ("Gen by Surface") the
+  default part's sensor is generated as the page opens; a model loaded
+  gets its largest flat face selected, a click selects another face, and
+  **Generate sensor**, alone under the 3D view, fits it and generates its
+  proposal #1 onto the part (its tooltip says what the sensor is, or what
+  to do next; the Gerber ZIPs are the downloads').  Everything else is
+  folded under **Customize the sensor**: the base edge, the resolution and
+  Fit, the proposals, Generate and the checks on the part, with **More
+  options** and the other folds inside it as before.  In the rectangular mode only
+  the rows, columns, pitches and Generate are in sight, the rest under
+  Customize the sensor with **Advanced** inside.  The design checks are
+  one line ("all N checks pass"), opening on a failure with only the
+  failing rules listed; the other files and the ordering notes are folded
+  (the stacked view stays open).  CAD mode hides the rectangular form and shows the
+  results once it has generated a build.
 - **Exports** (the two Gerber ZIPs first among the page's downloads, set
   off): one Direct Gerber ZIP per FPC (GTL, GTS, GKO, GBSL,
   `jlcpcb.json`, an IPC-D-356A `netlist.ipc`, `ORDER_NOTES.txt`,

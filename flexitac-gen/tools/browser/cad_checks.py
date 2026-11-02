@@ -177,6 +177,13 @@ def open_cad(page, caps=64, default_part=False):
         set_caps(page, caps)
 
 
+# One step (index.html #cadQuick, #cadCustomize): what the row under the view holds (Generate sensor alone since the
+# user's request of 2026-11-02), whether the button is in sight and enabled and its title, whether Customize is open and
+# whether its controls are in sight.
+QUICK = """() => { const button = document.getElementById('cadQuickGenerate');
+    return {row: [...document.getElementById('cadQuick').querySelectorAll('button, p, a')].map(node => node.textContent.trim()),
+            shown: button.checkVisibility(), generate: !button.disabled, title: button.title, customize: document.getElementById('cadCustomize').open,
+            hidden: Object.fromEntries(['cadSides', 'cadPitch', 'cadFit', 'cadProposalWrap', 'cadGenerate'].map(id => [id, document.getElementById(id).checkVisibility()]))}; }"""
 # The 3D view's status and loading veil (index.html #cadStatus, #cadLoading): the status's text (None when hidden),
 # whether it lies in the view's bottom-right corner (within 20 px of its right and bottom edges), the veil and its text,
 # and whether the workspace's header holds a status.
@@ -246,6 +253,107 @@ def part_remove_model(browser):
           "it arrives, is dropped (no mesh, no sensor)", enabled and not veil["veil"] and veil["text"] == "Loading stopped." and s["mesh"] is None
           and s["default_build"] == "stopped" and page.is_visible("#cadDrop"), (enabled, veil, s["mesh"], s["default_build"], s["default_part"]))
     check("remove while loading: no console errors", not errors_of(page), errors_of(page))
+    page.close()
+
+
+# At rest: nothing in flight, Generate sensor not at work, no model loading, the default part's build over.
+AT_REST = """() => { const s = JSON.parse(document.getElementById('cadState').textContent);
+    return s.busy.length === 0 && s.pending_build === null && !s.step_running && !s.loading && !['pending', 'running'].includes(s.default_build); }"""
+
+
+def at_rest(page, timeout=120):
+    # Twice: a step that follows another (the map after Generate's form request) starts a moment later.
+    for _ in range(2):
+        wait_until(page, AT_REST, timeout)
+        page.wait_for_timeout(500)
+    wait_until(page, AT_REST, timeout)
+
+
+def facet_centroid(path, facet):
+    data = Path(path).read_bytes()
+    values = struct.unpack("<9f", data[84 + 50 * facet + 12:84 + 50 * facet + 48])
+    return [round((values[k] + values[k + 3] + values[k + 6]) / 3, 3) for k in range(3)]
+
+
+def part_one_step(browser):
+    """One step to a sensor (the user's requests of 2026-11-02): the default part's sensor is generated at once; then a
+    click on another face (Customize the sensor folded) selects that face alone and builds nothing, the line under the
+    view saying so and Generate sensor lit (the Gerber buttons off); Generate sensor fits it and generates its proposal
+    #1, mapped onto the part; a click on the selected face does nothing; Undo brings the contact face back, again only
+    chosen; with Customize open an option changed runs nothing, and closed again only Generate sensor applies it; a
+    model loaded gets its largest flat face selected, generated with Generate sensor."""
+    page = new_page(browser, folded=True)
+    page.goto(URL)
+    wait_until(page, DONE, 60)
+    wait_until(page, DEFAULT_SETTLED, 120)
+    at_rest(page)
+    first = state(page)
+    check("one step: the default part's sensor is generated at once, Generate sensor off (nothing to generate)",
+          first["default_build"] == "done" and first["quick"]["kind"] == "ok" and not first["quick"]["generate"], first["quick"])
+    page.evaluate("() => document.querySelector('.cad-diagnostics').open = true")
+    page.evaluate("() => document.getElementById('cadView').scrollIntoView({block: 'center'})")
+    page.click("[data-cad-view='-y']"); page.wait_for_timeout(500)
+    page.fill("#cadProbe", ",".join(map(str, facet_centroid(DEFAULT_PART_FILE, 935)))); page.dispatch_event("#cadProbe", "input"); page.wait_for_timeout(100)
+    x, y = (float(value) for value in page.inner_text("#cadProbeOut").split(","))
+    builds = len(page.generate)
+    page.mouse.click(x, y); page.wait_for_timeout(300); at_rest(page)
+    s = state(page)
+    off = page.get_attribute("#cadQuickGenerate", "title") == s["quick"]["text"]
+    check("one step: a click on another face selects that face alone (the fin's side, 1823.0 mm2) and builds nothing; Generate "
+          "sensor lit, its title saying so",
+          s["ops"] == 1 and s["selection"] and round(s["selection"]["area_mm2"], 1) == 1823.0 and s["proposals"] == 0 and len(page.generate) == builds
+          and s["generated_build_id"] == first["generated_build_id"] and s["quick"]["kind"] == "todo"
+          and s["quick"]["text"] == "Face selected (1823.0 mm²): Generate sensor to put the sensor on it." and s["quick"]["generate"] and off, (s["selection"], s["quick"], off))
+    page.click("#cadQuickGenerate"); page.wait_for_timeout(300); at_rest(page)
+    s = state(page)
+    check("one step: Generate sensor fits the face and generates its proposal #1, mapped onto the part, every check passing; the "
+          "line says what the sensor is, Generate sensor off again",
+          s["proposal"] and s["proposal"]["rank"] == 1 and s["generated_build_id"] == s["proposal"]["build_id"] != first["generated_build_id"]
+          and s["verification"]["ok"] and s["quick"]["kind"] == "ok" and s["quick"]["text"].startswith("86 taxels in a 17 × 29 field") and not s["quick"]["generate"],
+          (s["generated_build_id"], s["quick"]))
+    moved = s["generated_build_id"]
+    builds = len(page.generate)
+    page.mouse.click(x, y); page.wait_for_timeout(600); at_rest(page)
+    s = state(page)
+    check("one step: a click on the selected face does nothing", s["generated_build_id"] == moved and len(page.generate) == builds and s["ops"] == 1
+          and s["proposals"] > 0, (s["generated_build_id"], len(page.generate), s["proposals"]))
+    page.click("#cadUndo"); page.wait_for_timeout(300); at_rest(page)
+    s = state(page)
+    check("one step: Undo brings the contact face back (3088.6 mm2), only chosen (Generate sensor lit, the sensor as it was)",
+          s["selection"] and round(s["selection"]["area_mm2"], 1) == 3088.6 and s["generated_build_id"] == moved and s["quick"]["generate"]
+          and s["quick"]["kind"] == "todo", (s["selection"], s["generated_build_id"], s["quick"]))
+    page.click("#cadQuickGenerate"); page.wait_for_timeout(300); at_rest(page)
+    s = state(page)
+    undone = s["generated_build_id"]
+    check("one step: Generate sensor puts a sensor of its own on it", undone not in (moved, None) and s["verification"]["ok"] and s["quick"]["kind"] == "ok", s["quick"])
+    page.click("#cadCustomize > summary"); page.wait_for_timeout(300)
+    page.fill("#cadPitch", "3"); page.wait_for_timeout(1000)
+    s = state(page)
+    check("one step: with Customize the sensor open a changed option runs nothing (the proposals stale, the sensor as it was)",
+          s["customize"] and s["fit_stale"] and s["generated_build_id"] == undone, (s["customize"], s["fit_stale"], s["generated_build_id"]))
+    page.click("#cadCustomize > summary"); page.wait_for_timeout(1000)
+    s = state(page)
+    check("one step: closed again, still nothing runs; the line says the settings changed, Generate sensor lit",
+          not s["customize"] and s["fit_stale"] and s["generated_build_id"] == undone and s["quick"]["text"] == "Settings changed: Generate sensor to update it."
+          and s["quick"]["generate"], s["quick"])
+    page.click("#cadQuickGenerate"); page.wait_for_timeout(300); at_rest(page)
+    s = state(page)
+    check("one step: Generate sensor applies the option (3.0 mm pitch, generated and mapped)",
+          not s["fit_stale"] and s["generated_build_id"] not in (undone, None) and s["fit_options"]["pitch_mm"] == 3
+          and s["verification"]["ok"] and "· 3.0 mm pitch ·" in s["quick"]["text"], (s["generated_build_id"], s["quick"]))
+    page.evaluate("() => { const c = document.getElementById('cadPitch'); c.value = '2'; c.dispatchEvent(new Event('input', {bubbles: true})); }")
+    if SOFT.exists():
+        built = s["generated_build_id"]
+        load(page, SOFT); at_rest(page)
+        s = state(page)
+        check("one step: a model loaded gets its largest flat face selected (the soft finger's 3087.7 mm2), nothing generated",
+              s["mesh"]["name"] == SOFT.name and s["selection"] and round(s["selection"]["area_mm2"], 1) == 3087.7 and s["generated_build_id"] == built
+              and s["quick"]["generate"], (s["selection"], s["quick"]))
+        page.click("#cadQuickGenerate"); page.wait_for_timeout(300); at_rest(page)
+        s = state(page)
+        check("one step: Generate sensor puts the sensor on it, generated and mapped",
+              s["generated_build_id"] == s["proposal"]["build_id"] != built and s["verification"]["ok"] and s["quick"]["kind"] == "ok", s["quick"])
+    check("one step: no console errors", not errors_of(page), errors_of(page))
     page.close()
 
 
@@ -386,6 +494,16 @@ def part_default_cad(browser):
     check("default: its border is 65 mm of the face from the tip, the face's full width (25.8 mm), the exit Auto",
           s["border"] is not None and s["border"]["edited"] and len(uv) == 4 and [round(edge, 3) for edge in edges] == [25.8, 65.0, 25.8, 65.0]
           and s["side"] == "auto", (s["border"], edges, s["side"]))
+    # One step (the user's requests of 2026-11-02): under the view Generate sensor alone (no line, no downloads: those are
+    # the Downloads section's); everything else under Customize the sensor, folded.
+    quick = page.evaluate(QUICK)
+    check("default: under the 3D view Generate sensor alone, in sight and off (nothing to generate), its title saying what the "
+          "sensor is (\"32 × 12 = 384 taxels · 2.0 mm pitch · all 12 checks pass on the part.\"); Customize the sensor folded, the "
+          "base edge, the settings, Fit, the proposals and Generate out of sight",
+          quick["row"] == ["Generate sensor"] and quick["shown"] and quick["generate"] is False
+          and quick["title"] == "32 × 12 = 384 taxels · 2.0 mm pitch · all 12 checks pass on the part." and s["quick"]["kind"] == "ok"
+          and not quick["customize"] and not any(quick["hidden"].values()) and s["customize"] is False, quick)
+    page.click("#cadCustomize > summary"); page.wait_for_timeout(300)
     auto = page.inner_text('#cadSides label:has(input[value="auto"])').strip()
     check("default: Auto names its edge only: 'Auto (Border edge 0)', the edge across the face toward the mount (how it chooses in its tooltip)",
           auto == "Auto (Border edge 0)" and "chosen: Border edge 0" in page.get_attribute('#cadSides label:has(input[value="auto"])', "title"), auto)
@@ -402,10 +520,10 @@ def part_default_cad(browser):
           and s["verification"] is not None and s["verification"]["ok"] and shown == 2 and len(page.generate) == 2,
           (s["default_build"], s["generated_build_id"], status_of(page)[:80], s["verification"] and s["verification"]["ok"], shown, len(page.generate)))
     heading = page.evaluate("() => [document.getElementById('cadTitle').textContent, document.getElementById('cadStepFile').textContent]")
-    check("default: the workspace is step 1, 'Select your gripper', its file '3D model'", heading == ["1Select your gripper", "3D model"], heading)
-    # The order of work on the page's left in Gen by Surface (the user's requests of 2026-10-30): the title and four
-    # steps, the first three done once the default sensor is built and mapped, the last one next; in sight from the top
-    # of the page to its end, the step whose part is in view lit, each step scrolling to its part.
+    check("default: the workspace is step 1, 'Load your gripper', its file '3D model'", heading == ["1Load your gripper", "3D model"], heading)
+    # The order of work on the page's left in Gen by Surface (the user's requests of 2026-10-30; three steps since
+    # 2026-11-02): the title and three steps, the first two done once the default sensor is built and mapped, the last one
+    # next; in sight from the top of the page to its end, the step whose part is in view lit, each step scrolling to its part.
     GUIDE = """() => { const box = document.getElementById('flowGuide').getBoundingClientRect(); const work = document.getElementById('cadWorkspace').getBoundingClientRect();
         const steps = [...document.querySelectorAll('#cadGuide .flow-step')];
         return {title: document.getElementById('flowGuideTitle').textContent, steps: steps.map(li => li.querySelector('strong').textContent),
@@ -413,20 +531,36 @@ def part_default_cad(browser):
                 here: steps.findIndex(li => li.classList.contains('is-here')) + 1, left: box.right <= work.left + 1, top: Math.round(box.top), height: Math.round(box.height),
                 current: document.querySelector('#cadGuide [aria-current=step] strong')?.textContent}; }"""
     guide = page.evaluate(GUIDE)
-    check("default: on the page's left the guide 'Design a FlexiTac sensor for your own robot': Select your gripper, Find best resolution, "
-          "Click to generate, Send to manufacture, the first three done and the last one next, step 1 in view",
+    check("default: on the page's left the guide 'Design a FlexiTac sensor for your own robot': Load your gripper, Generate the sensor, "
+          "Send to manufacture, the first two done and the last one next, step 1 in view",
           guide["title"] == "Design a FlexiTac sensor for your own robot" and guide["left"]
-          and guide["steps"] == ["Select your gripper", "Find best resolution", "Click to generate", "Send to manufacture"]
-          and guide["classes"] == s["guide"] == ["done", "done", "done", "next"] and guide["current"] == "Send to manufacture" and guide["here"] == 1, (guide, s["guide"]))
+          and guide["steps"] == ["Load your gripper", "Generate the sensor", "Send to manufacture"]
+          and guide["classes"] == s["guide"] == ["done", "done", "next"] and guide["current"] == "Send to manufacture" and guide["here"] == 1, (guide, s["guide"]))
     walked = []
-    for step, target in ((2, "cadStepConfig"), (3, "cadStepGenerate"), (4, "downloadsTitle")):
+    for step, target in ((2, "cadQuick"), (3, "downloadsTitle")):
         page.click(f'#cadGuide .flow-step[data-step="{step}"] button'); page.wait_for_timeout(1200)
         seen = page.evaluate("(id) => Math.round(document.getElementById(id).getBoundingClientRect().top)", target)
         walked.append([step, seen, page.evaluate(GUIDE)])
-    check("default: each step of the guide scrolls to its part (Find best resolution, Click to generate, the downloads), lit as it comes in "
+    check("default: each step of the guide scrolls to its part (the sensor's line under the view, the downloads), lit as it comes in "
           "view (the downloads, at the page's end, in sight), the guide in sight from top to bottom (0 px from the window's top, the window's height)",
-          all(here["here"] == step and here["top"] == 0 and here["height"] == 900 and 0 <= seen < (900 if step == 4 else 300) for step, seen, here in walked),
+          all(here["here"] == step and here["top"] == 0 and here["height"] == 900 and 0 <= seen < (900 if step == 3 else 300) for step, seen, here in walked),
           [(step, seen, here["here"], here["top"], here["height"]) for step, seen, here in walked])
+    # The guide's Customize the sensor and the fold on the right are one switch (the user's request of 2026-11-02): either
+    # opens both, the guide then showing step 2's own steps, Fit and Generate (each done or next), each scrolling to its part.
+    SYNC = """() => [document.getElementById('cadCustomize').open, document.getElementById('guideCustomize').getAttribute('aria-expanded') === 'true',
+        [...document.querySelectorAll('#guideSubsteps .flow-substep')].filter(li => li.checkVisibility()).map(li => li.dataset.substep)]"""
+    sync = []
+    for click in ("#cadCustomize > summary", "#guideCustomize", "#guideCustomize", "#cadCustomize > summary"):
+        page.click(click); page.wait_for_timeout(900)
+        sync.append(page.evaluate(SYNC))
+    s = state(page)
+    check("default: the guide's Customize the sensor and the fold on the right open and fold together, from either side; open, "
+          "the guide shows Fit and Generate under step 2, both done",
+          sync == [[False, False, []], [True, True, ["fit", "generate"]], [False, False, []], [True, True, ["fit", "generate"]]]
+          and s["guide_customize"] == {"open": True, "substeps": ["done", "done"]}, (sync, s["guide_customize"]))
+    page.click('#guideSubsteps [data-substep="generate"] button'); page.wait_for_timeout(1200)
+    seen = page.evaluate("() => [Math.round(document.getElementById('cadStepGenerate').getBoundingClientRect().top), document.querySelector('#guideSubsteps [data-substep=\"generate\"]').classList.contains('is-here')]")
+    check("default: the guide's Generate scrolls to its part, lit as it comes in view", 0 <= seen[0] < 300 and seen[1], seen)
     page.evaluate("() => window.scrollTo(0, 0)"); page.wait_for_timeout(300)
     # The camera in the 3D view's window, top right (no row of its own); the steps' titles larger (the user's requests).
     camera = page.evaluate("""() => { const view = document.getElementById('cadView').getBoundingClientRect();
@@ -435,9 +569,9 @@ def part_default_cad(browser):
                 rows: document.querySelectorAll('.cad-toolbar').length, title: parseFloat(getComputedStyle(document.getElementById('cadStepConfig')).fontSize)}; }""")
     check("default: the camera buttons stand in the 3D view's top right (no toolbar row), the steps' titles at least 17 px",
           camera["inside"] and camera["rows"] == 0 and camera["title"] >= 17, camera)
-    # Step 2 side by side (the user's request of 2026-10-30): the settings, Fit and the proposals left, the flattened map
-    # right, in sight while the left scrolls.
-    page.click('#cadGuide .flow-step[data-step="2"] button'); page.wait_for_timeout(1200)
+    # Step 2 side by side (the user's request of 2026-10-30; under Customize the sensor since 2026-11-02): the settings,
+    # Fit and the proposals left, the flattened map right, in sight while the left scrolls.
+    page.evaluate("() => document.getElementById('cadStepConfig').scrollIntoView({block: 'start'})"); page.wait_for_timeout(1200)
     side = page.evaluate("""() => { const main = document.querySelector('.cad-resolution-main').getBoundingClientRect(); const map = document.getElementById('cadFlatFigure').getBoundingClientRect();
         const fit = document.getElementById('cadFit').getBoundingClientRect(); const table = document.getElementById('cadProposalWrap').getBoundingClientRect();
         return {right: map.left >= main.right - 1, settings: fit.right <= main.right && table.right <= main.right + 1, top: Math.round(map.top), height: Math.round(map.height),
@@ -464,6 +598,21 @@ def part_default_cad(browser):
                 oneRow: files.every(r => Math.abs(r.top - files[0].top) < 1), button: Math.round(document.getElementById('cadGenerate').getBoundingClientRect().height)}; }""")
     check("default: Click to generate side by side: Generate left (its button on one line), the build on the part and its four files in a row right, "
           "under 230 px tall", build["beside"] and build["oneRow"] and build["button"] < 60 and build["height"] < 230, build)
+    page.evaluate("() => document.getElementById('cadStepConfig').scrollIntoView({block: 'start'})"); page.wait_for_timeout(300)
+    # While a fit runs the map's window keeps its place and size, empty, saying so (the user's request of 2026-11-02: it
+    # used to vanish, the settings widening and narrowing again).
+    page.evaluate("""() => { window.__boxes = []; window.__stop = false; const tick = () => {
+        const f = document.getElementById('cadFlatFigure'); const r = f.getBoundingClientRect(); const m = document.querySelector('.cad-resolution-main').getBoundingClientRect();
+        window.__boxes.push([Math.round(r.width), Math.round(r.height), Math.round(m.width), f.className, document.getElementById('cadFlatEmpty').textContent]);
+        if (!window.__stop) requestAnimationFrame(tick); }; tick(); }""")
+    page.fill("#cadPitch", "1.5"); page.click("#cadFit"); page.wait_for_timeout(200); settle(page, 180); page.wait_for_timeout(300)
+    boxes = page.evaluate("() => { window.__stop = true; return window.__boxes; }")
+    sizes = sorted({tuple(box[:3]) for box in boxes})
+    fitting = any("is-fitting" in box[3] and box[4] == "Fitting the sensor…" for box in boxes)
+    check("default: while a fit runs the map's window keeps its place and size (and the settings theirs), empty, saying "
+          "\"Fitting the sensor…\"; the map drawn in it again after", len(sizes) == 1 and fitting and "is-empty" not in boxes[-1][3],
+          (sizes, fitting, boxes[-1][3:]))
+    page.fill("#cadPitch", "2.0")
     page.evaluate("() => window.scrollTo(0, 0)"); page.wait_for_timeout(300)
     base = page.evaluate("""() => { const view = document.getElementById('cadView').getBoundingClientRect();
         const pills = [...document.querySelectorAll('#cadSides .cad-side')].map(label => label.getBoundingClientRect());
@@ -1440,14 +1589,17 @@ def soft_fit(page, side="0"):
 
 
 # Max rows and Max columns in sight after the tail since 2026-10-30 (the user's request).
-CAD_BASIC = ["cadFile", "cadPitch", "cadFill", "cadRowSides", "cadTailExtension", "cadMaxRows", "cadMaxColumns", "cadFit", "cadGenerate"]
+# One step (2026-11-02): the file, the 3D view's tools and the sensor's line in sight; the basic options under Customize.
+CAD_STEP = ["cadFile", "cadFileNote", "cadTools", "cadRemove", "cadQuickGenerate"]
+CAD_BASIC = ["cadPitch", "cadFill", "cadRowSides", "cadTailExtension", "cadMaxRows", "cadMaxColumns", "cadFit", "cadGenerate", "cadSides"]
 CAD_FOLDED = ["cadUnit", "cadPreset", "cadThetaD", "cadObjective", "cadContainment", "cadReader", "cadStrainLimit"]
 SHOWN = """(ids) => ids.map(id => { const node = document.getElementById(id); return [id, Boolean(node && node.checkVisibility())]; })"""
 
 
 def part_clean_cad(browser):
     """CAD mode as the user sees it (no unfold()): the rectangular form hidden (CAD mode has its own steps) and the shared
-    results (a rectangular build) hidden until CAD mode generates; the basic options in sight, File details, Selection
+    results (a rectangular build) hidden until CAD mode generates; the file, the view's tools and the sensor's line in
+    sight, the rest under Customize the sensor (2026-11-02); opened, its basic options in sight, File details, Selection
     settings and More options folded; after Fit and Generate on the soft finger the results in sight, step 7 one line
     ("all N checks pass") with its checks folded, the proposal's details folded; back in Rectangular mode the form."""
     if not SOFT.exists():
@@ -1457,8 +1609,13 @@ def part_clean_cad(browser):
     open_cad(page)
     check("clean CAD: the rectangular form and the results (the rectangular default build) are hidden before a CAD build",
           not page.is_visible("#designForm") and not page.is_visible("#results") and not page.is_visible("#status"))
+    shown = dict(page.evaluate(SHOWN, CAD_STEP + CAD_BASIC + CAD_FOLDED))
+    check("clean CAD: the file, its drag hint, the view's tools and the sensor's line in sight; the options, Fit and Generate under "
+          "Customize the sensor, folded", all(shown[name] for name in CAD_STEP) and not any(shown[name] for name in CAD_BASIC + CAD_FOLDED)
+          and not page.evaluate("() => document.getElementById('cadCustomize').open"), shown)
+    page.click("#cadCustomize > summary"); page.wait_for_timeout(200)
     shown = dict(page.evaluate(SHOWN, CAD_BASIC + CAD_FOLDED))
-    check("clean CAD: the basic options in sight, the rest folded (File details, Selection settings, More options)",
+    check("clean CAD: opened, Customize the sensor shows the basic options, the rest folded (File details, Selection settings, More options)",
           all(shown[name] for name in CAD_BASIC) and not any(shown[name] for name in CAD_FOLDED), shown)
     sizes = page.evaluate("() => ['#cadConfigMore > summary', '#cadFileMore > summary'].map(s => parseFloat(getComputedStyle(document.querySelector(s)).fontSize))")
     check("clean CAD: 'More options' is larger than the other folds' summaries (15 px or more)", sizes[0] >= 15 and sizes[0] > sizes[1], sizes)
@@ -1821,7 +1978,7 @@ def main():
     print(f"/api/default?template= {'served' if SERVED else 'not served (app.js keeps the default limits)'}", flush=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(args=WEBGL_ARGS)
-        parts = (part_rect_unchanged, part_default_cad, part_remove_model, part_clean_cad, part_soft, part_crank, part_crank_fill, part_no_rectangle_controls, part_field_soft, part_row_sides, part_review_fixes, part_tail_card, part_wrap_flexitac,
+        parts = (part_rect_unchanged, part_default_cad, part_one_step, part_remove_model, part_clean_cad, part_soft, part_crank, part_crank_fill, part_no_rectangle_controls, part_field_soft, part_row_sides, part_review_fixes, part_tail_card, part_wrap_flexitac,
                  part_ascii_and_narrow, part_drop, part_template_roundtrip, part_columns, part_presets, part_tail_edit, part_rounded_base,
                  part_rounded_corners, part_files)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]

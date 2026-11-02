@@ -171,6 +171,7 @@ def part_page(browser, timings):
           {key: state.get(key) for key in ("default_part", "default_build", "fit_source")})
     check("the status reports a valid build", "is-ok" in page.get_attribute("#status", "class"), page.inner_text("#status")[:160])
     downloads = {}
+    page.click("#moreFiles > summary")  # the other files are folded (2026-11-02)
     for selector in ('[data-download="design"]', '[data-export="top-gerber"]', '[data-export="bottom-gerber"]', '[data-export="project"]', '[data-export="easyeda-pro"]'):
         with page.expect_download(timeout=120000) as info:
             page.click(selector)

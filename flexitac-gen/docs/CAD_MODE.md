@@ -1043,6 +1043,33 @@ proposal's files:
 
 ## The browser
 
+One step to a sensor (the user's requests of 2026-11-02; main.js
+`quickMode`, `autoSelect`, `oneStep`, `renderQuick`): the default part's
+sensor is generated as the page opens (below).  After that the user's
+changes only choose, and **Generate sensor** under the view makes the
+sensor: with "Customize the sensor" folded a model loaded gets its largest
+flat face (the server's first flat candidate) selected and a click on the
+part selects the face under it alone (the face already selected: nothing
+to do); Generate sensor fits the inputs as they are when the fit is
+missing or stale (Undo, a base edge or border from the view's tools, the
+options changed in Customize all make it stale) and generates the chosen
+proposal (#1 of a new fit), mapped onto the part, after the proposal's
+preview (one surface request at a time).  It is off when the sensor on
+the part is the inputs' own, and it is alone under the view (the user's
+request of 2026-11-02; the Gerber ZIPs are the downloads'): its title says
+what the sensor is ("32 × 12 = 384 taxels · 2.0 mm pitch · all 12 checks
+pass on the part"), or what to do next ("Face selected (1823.0 mm²):
+Generate sensor to put the sensor on it", "Settings changed: …",
+"Proposal #1 (…) fitted: …"), under way or wrong.  Opened,
+Customize the sensor holds the base edge, the resolution and Fit, the
+proposals and the flattened map, Generate and the checks on the part, and
+a click toggles a surface as before.  (The first version of the day
+generated on every click; the user asked for the button.)  The flattened
+map's window keeps its place and size whatever it shows: empty, it says
+"Fitting the sensor…" while a fit runs, or what comes first (main.js
+`renderFlatEmpty`), so the settings beside it never widen and narrow
+again.
+
 The page (titled "FlexiTac-Gen") opens in CAD mode, which it calls "Gen by
 Surface" and never "CAD" (the user's requests of 2026-10-30: its workspace
 is "Pick a surface on a 3D model"); the
@@ -1055,14 +1082,16 @@ basic options are in sight; the file's unit and facts (File details), the
 grow settings (Selection settings), the other fit options (More options),
 the proposal's card (Proposal details) and the checks on the part (Check
 details) are folded.  On the page's left, in sight from its top to its end,
-the order of work (the user's requests of 2026-10-30): "Design a FlexiTac
-sensor for your own robot", 1 Select your gripper, 2 Find best resolution,
-3 Click to generate and 4 Send to manufacture, each marked done or next and
-the one whose part is in view lit (main.js `renderGuide`,
-`markGuideHere`); a step scrolls to its part on the right, whose headings
-carry the same numbers (the 3D model with the file, its details and the
-selection settings above the view; the resolution and the proposals;
-Generate, the checks on the part and the previews; the downloads).  Under
+the order of work (the user's requests of 2026-10-30; three steps since
+2026-11-02): "Design a FlexiTac sensor for your own robot", 1 Load your
+gripper, 2 Generate the sensor and 3 Send to manufacture, each with one
+short line, marked done or next and the one whose part is in view lit
+(main.js `renderGuide`, `markGuideHere`); a step scrolls to its part on the
+right (the workspace, Generate sensor under the view, the downloads).
+Under step 2 a small "Customize the sensor" switch is one with the fold on
+the right (main.js `syncGuideCustomize`): either one opens both, the
+guide then listing step 2's own steps, Fit and Generate, each done or next
+and scrolling to its part.  Under
 980 px the guide stands above the workspace.  In the view's top right the
 camera (Fit, Selection, the six axes); the camera frames the part, the
 selection and the sensor clear of these tools (viewer.js `setClearance`:
@@ -1070,8 +1099,9 @@ the bands they cover at the view's top and sides; farther than before by as
 much); on the view's left, a column of tools: Select a surface,
 Base edge, Edit border, Undo, Clear and Remove model (the model off the
 view with its selection, border, proposals and map; a build already
-generated stays, the default part does not come back); under the view, the
-base edge's choices across it.  The file step hints that an STL can also
+generated stays, the default part does not come back); under the view the
+sensor's line and its Gerber ZIPs, then Customize the sensor with the base
+edge's choices across its top.  The file step hints that an STL can also
 be dragged onto the view.  While a model loads, a veil over the view says
 "Loading name…"; CAD mode's status sits at the view's bottom right (the
 user's requests of 2026-10-31; the workspace's header has none): "name

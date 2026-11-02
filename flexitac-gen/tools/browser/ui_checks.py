@@ -761,9 +761,12 @@ def part_downloads_and_http(browser):
 
 
 SHOWN = """(ids) => ids.map(id => { const node = document.getElementById(id); return [id, Boolean(node && node.checkVisibility())]; })"""
-BASIC_CONTROLS = ["name", "rows", "columns", "pitchX", "pitchY", "rowWidth", "columnWidth", "topTailLength", "bottomTailLength", "connectorSide", "generate"]
+# One step to a sensor (the user's request of 2026-11-02): rows, columns, pitch and Generate in sight; the rest under
+# Customize the sensor, Advanced folded inside it.
+BASIC_CONTROLS = ["rows", "columns", "pitchX", "pitchY", "generate"]
+CUSTOMIZE_CONTROLS = ["name", "rowWidth", "columnWidth", "topTailLength", "bottomTailLength", "connectorSide"]
 ADVANCED_CONTROLS = ["rowLayer", "scanOrder", "rowPins", "columnPins", "traceWidth", "traceSpace", "rowSides", "lockedRules", "profileBadge"]
-FOLDS = ["formAdvanced", "assemblyMore", "drcPanel", "manufacturingNote"]
+FOLDS = ["formCustomize", "formAdvanced", "assemblyMore", "drcPanel", "moreFiles", "manufacturingNote"]
 
 
 def flip_a_check(route):
@@ -779,18 +782,24 @@ def flip_a_check(route):
 
 
 def part_clean_interface(browser):
-    """The rectangular mode as it opens, folded (no unfold()): the basic sensor and tail controls and Generate in sight,
-    the rest under Advanced; the header without its old eyebrow and profile badge; a clean pass without the summary box,
-    the design checks one line ("all N checks pass") and folded, the stacked view's notes and the ordering notes folded,
-    every download button in sight; a failing check opens the design checks listing only the failing rules, "Show all
-    checks" the rest."""
+    """The rectangular mode as it opens, folded (no unfold()): rows, columns, pitch and Generate in sight, the rest under
+    Customize the sensor with Advanced folded inside it (2026-11-02); the header without its old eyebrow and profile
+    badge; a clean pass without the summary box, the design checks one line ("all N checks pass") and folded, the stacked
+    view open with its notes folded, the other files and the ordering notes folded, the two Gerber ZIPs in sight; a failing check opens
+    the design checks listing only the failing rules, "Show all checks" the rest."""
     page = new_page(browser, width=1440, folded=True)
     boot(page)
     shown = dict(page.evaluate(SHOWN, BASIC_CONTROLS + ADVANCED_CONTROLS))
     check("clean: the basic controls are in sight", all(shown[name] for name in BASIC_CONTROLS), shown)
-    check("clean: the advanced controls are folded under Advanced", not any(shown[name] for name in ADVANCED_CONTROLS), shown)
+    shown = dict(page.evaluate(SHOWN, BASIC_CONTROLS + CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS))
+    check("clean: the other controls are folded under Customize the sensor", not any(shown[name] for name in CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS), shown)
     folds = page.evaluate("(ids) => ids.map(id => [id, document.getElementById(id).open])", FOLDS)
-    check("clean: Advanced, the stacked view's notes, the design checks and the ordering notes start folded", not any(open_ for _, open_ in folds), folds)
+    check("clean: Customize the sensor, Advanced, the stacked view's notes, the design checks, the other files and the "
+          "ordering notes start folded", not any(open_ for _, open_ in folds), folds)
+    page.click("#formCustomize > summary"); page.wait_for_timeout(100)
+    opened = dict(page.evaluate(SHOWN, CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS))
+    check("clean: opening Customize the sensor shows its controls, Advanced still folded",
+          all(opened[name] for name in CUSTOMIZE_CONTROLS) and not any(opened[name] for name in ADVANCED_CONTROLS), opened)
     page.click("#formAdvanced > summary"); page.wait_for_timeout(100)
     opened = dict(page.evaluate(SHOWN, ADVANCED_CONTROLS))
     check("clean: opening Advanced shows its controls", all(opened.values()), opened)
@@ -819,8 +828,10 @@ def part_clean_interface(browser):
     total = page.inner_text("#drcTotal")
     check("clean: a clean pass shows no summary box, the status line and the design checks' one line",
           status(page).startswith("Valid build") and not page.is_visible("#summary") and re.fullmatch(r"✓ all \d+ checks pass", total), (status(page), total))
-    buttons = page.evaluate("() => [...document.querySelectorAll('[data-download], [data-export]')].map(b => b.checkVisibility() && !b.disabled)")
-    check("clean: every download button is in sight and enabled", len(buttons) == 7 and all(buttons), buttons)
+    buttons = page.evaluate("() => [...document.querySelectorAll('[data-download], [data-export]')].map(b => [b.textContent.trim(), b.checkVisibility(), !b.disabled])")
+    check("clean: the two Gerber ZIPs are in sight and enabled, the other five files folded under More files (enabled)",
+          len(buttons) == 7 and [name for name, seen, _ in buttons if seen] == ["Top FPC Gerber ZIP", "Bottom FPC Gerber ZIP"] and all(ready for *_, ready in buttons), buttons)
+    page.click("#moreFiles > summary"); page.wait_for_timeout(100)
     # The two Gerber ZIPs first and set off (the user's request of 2026-10-30): filled, bold, taller than the others.
     order = page.evaluate("""() => [...document.querySelectorAll('.download-actions button')].map(b => { const s = getComputedStyle(b);
         return [b.textContent.trim(), Number(s.fontWeight), s.backgroundColor, Math.round(b.getBoundingClientRect().height)]; })""")
@@ -828,7 +839,8 @@ def part_clean_interface(browser):
           [name for name, *_ in order[:2]] == ["Top FPC Gerber ZIP", "Bottom FPC Gerber ZIP"] and all(weight >= 800 for _, weight, _, _ in order[:2])
           and all(fill != "rgb(255, 255, 255)" for _, _, fill, _ in order[:2]) and all(fill == "rgb(255, 255, 255)" for _, _, fill, _ in order[2:])
           and min(height for *_, height in order[:2]) > max(height for *_, height in order[2:]), order)
-    check("clean: the stacked view's keys in sight, its notes folded", page.is_visible(".assembly-key.upper-key") and not page.is_visible("#assemblyRowBus"),
+    check("clean: the stacked view open (the user's request of 2026-11-02), its keys in sight and its notes folded",
+          page.is_visible("#stackedPreview .assembly-board") and page.is_visible(".assembly-key.upper-key") and not page.is_visible("#assemblyRowBus"),
           page.inner_text("#assemblyLegend"))
     page.set_viewport_size({"width": 900, "height": 1000}); page.wait_for_timeout(200)
     overflow = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
