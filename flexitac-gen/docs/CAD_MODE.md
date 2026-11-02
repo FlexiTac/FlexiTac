@@ -1073,7 +1073,10 @@ again.
 The page (titled "FlexiTac-Gen") opens in CAD mode, which it calls "Gen by
 Surface" and never "CAD" (the user's requests of 2026-10-30: its workspace
 is "Pick a surface on a 3D model"); the
-"Rectangular" switch beside the title, or `#rect` in the address, shows the
+"Rectangular" switch beside the title (on one line with it and, at the
+header's right, FlexiTac's GitHub, with the repository's stars and forks
+on the static site, and Discord, as on flexitac.github.io:
+2026-11-02), or `#rect` in the address, shows the
 rectangular form, and `#cad` still names CAD mode.  CAD mode shows the
 CAD workspace in place of the rectangular form (Generate still writes the
 chosen design into it, out of sight); the results below (status, previews,
@@ -1136,7 +1139,11 @@ seed facet" picks one for the browser checks), and no Clean up.  The steps:
    there is no Add / Subtract switch since 2026-10-30), and Undo steps back
    through these changes.  A surface apart
    from the selection (or one the sheet cannot take) is refused and the
-   selection kept.  A preset or custom angles (Selection settings).  The
+   selection kept.  A preset or custom angles (Selection settings; a
+   click grows with Surface, 30° and no blend under 4 mm radius, by default
+   since 2026-11-02, so it takes a curved face too; the default part's
+   face and a loaded model's largest flat face keep the flat preset they
+   were found with).  The
    browser has no Disk tool since 2026-10-30 (the API's `disk` operation
    stays).
 3. **Base edge.**  Click a side or a rounded edge of the selection's

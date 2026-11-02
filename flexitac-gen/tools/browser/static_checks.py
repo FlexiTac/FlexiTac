@@ -157,6 +157,10 @@ def part_page(browser, timings):
     page.on("requestfailed", lambda request: problems.append(f"failed: {request.url}"))
     page.on("response", lambda response: problems.append(f"HTTP {response.status}: {response.url}") if response.status >= 400 else None)
     page.on("request", lambda request: outside.append(request.url) if request.url.startswith("http") and not request.url.startswith(SITE_URL) else None)
+    # The header's GitHub counts (web/backend.js): answered here, as GitHub's API would (its hourly limit stays out of the check).
+    asked = []
+    page.route(build_static_site.GITHUB_API, lambda route: (asked.append(route.request.url), route.fulfill(
+        status=200, content_type="application/json", body=json.dumps({"stargazers_count": 1234, "forks_count": 56})))[-1])
     started = time.monotonic()
     page.goto(SITE_URL)
     wait_until(page, "() => window.apiBackend !== undefined", 20)
@@ -188,7 +192,11 @@ def part_page(browser, timings):
               [name, reply["status"], reply["headers"].get("content-disposition"), hashlib.sha256(data).hexdigest()[:12], hashlib.sha256(reply["body"]).hexdigest()[:12]])
     part_api(page)
     check("no console error, failed request or HTTP error", not problems, problems[:8])
-    check(f"every request stays under /{SUBPATH}/ (relative URLs; no other host)", not outside, outside[:8])
+    card = page.evaluate("() => [document.querySelector('[data-gh-stars]').textContent, document.querySelector('[data-gh-forks]').textContent, document.querySelector('[data-gh-stats]').hidden, document.querySelector('[data-gh-badge]').getAttribute('aria-label')]")
+    check("the header's GitHub card shows the repository's stars and forks from GitHub's API (1.2k, 56), as flexitac.github.io",
+          asked == [build_static_site.GITHUB_API] and card == ["1.2k", "56", False, "FlexiTac on GitHub: 1234 stars, 56 forks"], (asked, card))
+    check(f"every request stays under /{SUBPATH}/ (relative URLs; no other host but GitHub's API for those counts)",
+          [url for url in outside if url != build_static_site.GITHUB_API] == [], outside[:8])
     context.close()
 
 

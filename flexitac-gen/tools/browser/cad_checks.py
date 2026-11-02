@@ -691,6 +691,16 @@ def part_soft(browser):
     page.click("#cadClear"); settle(page)
     check("soft: Clear empties the selection", state(page)["selection"] is None and state(page)["ops"] == 0, state(page))
     x, y = view_center(page)
+    # The default grow preset is Surface (the user's request of 2026-11-02): the face without its fillet strips (the
+    # blends under 4 mm radius); the flat preset takes the strips the candidate has.
+    preset = page.input_value("#cadPreset")
+    page.mouse.click(x, y); settle(page)
+    s = state(page)
+    check("soft: with the default preset (Surface) a click selects the face without its fillet strips (3079.6 mm2, 32 facets)",
+          preset == "surface" and s["selection"] and round(s["selection"]["area_mm2"], 1) == 3079.6 and s["selection"]["facets"] == 32 and s["ops"] == 1,
+          (preset, s["selection"]))
+    page.click("#cadClear"); settle(page)
+    page.select_option("#cadPreset", "flat"); page.wait_for_timeout(100)
     page.mouse.click(x, y); settle(page)
     s = state(page)
     check("soft: a click on the face selects the same 3087.7 mm2 face (flat preset)",
@@ -1459,6 +1469,7 @@ def part_ascii_and_narrow(browser):
     s = state(page)
     check("ascii: candidate #1 is the same 3087.7 mm2 face", s["selection"] and abs(s["selection"]["area_mm2"] - 3087.7) < 0.05, s["selection"])
     page.click("#cadClear"); settle(page)
+    page.select_option("#cadPreset", "flat"); page.wait_for_timeout(100)
     x, y = view_center(page)
     page.mouse.click(x, y); settle(page)
     s = state(page)

@@ -804,20 +804,36 @@ def part_clean_interface(browser):
     opened = dict(page.evaluate(SHOWN, ADVANCED_CONTROLS))
     check("clean: opening Advanced shows its controls", all(opened.values()), opened)
     header = page.inner_text(".masthead")
-    check("clean: the header holds the title, its line on FlexiTac and the mode switch only",
+    check("clean: the header holds the title, its line on FlexiTac, the mode switch and the community links only",
           "LOCAL" not in header and "Generic Matrix" not in header and "FlexiTac-Gen" in header, header)
     # The user's requests of 2026-10-30: the title FlexiTac-Gen with a line on FlexiTac (the paper, the website), the mode
     # switch larger and right after them, its modes "Rectangular" and "Gen by Surface"; the page never says "CAD".
+    # Since 2026-11-02 the title, the mode switch and the community links share one line, centred on the title (the
+    # title block's own box is the grid's: display contents).
     title = page.evaluate("""() => { const block = document.querySelector('.masthead-title'); const m = document.getElementById('modePicker');
-        const [a, b] = [block.getBoundingClientRect(), m.getBoundingClientRect()]; const span = m.querySelector('span');
+        const [a, b] = [block.querySelector('h1').getBoundingClientRect(), m.getBoundingClientRect()]; const span = m.querySelector('span');
+        const mid = r => (r.top + r.bottom) / 2; const tag = block.querySelector('.masthead-tagline'); const head = document.querySelector('.masthead').getBoundingClientRect();
         return {title: document.title, h1: block.querySelector('h1').textContent, next: block.nextElementSibling === m, gap: b.left - a.right,
-                middle: Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2), height: b.height, font: parseFloat(getComputedStyle(span).fontSize),
+                middle: Math.abs(mid(a) - mid(b)), height: b.height, font: parseFloat(getComputedStyle(span).fontSize),
+                community: [...document.querySelectorAll('.masthead-link')].map(l => [l.textContent.trim(), l.href, l.target, l.rel, Math.abs(mid(l.getBoundingClientRect()) - mid(a)) < 2,
+                  Boolean(l.querySelector('svg path'))]),
+                linksRight: head.right - [...document.querySelectorAll('.masthead-link')].at(-1).getBoundingClientRect().right,
+                tagLines: Math.round(tag.getBoundingClientRect().height / parseFloat(getComputedStyle(tag).lineHeight)), tagBelow: tag.getBoundingClientRect().top >= a.bottom,
                 modes: [...m.querySelectorAll('span')].map(s => s.textContent), line: block.querySelector('.masthead-tagline').textContent.replace(/\\s+/g, ' ').trim(),
                 links: [...block.querySelectorAll('a')].map(a => [a.textContent, a.href, a.target, a.rel])}; }""")
     check("clean: the title is FlexiTac-Gen (page and tab), the mode switch right after it (beside it, under 48 px off) and large "
           "(at least 40 px tall, 16 px text), its modes Rectangular and Gen by Surface",
           title["title"] == title["h1"] == "FlexiTac-Gen" and title["next"] and 0 <= title["gap"] < 48 and title["middle"] < 6
           and title["height"] >= 40 and title["font"] >= 16 and title["modes"] == ["Rectangular", "Gen by Surface"], title)
+    check("clean: on the header's right FlexiTac's GitHub and Discord with their marks (as on flexitac.github.io), each in a new tab, "
+          "centred on the title's line like the mode switch, at the header's right padding",
+          title["community"] == [["FlexiTac", "https://github.com/FlexiTac/FlexiTac", "_blank", "noopener noreferrer", True, True],
+                                 ["Discord", "https://discord.gg/6gw887Vxms", "_blank", "noopener noreferrer", True, True]]
+          and 60 <= title["linksRight"] <= 80, title)
+    # app.py's page asks nothing of other hosts: the GitHub card without its star and fork counts (the static site has them).
+    counts = page.evaluate("() => [document.querySelector('[data-gh-stats]').hidden, performance.getEntriesByType('resource').some(e => e.name.includes('api.github.com'))]")
+    check("clean: under app.py the GitHub card shows its name alone (no counts, no request to GitHub)", counts == [True, False], counts)
+    check("clean: the line on FlexiTac under the title is one line at 1440 px", title["tagLines"] == 1 and title["tagBelow"], title)
     check("clean: the line under the title links FlexiTac to its paper and the FlexiTac website, each in a new tab",
           title["line"] == "A customizer for FlexiTac sensors. For assembly instructions and applications, see the FlexiTac website."
           and title["links"] == [["FlexiTac", "https://arxiv.org/abs/2604.28156", "_blank", "noopener noreferrer"],

@@ -140,10 +140,50 @@ class SiteBuildTests(unittest.TestCase):
         policy = re.search(r'<meta http-equiv="Content-Security-Policy" content="([^"]+)" />', head)
         self.assertIsNotNone(policy)
         server = dict(app.SECURITY_HEADERS)["Content-Security-Policy"]
-        self.assertEqual(policy.group(1).replace("script-src 'self' 'wasm-unsafe-eval'; ", ""), server)
+        # The server's policy, with WebAssembly and GitHub's API (the header's star and fork counts) allowed.
+        self.assertEqual(policy.group(1).replace("script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.github.com; ", ""), server)
         # The policy comes first after the charset, before anything it governs.
         self.assertLess(head.index("Content-Security-Policy"), head.index("<link"))
         self.assertTrue(head.startswith('<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta http-equiv="Content-Security-Policy"'))
+
+    def test_the_header_carries_the_repositorys_counts_when_built_with_them(self) -> None:
+        # app.py's page: the GitHub card's name alone (its counts hidden, nothing asked of GitHub).
+        page = (WEB / "index.html").read_text(encoding="utf-8")
+        self.assertIn('data-gh-stats hidden>', page)
+        self.assertNotIn("api.github.com", page)
+        built = build_static_site.page({"stars": 159, "forks": 17})
+        self.assertIn('<span data-gh-stars>159</span>', built)
+        self.assertIn('<span data-gh-forks>17</span>', built)
+        self.assertIn('aria-label="FlexiTac on GitHub: 159 stars, 17 forks" data-gh-badge>', built)
+        self.assertNotIn("data-gh-stats hidden>", built)
+        self.assertEqual(build_static_site.page(None).count("data-gh-stats hidden>"), 1)
+        self.assertEqual([build_static_site.count_text(n) for n in (0, 999, 1000, 1049, 1250, 9999, 10000, 12600)],
+                         ["0", "999", "1k", "1k", "1.2k", "10k", "10k", "13k"])
+        # web/backend.js writes them the same way.
+        self.assertIn('const fmt = n => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\\.0$/, "")}k` : String(n));',
+                      (WEB / "backend.js").read_text(encoding="utf-8"))
+
+    def test_the_counts_are_optional(self) -> None:
+        # GitHub's API unreachable or refusing (rate limit): no counts, no failure; with GITHUB_TOKEN the request carries it.
+        seen = []
+
+        def refuse(request, timeout):
+            seen.append(dict(request.header_items()))
+            raise OSError("offline")
+        with mock.patch.object(build_static_site.urllib.request, "urlopen", side_effect=refuse), mock.patch.dict("os.environ", {"GITHUB_TOKEN": "t0ken"}):
+            self.assertIsNone(build_static_site.github_counts())
+        self.assertEqual(seen[0].get("Authorization"), "Bearer t0ken")
+
+        class Reply(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+        with mock.patch.object(build_static_site.urllib.request, "urlopen", return_value=Reply(b'{"stargazers_count": 159, "forks_count": 17}')):
+            self.assertEqual(build_static_site.github_counts(), {"stars": 159, "forks": 17})
+        with mock.patch.object(build_static_site.urllib.request, "urlopen", return_value=Reply(b'{"message": "Not Found"}')):
+            self.assertIsNone(build_static_site.github_counts())
 
     def test_every_url_of_the_page_is_relative(self) -> None:
         # The site is served under a path (https://<org>.github.io/<repo>/).

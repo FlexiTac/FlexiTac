@@ -61,8 +61,10 @@ jobs:
         if: steps.key.outputs.ready == 'true'
         with:
           python-version: "3.12"
-      - name: Build the site (Pyodide checked by its SHA-256)
+      - name: Build the site (Pyodide checked by its SHA-256; the repository's stars and forks from GitHub's API)
         if: steps.key.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: python -B flexitac-gen/tools/build_static_site.py --out site
       - uses: actions/checkout@v5
         if: steps.key.outputs.ready == 'true'

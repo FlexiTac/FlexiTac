@@ -65,7 +65,10 @@ byte (`tools/browser/static_checks.py` compares them).  The first visit
 downloads about 7 MB (Pyodide, then cached by the browser), and a surface fit
 takes about twice as long as under `app.py`.  The site carries the
 generator's Python source (`static/py/engine.zip`); its URLs are relative,
-so it works under any path.
+so it works under any path.  Its one request elsewhere is GitHub's API for
+the FlexiTac repository's star and fork counts in the header (written into
+the page when it is built, refreshed as it opens, as on
+flexitac.github.io); `app.py`'s page shows the card without them.
 
 ```bash
 python3 tools/build_static_site.py --out site/   # downloads Pyodide 0.27.8 and checks its SHA-256
@@ -78,7 +81,10 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   beside the title, "FlexiTac-Gen" (the page itself never says "CAD": its
   workspace is "Pick a surface on a 3D model"); the "Rectangular" switch or
   `#rect` for the rectangular mode; CLI: `cli.py surface`; HTTP:
-  `/api/surface/*`).
+  `/api/surface/*`).  The header holds the title, the mode switch and
+  FlexiTac's GitHub (with the repository's stars and forks on the static
+  site) and Discord on one line, centred on the title, with the line on
+  FlexiTac under them.
   - The workflow: drop in an STL, rotate it, click a surface, set the
     resolution, Generate.  The browser opens with the UMI fin-ray finger
     loaded (`web/vendor/umi`, HandUMI, Apache 2.0) and its sensor already

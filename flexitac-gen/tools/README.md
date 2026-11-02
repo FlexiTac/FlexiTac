@@ -30,8 +30,11 @@ project.
   with a Content-Security-Policy meta tag and the browser-backend flag,
   `web/` as `static/`, `static/py/engine.zip` (`app.py` and the packages it
   imports, byte-reproducible) and the Pyodide 0.27.8 core files, downloaded
-  (or `--pyodide-archive FILE`) and checked by their SHA-256; it replaces an
-  output folder only when an earlier build wrote it.  See the README, "As a
+  (or `--pyodide-archive FILE`) and checked by their SHA-256, and the
+  FlexiTac repository's star and fork counts from GitHub's API written into
+  the header (`GITHUB_TOKEN` when set; none with `--no-github` or when the
+  API does not answer: the page refreshes them); it replaces an output
+  folder only when an earlier build wrote it.  See the README, "As a
   static website".
 - `export_public.py`: writes the public part of the project from a commit
   (`git archive`, so only committed files) into a clone of FlexiTac/FlexiTac
