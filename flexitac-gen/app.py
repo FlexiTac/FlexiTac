@@ -16,6 +16,11 @@ an empty reply.
 The answers themselves need no HTTP (``answer``): the static site
 (``tools/build_static_site.py``) imports this module in the browser with
 Pyodide and serves the same replies to the page without a server.
+
+The one request the server itself makes is GitHub's API for the FlexiTac
+repository's star and fork counts in the page's header (``keep_github_counts``,
+hourly; ``--no-github`` turns it off).  No design or mesh leaves the computer,
+and the page asks no other host.
 """
 
 from __future__ import annotations
@@ -81,6 +86,14 @@ MAX_SURFACE_DRAIN_S = 10
 RETRY_AFTER_S = 1
 BUILD_CACHE_SIZE = 16
 LOOPBACK_HOSTS = ("localhost", "127.0.0.1", "[::1]")
+# The header's GitHub card shows the FlexiTac repository's stars and forks (the user's request of 2026-11-02, as
+# flexitac.github.io shows them).  The server reads them (keep_github_counts) and writes them into the page it serves
+# (fill_github_counts, as tools/build_static_site.py writes them into the static site's page), so the page itself asks
+# no other host and keeps its CSP.  Without them (offline, rate-limited, --no-github) the card shows the name alone.
+GITHUB_REPO = "FlexiTac/FlexiTac"
+GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}"
+GITHUB_REFRESH_S = 3600
+GITHUB_RETRY_S = 600
 SECURITY_HEADERS = (
     ("X-Content-Type-Options", "nosniff"),
     (
@@ -461,6 +474,82 @@ def answer(method: str, target: str, content_type: str = "", body: bytes = b"", 
     return payload if isinstance(payload, Reply) else design_reply(path, options, payload, cache)
 
 
+def github_counts(timeout: float = 15, token: str | None = None, why: list[str] | None = None) -> dict | None:
+    """The FlexiTac repository's stars and forks from GitHub's API, or None (offline, rate-limited, anything else; the
+    reason appended to ``why``).  ``token`` (the site's workflow passes GITHUB_TOKEN; the server sends none: one read an
+    hour is far under the anonymous limit) raises the hourly limit; the request is read-only either way."""
+
+    import urllib.request  # here: the static site's worker imports this module and never asks
+
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "flexitac-gen"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(GITHUB_API, headers=headers)
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as reply:
+            data = json.loads(reply.read())
+        stars, forks = data["stargazers_count"], data["forks_count"]
+    except Exception as error:  # noqa: BLE001 - the counts are optional: the page shows the name alone
+        if why is not None:
+            why.append(str(error) or type(error).__name__)
+        return None
+    if isinstance(stars, int) and isinstance(forks, int):
+        return {"stars": stars, "forks": forks}
+    if why is not None:
+        why.append("the reply has no star and fork counts")
+    return None
+
+
+def count_text(number: int) -> str:
+    """As web/backend.js writes it: 1.2k from a thousand, 12k from ten thousand."""
+
+    if number < 1000:
+        return str(number)
+    text = f"{number / 1000:.{0 if number >= 10000 else 1}f}"
+    return (text[:-2] if text.endswith(".0") else text) + "k"
+
+
+def fill_github_counts(page: str, counts: Mapping[str, int]) -> str:
+    """web/index.html with the counts in the header's GitHub card; ValueError when the card is not found once."""
+
+    fills = (
+        ("<span data-gh-stars></span>", f"<span data-gh-stars>{count_text(counts['stars'])}</span>"),
+        ("<span data-gh-forks></span>", f"<span data-gh-forks>{count_text(counts['forks'])}</span>"),
+        ("data-gh-stats hidden>", "data-gh-stats>"),
+        ('aria-label="FlexiTac on GitHub" data-gh-badge>', f'aria-label="FlexiTac on GitHub: {counts["stars"]} stars, {counts["forks"]} forks" data-gh-badge>'),
+    )
+    for old, new in fills:
+        if page.count(old) != 1:
+            raise ValueError(f"the GitHub card's {old!r} was not found once")
+        page = page.replace(old, new)
+    return page
+
+
+def keep_github_counts(server: AppServer, stop: threading.Event | None = None) -> threading.Thread:
+    """Keep ``server.github_counts`` from GitHub's API in a daemon thread: now, then hourly (sooner after a failure;
+    the last counts stay meanwhile).  ``stop`` ends it."""
+
+    stop = stop or threading.Event()
+
+    def run() -> None:
+        failing = False
+        while True:
+            why: list[str] = []
+            counts = github_counts(why=why)
+            if counts is not None:
+                server.github_counts = counts
+            elif not failing:  # one line when the reads start failing, not one every ten minutes
+                reason = why[0][:200].translate(_LOG_ESCAPES)  # the reply's words: escaped like a request line
+                sys.stderr.write(f"[tactile-fpc] GitHub's star and fork counts not read ({reason}); next try in {GITHUB_RETRY_S // 60} min\n")
+            failing = counts is None
+            if stop.wait(GITHUB_REFRESH_S if counts is not None else GITHUB_RETRY_S):
+                return
+
+    thread = threading.Thread(target=run, name="github-counts", daemon=True)
+    thread.start()
+    return thread
+
+
 class AppServer(ThreadingHTTPServer):
     """Threaded server with a deeper listen backlog, an allow-list of Host
     names, a bounded number of concurrent generations and a build cache.
@@ -485,6 +574,8 @@ class AppServer(ThreadingHTTPServer):
         self.generation_slots = threading.BoundedSemaphore(MAX_CONCURRENT_GENERATIONS)
         self.surface_slots = threading.BoundedSemaphore(MAX_CONCURRENT_SURFACE)
         self.build_cache = BuildCache(BUILD_CACHE_SIZE)
+        # The header's star and fork counts (keep_github_counts); None: the card shows the name alone.
+        self.github_counts: dict | None = None
 
     def host_allowed(self, name: str) -> bool:
         name = _bind_host_name(name)  # an IP literal in one notation, however the client wrote it
@@ -597,7 +688,7 @@ class AppHandler(BaseHTTPRequestHandler):
     def _get(self) -> None:
         path, query = self._target()
         if path in ("/", "/index.html"):
-            self._send_file(WEB_ROOT / "index.html")
+            self._send_page()
         elif path.startswith("/static/"):
             self._send_static(path[len("/static/"):])
         elif path not in GET_ROUTES:
@@ -774,6 +865,18 @@ class AppHandler(BaseHTTPRequestHandler):
             self._error(HTTPStatus.NOT_FOUND, "E_HTTP_NOT_FOUND", "Static file not found.")
             return
         self._send_file(candidate)
+
+    def _send_page(self) -> None:
+        counts = getattr(self.server, "github_counts", None)
+        if not counts:
+            self._send_file(WEB_ROOT / "index.html")
+            return
+        try:
+            page = fill_github_counts((WEB_ROOT / "index.html").read_bytes().decode("utf-8"), counts)
+        except (OSError, UnicodeDecodeError, ValueError):
+            self._send_file(WEB_ROOT / "index.html")  # the page as it is (or its 404)
+            return
+        self._send_bytes(HTTPStatus.OK, STATIC_TYPES[".html"], page.encode("utf-8"))
 
     def _send_file(self, path: Path) -> None:
         try:
@@ -1020,6 +1123,8 @@ def main(argv: list[str] | None = None) -> int:
         metavar="NAME",
         help="also serve this Host name, e.g. a tunnel or LAN name ('.example.com' allows its subdomains); repeatable",
     )
+    parser.add_argument("--no-github", action="store_true",
+                        help="do not read the FlexiTac repository's star and fork counts from GitHub's API (the header's card shows the name alone)")
     args = parser.parse_args(argv)
     if not _is_loopback(args.host):
         print(
@@ -1037,7 +1142,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Tactile FPC Customizer: http://{shown}:{httpd.server_address[1]}", flush=True)
     if args.allow_host:
         print("Also serving the Host names: " + ", ".join(sorted(set(args.allow_host))), flush=True)
-    print("Local deterministic mode; no external API is used.", flush=True)
+    if args.no_github:
+        print("Local deterministic mode; no external API is used.", flush=True)
+    else:
+        keep_github_counts(httpd)
+        print("Local deterministic mode; no design leaves this computer. The header's GitHub star and fork counts are read "
+              "from api.github.com hourly (--no-github: none).", flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

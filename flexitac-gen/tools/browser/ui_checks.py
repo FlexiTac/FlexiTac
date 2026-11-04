@@ -762,11 +762,24 @@ def part_downloads_and_http(browser):
 
 SHOWN = """(ids) => ids.map(id => { const node = document.getElementById(id); return [id, Boolean(node && node.checkVisibility())]; })"""
 # One step to a sensor (the user's request of 2026-11-02): rows, columns, pitch and Generate in sight; the rest under
-# Customize the sensor, Advanced folded inside it.
+# Advanced Customization, More options folded inside it.
 BASIC_CONTROLS = ["rows", "columns", "pitchX", "pitchY", "generate"]
 CUSTOMIZE_CONTROLS = ["name", "rowWidth", "columnWidth", "topTailLength", "bottomTailLength", "connectorSide"]
 ADVANCED_CONTROLS = ["rowLayer", "scanOrder", "rowPins", "columnPins", "traceWidth", "traceSpace", "rowSides", "lockedRules", "profileBadge"]
 FOLDS = ["formCustomize", "formAdvanced", "assemblyMore", "drcPanel", "moreFiles", "manufacturingNote"]
+
+
+# The GitHub card's counts as app.py served them ("served"), none (null) or the two given; then the header's fit.
+HEADER_COUNTS = """(counts) => { const card = document.querySelector('[data-gh-badge]'), stats = card.querySelector('[data-gh-stats]');
+    const stars = card.querySelector('[data-gh-stars]'), forks = card.querySelector('[data-gh-forks]');
+    window.servedCounts = window.servedCounts || [stats.hidden, stars.textContent, forks.textContent];
+    const [hidden, starText, forkText] = counts === 'served' ? window.servedCounts : counts ? [false, ...counts] : [true, '', ''];
+    stats.hidden = hidden; stars.textContent = starText; forks.textContent = forkText; }"""
+HEADER_FIT = """() => { const range = document.createRange(); range.selectNodeContents(document.querySelector('.masthead h1'));
+    const links = [...document.querySelectorAll('.masthead-link')];
+    return {gap: Math.round((links[0].getBoundingClientRect().left - range.getBoundingClientRect().right) * 10) / 10,
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            named: links.map(link => link.querySelector(':scope > span').checkVisibility())}; }"""
 
 
 def flip_a_check(route):
@@ -783,7 +796,7 @@ def flip_a_check(route):
 
 def part_clean_interface(browser):
     """The rectangular mode as it opens, folded (no unfold()): rows, columns, pitch and Generate in sight, the rest under
-    Customize the sensor with Advanced folded inside it (2026-11-02); the header without its old eyebrow and profile
+    Advanced Customization with More options folded inside it (2026-11-02); the header without its old eyebrow and profile
     badge; a clean pass without the summary box, the design checks one line ("all N checks pass") and folded, the stacked
     view open with its notes folded, the other files and the ordering notes folded, the two Gerber ZIPs in sight; a failing check opens
     the design checks listing only the failing rules, "Show all checks" the rest."""
@@ -792,17 +805,17 @@ def part_clean_interface(browser):
     shown = dict(page.evaluate(SHOWN, BASIC_CONTROLS + ADVANCED_CONTROLS))
     check("clean: the basic controls are in sight", all(shown[name] for name in BASIC_CONTROLS), shown)
     shown = dict(page.evaluate(SHOWN, BASIC_CONTROLS + CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS))
-    check("clean: the other controls are folded under Customize the sensor", not any(shown[name] for name in CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS), shown)
+    check("clean: the other controls are folded under Advanced Customization", not any(shown[name] for name in CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS), shown)
     folds = page.evaluate("(ids) => ids.map(id => [id, document.getElementById(id).open])", FOLDS)
-    check("clean: Customize the sensor, Advanced, the stacked view's notes, the design checks, the other files and the "
+    check("clean: Advanced Customization, More options, the stacked view's notes, the design checks, the other files and the "
           "ordering notes start folded", not any(open_ for _, open_ in folds), folds)
     page.click("#formCustomize > summary"); page.wait_for_timeout(100)
     opened = dict(page.evaluate(SHOWN, CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS))
-    check("clean: opening Customize the sensor shows its controls, Advanced still folded",
+    check("clean: opening Advanced Customization shows its controls, More options still folded",
           all(opened[name] for name in CUSTOMIZE_CONTROLS) and not any(opened[name] for name in ADVANCED_CONTROLS), opened)
     page.click("#formAdvanced > summary"); page.wait_for_timeout(100)
     opened = dict(page.evaluate(SHOWN, ADVANCED_CONTROLS))
-    check("clean: opening Advanced shows its controls", all(opened.values()), opened)
+    check("clean: opening More options shows its controls", all(opened.values()), opened)
     header = page.inner_text(".masthead")
     check("clean: the header holds the title, its line on FlexiTac, the mode switch and the community links only",
           "LOCAL" not in header and "Generic Matrix" not in header and "FlexiTac-Gen" in header, header)
@@ -815,7 +828,7 @@ def part_clean_interface(browser):
         const mid = r => (r.top + r.bottom) / 2; const tag = block.querySelector('.masthead-tagline'); const head = document.querySelector('.masthead').getBoundingClientRect();
         return {title: document.title, h1: block.querySelector('h1').textContent, next: block.nextElementSibling === m, gap: b.left - a.right,
                 middle: Math.abs(mid(a) - mid(b)), height: b.height, font: parseFloat(getComputedStyle(span).fontSize),
-                community: [...document.querySelectorAll('.masthead-link')].map(l => [l.textContent.trim(), l.href, l.target, l.rel, Math.abs(mid(l.getBoundingClientRect()) - mid(a)) < 2,
+                community: [...document.querySelectorAll('.masthead-link')].map(l => [(l.querySelector('.masthead-gh-name') || l).textContent.trim(), l.href, l.target, l.rel, Math.abs(mid(l.getBoundingClientRect()) - mid(a)) < 2,
                   Boolean(l.querySelector('svg path'))]),
                 linksRight: head.right - [...document.querySelectorAll('.masthead-link')].at(-1).getBoundingClientRect().right,
                 tagLines: Math.round(tag.getBoundingClientRect().height / parseFloat(getComputedStyle(tag).lineHeight)), tagBelow: tag.getBoundingClientRect().top >= a.bottom,
@@ -830,9 +843,16 @@ def part_clean_interface(browser):
           title["community"] == [["FlexiTac", "https://github.com/FlexiTac/FlexiTac", "_blank", "noopener noreferrer", True, True],
                                  ["Discord", "https://discord.gg/6gw887Vxms", "_blank", "noopener noreferrer", True, True]]
           and 60 <= title["linksRight"] <= 80, title)
-    # app.py's page asks nothing of other hosts: the GitHub card without its star and fork counts (the static site has them).
-    counts = page.evaluate("() => [document.querySelector('[data-gh-stats]').hidden, performance.getEntriesByType('resource').some(e => e.name.includes('api.github.com'))]")
-    check("clean: under app.py the GitHub card shows its name alone (no counts, no request to GitHub)", counts == [True, False], counts)
+    # app.py writes the star and fork counts it read from GitHub into the page (none: the name alone); the page asks no other host.
+    counts = page.evaluate("""() => { const card = document.querySelector('[data-gh-badge]'), stats = card.querySelector('[data-gh-stats]');
+        return {hidden: stats.hidden, shown: stats.checkVisibility(), stars: card.querySelector('[data-gh-stars]').textContent,
+                forks: card.querySelector('[data-gh-forks]').textContent, label: card.getAttribute('aria-label'),
+                asked: performance.getEntriesByType('resource').some(e => e.name.includes('api.github.com'))}; }""")
+    shown = (not counts["hidden"] and counts["shown"] and all(re.fullmatch(r"\d+|\d+(\.\d)?k", counts[key]) for key in ("stars", "forks"))
+             and re.fullmatch(r"FlexiTac on GitHub: \d+ stars, \d+ forks", counts["label"] or ""))
+    alone = counts["hidden"] and not counts["shown"] and counts["stars"] == counts["forks"] == "" and counts["label"] == "FlexiTac on GitHub"
+    check("clean: under app.py the GitHub card shows the stars and forks app.py read from GitHub (or, without them, its name alone), "
+          "and the page asks GitHub nothing", bool(shown or alone) and not counts["asked"], counts)
     check("clean: the line on FlexiTac under the title is one line at 1440 px", title["tagLines"] == 1 and title["tagBelow"], title)
     check("clean: the line under the title links FlexiTac to its paper and the FlexiTac website, each in a new tab",
           title["line"] == "A customizer for FlexiTac sensors. For assembly instructions and applications, see the FlexiTac website."
@@ -848,11 +868,12 @@ def part_clean_interface(browser):
     check("clean: the two Gerber ZIPs are in sight and enabled, the other five files folded under More files (enabled)",
           len(buttons) == 7 and [name for name, seen, _ in buttons if seen] == ["Top FPC Gerber ZIP", "Bottom FPC Gerber ZIP"] and all(ready for *_, ready in buttons), buttons)
     page.click("#moreFiles > summary"); page.wait_for_timeout(100)
-    # The two Gerber ZIPs first and set off (the user's request of 2026-10-30): filled, bold, taller than the others.
+    # The two Gerber ZIPs first and set off (the user's request of 2026-10-30): filled, bold (semibold, 600, as the other large
+    # pills since the Apple-style theme of 2026-11-04, web/theme.css), taller than the others.
     order = page.evaluate("""() => [...document.querySelectorAll('.download-actions button')].map(b => { const s = getComputedStyle(b);
         return [b.textContent.trim(), Number(s.fontWeight), s.backgroundColor, Math.round(b.getBoundingClientRect().height)]; })""")
     check("clean: the Top and Bottom FPC Gerber ZIPs come first among the downloads, filled, bold and taller than the others",
-          [name for name, *_ in order[:2]] == ["Top FPC Gerber ZIP", "Bottom FPC Gerber ZIP"] and all(weight >= 800 for _, weight, _, _ in order[:2])
+          [name for name, *_ in order[:2]] == ["Top FPC Gerber ZIP", "Bottom FPC Gerber ZIP"] and all(weight >= 600 for _, weight, _, _ in order[:2])
           and all(fill != "rgb(255, 255, 255)" for _, _, fill, _ in order[:2]) and all(fill == "rgb(255, 255, 255)" for _, _, fill, _ in order[2:])
           and min(height for *_, height in order[:2]) > max(height for *_, height in order[2:]), order)
     check("clean: the stacked view open (the user's request of 2026-11-02), its keys in sight and its notes folded",
@@ -861,6 +882,20 @@ def part_clean_interface(browser):
     page.set_viewport_size({"width": 900, "height": 1000}); page.wait_for_timeout(200)
     overflow = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
     check("clean: no horizontal page overflow at 900 px", overflow <= 0, f"{overflow}px")
+    # The header from 360 to 720 px (2026-11-04: from 521 to 544 px the GitHub card with its counts ran over the title's
+    # end): with the counts app.py served, without counts and with four-character ones, the title's text 8 px or more
+    # clear of the community links, no horizontal page overflow, the links' icons alone up to 600 px and named above.
+    misfits = []
+    for counts in ("served", None, ["9.9k", "999"]):
+        page.evaluate(HEADER_COUNTS, counts)
+        for width in range(360, 722, 2):
+            page.set_viewport_size({"width": width, "height": 1000})
+            fit = page.evaluate(HEADER_FIT)
+            if fit["gap"] < 8 or fit["overflow"] > 0 or fit["named"] != [width > 600] * 2:
+                misfits.append([counts, width, fit])
+    page.evaluate(HEADER_COUNTS, "served")
+    check("clean: from 360 to 720 px the title clears the GitHub card (with the counts served, none and 9.9k / 999), no "
+          "horizontal overflow, the community links' icons alone up to 600 px", misfits == [], misfits[:6])
     page.set_viewport_size({"width": 1440, "height": 1000}); page.wait_for_timeout(100)
     page.route("**/api/generate", flip_a_check)
     page.fill("#rows", "11"); page.click("#regenerate" if page.is_visible("#regenerate") else "#generate"); settle(page)

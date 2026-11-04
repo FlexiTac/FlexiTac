@@ -52,9 +52,9 @@ PYODIDE_FILES = ("pyodide.js", "pyodide.asm.js", "pyodide.asm.wasm", "python_std
 ENGINE_SOURCES = ("app.py", "engine", "exporters", "surface", "profiles")
 BUILD_MARKER = ".flexitac-static-site"
 # The server's policy (app.SECURITY_HEADERS) as a meta tag, with WebAssembly allowed and GitHub's API for the header's
-# star and fork counts (web/backend.js; app.py's page asks nothing of other hosts).
-GITHUB_REPO = "FlexiTac/FlexiTac"
-GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}"
+# star and fork counts (web/backend.js refreshes them here; app.py's page is served with them and asks no other host).
+GITHUB_REPO = app.GITHUB_REPO
+GITHUB_API = app.GITHUB_API
 CSP = dict(app.SECURITY_HEADERS)["Content-Security-Policy"].replace(
     "default-src 'self';", "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.github.com;", 1)
 HEAD_ANCHOR = '    <meta charset="utf-8" />\n'
@@ -115,30 +115,12 @@ def engine_zip() -> bytes:
     return buffer.getvalue()
 
 
+# The counts as app.py reads and writes them for its own page; the build sends GITHUB_TOKEN when set (the site's workflow).
+count_text = app.count_text
+
+
 def github_counts(timeout: float = 15) -> dict | None:
-    """The FlexiTac repository's stars and forks from GitHub's API, or None (offline, rate-limited, anything else).
-    GITHUB_TOKEN, when set (the site's workflow), raises the hourly limit; the request is read-only either way."""
-
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "flexitac-gen-site-build"}
-    if os.environ.get("GITHUB_TOKEN"):
-        headers["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
-    request = urllib.request.Request(GITHUB_API, headers=headers)
-    try:
-        with urllib.request.urlopen(request, timeout=timeout) as reply:
-            data = json.loads(reply.read())
-        stars, forks = data["stargazers_count"], data["forks_count"]
-    except Exception:  # noqa: BLE001 - the counts are optional: the page shows the name alone
-        return None
-    return {"stars": stars, "forks": forks} if isinstance(stars, int) and isinstance(forks, int) else None
-
-
-def count_text(number: int) -> str:
-    """As web/backend.js writes it: 1.2k from a thousand, 12k from ten thousand."""
-
-    if number < 1000:
-        return str(number)
-    text = f"{number / 1000:.{0 if number >= 10000 else 1}f}"
-    return (text[:-2] if text.endswith(".0") else text) + "k"
+    return app.github_counts(timeout, token=os.environ.get("GITHUB_TOKEN"))
 
 
 def page(counts: dict | None = None) -> str:
@@ -149,16 +131,10 @@ def page(counts: dict | None = None) -> str:
         raise BuildError("web/index.html: the charset meta tag the site's head tags follow was not found once")
     text = text.replace(HEAD_ANCHOR, HEAD_ANCHOR + HEAD_TAGS, 1)
     if counts:
-        fills = (
-            ("<span data-gh-stars></span>", f"<span data-gh-stars>{count_text(counts['stars'])}</span>"),
-            ("<span data-gh-forks></span>", f"<span data-gh-forks>{count_text(counts['forks'])}</span>"),
-            ("data-gh-stats hidden>", "data-gh-stats>"),
-            ('aria-label="FlexiTac on GitHub" data-gh-badge>', f'aria-label="FlexiTac on GitHub: {counts["stars"]} stars, {counts["forks"]} forks" data-gh-badge>'),
-        )
-        for old, new in fills:
-            if text.count(old) != 1:
-                raise BuildError(f"web/index.html: the GitHub card's {old!r} was not found once")
-            text = text.replace(old, new)
+        try:
+            text = app.fill_github_counts(text, counts)
+        except ValueError as error:
+            raise BuildError(f"web/index.html: {error}") from None
     return text
 
 

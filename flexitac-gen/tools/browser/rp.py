@@ -30,7 +30,7 @@ DONE = ("() => ['is-ok','is-error','is-warning'].some(c => document.querySelecto
 
 RESULTS = {"pass": 0, "fail": 0, "failures": []}
 
-# The interface folds what goes beyond the basic flow (web/index.html: the form's Advanced, CAD mode's File details,
+# The interface folds what goes beyond the basic flow (web/index.html: the form's More options, CAD mode's File details,
 # Selection settings, More options and Proposal details, step 7's Check details, the design checks, the stacked view's
 # notes and the ordering notes), hides the rectangular form in CAD mode and CAD mode's results until it has generated a
 # build.  The checks reach every control with every fold open, the form shown and the results in sight (an init script

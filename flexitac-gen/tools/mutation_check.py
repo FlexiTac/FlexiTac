@@ -867,7 +867,7 @@ TESTS_AND_DOCS = (
     m("T/doc-ci", "L13/M12", "README: CI described on Python versions the workflow does not run",
       ("README.md", "runs the suite on Python 3.9 and 3.12", "runs the suite on Python 3.8 and 3.12")),
     m("T/doc-test-count", "M12", "handoff: a stale test count",
-      ("claude/APP_HANDOFF.md", " tests in 45 modules", "0 tests in 45 modules")),
+      ("claude/APP_HANDOFF.md", " tests in 46 modules", "0 tests in 46 modules")),
     m("T/doc-mutation-summary", "M12", "handoff: a mutation summary that the catalogue does not give",
       ("claude/APP_HANDOFF.md", "3 equivalent (`E/F1-inputs`,", "4 equivalent (`E/F1-inputs`,")),
     m("F/stale-banner", "M4", "browser: the 'Form changed' banner is never shown",

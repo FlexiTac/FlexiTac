@@ -676,12 +676,22 @@ The core manifest (`tactile-fpc-manifest/v2`) carries `format`, `generator`,
 python3 app.py                         # http://127.0.0.1:8008
 python3 app.py --port 8009 --host ::1  # another port or loopback address
 python3 app.py --allow-host abc-8008.usw2.devtunnels.ms  # also serve a tunnel, proxy or LAN name
+python3 app.py --no-github             # the header's GitHub card without its star and fork counts
 ```
 
 A non-loopback `--host` prints a warning: the API has no authentication.  A
 port that is already taken is reported in one line (exit status 1), usually
 because the customizer is already running there; a port outside 0-65535 or a
 malformed `--allow-host` name ends with exit status 2 before anything binds.
+
+The page's header shows the FlexiTac repository's star and fork counts.  The
+server reads them from GitHub's API (`https://api.github.com/repos/FlexiTac/FlexiTac`,
+read-only, without a token) in a background thread, at start and then
+hourly (ten minutes after a failure, with one line on stderr when the reads
+start failing), and writes them into the page it serves; the page itself
+asks no other host.  Offline, rate-limited or with `--no-github` the card
+shows the name alone.  It is the server's only request
+elsewhere: no design or mesh leaves the computer.
 
 **Remote use.**  On a remote machine (for example over VS Code Remote-SSH)
 forward the port and open `http://localhost:8008` on your own machine: a

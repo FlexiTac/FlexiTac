@@ -7,6 +7,9 @@
   controls live outside #designForm and carry no name/data-field of the design form;
   the mode switch is a radio group, not a tablist; the CAD SVG has no aria-label; the
   3D view has a role, the live regions are only the status lines.
+- The guide's switch and the two folds beyond the basic flow are named "Advanced
+  Customization", the form's fold inside it "More options" as the fit's (the user's
+  request of 2026-11-04), as are main.js's two lines naming them.
 - app.js dispatches only the two document events of the CAD hook and owns the design
   template ("fpc:mode", "fpc:template-info", "fpc:apply-design"); web/cad/ neither
   patches fetch nor posts to the generator or the validator itself.
@@ -352,6 +355,61 @@ class ServerCopyTests(unittest.TestCase):
         self.assertEqual(int(_js_constant(stl, "MAX_FACETS").replace("_", "")), mesh.MAX_FACETS)
         api_js = (CAD / "api.js").read_text(encoding="utf-8")
         self.assertEqual(eval(_js_constant(api_js, "MAX_SURFACE_BYTES"), {}), app.MAX_SURFACE_BYTES)  # noqa: S307 - a product of literals
+
+
+class _Names(HTMLParser):
+    """The text of #guideCustomize and of each <details id>'s own <summary>, its hint left out."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.names: dict = {}
+        self._details: list = []
+        self._into = None
+        self._text: list = []
+        self._skip = 0
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if self._into is not None and tag == "span":
+            if self._skip or "hint" in (attributes.get("class") or "").split():
+                self._skip += 1
+        elif tag == "details":
+            self._details.append(attributes.get("id"))
+        elif tag == "summary" and self._details and self._details[-1]:
+            self._into = self._details[-1]
+        elif tag == "button" and attributes.get("id") == "guideCustomize":
+            self._into = "guideCustomize"
+
+    def handle_endtag(self, tag):
+        if self._into is not None and tag == "span" and self._skip:
+            self._skip -= 1
+        elif self._into is not None and tag in ("summary", "button"):
+            self.names[self._into] = " ".join("".join(self._text).split())
+            self._into, self._text = None, []
+        elif tag == "details" and self._details:
+            self._details.pop()
+
+    def handle_data(self, data):
+        if self._into is not None and not self._skip:
+            self._text.append(data)
+
+
+class FoldNameTests(unittest.TestCase):
+    def test_the_customize_folds_are_named_advanced_customization(self) -> None:
+        # The user's request of 2026-11-04: the guide's switch and the two folds "Advanced Customization" ("Customize the
+        # sensor" before), the form's fold inside it "More options" ("Advanced" before), as the fit's.
+        parser = _Names()
+        parser.feed((WEB / "index.html").read_text(encoding="utf-8"))
+        names = parser.names
+        self.assertEqual([names.get(key) for key in ("guideCustomize", "cadCustomize", "formCustomize")],
+                         ["Advanced Customization"] * 3)
+        self.assertEqual([names.get(key) for key in ("formAdvanced", "cadConfigMore")], ["More options"] * 2)
+        main = (CAD / "main.js").read_text(encoding="utf-8")
+        self.assertIn('"The sensor fails a check on the part: see Advanced Customization, On the part."', main)
+        self.assertIn('"No sensor fits here: choose another face, or open Advanced Customization."', main)
+        for name in ("index.html", "app.js", "cad/main.js", "theme.css", "styles.css"):
+            with self.subTest(file=name):
+                self.assertNotIn("Customize the sensor", (WEB / name).read_text(encoding="utf-8"))
 
 
 class AccessibilityTests(unittest.TestCase):

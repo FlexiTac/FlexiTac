@@ -115,7 +115,8 @@ def answers(timeout=1.0):
 def start_server():
     python = os.environ.get("FPC_SERVER_PYTHON", "python3.12")
     env = {**os.environ, "PYTHONPATH": "."}
-    process = subprocess.Popen([python, "-B", "app.py", "--port", str(PORT)], cwd=ROOT, env=env,
+    # --no-github: the checks' own server reads nothing from GitHub (the header's counts are ui_checks.py's).
+    process = subprocess.Popen([python, "-B", "app.py", "--port", str(PORT), "--no-github"], cwd=ROOT, env=env,
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     end = time.monotonic() + 30
     while time.monotonic() < end:

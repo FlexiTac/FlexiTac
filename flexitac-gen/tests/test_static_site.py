@@ -147,7 +147,7 @@ class SiteBuildTests(unittest.TestCase):
         self.assertTrue(head.startswith('<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta http-equiv="Content-Security-Policy"'))
 
     def test_the_header_carries_the_repositorys_counts_when_built_with_them(self) -> None:
-        # app.py's page: the GitHub card's name alone (its counts hidden, nothing asked of GitHub).
+        # web/index.html: the GitHub card's name alone (its counts hidden, nothing asked of GitHub); app.py and the build fill it.
         page = (WEB / "index.html").read_text(encoding="utf-8")
         self.assertIn('data-gh-stats hidden>', page)
         self.assertNotIn("api.github.com", page)

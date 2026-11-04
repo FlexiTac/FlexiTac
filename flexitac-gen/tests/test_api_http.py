@@ -73,8 +73,13 @@ class HttpTestCase(unittest.TestCase):
         patcher = mock.patch("sys.stderr", self.stderr)
         patcher.start()
         self.addCleanup(patcher.stop)
+        # The server reads GitHub's counts only from main() (keep_github_counts): never here.
+        guard = mock.patch.object(app, "github_counts", side_effect=AssertionError("a test server asked GitHub"))
+        self.github_counts = guard.start()
+        self.addCleanup(guard.stop)
         self.server = _Server(self.handler, self.allow_hosts)
         self.addCleanup(self.server.close)
+        self.addCleanup(lambda: self.github_counts.assert_not_called())
 
     def request(self, method: str, path: str, body=None, headers=None) -> _Reply:
         connection = http.client.HTTPConnection("127.0.0.1", self.server.port, timeout=30)
@@ -139,6 +144,28 @@ class RouteTests(HttpTestCase):
         script = self.request("GET", "/static/app.js?v=1")
         self.assertEqual(script.status, 200)
         self.assertIn("javascript", script.headers["content-type"])
+
+    def test_the_page_carries_the_github_counts_the_server_read(self) -> None:
+        # Without counts: web/index.html as it is (the GitHub card's name alone).
+        page = (app.WEB_ROOT / "index.html").read_bytes()
+        self.assertEqual(self.request("GET", "/").body, page)
+        self.server.httpd.github_counts = {"stars": 1234, "forks": 56}
+        for path in ("/", "/index.html"):
+            with self.subTest(path=path):
+                reply = self.request("GET", path)
+                self.assertEqual((reply.status, reply.headers["content-type"], reply.headers["content-security-policy"]),
+                                 (200, "text/html; charset=utf-8", CSP))
+                text = reply.body.decode("utf-8")
+                self.assertEqual(text, app.fill_github_counts(page.decode("utf-8"), {"stars": 1234, "forks": 56}))
+                self.assertIn("<span data-gh-stars>1.2k</span>", text)
+                self.assertIn("<span data-gh-forks>56</span>", text)
+                self.assertIn('aria-label="FlexiTac on GitHub: 1234 stars, 56 forks" data-gh-badge>', text)
+                self.assertNotIn("data-gh-stats hidden>", text)
+                head = self.request("HEAD", path)
+                self.assertEqual((head.status, head.body, int(head.headers["content-length"])), (200, b"", len(reply.body)))
+        # A page whose card is not found once is served as it is.
+        with mock.patch.object(app, "fill_github_counts", side_effect=ValueError("not found")):
+            self.assertEqual(self.request("GET", "/").body, page)
 
     def test_generate_full_and_compact_views(self) -> None:
         full = self.request("POST", "/api/generate", {})
@@ -662,7 +689,94 @@ class AllowHostTests(HttpTestCase):
             app.AppServer(("127.0.0.1", 0), allow_hosts=["http://x.example"])
 
 
+class GithubCountsTests(unittest.TestCase):
+    def test_the_thread_keeps_the_last_counts_and_stops(self) -> None:
+        class Server:
+            github_counts = None
+
+        class Stop:  # records the waits; the fifth ends the thread
+            def __init__(self) -> None:
+                self.waits = []
+
+            def wait(self, timeout: float) -> bool:
+                self.waits.append(timeout)
+                return len(self.waits) == 5
+
+        server, stop, calls = Server(), Stop(), []
+        replies = [None, None, {"stars": 159, "forks": 17}, None, None]  # offline twice, the counts, rate-limited twice
+
+        def read(why):
+            calls.append(why)
+            reply = replies[len(calls) - 1]
+            if reply is None:
+                why.append("HTTP Error 403: rate limit exceeded\x1b[2J")
+            return reply
+        with mock.patch.object(app, "github_counts", side_effect=lambda why: read(why)), mock.patch("sys.stderr", new_callable=io.StringIO) as log:
+            thread = app.keep_github_counts(server, stop)
+            thread.join(5)
+        self.assertFalse(thread.is_alive())
+        self.assertTrue(thread.daemon)
+        self.assertEqual((app.GITHUB_REFRESH_S, app.GITHUB_RETRY_S), (3600, 600))
+        # Ten minutes after a failure, an hour after a read; the last counts stay.
+        self.assertEqual(stop.waits, [600, 600, 3600, 600, 600])
+        self.assertEqual(server.github_counts, {"stars": 159, "forks": 17})
+        # One line each time the reads start failing, with the reason escaped; none for the failures that follow.
+        lines = log.getvalue().splitlines()
+        self.assertEqual(len(lines), 2)
+        self.assertTrue(all(line.startswith("[tactile-fpc] GitHub's star and fork counts not read (HTTP Error 403: rate limit exceeded") for line in lines))
+        self.assertNotIn("\x1b", log.getvalue())
+
+    def test_the_server_sends_no_token(self) -> None:
+        seen = []
+
+        def refuse(request, timeout):
+            seen.append(dict(request.header_items()))
+            raise OSError("offline")
+        why = []
+        with mock.patch("urllib.request.urlopen", side_effect=refuse), mock.patch.dict("os.environ", {"GITHUB_TOKEN": "t0ken"}):
+            self.assertIsNone(app.github_counts(why=why))
+        self.assertNotIn("Authorization", seen[0])
+        self.assertEqual(why, ["offline"])
+
+    def test_the_card_is_filled_once_or_refused(self) -> None:
+        page = (app.WEB_ROOT / "index.html").read_text(encoding="utf-8")
+        filled = app.fill_github_counts(page, {"stars": 12600, "forks": 0})
+        self.assertIn("<span data-gh-stars>13k</span>", filled)
+        self.assertIn("<span data-gh-forks>0</span>", filled)
+        with self.assertRaises(ValueError):
+            app.fill_github_counts(filled, {"stars": 1, "forks": 1})  # filled already: the card's empty spans are gone
+
+
 class MainTests(unittest.TestCase):
+    def setUp(self) -> None:
+        # main() starts the thread that reads the header's counts from GitHub: never in the tests.
+        patcher = mock.patch.object(app, "keep_github_counts")
+        self.keep_github_counts = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_the_github_counts_are_read_unless_no_github(self) -> None:
+        class Fake:
+            server_address = ("127.0.0.1", 8008)
+
+            def serve_forever(self) -> None:
+                raise KeyboardInterrupt
+
+            def server_close(self) -> None:
+                pass
+
+        for argv, read in (([], True), (["--no-github"], False)):
+            with self.subTest(argv=argv):
+                self.keep_github_counts.reset_mock()
+                fake = Fake()
+                with mock.patch.object(app, "make_server", return_value=fake), mock.patch("sys.stderr", new_callable=io.StringIO), \
+                        mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                    self.assertEqual(app.main(argv), 0)
+                if read:
+                    self.keep_github_counts.assert_called_once_with(fake)
+                else:
+                    self.keep_github_counts.assert_not_called()
+                self.assertEqual("api.github.com" in stdout.getvalue(), read)
+
     def test_non_loopback_bind_prints_a_warning(self) -> None:
         class Fake:
             server_address = ("0.0.0.0", 8008)

@@ -68,7 +68,9 @@ generator's Python source (`static/py/engine.zip`); its URLs are relative,
 so it works under any path.  Its one request elsewhere is GitHub's API for
 the FlexiTac repository's star and fork counts in the header (written into
 the page when it is built, refreshed as it opens, as on
-flexitac.github.io); `app.py`'s page shows the card without them.
+flexitac.github.io).  `app.py` writes them into the page it serves: it reads
+them from GitHub's API itself, hourly, so its page asks no other host
+(`--no-github`: the card shows the name alone).
 
 ```bash
 python3 tools/build_static_site.py --out site/   # downloads Pyodide 0.27.8 and checks its SHA-256
@@ -82,9 +84,8 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   workspace is "Pick a surface on a 3D model"); the "Rectangular" switch or
   `#rect` for the rectangular mode; CLI: `cli.py surface`; HTTP:
   `/api/surface/*`).  The header holds the title, the mode switch and
-  FlexiTac's GitHub (with the repository's stars and forks on the static
-  site) and Discord on one line, centred on the title, with the line on
-  FlexiTac under them.
+  FlexiTac's GitHub (with the repository's stars and forks) and Discord on
+  one line, centred on the title, with the line on FlexiTac under them.
   - The workflow: drop in an STL, rotate it, click a surface, set the
     resolution, Generate.  The browser opens with the UMI fin-ray finger
     loaded (`web/vendor/umi`, HandUMI, Apache 2.0) and its sensor already
@@ -230,15 +231,24 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   **Generate sensor**, alone under the 3D view, fits it and generates its
   proposal #1 onto the part (its tooltip says what the sensor is, or what
   to do next; the Gerber ZIPs are the downloads').  Everything else is
-  folded under **Customize the sensor**: the base edge, the resolution and
+  folded under **Advanced Customization** ("Customize the sensor" until
+  2026-11-04): the base edge, the resolution and
   Fit, the proposals, Generate and the checks on the part, with **More
   options** and the other folds inside it as before.  In the rectangular mode only
   the rows, columns, pitches and Generate are in sight, the rest under
-  Customize the sensor with **Advanced** inside.  The design checks are
+  Advanced Customization with **More options** inside.  The design checks are
   one line ("all N checks pass"), opening on a failure with only the
   failing rules listed; the other files and the ordering notes are folded
   (the stacked view stays open).  CAD mode hides the rectangular form and shows the
   results once it has generated a build.
+- **Look**: the page is `web/index.html` with `web/app.js` and `web/cad/`,
+  styled by `web/styles.css` and, linked right after it, `web/theme.css`
+  (2026-11-04): an Apple-style look in the system's fonts, light or dark
+  with the system, the drawings' areas (the 3D view, the previews, the
+  stacked view, the map) light in either.  Blue fills only each region's
+  primary action and what is chosen; motion is only feedback to the
+  pointer and the keyboard (none under the system's reduced motion), and
+  nothing moves with the scroll.
 - **Exports** (the two Gerber ZIPs first among the page's downloads, set
   off): one Direct Gerber ZIP per FPC (GTL, GTS, GKO, GBSL,
   `jlcpcb.json`, an IPC-D-356A `netlist.ipc`, `ORDER_NOTES.txt`,
