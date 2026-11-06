@@ -778,7 +778,9 @@ class LayoutDocumentTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        designs = ({}, {"connector": {"row_pins": 14}}, {"matrix": {"columns": 16}}, {"matrix": {"taxel_width_mm": 1.3, "taxel_height_mm": 1.3}})
+        # The default (a window per electrode since its 1.0 mm electrodes of 2026-11-06) and 1.4 mm electrodes (the merged
+        # field window of the default before).
+        designs = ({}, {"connector": {"row_pins": 14}}, {"matrix": {"columns": 16}}, {"matrix": {"taxel_width_mm": 1.4, "taxel_height_mm": 1.4}})
         cls.results = [generate_design(design) for design in designs]
         cls.boards = [board for result in cls.results for board in result["boards"].values()]
         cls.text = _text(ROOT / "docs" / "LAYOUT_SCHEMA.md")
@@ -811,14 +813,23 @@ class LayoutDocumentTests(unittest.TestCase):
             self.assertEqual(board["id"], f"{board['physical_side']}_{board['role']}_fpc")
 
     def test_fixed_values_match_the_layout(self) -> None:
-        width, pitch, bridge = _quoted(
-            self, self.prose, r"The default design \(([\d.]+) mm electrodes at ([\d.]+) mm pitch, bridges of ([\d.]+) mm\) gets one merged field window per board"
+        width, pitch, bridge, wide, wide_pitch, narrow = _quoted(
+            self, self.prose, r"The default design \(([\d.]+) mm electrodes at ([\d.]+) mm pitch, bridges of ([\d.]+) mm\) gets one window per "
+            r"electrode; with ([\d.]+) mm electrodes at ([\d.]+) mm pitch \(bridges of ([\d.]+) mm, the default until 2026-11-06\) it gets one "
+            r"merged field window per board"
         )
-        matrix = self.results[0]["design"]["matrix"]
-        self.assertEqual((width, pitch), (matrix["taxel_width_mm"], matrix["pitch_x_mm"]))
-        self.assertEqual(bridge, round(pitch - width - 2 * self.profile["coverlay"]["coverlay_expansion_mm"], 6))
-        for board in self.results[0]["boards"].values():
-            self.assertEqual([o["kind"] for o in board["layers"]["top_coverlay_openings"]].count("electrode_field_opening"), 1)
+        expansion = self.profile["coverlay"]["coverlay_expansion_mm"]
+        for result, (cell, step, gap), kind, count in (
+            (self.results[0], (width, pitch, bridge), "sensor_electrode_opening", None),
+            (self.results[3], (wide, wide_pitch, narrow), "electrode_field_opening", 1),
+        ):
+            matrix = result["design"]["matrix"]
+            self.assertEqual((cell, step), (matrix["taxel_width_mm"], matrix["pitch_x_mm"]))
+            self.assertEqual(gap, round(step - cell - 2 * expansion, 6))
+            self.assertEqual(gap >= self.profile["coverlay"]["coverlay_min_bridge_mm"], kind == "sensor_electrode_opening")
+            for board in result["boards"].values():
+                kinds = [o["kind"] for o in board["layers"]["top_coverlay_openings"]]
+                self.assertEqual(kinds.count(kind), len(board["layers"]["top_copper"]["electrodes"]) if count is None else count)
         kind, zone, side, layer, material = _quoted(
             self, self.prose, r'kind: "(\w+)", zone \((\w+) for the connector-zone stiffener, exactly one per board\), side \((\w+)\), layer \((\w+)\), material \((\w+)\)'
         )
@@ -989,6 +1000,14 @@ class HandoffTests(unittest.TestCase):
         self.assertEqual(catalogue._CATALOGUE_TEST, f"{type(self).__name__}.{self._testMethodName}")
         ids = [mutant.id for mutant in catalogue.MUTANTS]
         self.assertEqual(sorted({identifier for identifier in ids if ids.count(identifier) > 1}), [], "duplicate mutant ids")
+        # The public copy's CI (tools/export_public.py PUBLIC) runs this check too, so every edited file is a public one
+        # (the integration's review of 2026-11-05: a mutant of the private tools/library_import.py was stale there).
+        spec = importlib.util.spec_from_file_location("fpc_export_public", ROOT / "tools" / "export_public.py")
+        export_public = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(export_public)
+        private = sorted({path for mutant in catalogue.MUTANTS for path, _, _ in mutant.edits
+                          if not any(path == root or path.startswith(root + "/") for root in export_public.PUBLIC)})
+        self.assertEqual(private, [], "a mutant edits a file outside export_public.PUBLIC")
         stale = {mutant.id: catalogue._problems(mutant) for mutant in catalogue.MUTANTS}
         self.assertEqual({identifier: problems for identifier, problems in stale.items() if problems}, {})
 

@@ -1,7 +1,24 @@
 """The page's Apple-style theme (web/theme.css over web/styles.css) in the browser, light and dark.
 
-Against a running app.py (FPC_PORT), on pages as the user opens them (no fold opened by an init script), 1440 x 900:
-- part_schemes, in the light and the dark scheme, in Gen by Surface (its default part's sensor built) and at #rect:
+Against a running app.py (FPC_PORT), on pages as the user opens them (no fold opened by an init script), 1440 x 900.
+The look is light for every visitor whatever the system's scheme, dark once the header's toggle is turned on (the user's
+request of 2026-11-06; web/theme.js): "dark" below is the toggle's, turned on with a click on the Library page before
+the page checked opens (so the generator opens dark from the stored choice), the system's scheme light.
+- part_toggle (2026-11-06): a dark system with no stored choice opens both pages light (data-theme light, the page's
+  grey, color-scheme light, the toggle off: its moon, aria-pressed false, "Turn dark mode on"); the toggle a button
+  named Dark mode, 44 x 44 and round, right before GitHub (10 px) on its line, the community links next to it, at 1440 px;
+  clicked on the Library it turns the page dark (pressed, its sun, "Turn dark mode off", the page black, the bar
+  #161617, color-scheme dark), the choice stored; the generator then opens dark and stays dark after a reload; off on
+  the generator, the Library opens light, after a reload too; Tab reaches it with its focus ring and Enter and Space
+  flip it; a second tab follows a flip in the first (the storage event), and the first's clear() of the storage (light
+  again, the event's key null); no flash: with dark stored, on both pages
+  data-theme is set before <body> is parsed and before the first paint, and with the pages' other scripts blocked the
+  first screen is already dark (the bar and the page black), light for a dark system with nothing stored; with
+  storage blocked the pages open light, the toggle still flips the page and a reload is light again; at 390, 375 and
+  320 px the toggle on the title's line before GitHub (6 px), 40 x 40, 36 x 36 and 32 x 32 as the community's circles
+  (the line's room, the review of 2026-11-06), the header as tall as before the toggle (239, 239 and 238.5 px) and a
+  tap flips it; no console error.
+- part_schemes, in the light and the dark look, in Gen by Surface (its default part's sensor built) and at #rect:
   - scrolling changes nothing: the whole page scrolled to its end in 300 px steps and back, every element's opacity,
     transform, visibility, filter, backdrop filter and classes (but the guide's .is-here, which follows the scroll) as
     they were, no animation started; scroll-behavior auto, every element's animation timeline auto and no scroll or
@@ -9,10 +26,11 @@ Against a running app.py (FPC_PORT), on pages as the user opens them (no fold op
   - the first screen: Generate sensor's bottom at most 876 px and at most the page's before the theme, the rectangular
     form's Generate & validate in the window and no lower than before the theme (FPC_THEME_BASELINE: a JSON file with
     cadQuickGenerateBottom and generateBottomRect, else the values measured on the page before the theme);
-  - the scheme: light, the page's grey (#f5f5f7) and color-scheme light; dark, the shell dark (the page, the header,
+  - the scheme: light, data-theme light, the page's grey (#f5f5f7) and color-scheme light; dark, data-theme dark, the
+    shell dark (the page, the header,
     the guide, the cards, the form, the fields, the design checks' row) with light text, the drawings' areas light
-    lightboxes (the 3D view's #f5f5f7 and its pills' light material, the previews' white, the stacked view's grey, the
-    map's white; color-scheme light there);
+    lightboxes (the 3D view's #f5f5f7 and its pills' light material, the previews' white, the stacked view's grey and,
+    beside it in Gen by Surface, the sensor on the part's (2026-11-05), the map's white; color-scheme light there);
   - the colours, as Apple uses them: the elements filled with the action blue (or any blue) only the regions' primary
     actions (Generate sensor, Generate & validate in the form and in Advanced Customization, the two Gerber ZIPs, Fit while it is the
     guide's next step) and the selection states (the guide's next step, Edit border on; tinted: the chosen tool, the
@@ -28,17 +46,22 @@ Against a running app.py (FPC_PORT), on pages as the user opens them (no fold op
   - #rect stale: the previews and the stacked view faded as lightboxes (light: styles.css's half opacity, greyed;
     dark: opaque and paled by the filter, not a grey slab over the dark card);
   - hit targets: the segmented controls (the mode switch, the preview tabs, the stacked view's modes, the looks), the
-    zoom buttons, the design checks' row and its Show all checks (shown on a failure), the camera buttons at least 24 x 24 px;
+    zoom buttons, the design checks' row and its Show all checks (shown on a failure), the camera buttons, the sensor on
+    the part's Reset view, the header's toggle at least 24 x 24 px;
   - no console error.
-  Gen by Surface's default part loads once more when it failed (a server busy with another client's fit answers 503).
+  Gen by Surface's default part loads once more when it failed (a server busy with another client's fit answers 503);
+  its checks start once the sensor on the part is drawn (or settled with nothing to draw).
 - part_reduced_motion (prefers-reduced-motion: reduce): the disclosure arrows' and every button's, summary's and header
   link's transition 0s; a guide step and its Advanced Customization switch jump (80 ms after the click the target is in its place);
   a button held down is neither scaled nor moved; no animation.
-- part_reduced_transparency (prefers-reduced-transparency: reduce, by CDP), light and dark: the 3D view's three pills
-  without backdrop filter, their material opaque (alpha .95 or more) and light.
+- part_reduced_transparency (prefers-reduced-transparency: reduce, by CDP), light and dark (the toggle's): the 3D view's
+  three pills without backdrop filter, their material opaque (alpha .95 or more) and light.
 - part_contrast_and_forced: prefers-contrast more (the cards edged in the control border, the secondary text darker,
   links underlined) and forced colours (the chosen mode, tab, stacked view mode and look outlined): smoke, no console
   error.
+- part_library (2026-11-05): Generate sensor's bottom at most 857.1 px with the header's Library link; library.html in
+  both schemes, the action blue only on Open in Gen by Surface, nothing green, no old palette, no fades; more contrast
+  underlines its links and the header's Library link.
 Screenshots go to $FPC_BROWSER_OUT/shots (theme_*.png).
 """
 from __future__ import annotations
@@ -53,7 +76,7 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DONE, RECT_URL, SHOTS, URL, check, summary, wait_until  # noqa: E402
+from rp import DARK_CHOICE, DONE, RECT_URL, SHOTS, THEME_KEY, URL, check, summary, wait_until  # noqa: E402
 
 WEBGL_ARGS = ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"]
 WIDTH, HEIGHT = 1440, 900
@@ -65,11 +88,15 @@ SETTLED = ("() => !['pending', 'running'].includes(JSON.parse(document.getElemen
            " && ['loaded', 'skipped', 'failed'].includes(JSON.parse(document.getElementById('cadState').textContent || '{}').default_part)"
            " && JSON.parse(document.getElementById('cadState').textContent || '{}').busy?.length === 0")
 BUILT = "() => !document.body.classList.contains('cad-no-build') && " + DONE[6:]
+# The sensor on the part beside the stacked view (2026-11-05) drawn, or settled on a state with nothing to draw: its DOM
+# no longer changes (the scroll invariance compares every element's classes).
+ON_PART_SETTLED = ("() => ['drawn', 'unavailable', 'failed', 'empty'].includes("
+                   "JSON.parse(document.getElementById('cadState').textContent || '{}').on_part?.state)")
 RECT_DONE = "() => (" + DONE[6:] + ") && !document.querySelector('#status').textContent.startsWith('Deriving')"
 
 # The drawings and what they draw keep their own colours (the plan's sections 1 and 5): the SVGs, the 3D view's canvas,
-# the photos, the oblique and stacked scenes, the legends' swatches and the stacked view's ring keys (teal and orange).
-DRAWINGS = "svg, canvas, img, .oblique-board, .assembly-scene, .swatch, .assembly-key, .coin-ref, .coin-plane"
+# the photos and the oblique and stacked scenes (the legends' swatches and ring keys went with the legends on 2026-11-06).
+DRAWINGS = "svg, canvas, img, .oblique-board, .assembly-scene, .coin-ref, .coin-plane"
 # Blue fills allowed: each region's one primary action and the selection states (the theme's rule of colour, 2026-11-04).
 FIT_NEXT = '#guideSubsteps .flow-substep[data-substep="fit"].is-next'
 BLUE_ALLOWED = ["#generate", "#cadGenerate", "#cadQuickGenerate", ".download-actions button.download-main",
@@ -93,7 +120,8 @@ OLD_KEPT = [[".cad-view.is-editing", "outline", "#1e88e5"]]
 # The hit targets (WCAG 2.5.8, 24 x 24 px) of the small controls.
 TARGETS = {"the mode switch": "#modePicker label", "the preview tabs": ".preview-tabs button", "the stacked view's modes": ".mode-switch button",
            "the looks": ".look-bar button", "the zoom buttons": ".zoom-tools button", "the design checks' row": ".drc-panel > summary",
-           "Show all checks": ".drc-bar button", "the camera buttons": ".cad-views button"}
+           "Show all checks": ".drc-bar button", "the camera buttons": ".cad-views button", "the reset of the view on the part": "#onPartReset",
+           "the reset of the registration's 3D view": "#stackedReset", "the header's toggle": "#themeToggle"}
 
 # Each element's opacity, transform, visibility, filters and classes (the guide's .is-here apart), and the animations.
 SNAPSHOT = """() => { const out = [];
@@ -162,14 +190,16 @@ SCAN = r"""([drawings, blueAllowed, tintAllowed, old, kept]) => {
 
 SCHEME = """() => { const cs = (sel, pseudo) => { const node = document.querySelector(sel); return node ? getComputedStyle(node, pseudo || null) : null; };
   const pick = (sel, props, pseudo) => { const s = cs(sel, pseudo); return s ? Object.fromEntries(props.map(p => [p, s[p]])) : null; };
-  return {html: pick('html', ['colorScheme']), body: pick('body', ['backgroundColor', 'color']),
+  return {html: pick('html', ['colorScheme']), theme: document.documentElement.dataset.theme || null, body: pick('body', ['backgroundColor', 'color']),
     masthead: pick('.masthead', ['backgroundColor', 'color']), title: pick('.masthead h1', ['color']),
     guide: pick('.flow-guide', ['backgroundColor']), workspace: pick('#cadWorkspace', ['backgroundColor', 'color']),
     hint: pick('.cad-title-hint', ['color']), card: pick('#rowCard', ['backgroundColor', 'color']), downloads: pick('.downloads', ['backgroundColor']),
     controls: pick('.controls', ['backgroundColor']), field: pick('#rows', ['backgroundColor', 'color']), drc: pick('.drc-panel > summary', ['backgroundColor']),
     view: pick('.cad-view', ['backgroundColor', 'colorScheme']), tools: pick('.cad-view-tools', ['backgroundColor', 'colorScheme']),
     status3d: pick('#cadStatus', ['color']), canvas: pick('.canvas-wrap', ['backgroundColor', 'colorScheme']),
-    stacked: pick('.stacked-canvas', ['backgroundImage', 'colorScheme']), map: pick('.cad-flat', ['backgroundColor', 'colorScheme'])}; }"""
+    stacked: pick('.stacked-canvas', ['backgroundImage', 'colorScheme']), map: pick('.cad-flat', ['backgroundColor', 'colorScheme']),
+    onPart: pick('#sensorOnPart', ['backgroundImage', 'colorScheme']),
+    chips: pick('.is-registration .figure-tools .mode-switch', ['backgroundColor', 'colorScheme']), reset: pick('#stackedReset', ['backgroundColor', 'colorScheme'])}; }"""
 
 
 def rgba(value):
@@ -208,8 +238,10 @@ def flip_a_check(route):
     route.fulfill(response=response, json=body)
 
 
-def new_page(browser, scheme="light", motion="no-preference", forced="none", contrast="no-preference", features=None):
-    context = browser.new_context(viewport={"width": WIDTH, "height": HEIGHT}, color_scheme=scheme, reduced_motion=motion,
+def new_page(browser, scheme="light", motion="no-preference", forced="none", contrast="no-preference", features=None, system="light"):
+    """A page in the look ``scheme``: "dark" turns the header's toggle on, clicked on the Library page (the choice then
+    stored for the page the part opens); the system's own scheme ``system``, light unless asked."""
+    context = browser.new_context(viewport={"width": WIDTH, "height": HEIGHT}, color_scheme=system, reduced_motion=motion,
                                   forced_colors=forced, contrast=contrast)
     page = context.new_page()
     page.errors = []
@@ -218,8 +250,14 @@ def new_page(browser, scheme="light", motion="no-preference", forced="none", con
     if features:
         # CDP replaces the emulated features as a whole: the scheme and motion are named again with the extra ones.
         session = context.new_cdp_session(page)
-        session.send("Emulation.setEmulatedMedia", {"features": [{"name": "prefers-color-scheme", "value": scheme},
+        session.send("Emulation.setEmulatedMedia", {"features": [{"name": "prefers-color-scheme", "value": system},
                                                                  {"name": "prefers-reduced-motion", "value": motion}] + features})
+    if scheme == "dark":
+        page.goto(URL + "library.html")
+        page.click("#themeToggle")
+        if page.evaluate("() => document.documentElement.dataset.theme") != "dark":
+            raise RuntimeError("the header's toggle did not turn the dark look on")
+        page.mouse.move(WIDTH - 2, HEIGHT - 2)
     return page
 
 
@@ -236,6 +274,7 @@ def open_cad(page):
         page.errors.clear()
         page.wait_for_timeout(5000)
     wait_until(page, BUILT, 120)
+    wait_until(page, ON_PART_SETTLED, 120)
     page.wait_for_timeout(500)
     page.mouse.move(WIDTH - 2, HEIGHT - 2)
     page.wait_for_timeout(250)
@@ -298,8 +337,8 @@ def hit_targets(page, label, seen):
 def check_scheme(page, scheme, label, mode):
     data = page.evaluate(SCHEME)
     if scheme == "light":
-        check(f"{label}: light: the page's grey (#f5f5f7), color-scheme light", data["body"]["backgroundColor"] == "rgb(245, 245, 247)"
-              and data["html"]["colorScheme"] == "light", data["body"])
+        check(f"{label}: light: data-theme light, the page's grey (#f5f5f7), color-scheme light", data["theme"] == "light"
+              and data["body"]["backgroundColor"] == "rgb(245, 245, 247)" and data["html"]["colorScheme"] == "light", [data["theme"], data["body"]])
         return
     shell = {"body": data["body"], "masthead": data["masthead"], "workspace" if mode == "cad" else "controls": data["workspace" if mode == "cad" else "controls"],
              "card": data["card"], "downloads": data["downloads"], "field": data["field"], "design checks": data["drc"]}
@@ -308,20 +347,252 @@ def check_scheme(page, scheme, label, mode):
     dark = {name: luminance(value["backgroundColor"]) for name, value in shell.items()}
     text = {name: luminance(data[name]["color"]) for name in ("body", "title", "card", "field")}
     secondary = luminance(data["hint"]["color"])
-    check(f"{label}: dark: the shell dark (the page, the header{', the guide, the workspace' if mode == 'cad' else ', the form'}, the cards, "
+    check(f"{label}: dark (the toggle's): data-theme dark, the shell dark (the page, the header{', the guide, the workspace' if mode == 'cad' else ', the form'}, the cards, "
           "the fields, the design checks' row: luminance under .03), its text light (over .6; the secondary grey over .25), color-scheme dark",
-          all(value < 0.03 for value in dark.values()) and all(value > 0.6 for value in text.values()) and secondary > 0.25
+          data["theme"] == "dark" and all(value < 0.03 for value in dark.values()) and all(value > 0.6 for value in text.values()) and secondary > 0.25
           and data["html"]["colorScheme"] == "dark",
           {"backgrounds": {k: round(v, 4) for k, v in dark.items()}, "text": {k: round(v, 3) for k, v in text.items()}, "secondary": round(secondary, 3)})
     boxes = {"canvas": data["canvas"]["backgroundColor"] == "rgb(255, 255, 255)" and data["canvas"]["colorScheme"] == "light",
-             "stacked": "rgb(245, 245, 247)" in data["stacked"]["backgroundImage"] and data["stacked"]["colorScheme"] == "light"}
+             "stacked": "rgb(245, 245, 247)" in data["stacked"]["backgroundImage"] and data["stacked"]["colorScheme"] == "light",
+             # The figures' controls over them (2026-11-06): the light material, outside the stacked view's pane too.
+             "chips": rgba(data["chips"]["backgroundColor"])[:3] == (255.0, 255.0, 255.0) and data["chips"]["colorScheme"] == "light",
+             "reset": rgba(data["reset"]["backgroundColor"])[:3] == (255.0, 255.0, 255.0) and data["reset"]["colorScheme"] == "light"}
     if mode == "cad":
         boxes.update(view=data["view"]["backgroundColor"] == "rgb(245, 245, 247)" and data["view"]["colorScheme"] == "light",
                      tools=rgba(data["tools"]["backgroundColor"])[:3] == (255.0, 255.0, 255.0) and data["tools"]["colorScheme"] == "light",
                      status=luminance(data["status3d"]["color"]) < 0.05,
-                     map=data["map"]["backgroundColor"] == "rgb(255, 255, 255)" and data["map"]["colorScheme"] == "light")
+                     map=data["map"]["backgroundColor"] == "rgb(255, 255, 255)" and data["map"]["colorScheme"] == "light",
+                     on_part="rgb(245, 245, 247)" in data["onPart"]["backgroundImage"] and data["onPart"]["colorScheme"] == "light")
     check(f"{label}: dark: the drawings' areas stay light lightboxes ({', '.join(boxes)}: their light colours, color-scheme light)",
-          all(boxes.values()), {"boxes": boxes, "data": {k: data[k] for k in ("view", "tools", "status3d", "canvas", "stacked", "map")}})
+          all(boxes.values()), {"boxes": boxes, "data": {k: data[k] for k in ("view", "tools", "status3d", "canvas", "stacked", "map", "onPart", "chips", "reset")}})
+
+
+# The header's toggle (2026-11-06): its state and its box, and what the page shows.
+TOGGLE = """() => { const b = document.getElementById('themeToggle'), r = b.getBoundingClientRect();
+  const gh = document.querySelector('.masthead-github').getBoundingClientRect(), shown = s => b.querySelector(s).checkVisibility();
+  const stored = (() => { try { return localStorage.getItem('%s'); } catch (error) { return 'blocked'; } })();
+  return {theme: document.documentElement.dataset.theme || null, pressed: b.getAttribute('aria-pressed'), title: b.title,
+          moon: shown('.theme-moon'), sun: shown('.theme-sun'), body: getComputedStyle(document.body).backgroundColor,
+          bar: getComputedStyle(document.querySelector('.masthead')).backgroundColor, scheme: getComputedStyle(document.documentElement).colorScheme,
+          box: [r.width, r.height].map(v => Math.round(v * 10) / 10), gap: Math.round((gh.left - r.right) * 10) / 10,
+          middle: Math.round(Math.abs((r.top + r.bottom) / 2 - (gh.top + gh.bottom) / 2) * 10) / 10,
+          next: Boolean(b.nextElementSibling && b.nextElementSibling.matches('nav.masthead-links')), round: getComputedStyle(b).borderRadius,
+          masthead: Math.round(document.querySelector('.masthead').getBoundingClientRect().height * 10) / 10, stored}; }""" % THEME_KEY
+LIGHT_LOOK = {"theme": "light", "pressed": "false", "title": "Turn dark mode on", "moon": True, "sun": False, "body": "rgb(245, 245, 247)",
+              "bar": "rgb(251, 251, 253)", "scheme": "light"}
+DARK_LOOK = {"theme": "dark", "pressed": "true", "title": "Turn dark mode off", "moon": False, "sun": True, "body": "rgb(0, 0, 0)",
+             "bar": "rgb(22, 22, 23)", "scheme": "dark"}
+# Recorded from the document's creation (an init script): the order in which <html data-theme> is set and <body> is
+# inserted, the look at DOMContentLoaded, and when the attribute was set against the first paint.
+FIRST_PAINT = """(() => { const seen = window.__look = {order: [], ready: null, setAt: null};
+  new MutationObserver(records => { for (const record of records) {
+      if (record.type === 'attributes' && record.attributeName === 'data-theme' && seen.setAt === null) { seen.order.push('theme:' + record.target.dataset.theme); seen.setAt = performance.now(); }
+      if (record.type === 'childList' && [...record.addedNodes].some(node => node.nodeName === 'BODY')) seen.order.push('body');
+    } }).observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['data-theme']});
+  document.addEventListener('DOMContentLoaded', () => { seen.ready = document.documentElement.dataset.theme || null; });
+})();"""
+FIRST_PAINT_READ = """() => { const paint = performance.getEntriesByType('paint').find(entry => entry.name === 'first-paint');
+  return {...window.__look, firstPaint: paint ? paint.startTime : null}; }"""
+# Storage that throws (a private window or blocked site data).
+NO_STORAGE = """Object.defineProperty(window, 'localStorage', {configurable: true, get() { throw new DOMException('The operation is insecure.', 'SecurityError'); }});"""
+# The pages' own scripts, blocked for the first screen (theme.js alone runs).
+PAGE_SCRIPTS = ("**/static/backend.js", "**/static/app.js", "**/static/cad/main.js", "**/static/library.js")
+TOGGLE_PAGES = (("index.html", RECT_URL), ("library.html", URL + "library.html"))
+
+
+def looks(state, expected):
+    return all(state.get(key) == value for key, value in expected.items())
+
+
+def toggle_context(browser, system="light", width=WIDTH, height=HEIGHT, scripts=()):
+    context = browser.new_context(viewport={"width": width, "height": height}, color_scheme=system)
+    for script in scripts:
+        context.add_init_script(script)
+    context.errors = []
+    context.on("console", lambda message: context.errors.append(message.text) if message.type == "error" else None)
+    context.on("weberror", lambda error: context.errors.append(str(error.error)))
+    return context
+
+
+def open_toggle_page(page, url):
+    page.goto(url)
+    if url == RECT_URL:
+        wait_until(page, RECT_DONE, 120)
+    else:
+        wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
+    page.mouse.move(WIDTH - 2, HEIGHT - 2)
+    page.wait_for_timeout(150)
+    return page.evaluate(TOGGLE)
+
+
+def part_toggle(browser):
+    """The header's toggle: light by default whatever the system says, dark on it, kept, no flash, the keyboard, phones."""
+    # A dark system, nothing stored: both pages light, the toggle off.
+    context = toggle_context(browser, system="dark")
+    page = context.new_page()
+    opened = {name: open_toggle_page(page, url) for name, url in TOGGLE_PAGES}
+    check("toggle: a dark system with no stored choice opens both pages light (data-theme light, the page's grey, the bar #fbfbfd, "
+          "color-scheme light), the toggle off (its moon, aria-pressed false, 'Turn dark mode on'), nothing stored",
+          all(looks(state, LIGHT_LOOK) and state["stored"] is None for state in opened.values()), opened)
+    named = page.get_by_role("button", name="Dark mode", exact=True).count()
+    state = opened["library.html"]
+    check("toggle: a button named Dark mode, 44 x 44 and round, right before GitHub (10 px) and centred on its line, the community "
+          "links next to it, the same box on both pages (1440 px)",
+          named == 1 and state["box"] == [44.0, 44.0] and state["round"] != "0px" and state["gap"] == 10 and state["middle"] <= 0.5 and state["next"]
+          and all(other[key] == state[key] for other in opened.values() for key in ("box", "gap", "middle", "masthead")), (named, opened))
+    page.screenshot(path=f"{SHOTS}/theme_toggle_light_library.png", clip={"x": 0, "y": 0, "width": WIDTH, "height": 104})
+    # On: the Library dark at once and the choice stored; the generator opens dark, and after a reload.
+    page.click("#themeToggle")
+    page.mouse.move(WIDTH - 2, HEIGHT - 2)
+    page.wait_for_timeout(150)
+    flipped = page.evaluate(TOGGLE)
+    page.screenshot(path=f"{SHOTS}/theme_toggle_dark_library.png", clip={"x": 0, "y": 0, "width": WIDTH, "height": 104})
+    there = open_toggle_page(page, RECT_URL)
+    page.reload()
+    wait_until(page, RECT_DONE, 120)
+    reloaded = page.evaluate(TOGGLE)
+    check("toggle: clicked on the Library it turns the page dark (pressed, its sun, 'Turn dark mode off', the page black, the bar #161617, "
+          "color-scheme dark) and stores dark; the generator then opens dark, and stays dark after a reload",
+          all(looks(state, DARK_LOOK) and state["stored"] == "dark" for state in (flipped, there, reloaded)), [flipped, there, reloaded])
+    # Off on the generator: the Library opens light, and after a reload.
+    page.click("#themeToggle")
+    page.wait_for_timeout(150)
+    off = page.evaluate(TOGGLE)
+    library = open_toggle_page(page, URL + "library.html")
+    page.reload()
+    page.wait_for_timeout(300)
+    again = page.evaluate(TOGGLE)
+    check("toggle: off on the generator (light, stored light), the Library opens light, and after a reload",
+          all(looks(state, LIGHT_LOOK) and state["stored"] == "light" for state in (off, library, again)), [off, library, again])
+    # The keyboard: Tab from the top reaches it (after the Library link) with the page's focus ring; Enter and Space flip it.
+    page.evaluate("() => { window.scrollTo(0, 0); document.activeElement && document.activeElement.blur(); }")
+    order = []
+    for _ in range(16):
+        page.keyboard.press("Tab")
+        order.append(page.evaluate("() => document.activeElement.id || document.activeElement.className || document.activeElement.tagName"))
+        if order[-1] == "themeToggle":
+            break
+    ring = page.evaluate("""() => { const b = document.getElementById('themeToggle'), s = getComputedStyle(b);
+        return [document.activeElement === b, b.matches(':focus-visible'), s.outlineStyle, s.outlineWidth, s.outlineColor, s.outlineOffset]; }""")
+    page.screenshot(path=f"{SHOTS}/theme_toggle_focus.png", clip={"x": 900, "y": 0, "width": 540, "height": 104})
+    page.keyboard.press("Enter")
+    after_enter = page.evaluate("() => document.documentElement.dataset.theme")
+    page.keyboard.press("Space")
+    after_space = page.evaluate("() => document.documentElement.dataset.theme")
+    check("toggle: Tab reaches it after the Library link with the focus ring (2 px, the focus blue, 2 px out); Enter turns dark on, Space off",
+          order[-1] == "themeToggle" and "masthead-library" in order[-2:-1] and ring[:4] == [True, True, "solid", "2px"]
+          and ring[4] == "rgb(0, 113, 227)" and ring[5] == "2px" and after_enter == "dark" and after_space == "light", [order, ring, after_enter, after_space])
+    # Two tabs (the generator opens the Library in a new one): a flip in one, the other follows.
+    other = context.new_page()
+    open_toggle_page(other, RECT_URL)
+    page.click("#themeToggle")
+    followed = None
+    for _ in range(50):
+        followed = other.evaluate("() => document.documentElement.dataset.theme")
+        if followed == "dark":
+            break
+        other.wait_for_timeout(40)
+    pressed = other.evaluate("() => document.getElementById('themeToggle').getAttribute('aria-pressed')")
+    check("toggle: a second tab follows a flip in the first (the storage event: the generator dark, its toggle pressed)",
+          followed == "dark" and pressed == "true", [followed, pressed])
+    # The first tab clears the storage (the event's key null; the review of 2026-11-06): nothing stored, the second light.
+    page.evaluate("() => localStorage.clear()")
+    cleared = None
+    for _ in range(50):
+        cleared = other.evaluate("() => [document.documentElement.dataset.theme, document.getElementById('themeToggle').getAttribute('aria-pressed')]")
+        if cleared[0] == "light":
+            break
+        other.wait_for_timeout(40)
+    check("toggle: the second tab follows the first's clear() of the storage too (light, its toggle not pressed, as its next reload opens)",
+          cleared == ["light", "false"], cleared)
+    check("toggle: no console error (both pages, every flip)", not context.errors, context.errors[:5])
+    context.close()
+    # No flash: dark stored (the toggle clicked on a first page), each page opened anew with the attribute recorded from the
+    # document's creation: set before <body> is parsed and before the first paint; DOMContentLoaded sees it.
+    context = toggle_context(browser, scripts=(FIRST_PAINT,))
+    page = context.new_page()
+    open_toggle_page(page, URL + "library.html")
+    page.click("#themeToggle")
+    early = {}
+    for name, url in TOGGLE_PAGES:
+        open_toggle_page(page, url)
+        early[name] = page.evaluate(FIRST_PAINT_READ)
+    check("no flash: with dark stored, on both pages data-theme dark is set before <body> is inserted and before the first paint, "
+          "and DOMContentLoaded sees it", all(seen["order"][:2] == ["theme:dark", "body"] and seen["ready"] == "dark" and seen["firstPaint"] is not None
+                                               and seen["setAt"] <= seen["firstPaint"] for seen in early.values()), early)
+    # The first screen with the pages' own scripts blocked (theme.js alone runs): already dark.
+    for pattern in PAGE_SCRIPTS:
+        page.route(pattern, lambda route: route.abort())
+    first = {}
+    for name, url in (("index.html", URL), ("library.html", URL + "library.html")):
+        page.goto(url, wait_until="domcontentloaded")
+        page.wait_for_timeout(200)
+        path = f"{SHOTS}/theme_first_screen_dark_{name.split('.')[0]}.png"
+        page.screenshot(path=path)
+        first[name] = page.evaluate("""() => [document.documentElement.dataset.theme, getComputedStyle(document.querySelector('.masthead')).backgroundColor,
+            getComputedStyle(document.body).backgroundColor]""") + [pixel(path, 6, 6)]
+    check("no flash: with the pages' own scripts blocked the first screen is already dark on both pages (data-theme dark, the bar "
+          "#161617, the page black; the shot's corner the bar's)", all(state[:3] == ["dark", "rgb(22, 22, 23)", "rgb(0, 0, 0)"]
+                                                                         and state[3] == (22, 22, 23) for state in first.values()), first)
+    context.close()
+    context = toggle_context(browser, system="dark")
+    page = context.new_page()
+    for pattern in PAGE_SCRIPTS:
+        page.route(pattern, lambda route: route.abort())
+    plain = {}
+    for name, url in (("index.html", URL), ("library.html", URL + "library.html")):
+        page.goto(url, wait_until="domcontentloaded")
+        page.wait_for_timeout(200)
+        path = f"{SHOTS}/theme_first_screen_light_{name.split('.')[0]}.png"
+        page.screenshot(path=path)
+        plain[name] = [page.evaluate("() => document.documentElement.dataset.theme"), pixel(path, 6, 6)]
+    check("no flash: a dark system with nothing stored, the first screen light on both pages (the bar #fbfbfd)",
+          all(state == ["light", (251, 251, 253)] for state in plain.values()), plain)
+    context.close()
+    # Storage blocked: the pages open light, the toggle still flips the page, a reload is light again.
+    context = toggle_context(browser, scripts=(NO_STORAGE,))
+    page = context.new_page()
+    blocked = {}
+    for name, url in TOGGLE_PAGES:
+        state = open_toggle_page(page, url)
+        page.click("#themeToggle")
+        page.wait_for_timeout(100)
+        flipped = page.evaluate(TOGGLE)
+        page.reload()
+        page.wait_for_timeout(400)
+        blocked[name] = [state, flipped, page.evaluate(TOGGLE)]
+    check("toggle: with storage blocked both pages open light, the toggle still turns the page dark, a reload is light again; no console error",
+          all(looks(a, LIGHT_LOOK) and looks(b, DARK_LOOK) and looks(c, LIGHT_LOOK) and a["stored"] == "blocked" for a, b, c in blocked.values())
+          and not context.errors, [blocked, context.errors[:3]])
+    context.close()
+    # Phones: on the title's line before GitHub (6 px), a circle as the community's, as large as the line has room for
+    # (40, 36, 32 px), the header as tall as before the toggle; a tap flips it.
+    phones = {}
+    for width, height, mast, size in ((390, 844, 239.0, 40.0), (375, 812, 239.0, 36.0), (320, 700, 238.5, 32.0)):
+        context = toggle_context(browser, width=width, height=height)
+        page = context.new_page()
+        for name, url in TOGGLE_PAGES:
+            state = open_toggle_page(page, url)
+            page.click("#themeToggle")
+            page.wait_for_timeout(100)
+            tapped = page.evaluate(TOGGLE)
+            page.screenshot(path=f"{SHOTS}/theme_toggle_{width}_{name.split('.')[0]}.png", clip={"x": 0, "y": 0, "width": width, "height": 240})
+            page.click("#themeToggle")
+            links = page.evaluate("() => [...document.querySelectorAll('.masthead-link')].map(a => { const r = a.getBoundingClientRect(); return [r.width, r.height]; })")
+            phones[(width, name)] = [state["box"], state["gap"], state["middle"], state["masthead"], mast, tapped["theme"],
+                                     page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth"), size, links]
+        context.close()
+    check("toggle: at 390, 375 and 320 px on the title's line before GitHub (6 px), 40, 36 and 32 px circles as the community's, the header "
+          "as tall as before it (239, 239 and 238.5 px), a tap flips it, no sideways scroll",
+          all(box == [size, size] and links == [[size, size]] * 2 and gap == 6 and middle <= 0.5 and abs(height - mast) <= 0.5 and theme == "dark"
+              and overflow <= 0 for box, gap, middle, height, mast, theme, overflow, size, links in phones.values()),
+          {f"{k[0]} {k[1]}": v for k, v in phones.items()})
+
+
+def pixel(path, x, y):
+    """The sRGB colour of a screenshot's pixel (Pillow, as the other checks read their shots)."""
+    from PIL import Image
+    return Image.open(path).convert("RGB").getpixel((x, y))
 
 
 def part_schemes(browser):
@@ -485,7 +756,7 @@ def part_reduced_transparency(browser):
     for scheme in ("light", "dark"):
         page = new_page(browser, scheme, features=[{"name": "prefers-reduced-transparency", "value": "reduce"}])
         open_cad(page)
-        media = page.evaluate("s => [matchMedia('(prefers-reduced-transparency: reduce)').matches, matchMedia('(prefers-color-scheme: ' + s + ')').matches]", scheme)
+        media = page.evaluate("s => [matchMedia('(prefers-reduced-transparency: reduce)').matches, document.documentElement.dataset.theme === s]", scheme)
         pills = page.evaluate("""() => ['.cad-view-tools', '.cad-views', '.cad-status'].map(s => { const c = getComputedStyle(document.querySelector(s));
             return [s, c.backdropFilter, c.webkitBackdropFilter, c.backgroundColor]; })""")
         solid = all(backdrop == "none" and webkit in (None, "none") and rgba(colour)[3] >= 0.95 and rgba(colour)[:3] == (255.0, 255.0, 255.0)
@@ -521,10 +792,57 @@ def part_contrast_and_forced(browser):
     page.context.close()
 
 
+
+# The Library (library.html, the user's requests of 2026-11-05): the action blue fills only Open in Gen by Surface.
+LIBRARY_BLUE = [".lib-open"]
+LIBRARY_LINKS = """() => [...document.querySelectorAll('a')].filter(a => a.checkVisibility() && !a.matches('.masthead-link, .lib-card, .lib-open, .lib-pill'))
+    .map(a => [a.textContent.trim().slice(0, 30), getComputedStyle(a).textDecorationLine, getComputedStyle(a.querySelector('span') || a).textDecorationLine])"""
+
+
+def part_library(browser):
+    """The Library and the header's link in the theme: Generate sensor's bottom still at most 857.1 px on the generator (the
+    link changes no line of its header at 1440 px; 850.1 measured); library.html in the light and the dark scheme, its grid
+    and a sensor's page, the action blue filling only Open in Gen by Surface, nothing green, none of styles.css's old
+    palette, no colour fades; under more contrast every text link underlined (the header's Library link too, there and
+    on the generator)."""
+    page = new_page(browser)
+    open_cad(page)
+    bottom = page.evaluate("() => Math.round(document.getElementById('cadQuickGenerate').getBoundingClientRect().bottom * 10) / 10")
+    check("library: Generate sensor's bottom at most 857.1 px with the header's Library link (1440 x 900)", bottom <= 857.1, bottom)
+    page.context.close()
+    for scheme in ("light", "dark"):
+        page = new_page(browser, scheme=scheme)
+        found = {}
+        for fragment in ("", "#i2rt-yam-1mm"):
+            page.goto(URL + "library.html" + fragment)
+            wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
+            page.wait_for_timeout(300)
+            page.mouse.move(WIDTH - 2, HEIGHT - 2)
+            scan = page.evaluate(SCAN, [DRAWINGS + ", .lib-shot", LIBRARY_BLUE, [], sorted({value for values in OLD_PALETTE.values() for value in values}), []])
+            for key in ("blue", "green", "old"):
+                found.setdefault(key, []).extend(scan[key])
+            found.setdefault("fading", []).extend(page.evaluate(FADING.replace("a.masthead-link", "a")))
+        opened = page.evaluate("() => getComputedStyle(document.querySelector('.lib-open')).backgroundColor")
+        check(f"library {scheme}: the action blue fills only Open in Gen by Surface ({opened}), nothing green, none of styles.css's old palette, "
+              "no colour fades", not any(found.values()) and opened == "rgb(0, 113, 227)", {key: value[:4] for key, value in found.items()})
+        page.screenshot(path=f"{SHOTS}/theme_library_{scheme}.png")
+        check(f"library {scheme}: no console error", not page.errors, page.errors[:5])
+        page.context.close()
+    page = new_page(browser, contrast="more")
+    page.goto(URL + "library.html#widowx-250-1mm")
+    wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
+    links = page.evaluate(LIBRARY_LINKS)
+    open_rect(page)
+    header = page.evaluate("() => getComputedStyle(document.querySelector('.masthead-library')).textDecorationLine")
+    check("library: under more contrast every text link of the Library underlined, and the header's Library link on the generator",
+          links and all("underline" in own or "underline" in inner for _, own, inner in links) and "underline" in header, (links, header))
+    page.context.close()
+
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(args=WEBGL_ARGS)
-        parts = (part_schemes, part_reduced_motion, part_reduced_transparency, part_contrast_and_forced)
+        parts = (part_toggle, part_schemes, part_reduced_motion, part_reduced_transparency, part_contrast_and_forced)
+        parts += (part_library,)  # the Library and the header's link (2026-11-05)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
         for part in chosen:
             print(f"--- {part.__name__}", flush=True)

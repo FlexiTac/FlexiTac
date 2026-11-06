@@ -16,7 +16,7 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DONE, RECT_URL, SCRATCH, SHOTS, URL, api, check, pin1_shapes, pin1_strokes, stacked_pin1, summary, unfold, wait_until  # noqa: E402
+from rp import DONE, RECT_URL, SCRATCH, SHOTS, URL, api, check, figure_controls, pin1_shapes, pin1_strokes, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
 
 DOWNLOADS = f"{SCRATCH}/downloads"
 ALL_CONTROLS = ["name", "rows", "columns", "pitchX", "pitchY", "rowWidth", "columnWidth", "topTailLength", "bottomTailLength",
@@ -240,10 +240,11 @@ def part_row_traces(browser):
           and [value for value, _ in options] == ["channel", "both", "left", "right"] and options[0][1] == "Straight channel"
           and page.is_visible("#rowSidesHint"), (page.is_visible("#rowSides"), page.input_value("#rowSides"), options))
     body, result = bodies[0], responses[0]
-    legend = page.inner_text("#assemblyRowBus") if page.query_selector("#assemblyRowBus") else ""
-    check("the boot build is the diagonal Row bus with both: sent with the form, row_bus in the manifest, the folded pins in the stacked view",
+    # The Row bus as built (the stacked view's note that named it went with its notes on 2026-11-06).
+    row_bus = result["boards"]["row"].get("construction", {}).get("row_bus") or {}
+    check("the boot build is the diagonal Row bus with both: sent with the form, row_bus in the manifest, the Row board's bus both sides",
           body.get("routing") == {"row_sides": "both"} and result["manifest"].get("row_bus") == "diagonal-bus/11"
-          and result["design"]["routing"]["row_sides"] == "both" and "folded" in legend, (body.get("routing"), result["manifest"].get("row_bus"), legend[:160]))
+          and result["design"]["routing"]["row_sides"] == "both" and row_bus.get("sides") == "both", (body.get("routing"), result["manifest"].get("row_bus"), row_bus.get("sides")))
     _, default, _ = api("/api/default")
     check("/api/default's generic design names both", default["design"]["routing"].get("row_sides") == "both", default["design"]["routing"])
     first_id = status(page).split()[2]
@@ -272,13 +273,13 @@ def part_row_traces(browser):
         before = len(bodies)
         page.click("#regenerate" if page.is_visible("#regenerate") else "#generate"); settle(page)
         sent, built = (bodies[-1], responses[-1]) if len(bodies) > before else ({}, {})
-        legend = page.inner_text("#assemblyRowBus") if page.query_selector("#assemblyRowBus") else ""
+        row_bus = (((built.get("boards") or {}).get("row") or {}).get("construction") or {}).get("row_bus") or {}
         _, expected, _ = api("/api/generate?view=compact", dict(default["design"], routing=dict(default["design"]["routing"], row_sides=choice)))
         check(f"Row traces {choice}: an edit is stale; Generate sends routing.row_sides {choice} and builds the API's build for it",
               edited and (sent.get("routing") or {}).get("row_sides") == choice and built.get("ok") is True
               and built.get("manifest", {}).get("row_bus") == bus and built["manifest"]["build_id"] == expected["manifest"]["build_id"]
-              and not stale(page) and ((bus is None) == (legend == "")) and (choice != "left" or "the left side" in legend),
-              (edited, sent.get("routing"), built.get("manifest", {}).get("row_bus"), legend[:120]))
+              and not stale(page) and row_bus.get("sides") == (None if choice == "channel" else choice),
+              (edited, sent.get("routing"), built.get("manifest", {}).get("row_bus"), row_bus.get("sides")))
     check("Both again gives the boot build back", status(page).split()[2] == first_id, (status(page), first_id))
     check("row traces part: no console errors", not console_errors(page), console_errors(page))
     page.close()
@@ -293,25 +294,22 @@ def part_stacked_pin1(browser):
     the two boards' pin-1 contacts may lie side by side at one height), in the exploded view (the default) and the plan
     view, on small fields (a 2 x 2's pin-1 contacts 0.5 mm apart), with both and one side, the form's former default
     tails (12 and 7.5 mm), equal ones (12 and 12, the default since section 27.7; 7.5 and 7.5) and nearly equal ones (12
-    and 11.5: the triangles apart on a slant), the tails leaving left, and the default 12 x 32 (first as the form opens:
+    and 11.5: the triangles apart on a slant), the tails leaving left (also nearly equal: there the rings part off the
+    line through them, along it each would leave its own triangle), and the default 12 x 32 (first as the form opens:
     both tails 12 mm, ending together): the top FPC's teal ring and the bottom FPC's orange ring
     never overlap, neither takes in the other board's pin-1 triangle and each still rounds its own (its centre within
     one ring radius of the triangle's: section 27.5, where the plan view's rings had stepped a ring diameter off, one
     beside the tail's end marking nothing), so each marks its own pad; the rings move only where, round their triangles,
-    the two would clash (moved back there by the check, a resize places them again); the legend names each ring; the
-    stacked view's note has both tails centred on the field, ending together where their lengths are equal, else the
-    longer named, one side's traces fanning in under the field into the centred Row tail, and no length finer than its
-    three decimals.  At 1440 px wide the plan view's caption reaches under a narrow board's tail end, so the rings of the
-    nearly equal tails part on a slant off the line through them."""
+    the two would clash (moved back there by the check, a resize places them again).  (The legend that named the rings
+    and the note on the tails went with the stacked card's notes, the user's request of 2026-11-06; the caption, which
+    the plan view's rings of the nearly equal tails leaving at the bottom had parted off the line to avoid at 1440 px,
+    went on 2026-11-06 too.)"""
     page = new_page(browser, width=1440)
     boot(page)
     # The default build as the form opens (the user's decision of 2026-10-27, section 27.7: the rectangular mode's tails 12
-    # / 12 mm): both tails 12 mm, the stacked note's tails ending together (the Row tail 4.500 mm longer before), and its
-    # pin-1 rings right in both views.
+    # / 12 mm): both tails 12 mm, and its pin-1 rings right in both views.
     form = page.evaluate("() => ['topTailLength', 'bottomTailLength'].map(id => document.getElementById(id).value)")
-    note = page.inner_text("#assemblyRowBus") if page.query_selector("#assemblyRowBus") else ""
-    check("the default build as the form opens: both tails 12 mm, ending together in the stacked view's note (no tail longer)",
-          form == ["12", "12"] and "both centred on the field, ending together, their contacts in line" in note and "longer" not in note, (form, note))
+    check("the default build as the form opens: both tails 12 mm", form == ["12", "12"], form)
     for view in ("exploded", "plan"):
         page.click(f'[data-assembly-mode="{view}"]'); page.wait_for_timeout(250)
         problems, rings = stacked_pin1(page)
@@ -326,7 +324,7 @@ def part_stacked_pin1(browser):
     page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(100)
     cases = [(rows, columns, sides, tails, "bottom") for rows, columns in ((2, 2), (3, 2), (2, 3), (3, 3)) for sides in ("both", "left")
              for tails in (("12", "7.5"), ("12", "12"), ("7.5", "7.5"))]
-    cases += [(2, 2, "both", ("12", "11.5"), "bottom"), (2, 2, "both", ("12", "12"), "left")]
+    cases += [(2, 2, "both", ("12", "11.5"), "bottom"), (2, 2, "both", ("12", "12"), "left"), (2, 2, "both", ("12", "11.5"), "left")]
     cases += [(12, 32, sides, tails, "bottom") for sides in ("both", "left") for tails in (("12", "7.5"), ("12", "12"))]
     seen_over = {"exploded": 0, "plan": 0}  # views where the bottom FPC's ring crosses the top FPC (the stroke check bites)
     for rows, columns, sides, (top, bottom), exit_side in cases:
@@ -362,29 +360,20 @@ def part_stacked_pin1(browser):
                 # Seen from straight above (the exploded view turned to tilt 0, arrow keys) the boards' 96 px apart still
                 # overlap, so the bottom FPC's ring crosses the top FPC there too and the stroke check bites in this view
                 # (not on a 2 x 2: beside the coin for scale it sits left of the camera's axis, the top FPC drawn off it).
+                # Turned 40 degrees more (spin -60): since the views' light of 2026-11-05 the top FPC's shadow falls away
+                # from the key, down and to the right on screen, and at spin -20 no longer lies under the bottom FPC's
+                # ring, which crossed only it there; at -60 the ring crosses the top FPC itself.
                 page.focus("#stackedPreview")
-                for _ in range(12):
-                    page.keyboard.press("ArrowDown")
+                for key in ["ArrowDown"] * 12 + ["ArrowRight"] * 8:
+                    page.keyboard.press(key)
                 page.wait_for_timeout(250)
                 covered, counts = pin1_strokes(page)
-                check(f"stacked pin 1, {name}, exploded view from straight above: both pin-1 rings drawn above both boards",
-                      covered == [] and page.evaluate("() => document.getElementById('stackedPreview').dataset.orbit") == "0,-20", (covered, counts))
+                check(f"stacked pin 1, {name}, exploded view from straight above, turned to spin -60: both pin-1 rings drawn above both boards",
+                      covered == [] and page.evaluate("() => document.getElementById('stackedPreview').dataset.orbit") == "0,-60", (covered, counts))
                 seen_over[view] += counts.get("lower", (0, 0))[0] > 0
                 page.keyboard.press("0"); page.wait_for_timeout(200)
             if (rows, columns, sides, exit_side) == (2, 2, "both", "bottom") and top in ("12",):
                 page.locator(".stacked-review").screenshot(path=f"{SHOTS}/stacked_pin1_2x2_both_{top}_{bottom}_{view}.png")
-        # The two boards' keys in the legend, its notes folded under "About this view" (#assemblyNotes).
-        legend = page.inner_text("#assemblyLegend") + "\n" + page.inner_text("#assemblyNotes")
-        check(f"stacked pin 1, {name}: the legend names the top FPC's teal ring and the bottom FPC's orange ring and says how they part",
-              "(teal ring)" in legend and "(orange ring)" in legend and "Each pin-1 ring rounds its board's triangle past the tail's end" in legend
-              and "each still round its own triangle's centre" in legend, legend)
-        note = page.inner_text("#assemblyRowBus") if page.query_selector("#assemblyRowBus") else ""
-        ends = "ending together, their contacts in line" if top == bottom else f"the Row tail {float(top) - float(bottom):.3f} mm longer"
-        check(f"stacked pin 1, {name}: the stacked view's note has both tails centred on the field, {ends}",
-              f"both centred on the field, {ends}" in note and (sides == "both" or "fan in under the field into the Row tail centred under it" in note), note)
-        finer = re.findall(r"\d\.\d{4,}", legend)
-        check(f"stacked pin 1, {name}: the stacked view's notes give every length to three decimals (the shared outline's depth too)",
-              finer == [] and re.search(r"tail roots \(\d+\.\d{3} mm below the taxel field\)", note), (finer, note))
         page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(100)
     page.select_option("#connectorSide", "bottom")
     check("stacked pin 1: the stroke check saw the bottom FPC's ring cross the top FPC in both views", all(seen_over.values()), seen_over)
@@ -475,6 +464,11 @@ def part_zoom(browser):
         page.click("#rowZoomTools [data-zoom=in]")
     level = page.inner_text("#rowZoomLevel")
     check("zoom is capped at 400x", level.startswith("400.0×"), level)
+    # The level alone in sight (the user's request of 2026-11-06), the scale on screen in its tooltip and accessible text.
+    shown = page.evaluate("""() => { const out = document.getElementById('rowZoomLevel'); const hidden = out.querySelector('.cad-sr-only');
+        return [out.firstChild.textContent, out.title, hidden ? hidden.textContent : null, hidden ? hidden.getBoundingClientRect().width : null]; }""")
+    check("the zoom's level alone in sight (400.0×), the px/mm in its tooltip and, visually hidden, its text",
+          shown[0] == "400.0×" and re.fullmatch(r"400\.0× · \d+\.\d px/mm", shown[1] or "") and shown[2] == shown[1][len("400.0×"):] and shown[3] <= 1, shown)
     page.click("#rowZoomTools [data-zoom=reset]")
     # the wheel at fit view scrolls the page (no scroll trap); ctrl+wheel never zooms the page
     page.evaluate("() => window.scrollTo(0, 200)"); page.wait_for_timeout(80)
@@ -605,6 +599,9 @@ def part_aria(browser):
         return [t.id, t.getAttribute('aria-selected'), t.tabIndex, panel.getAttribute('role'), panel.getAttribute('aria-labelledby') === t.id, panel.hidden]; })""")
     ok = all(a[3] == "tabpanel" and a[4] and ((a[1] == "true") == (a[2] == 0) == (not a[5])) for a in attrs)
     check("tabs: aria-selected, roving tabindex, aria-controls -> tabpanel with aria-labelledby, inactive panel hidden", ok, attrs)
+    # The tabs "3D view" then "2D view" (the user's request of 2026-11-06), the 2D view selected as the card opens.
+    order = page.evaluate("() => [...document.querySelectorAll('#rowCard [role=tab]')].map(t => [t.id, t.textContent, t.getAttribute('aria-selected')])")
+    check("tabs: 3D view first, then 2D view, the 2D view selected as the card opens", order == [["rowTab3d", "3D view", "false"], ["rowTab2d", "2D view", "true"]], order)
     page.focus("#rowTab2d"); page.keyboard.press("ArrowRight")
     s1 = page.evaluate("() => [document.activeElement.id, document.querySelector('#rowTab3d').getAttribute('aria-selected'), document.querySelector('#rowPreview').hidden]")
     page.keyboard.press("ArrowRight")
@@ -613,7 +610,7 @@ def part_aria(browser):
     page.keyboard.press("Home"); s4 = page.evaluate("() => document.activeElement.id")
     page.keyboard.press("ArrowLeft"); s5 = page.evaluate("() => document.activeElement.id")
     check("keyboard: ArrowRight selects/focuses the next tab (wrapping), End/Home/ArrowLeft work",
-          s1 == ["rowTab3d", "true", True] and s2 == "rowTab2d" and s3 == "rowTab3d" and s4 == "rowTab2d" and s5 == "rowTab3d", [s1, s2, s3, s4, s5])
+          s1 == ["rowTab3d", "true", True] and s2 == "rowTab2d" and s3 == "rowTab2d" and s4 == "rowTab3d" and s5 == "rowTab2d", [s1, s2, s3, s4, s5])
     labels = page.evaluate("() => [...document.querySelectorAll('svg[aria-label]')].map(s => s.getAttribute('aria-label'))")
     check("the six SVG copies have distinct aria-labels", len(labels) == 6 and len(set(labels)) == 6, labels)
     texts = page.evaluate("() => document.body.innerText")
@@ -766,7 +763,7 @@ SHOWN = """(ids) => ids.map(id => { const node = document.getElementById(id); re
 BASIC_CONTROLS = ["rows", "columns", "pitchX", "pitchY", "generate"]
 CUSTOMIZE_CONTROLS = ["name", "rowWidth", "columnWidth", "topTailLength", "bottomTailLength", "connectorSide"]
 ADVANCED_CONTROLS = ["rowLayer", "scanOrder", "rowPins", "columnPins", "traceWidth", "traceSpace", "rowSides", "lockedRules", "profileBadge"]
-FOLDS = ["formCustomize", "formAdvanced", "assemblyMore", "drcPanel", "moreFiles", "manufacturingNote"]
+FOLDS = ["formCustomize", "formAdvanced", "drcPanel", "moreFiles", "manufacturingNote"]
 
 
 # The GitHub card's counts as app.py served them ("served"), none (null) or the two given; then the header's fit.
@@ -775,11 +772,32 @@ HEADER_COUNTS = """(counts) => { const card = document.querySelector('[data-gh-b
     window.servedCounts = window.servedCounts || [stats.hidden, stars.textContent, forks.textContent];
     const [hidden, starText, forkText] = counts === 'served' ? window.servedCounts : counts ? [false, ...counts] : [true, '', ''];
     stats.hidden = hidden; stars.textContent = starText; forks.textContent = forkText; }"""
+# The gap from the title's text to the header's right (its first item, the look's toggle since 2026-11-06), and the
+# boxes of the toggle and the community links ([width, height]).
 HEADER_FIT = """() => { const range = document.createRange(); range.selectNodeContents(document.querySelector('.masthead h1'));
-    const links = [...document.querySelectorAll('.masthead-link')];
-    return {gap: Math.round((links[0].getBoundingClientRect().left - range.getBoundingClientRect().right) * 10) / 10,
+    const links = [...document.querySelectorAll('.masthead-link')], right = document.querySelector('.masthead-end').firstElementChild;
+    return {gap: Math.round((right.getBoundingClientRect().left - range.getBoundingClientRect().right) * 10) / 10,
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-            named: links.map(link => link.querySelector(':scope > span').checkVisibility())}; }"""
+            named: links.map(link => link.querySelector(':scope > span').checkVisibility()),
+            sizes: [right, ...links].map(n => { const r = n.getBoundingClientRect(); return [Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10]; })}; }"""
+
+
+def header_sizes_ok(width, sizes):
+    """The header's right as large as the line has room for (the review of 2026-11-06): up to 410 px the toggle and the
+    community links equal circles of 44, 40, 36 or 32 px by the width (styles.css), above it the toggle 44 x 44 and the
+    community's pills 44 px tall."""
+    if width <= 410:
+        size = 44.0 if width > 394 else 40.0 if width > 382 else 36.0 if width > 370 else 32.0
+        return sizes == [[size, size]] * 3
+    return sizes[0] == [44.0, 44.0] and all(height == 44.0 for _, height in sizes[1:])
+
+
+HEADER_LINE = """() => { const m = document.querySelector('.masthead'), H = m.getBoundingClientRect(), s = getComputedStyle(m);
+    const toggle = document.getElementById('themeToggle').getBoundingClientRect(), lib = document.querySelector('.masthead-library').getBoundingClientRect();
+    const last = [...document.querySelectorAll('.masthead-link')].at(-1).getBoundingClientRect();
+    return {clear: Math.round((toggle.left - lib.right) * 10) / 10, pad: Math.round((H.right - last.right) * 10) / 10, padding: parseFloat(s.paddingRight),
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, height: Math.round(H.height),
+            discord: document.querySelector('.masthead-discord > span').checkVisibility()}; }"""
 
 
 def flip_a_check(route):
@@ -798,7 +816,7 @@ def part_clean_interface(browser):
     """The rectangular mode as it opens, folded (no unfold()): rows, columns, pitch and Generate in sight, the rest under
     Advanced Customization with More options folded inside it (2026-11-02); the header without its old eyebrow and profile
     badge; a clean pass without the summary box, the design checks one line ("all N checks pass") and folded, the stacked
-    view open with its notes folded, the other files and the ordering notes folded, the two Gerber ZIPs in sight; a failing check opens
+    view open with no legend or notes under it (2026-11-06), the other files and the ordering notes folded, the two Gerber ZIPs in sight; a failing check opens
     the design checks listing only the failing rules, "Show all checks" the rest."""
     page = new_page(browser, width=1440, folded=True)
     boot(page)
@@ -807,8 +825,8 @@ def part_clean_interface(browser):
     shown = dict(page.evaluate(SHOWN, BASIC_CONTROLS + CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS))
     check("clean: the other controls are folded under Advanced Customization", not any(shown[name] for name in CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS), shown)
     folds = page.evaluate("(ids) => ids.map(id => [id, document.getElementById(id).open])", FOLDS)
-    check("clean: Advanced Customization, More options, the stacked view's notes, the design checks, the other files and the "
-          "ordering notes start folded", not any(open_ for _, open_ in folds), folds)
+    check("clean: Advanced Customization, More options, the design checks, the other files and the ordering notes start folded",
+          not any(open_ for _, open_ in folds), folds)
     page.click("#formCustomize > summary"); page.wait_for_timeout(100)
     opened = dict(page.evaluate(SHOWN, CUSTOMIZE_CONTROLS + ADVANCED_CONTROLS))
     check("clean: opening Advanced Customization shows its controls, More options still folded",
@@ -876,26 +894,60 @@ def part_clean_interface(browser):
           [name for name, *_ in order[:2]] == ["Top FPC Gerber ZIP", "Bottom FPC Gerber ZIP"] and all(weight >= 600 for _, weight, _, _ in order[:2])
           and all(fill != "rgb(255, 255, 255)" for _, _, fill, _ in order[:2]) and all(fill == "rgb(255, 255, 255)" for _, _, fill, _ in order[2:])
           and min(height for *_, height in order[:2]) > max(height for *_, height in order[2:]), order)
-    check("clean: the stacked view open (the user's request of 2026-11-02), its keys in sight and its notes folded",
-          page.is_visible("#stackedPreview .assembly-board") and page.is_visible(".assembly-key.upper-key") and not page.is_visible("#assemblyRowBus"),
-          page.inner_text("#assemblyLegend"))
+    # No legend or notes under it since the user's request of 2026-11-06 ("这部分的解释说明可以去掉").
+    gone = page.evaluate("() => ['#assemblyLegend', '#onPartLegend', '#assemblyMore', '#assemblyNotes', '#assemblyRowBus', '.assembly-key']"
+                         ".filter(s => document.querySelector(s))")
+    check("clean: the stacked view open (the user's request of 2026-11-02), no legend or notes under it",
+          page.is_visible("#stackedPreview .assembly-board") and gone == [] and "About this view" not in page.inner_text(".stacked-review"), gone)
+    # Nor its caption ("Exploded 3D registration review · ...", the user's request of 2026-11-06), in either view.
+    bare = [stacked_bare(page)]
+    page.click('[data-assembly-mode="plan"]'); page.wait_for_timeout(200)
+    bare.append(stacked_bare(page))
+    page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(200)
+    check("clean: no caption in the stacked view, exploded or plan", all(ok for ok, _ in bare), bare)
+    # Nor the board cards' layer legends since the user's request of 2026-11-06 ("这个部分也可以去掉,没必要的介绍"): each
+    # card ends with its preview, rounded as the card's foot, in both looks.
+    for look in ("diagram", "photo"):
+        page.click(f'button[data-look="{look}"]'); page.wait_for_timeout(200)
+        cards = page.evaluate("""() => ['rowCard', 'columnCard'].map(id => { const card = document.getElementById(id); const last = card.lastElementChild;
+            return [last.className, getComputedStyle(last).borderBottomLeftRadius, Math.round(card.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom),
+                    Boolean(card.querySelector('.layer-legend, .swatch')), /Top copper|Coin for scale/.test(card.innerText)]; })""")
+        check(f"clean: {look}: no layer legend under the board cards (2026-11-06), each ending with its preview, rounded as the card's foot",
+              all(row[0] == "canvas-wrap" and row[1] != "0px" and row[2] <= 1 and not row[3] and not row[4] for row in cards), cards)
     page.set_viewport_size({"width": 900, "height": 1000}); page.wait_for_timeout(200)
     overflow = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
     check("clean: no horizontal page overflow at 900 px", overflow <= 0, f"{overflow}px")
     # The header from 360 to 720 px (2026-11-04: from 521 to 544 px the GitHub card with its counts ran over the title's
     # end): with the counts app.py served, without counts and with four-character ones, the title's text 8 px or more
-    # clear of the community links, no horizontal page overflow, the links' icons alone up to 600 px and named above.
+    # clear of the header's right (the look's toggle before the community links since 2026-11-06), no horizontal page
+    # overflow, the links' icons alone up to 600 px and named above, but Discord's mark alone up to 630 px (the toggle's
+    # room: with 9.9k counts the title ran into it at 601 px); up to 410 px the three circles as large as the line has
+    # room for (44, 40, 36, 32 px; the review of 2026-11-06), every width from 360 to 410 px.
     misfits = []
     for counts in ("served", None, ["9.9k", "999"]):
         page.evaluate(HEADER_COUNTS, counts)
-        for width in range(360, 722, 2):
+        for width in list(range(360, 411)) + list(range(412, 722, 2)):
             page.set_viewport_size({"width": width, "height": 1000})
             fit = page.evaluate(HEADER_FIT)
-            if fit["gap"] < 8 or fit["overflow"] > 0 or fit["named"] != [width > 600] * 2:
+            if fit["gap"] < 8 or fit["overflow"] > 0 or fit["named"] != [width > 600, width > 630] or not header_sizes_ok(width, fit["sizes"]):
                 misfits.append([counts, width, fit])
     page.evaluate(HEADER_COUNTS, "served")
-    check("clean: from 360 to 720 px the title clears the GitHub card (with the counts served, none and 9.9k / 999), no "
-          "horizontal overflow, the community links' icons alone up to 600 px", misfits == [], misfits[:6])
+    check("clean: from 360 to 720 px the title clears the header's right, the look's toggle first (with the counts served, none and "
+          "9.9k / 999), no horizontal overflow, the community links' icons alone up to 600 px, Discord's up to 630 px; up to 410 px "
+          "the three circles 44, 40, 36 or 32 px by the width", misfits == [], misfits[:6])
+    # The one line from 1101 to 1240 px (2026-11-06): the Library link clear of the toggle (8 px or more), the community
+    # links at the header's right padding, no overflow, with each set of counts; Discord's mark alone up to 1220 px.
+    misfits = []
+    for counts in ("served", None, ["9.9k", "999"]):
+        page.evaluate(HEADER_COUNTS, counts)
+        for width in range(1101, 1241, 3):
+            page.set_viewport_size({"width": width, "height": 1000})
+            line = page.evaluate(HEADER_LINE)
+            if line["clear"] < 8 or line["pad"] < line["padding"] - 0.5 or line["overflow"] > 0 or line["discord"] != (width > 1220) or line["height"] != 104:
+                misfits.append([counts, width, line])
+    page.evaluate(HEADER_COUNTS, "served")
+    check("clean: from 1101 to 1240 px the header one line (104 px), the Library link 8 px or more clear of the look's toggle, the community "
+          "links within the right padding, no overflow (the counts served, none and 9.9k / 999), Discord's mark alone up to 1220 px", misfits == [], misfits[:6])
     page.set_viewport_size({"width": 1440, "height": 1000}); page.wait_for_timeout(100)
     page.route("**/api/generate", flip_a_check)
     page.fill("#rows", "11"); page.click("#regenerate" if page.is_visible("#regenerate") else "#generate"); settle(page)
@@ -912,6 +964,98 @@ def part_clean_interface(browser):
     check("clean part: no console errors", not console_errors(page), console_errors(page))
     page.close()
 
+
+
+# The header's Library link (index.html, library.html; the user's requests of 2026-11-05): the header's height, the link
+# beside the mode switch (12 px after it) or on a line of its own, and the boxes of the header (the masthead, the title's
+# text, the switch, the link, the community links, the line under the title) to compare the two pages.
+LIBRARY_HEADER = """() => { const m = document.querySelector('.masthead .mode-picker'), lib = document.querySelector('.masthead-library');
+    const box = r => [r.left, r.top, r.width, r.height].map(v => Math.round(v * 10) / 10);
+    const range = document.createRange(); range.selectNodeContents(document.querySelector('.masthead h1'));
+    const M = m.getBoundingClientRect(), L = lib.getBoundingClientRect(), H = document.querySelector('.masthead').getBoundingClientRect();
+    return {mast: Math.round(H.height * 10) / 10, after: Math.round((L.left - M.right) * 10) / 10, beside: Math.abs((L.top + L.bottom) / 2 - (M.top + M.bottom) / 2) < 3,
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            boxes: [H, range.getBoundingClientRect(), M, L, ...[...document.querySelectorAll('#themeToggle, .masthead-link')].map(n => n.getBoundingClientRect()),
+                    document.querySelector('.masthead-tagline').getBoundingClientRect()].map(box)}; }"""
+# The masthead's height (px; Chromium on Linux, DejaVu Sans) with the link: as before it everywhere (from 1101 to 1130 px
+# its one line kept with the grid's gaps 18 px; the review of 2026-11-05) but at 479 px and below, where the link takes
+# its own line (+46).
+LIBRARY_MAST = {1440: 104, 1200: 104, 1131: 104, 1130: 104, 1120: 104, 1110: 104, 1101: 104, 1100: 158, 900: 158, 800: 178, 601: 178,
+                600: 178, 521: 178, 520: 173, 500: 173, 486: 173, 481: 173, 480: 173, 479: 219, 430: 219, 390: 239, 360: 239}
+# Below 360 px (an iPhone SE with Display Zoom: 320; the review of 2026-11-05): the header within the window's 20 px gutters
+# and the title clear of the community links, on both pages (styles.css's and theme.css's rules below 360 px).
+LIBRARY_NARROW = (359, 340, 320)
+
+
+def narrow_header(page, page_overflow=False):
+    """The widths of LIBRARY_NARROW where the header leaves the window's 20 px gutters, the title runs within 8 px of the
+    community links or (``page_overflow``) the page scrolls sideways: [[width, the header's right, the gap, the overflow]]."""
+    misfits = []
+    for width in LIBRARY_NARROW:
+        page.set_viewport_size({"width": width, "height": 1000}); page.wait_for_timeout(40)
+        header, fit = page.evaluate(LIBRARY_HEADER), page.evaluate(HEADER_FIT)
+        right = max(box[0] + box[2] for box in header["boxes"][1:])
+        if right > width - 20 + 0.5 or fit["gap"] < 8 or (page_overflow and header["overflow"] > 0):
+            misfits.append([width, right, fit["gap"], header["overflow"]])
+    return misfits
+
+
+def part_library_header(browser):
+    """The header's Library link (the user's requests of 2026-11-05): on index.html right after the mode switch, 12 px after it
+    and on its line from 480 to 1440 px, on a line of its own below (the user accepted +46 px at 480 px and below); the
+    header 104 px at 1440 px and as before everywhere else (1101 to 1130 px included); below 360 px the header within the
+    window and the title clear of the community links; the link opens the Library in a new tab.  library.html's header has
+    the same geometry (within 0.5 px at 1440, 900, 600 and 390 px), passes the 360-720 px sweep too, and below 360 px
+    the page itself does not scroll sideways."""
+    page = new_page(browser, width=1440, folded=True)
+    boot(page)
+    misfits, index_boxes = [], {}
+    for width, mast in LIBRARY_MAST.items():
+        page.set_viewport_size({"width": width, "height": 1000}); page.wait_for_timeout(40)
+        header = page.evaluate(LIBRARY_HEADER)
+        index_boxes[width] = header["boxes"]
+        beside = width >= 480
+        if abs(header["mast"] - mast) > 0.5 or header["beside"] != beside or (beside and header["after"] != 12) or header["overflow"] > 0:
+            misfits.append([width, header["mast"], header["beside"], header["after"], header["overflow"]])
+    check("library header: on index.html the Library link 12 px after the mode switch, on its line from 480 to 1440 px and on its own "
+          "below; the header 104 px at 1440 px and as before everywhere but at 479 px and below (+46 px)", misfits == [], misfits[:6])
+    narrow = narrow_header(page)
+    check("library header: below 360 px (359, 340, 320) index.html's header within the window, the title clear of the community links",
+          narrow == [], narrow[:3])
+    page.set_viewport_size({"width": 1440, "height": 1000}); page.wait_for_timeout(60)
+    link = page.evaluate("() => { const a = document.querySelector('.masthead-library'); return [a.textContent, a.getAttribute('href'), a.target, a.rel, a.title, a.classList.contains('masthead-link')]; }")
+    with page.context.expect_page() as opened:
+        page.click(".masthead-library")
+    library = opened.value
+    library.wait_for_load_state()
+    check("library header: the link reads Library and opens library.html in a new tab (rel noopener), the generator left as it was",
+          link == ["Library", "library.html", "_blank", "noopener", "Sensors already fitted to open-source grippers (opens in a new tab)", False]
+          and library.url.endswith("/library.html") and page.url.endswith("#rect"), (link, library.url))
+    library.close()
+    page.close()
+    page = new_page(browser, width=1440, folded=True)
+    page.goto(URL + "library.html")
+    wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
+    differs = []
+    for width in (1440, 900, 600, 390):
+        page.set_viewport_size({"width": width, "height": 1000}); page.wait_for_timeout(60)
+        boxes = page.evaluate(LIBRARY_HEADER)["boxes"]
+        if any(abs(a - b) > 0.5 for one, other in zip(boxes, index_boxes[width]) for a, b in zip(one, other)) or len(boxes) != len(index_boxes[width]):
+            differs.append([width, boxes, index_boxes[width]])
+    check("library header: library.html's header has index.html's geometry (within 0.5 px at 1440, 900, 600 and 390 px)", differs == [], differs[:2])
+    misfits = []
+    for width in list(range(360, 411)) + list(range(412, 722, 2)):
+        page.set_viewport_size({"width": width, "height": 1000})
+        fit = page.evaluate(HEADER_FIT)
+        if fit["gap"] < 8 or fit["overflow"] > 0 or fit["named"] != [width > 600, width > 630] or not header_sizes_ok(width, fit["sizes"]):
+            misfits.append([width, fit])
+    check("library header: on library.html from 360 to 720 px the title clears the header's right (the look's toggle first), no horizontal "
+          "overflow, up to 410 px the three circles as on the generator", misfits == [], misfits[:6])
+    narrow = narrow_header(page, page_overflow=True)
+    check("library header: below 360 px (359, 340, 320) library.html's header within the window, the title clear of the links, the page "
+          "not scrolling sideways", narrow == [], narrow[:3])
+    check("library header: no console errors", not console_errors(page), console_errors(page))
+    page.close()
 
 # The look, its pressed buttons, then the outline's fill and the ENIG's display in the 2D preview, the oblique view and the
 # stacked view's lower board.
@@ -953,7 +1097,7 @@ def part_looks(browser):
 
 
 ORBIT_STATE = """() => { const view = document.getElementById('stackedPreview');
-    return [view.dataset.orbit || '', getComputedStyle(view.querySelector('.assembly-camera')).transform, document.getElementById('orbitHint').hidden]; }"""
+    return [view.dataset.orbit || '', getComputedStyle(view.querySelector('.assembly-camera')).transform, document.getElementById('stackedReset').hidden]; }"""
 
 
 def part_stacked_orbit(browser):
@@ -961,7 +1105,8 @@ def part_stacked_orbit(browser):
     down tilts it toward the view from above (0.4 degrees a pixel), the tilt held between straight above and from under
     the stack; the pin-1 rings drawn on the boards as they now lie and placed again once the drag ends; the arrow keys
     turn it by 5 degrees and 0 or a double click sets it back to 57 / -20 degrees; the angles held across a new design;
-    the plan view keeps still and hides the hint."""
+    the plan view keeps still and hides Reset view, which (in the 3D view's top right since 2026-11-06, the drag hint hidden)
+    takes it home as 0 does."""
     page = new_page(browser, width=1440)
     boot(page)
     page.evaluate("() => document.querySelector('#stackedPreview').scrollIntoView({block: 'center'})")
@@ -971,7 +1116,7 @@ def part_stacked_orbit(browser):
     page.mouse.move(x, y); page.mouse.down(); page.mouse.move(x + 60, y + 25, steps=6); page.mouse.move(x + 120, y + 50, steps=6); page.mouse.up()
     page.wait_for_timeout(150)
     turned = page.evaluate(ORBIT_STATE)
-    check("orbit: a drag 120 px right and 50 px down turns the exploded view to tilt 37, spin -68 degrees (the hint shown)",
+    check("orbit: a drag 120 px right and 50 px down turns the exploded view to tilt 37, spin -68 degrees (Reset view shown)",
           home[0] == "" and turned[0] == "37,-68" and turned[1] != home[1] and turned[2] is False, (home, turned))
     problems, rings = stacked_pin1(page)
     check("orbit: after the drag the two pin-1 rings are placed again, apart, each round its own triangle",
@@ -1000,11 +1145,16 @@ def part_stacked_orbit(browser):
     x, y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
     page.mouse.dblclick(x, y); page.wait_for_timeout(150)
     check("orbit: a double click sets it back to 57 / -20", page.evaluate(ORBIT_STATE)[0] == "57,-20", page.evaluate(ORBIT_STATE))
+    page.focus("#stackedPreview"); page.keyboard.press("ArrowLeft"); page.keyboard.press("ArrowDown"); page.wait_for_timeout(150)
+    turned = page.evaluate(ORBIT_STATE)[0]
+    page.click("#stackedReset"); page.wait_for_timeout(150)
+    check("orbit: Reset view (the 3D view's top right, 2026-11-06) sets it back to 57 / -20 as 0 does", turned == "52,-15"
+          and page.evaluate(ORBIT_STATE)[0] == "57,-20", (turned, page.evaluate(ORBIT_STATE)))
     page.click('[data-assembly-mode="plan"]'); page.wait_for_timeout(200)
     before = page.evaluate(ORBIT_STATE)
     page.mouse.move(x, y); page.mouse.down(); page.mouse.move(x + 100, y + 100, steps=5); page.mouse.up(); page.wait_for_timeout(150)
     after = page.evaluate(ORBIT_STATE)
-    check("orbit: the plan view keeps still under a drag and hides the hint", before == after and after[1] == "none" and after[2] is True, (before, after))
+    check("orbit: the plan view keeps still under a drag and hides Reset view", before == after and after[1] == "none" and after[2] is True, (before, after))
     page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(150)
     check("orbit part: no console errors", not console_errors(page), console_errors(page))
     page.close()
@@ -1116,8 +1266,8 @@ def part_coin(browser):
     board centred at its scale), 0.6 mm in from its edges, at least 2 mm clear of the outline (the view grows to hold it),
     there again after a resize, and moving with the scene when zoomed.  In the oblique and stacked 3D views it lies on a plane of its own below the boards
     (28 / 56 px), as thick as a quarter (1.75 mm: its shadow, eight disks of its reeded side, its face, its gleam that
-    keeps to the room as the view turns), the boards covering none of it; the plan view lays it flat; the legends name
-    it."""
+    keeps to the room as the view turns), the boards covering none of it; the plan view lays it flat; no legend names it
+    since 2026-11-06 (its drawing carries its name and size)."""
     page = new_page(browser, width=1440)
     boot(page)
     for name in ("row", "column"):
@@ -1177,8 +1327,12 @@ def part_coin(browser):
     check("coin: the plan view lays the quarter flat beside the boards (no rise), none of it covered",
           plan is not None and plan["plane"] == 0 and plan["top"] == 0 and plan["hits"] == ",".join(["coin"] * 9), plan)
     page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(200)
-    legends = [page.inner_text(f"#{key}Legend") for key in ("row", "column")] + [page.inner_text("#assemblyLegend")]
-    check("coin: the board legends and the stacked view's keys name it", all("Coin for scale" in text and "US quarter, 24.26 mm" in text for text in legends), legends)
+    # No legend names it since the user's requests of 2026-11-06 (the stacked view's keys, then the board cards' legends):
+    # the drawings' coins carry its name and size.
+    named = page.evaluate("""() => [[...document.querySelectorAll('#rowPreview .coin-ref, #columnPreview .coin-ref')].map(c => [c.dataset.coin, c.dataset.diameterMm]),
+        ['#rowLegend', '#columnLegend', '#assemblyLegend', '.layer-legend', '.swatch'].filter(s => document.querySelector(s))]""")
+    check("coin: no legend names it (2026-11-06), each 2D view's coin carries its name and size (US quarter, 24.26 mm)",
+          named[0] == [["US quarter", "24.26"], ["US quarter", "24.26"]] and named[1] == [], named)
     check("coin part: no console errors", not console_errors(page), console_errors(page))
     page.close()
 
@@ -1219,7 +1373,8 @@ def part_depth(browser):
     (board.fpc.stackup: 0.11 mm of PI, copper, coverlay adhesive and coverlay, the PI stiffener 0.225 mm below it) behind
     the copper side, which stays in its place; to scale where that is 2 px or more on screen, else the FPC drawn 2 px
     thick and the stiffener in proportion; the walls rings along the edges, so the turned-over top FPC stays see-through
-    over the taxel field; none in the plan view; the captions say so."""
+    over the taxel field; none in the plan view; the oblique views' caption says so (the stacked view has none since
+    2026-11-06)."""
     page = new_page(browser, width=1440)
     boot(page)
     page.click("#rowTab3d"); page.click("#columnTab3d"); page.wait_for_timeout(300)
@@ -1263,9 +1418,9 @@ def part_depth(browser):
     edges = ImageChops.difference(shown, hidden).getbbox()
     check("depth: the walls change nothing inside the top FPC's projected taxel field (it stays see-through) and show at its edges",
           worst <= 2 and edges is not None, (worst, edges, inner))
-    caption = page.inner_text("#stackedPreview .assembly-caption")
-    pane = page.evaluate("() => getComputedStyle(document.getElementById('rowPreview3d'), '::after').content")
-    check("depth: the captions say the thickness is drawn at least 2 px", "thickness at least 2 px" in caption and "thickness at least 2 px" in pane, (caption, pane))
+    panes = page.evaluate("() => ['rowPreview3d', 'columnPreview3d'].map(id => getComputedStyle(document.getElementById(id), '::after').content)")
+    check("depth: the oblique views' caption says the thickness is drawn at least 2 px (the stacked view has no caption)",
+          all("thickness at least 2 px" in pane for pane in panes) and page.locator("#stackedPreview .assembly-caption").count() == 0, panes)
     page.click('[data-assembly-mode="plan"]'); page.wait_for_timeout(300)
     plan = page.evaluate(DEPTH_STATE, "#stackedPreview .assembly-board")
     check("depth: the plan view draws no thickness (no walls, the other side in the copper side's plane)",
@@ -1275,11 +1430,211 @@ def part_depth(browser):
     page.close()
 
 
+# The 3D views' light (app.js lightBoard, lightView; the user's request of 2026-11-05): what a view holds of it.  Each
+# board's leaves (two veils, a shadow), their paths' rings against its outline's and cutouts', and the wall parts' bins.
+LIGHT_LEAVES = r"""(selector) => [...document.querySelectorAll(selector)].map(board => {
+    const host = board.querySelector(':scope > .assembly-face') || board; const art = host.querySelector(':scope > svg');
+    const rings = art.querySelectorAll(':scope > g[transform] > :is(.outline, .cutout)').length;
+    const leaves = [...host.querySelectorAll(':scope > svg.board-light, :scope > svg.board-shadow')];
+    return {leaves: leaves.map(leaf => leaf.getAttribute('class')).join(','), rings,
+            paths: leaves.map(leaf => [...leaf.querySelectorAll('path')].map(path => (path.getAttribute('d').match(/M/g) || []).length + ':' + (path.getAttribute('fill-rule') || '')).join(' ')),
+            hidden: leaves.every(leaf => leaf.getAttribute('aria-hidden') === 'true' && getComputedStyle(leaf).pointerEvents === 'none'),
+            bins: [...new Set([...board.querySelectorAll('svg.board-edge path[data-wall]')].map(path => path.dataset.wall))].length}; })"""
+# Where a board's shadow lies on screen from its copper side's (CSS px between their boxes' centres).
+SHADOW_OFFSET = r"""(selector) => { const board = document.querySelector(selector); const host = board.querySelector(':scope > .assembly-face') || board;
+    const [art, shadow] = [host.querySelector(':scope > svg'), host.querySelector(':scope > svg.board-shadow')].map(node => node.getBoundingClientRect());
+    return [+((shadow.left + shadow.right - art.left - art.right) / 2).toFixed(2), +((shadow.top + shadow.bottom - art.top - art.bottom) / 2).toFixed(2),
+            +getComputedStyle(host.querySelector(':scope > svg.board-shadow')).opacity]; }"""
+# A wall part's colour (its stroke's sRGB luminance) by bin, on a board's first ring.
+WALL_LEVELS = r"""(selector) => { const ring = document.querySelector(selector).querySelector('svg.board-edge-fpc');
+    const level = paint => { const value = paint.match(/[\d.]+/g).slice(-3).map(Number); const scale = /color\(/.test(paint) ? 255 : 1;
+      return +(0.2126 * value[0] * scale + 0.7152 * value[1] * scale + 0.0722 * value[2] * scale).toFixed(1); };
+    return Object.fromEntries([...ring.querySelectorAll('path[data-wall]')].map(path => [path.dataset.wall, level(getComputedStyle(path).stroke)])); }"""
+
+
+def light_pixels(page, pane, board, others):
+    """A board's face in a 3D view's light, from three shots of ``pane`` with the light's neighbours hidden (the shadows,
+    the walls, the coin, the rings, the oblique views' caption and the ``others``): lit, the veils hidden, and the board
+    hidden too (the pane's background).  Its face: the pixels the board changes (more than 12 sRGB levels), less 2 px round; just
+    outside it: those 2 to 3 px beyond.  Returns (the lit face's mean luminance over the unlit one's, the largest change
+    the light makes just outside the face, the largest change it makes on the face with its sweep hidden, the face's
+    size in pixels)."""
+    from PIL import Image, ImageChops, ImageFilter, ImageStat
+    import io
+    quiet = page.add_style_tag(content=".board-shadow, .board-edge, .coin-plane, .pin1-overlay, .three-d-pane::after"
+                               f"{', ' + others if others else ''} {{ visibility:hidden !important; }}")
+    page.wait_for_timeout(120)
+
+    def shot(css=""):
+        tag = page.add_style_tag(content=css) if css else None
+        page.wait_for_timeout(120)
+        image = Image.open(io.BytesIO(page.locator(pane).screenshot())).convert("RGB")
+        if tag:
+            page.evaluate("s => s.remove()", tag)
+        return image
+    lit = shot()
+    bare = shot(".board-light { visibility:hidden !important; }")
+    flat = shot(".board-light-sheen { visibility:hidden !important; }")
+    ground = shot(f".board-light, {board} {{ visibility:hidden !important; }}")
+    page.evaluate("s => s.remove()", quiet)
+    page.wait_for_timeout(80)
+    face = ImageChops.difference(bare, ground).convert("L").point(lambda value: 255 if value > 12 else 0)
+    inner = face.filter(ImageFilter.MinFilter(5))
+    ring = ImageChops.subtract(face.filter(ImageFilter.MaxFilter(7)), face.filter(ImageFilter.MaxFilter(5)))
+    pixels = ImageStat.Stat(inner).sum[0] / 255
+    if not pixels:
+        return None, None, None, 0
+    ratio = ImageStat.Stat(lit.convert("L"), mask=inner).mean[0] / max(1e-6, ImageStat.Stat(bare.convert("L"), mask=inner).mean[0])
+    outside = max(high for _, high in ImageStat.Stat(ImageChops.difference(lit, ground), mask=ring).extrema)
+    shaded = max(high for _, high in ImageStat.Stat(ImageChops.difference(flat, bare), mask=inner).extrema)
+    return round(ratio, 4), outside, shaded, int(pixels)
+
+
+def part_view_light(browser):
+    """The 3D views in the light of the sensor on the part (the user's request of 2026-11-05: "the new light and shade on
+    every 3D view"; app.js lightBoard, lightView): each board's sides veiled (their shade and satin sweep) and its shadow
+    a leaf of its own, their paths the outline less its cutouts; each board's face, in the stacked view (the bottom FPC)
+    and a board card's oblique view (the Row FPC), lit as it faces the viewer-fixed lights: at the home view as drawn
+    (with the sweep hidden, within 3 sRGB levels) and a little lighter with it, darker seen from straight above, darkest
+    turned over to show its underside (its face then turned down, from the key); nothing painted just outside the face
+    (those pixels the pane's background, the shadows and walls hidden); the walls lit by the way they face (the near wall,
+    turned from the key, darker than the left one, which faces it) and changing as the view turns; the shadows down and
+    to the right of their boards on screen at the home view, turned (30 / 40 degrees) and spun half round, where they had
+    turned with the board; the plan view unlit."""
+    page = new_page(browser, width=1440)
+    boot(page)
+    page.click("#rowTab3d"); page.wait_for_timeout(300)
+    for selector in ("#stackedPreview .assembly-board", "#rowPreview3d .oblique-board"):
+        leaves = page.evaluate(LIGHT_LEAVES, selector)
+        expected = [{"leaves": "board-light,board-shadow,board-light is-back", "rings": state["rings"],
+                     "paths": [f"{state['rings']}:evenodd {state['rings']}:evenodd", f"{state['rings']}:evenodd", f"{state['rings']}:evenodd {state['rings']}:evenodd"],
+                     "hidden": True, "bins": state["bins"]} for state in leaves]
+        check(f"light: {selector}'s boards each have their two sides' veils and their shadow, each path the outline less its cutouts "
+              "(even-odd), hidden from assistive tech and the pointer; their walls in parts by the way they face",
+              leaves and leaves == expected and all(state["bins"] >= 4 for state in leaves), leaves)
+    cases = (("#stackedPreview", "#stackedPreview .assembly-board.is-lower", "#stackedPreview .assembly-board.is-upper", 57),
+             ("#rowPreview3d", "#rowPreview3d .oblique-board", "", 56))
+    for pane, board, others, home in cases:
+        page.evaluate(f"() => document.querySelector('{pane}').scrollIntoView({{block: 'center'}})"); page.wait_for_timeout(200)
+        page.focus(pane); page.keyboard.press("0"); page.wait_for_timeout(200)
+        results = {}
+        for name, keys in (("home", []), ("above", ["ArrowDown"] * 8), ("under", ["ArrowUp"] * 19)):
+            page.focus(pane); page.keyboard.press("0")
+            for key in keys:
+                page.keyboard.press(key)
+            page.wait_for_timeout(250)
+            results[name] = (page.evaluate(f"() => document.querySelector('{pane}').dataset.orbit || ''"),) + light_pixels(page, pane, board, others)
+        page.focus(pane); page.keyboard.press("0"); page.wait_for_timeout(200)
+        home_state, above, under = results["home"], results["above"], results["under"]
+        check(f"light: {board}'s face at the home view ({home} degrees) as drawn with the sweep hidden (within 3 sRGB levels) and "
+              "no darker with it (its mean luminance 1 to 1.06 times the unlit face's)",
+              home_state[3] is not None and home_state[3] <= 3 and 1 <= home_state[1] <= 1.06 and home_state[4] > 2000, results)
+        check(f"light: {board}'s face changes with the tilt as it faces the key: darker from straight above ({above[0]}) than at the "
+              f"home view, darker still turned over ({under[0]}), its face then turned down from the key",
+              None not in (home_state[1], above[1], under[1]) and under[1] < above[1] - 0.05 and above[1] < home_state[1] - 0.03, results)
+        check(f"light: nothing painted just outside {board}'s face at any of these tilts (those pixels the pane's background, within "
+              "2 sRGB levels, its shadow and walls hidden)", all(state[2] is not None and state[2] <= 2 for state in results.values()), results)
+    walls = {}
+    for name, keys in (("home", []), ("spun", ["ArrowLeft"] * 36)):
+        page.focus("#rowPreview3d"); page.keyboard.press("0")
+        for key in keys:
+            page.keyboard.press(key)
+        page.wait_for_timeout(300)
+        walls[name] = page.evaluate(WALL_LEVELS, "#rowPreview3d .oblique-board")
+    check("light: the Row FPC's walls lit by the way they face: at the home view the near wall (turned down, from the key) darker "
+          "than the left one (facing the key) by 15 levels or more; spun half round the near wall's part and the far wall's change "
+          "places",
+          walls["home"].get("3", 999) < walls["home"].get("6", 0) - 15 and walls["spun"].get("3", 0) > walls["spun"].get("9", 999) - 1
+          and walls["spun"] != walls["home"], walls)
+    page.focus("#rowPreview3d"); page.keyboard.press("0"); page.wait_for_timeout(200)
+    shadows = {}
+    for pane, board in (("#stackedPreview", "#stackedPreview .assembly-board.is-lower"), ("#rowPreview3d", "#rowPreview3d .oblique-board")):
+        page.evaluate(f"() => document.querySelector('{pane}').scrollIntoView({{block: 'center'}})"); page.wait_for_timeout(200)
+        for name, keys in (("home", []), ("turned", ["ArrowDown"] * 5 + ["ArrowLeft"] * 12), ("spun", ["ArrowLeft"] * 36)):
+            page.focus(pane); page.keyboard.press("0")
+            for key in keys:
+                page.keyboard.press(key)
+            page.wait_for_timeout(250)
+            shadows[f"{pane} {name}"] = (page.evaluate(f"() => document.querySelector('{pane}').dataset.orbit || ''"),) + tuple(page.evaluate(SHADOW_OFFSET, board))
+        page.focus(pane); page.keyboard.press("0"); page.wait_for_timeout(200)
+    check("light: each shadow lies down and to the right of its board on screen (2 px or more each way) at the home view, tilted and "
+          "turned (32 / 40 degrees) and spun half round, and it is seen", all(dx >= 2 and dy >= 2 and opacity > 0.1 for _, dx, dy, opacity in shadows.values()), shadows)
+    page.click('[data-assembly-mode="plan"]'); page.wait_for_timeout(300)
+    plan = page.evaluate("() => [...document.querySelectorAll('#stackedPreview :is(.board-light, .board-shadow)')].map(leaf => getComputedStyle(leaf).display)")
+    check("light: the plan view stays a flat plan, unlit (no veil, no shadow)", plan and set(plan) == {"none"}, plan)
+    page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(150)
+    check("light part: no console errors", not console_errors(page), console_errors(page))
+    page.close()
+
+
+FOCUS_RING = """() => { const node = document.activeElement; const style = getComputedStyle(node);
+    return [node.id || node.dataset.zoom || node.dataset.assemblyMode || node.textContent.trim(), style.outlineStyle, parseFloat(style.outlineWidth)]; }"""
+
+
+def part_figure_controls(browser):
+    """The figures' controls in their frames (the user's request of 2026-11-06: "这个可以把button做进示意图框里面放在左侧
+    排列 更简洁; 同时字可以更简略; 而且可以统一, 3d view/2d view"), Rectangular mode as it opens at 1440, 900, 390 and 360 px
+    wide: no bar over the board cards' previews (the frame right under the header); each frame's controls in one row 12 px
+    from its top left (the cards' "3D view" and "2D view" tabs and, with the 2D view, its zoom; the registration's "3D view"
+    and "2D view"), Reset view 12 px from the registration's top right in its 3D view only, every button 24 x 24 px or more,
+    and at each view's home nothing drawn under them (rp.figure_controls: the 2D views, the oblique views, the exploded and
+    the plan view); the default boards' 2D windows as before (they lie clear of the controls, no band); the zoom's level
+    "1.0×", its scale in the tooltip; no caption under the registration in either view (2026-11-06).  At 1440 px Tab goes
+    from the 2D view's tab through the zoom's buttons and from the registration's switch through its view to Reset view,
+    each with its focus ring."""
+    for width in (1440, 900, 390, 360):
+        page = new_page(browser, width=width, height=900, folded=True)
+        boot(page)
+        page.wait_for_timeout(300)
+        problems, data = figure_controls(page)
+        labels = {name: item["labels"] for name, item in data.items()}
+        check(f"figure controls {width}: the 2D views and the exploded view: in one row 12 px in, Reset view top right, 24 px targets, nothing drawn under them",
+              problems == [] and labels == {"row": [["3D view", "2D view"], ["−", "+", "Reset"]], "column": [["3D view", "2D view"], ["−", "+", "Reset"]],
+                                            "registration": [["3D view", "2D view"]]} and len(data["registration"]["reset"]) == 1, (problems, labels, data))
+        frame = page.evaluate("""() => ['row', 'column'].map(key => { const card = document.getElementById(key + 'Card');
+            return [Math.round(card.querySelector(':scope > header').getBoundingClientRect().bottom), Math.round(card.querySelector(':scope > .canvas-wrap').getBoundingClientRect().top),
+                    document.querySelector('#' + key + 'Preview svg').style.paddingTop]; })""")
+        check(f"figure controls {width}: each board card's preview right under its header (no bar), the default boards' 2D windows as before (no band)",
+              all(abs(bottom - top) <= 1 and pad == "" for bottom, top, pad in frame), frame)
+        level = page.evaluate("() => [document.getElementById('rowZoomLevel').firstChild.textContent, document.getElementById('rowZoomLevel').title]")
+        check(f"figure controls {width}: the zoom's level 1.0× alone in sight, its scale in the tooltip", level[0] == "1.0×" and re.fullmatch(r"1\.0× · \d+\.\d px/mm", level[1]), level)
+        page.click('[data-assembly-mode="plan"]'); page.wait_for_timeout(300)
+        problems, data = figure_controls(page)
+        check(f"figure controls {width}: the plan view: its switch in one row 12 px in, no Reset view, nothing drawn under it",
+              problems == [] and data["registration"]["reset"] == [] and data["registration"]["labels"] == [["3D view", "2D view"]], (problems, data["registration"]))
+        bare = [stacked_bare(page)]
+        page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(150)
+        bare.append(stacked_bare(page))
+        check(f"figure controls {width}: no caption under the registration in the plan or the exploded view (2026-11-06)", all(ok for ok, _ in bare), bare)
+        page.click("#rowTab3d"); page.click("#columnTab3d"); page.wait_for_timeout(400)
+        problems, data = figure_controls(page)
+        check(f"figure controls {width}: the oblique views: their tabs alone (no zoom), 12 px in, nothing drawn under them",
+              problems == [] and data["row"]["labels"] == [["3D view", "2D view"]] and data["column"]["labels"] == [["3D view", "2D view"]], (problems, data["row"], data["column"]))
+        page.click("#rowTab2d"); page.click("#columnTab2d"); page.wait_for_timeout(200)
+        if width == 1440:
+            page.locator("#rowCard").screenshot(path=f"{SHOTS}/figure_controls_row_1440.png")
+            page.locator(".stacked-review").screenshot(path=f"{SHOTS}/figure_controls_stacked_1440.png")
+            page.focus("#rowTab2d")
+            rings = []
+            for _ in range(3):
+                page.keyboard.press("Tab"); rings.append(page.evaluate(FOCUS_RING))
+            page.focus('[data-assembly-mode="exploded"]'); page.keyboard.press("Tab")
+            rings.append(page.evaluate(FOCUS_RING))
+            for _ in range(2):
+                page.keyboard.press("Tab"); rings.append(page.evaluate(FOCUS_RING))
+            check("figure controls: Tab from the 2D view's tab to −, + and Reset, from the registration's 3D view to its 2D view, the view and Reset view, each "
+                  "with its focus ring", [ring[0] for ring in rings] == ["out", "in", "reset", "plan", "stackedPreview", "stackedReset"]
+                  and all(style != "none" and size >= 2 for _, style, size in rings), rings)
+        check(f"figure controls {width}: no console errors", not console_errors(page), console_errors(page))
+        page.close()
+
+
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        parts = (part_boot_and_limits, part_clean_interface, part_looks, part_row_traces, part_stacked_pin1, part_stacked_orbit, part_two_sided, part_coin, part_depth, part_nudges_and_advice, part_stale, part_zoom, part_drc_and_failures,
-                 part_aria, part_downloads_and_http)
+        parts = (part_boot_and_limits, part_clean_interface, part_looks, part_row_traces, part_stacked_pin1, part_stacked_orbit, part_two_sided, part_coin, part_depth, part_view_light, part_nudges_and_advice, part_stale, part_zoom, part_drc_and_failures,
+                 part_aria, part_downloads_and_http, part_figure_controls)
+        parts += (part_library_header,)  # the header's Library link (2026-11-05)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
         for part in chosen:
             print(f"--- {part.__name__}", flush=True)

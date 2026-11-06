@@ -110,8 +110,9 @@ Every opening has `kind, net, nets, opening_for, anchor, x, y, width_mm,
 height_mm`: `net` is the one net of a single-electrode window, else `null`;
 `nets` lists every net the window exposes; `opening_for` is the electrode
 kind or `connector_contacts`.  Openings never cross the outline.  The
-default design (1.4 mm electrodes at 2.0 mm pitch, bridges of 0.4 mm) gets
-one merged field window per board.
+default design (1.0 mm electrodes at 2.0 mm pitch, bridges of 0.8 mm) gets
+one window per electrode; with 1.4 mm electrodes at 2.0 mm pitch (bridges of
+0.4 mm, the default until 2026-11-06) it gets one merged field window per board.
 
 On a [masked board](#masked-boards) the merged field window follows the
 electrodes: `{kind: "electrode_field_opening", shape: "polygon", net: null,
@@ -861,8 +862,9 @@ Each of the 30 `checks` is
 - `violation_count` is exact: every pair that can violate a rule is measured
   (sort-and-sweep over bounding boxes; nothing is pruned).
 - `measured_mm` is `null` when nothing was in reach (pairs are measured up
-  to 2 mm beyond the rule), e.g. `coverlay_bridge` on the default boards whose
-  only two windows are far apart; a `required_mm` of `null` marks a
+  to 2 mm beyond the rule), e.g. `coverlay_bridge` on boards whose only two
+  windows are far apart (the merged field window and the contacts' window of
+  1.4 mm electrodes at 2 mm); a `required_mm` of `null` marks a
   pass/fail containment check.
 - `where` names the extreme: among values equal at 1e-6 mm the first in the
   deterministic sweep order wins, so records are identical across Python
@@ -898,8 +900,8 @@ instead, 0.246 mm, as the traces between the contacts do (measured 0.246 /
 | `route_route_clearance` | different-net route copper gap; the design's `routing.trace_space_mm`, and for a pair with a tail piece the finger-section spacing (`finger_section`) | 0.127 / 0.127 | `E_ROUTE_CLEARANCE` | `layers.top_copper.routes` | 0.127 / 0.169721 |
 | `pad_trace_clearance` | contact to other-net route; `routing.min_pad_to_trace_mm` | 0.2 / 0.2 | `E_PAD_TRACE_CLEARANCE` | `layers.top_copper.pads` | 0.223 / 0.223 |
 | `pad_pad_clearance` | contact to contact; `routing.min_pad_space_mm` | 0.2 / 0.2 | `E_PAD_CLEARANCE` | `layers.top_copper.pads` | 0.2 / 0.2 |
-| `electrode_electrode_clearance` | electrode to electrode; `routing.min_electrode_gap_mm` | 0.25 / 0.25 | `E_ELECTRODE_CLEARANCE` | `layers.top_copper.electrodes` | 0.6 / 0.6 |
-| `electrode_route_clearance` | electrode to other-net route; the route rule | 0.127 / 0.127 | `E_ELECTRODE_ROUTE_CLEARANCE` | `layers.top_copper.electrodes` | 0.250001 / 0.950101 |
+| `electrode_electrode_clearance` | electrode to electrode; `routing.min_electrode_gap_mm` | 0.25 / 0.25 | `E_ELECTRODE_CLEARANCE` | `layers.top_copper.electrodes` | 1.0 / 1.0 |
+| `electrode_route_clearance` | electrode to other-net route; the route rule | 0.127 / 0.127 | `E_ELECTRODE_ROUTE_CLEARANCE` | `layers.top_copper.electrodes` | 0.250001 / 0.984833 |
 | `electrode_pad_clearance` | electrode to contact; the route rule | 0.127 / 0.127 | `E_ELECTRODE_PAD_CLEARANCE` | `layers.top_copper.electrodes` | null / null |
 | `copper_to_outline` | contacts and electrodes to the outer edge; `routing.copper_to_edge_mm` | 0.3 / 0.3 | `E_COPPER_EDGE_CLEARANCE` | `outline.points` | 0.3 / 0.3 |
 | `route_to_outline` | route copper to the outer edge; `routing.copper_to_edge_mm` | 0.3 / 0.3 | `E_ROUTE_EDGE_CLEARANCE` | `layers.top_copper.routes` | 0.300999 / 0.364499 |
@@ -907,8 +909,8 @@ instead, 0.246 mm, as the traces between the contacts do (measured 0.246 /
 | `copper_inside_outline` | the centre of every copper item inside the outline and outside the cutouts (the distance records cover the rest) | pass/fail | `E_COPPER_OUTLINE` | `outline.points` | null / null |
 | `active_field_margin` | board material around the taxel field; `routing.active_edge_clearance_mm` | 0.5 / 0.5 | `E_ACTIVE_MARGIN` | `outline.points` | 0.5 / 0.5 |
 | `coverlay_openings_inside_outline` | openings inside the outline, clear of cutouts | pass/fail | `E_COVERLAY_OUTLINE` | `layers.top_coverlay_openings` | null / null |
-| `coverlay_bridge` | coverlay between two openings; `coverlay.coverlay_min_bridge_mm` | 0.5 / 0.5 | `E_COVERLAY_BRIDGE` | `layers.top_coverlay_openings` | null / null |
-| `coverlay_opening_to_trace` | opening to a route of another net; `coverlay.coverlay_opening_to_trace_mm` | 0.15 / 0.15 | `E_COVERLAY_TRACE_CLEARANCE` | `layers.top_coverlay_openings` | 0.15 / 0.214656 |
+| `coverlay_bridge` | coverlay between two openings; `coverlay.coverlay_min_bridge_mm` | 0.5 / 0.5 | `E_COVERLAY_BRIDGE` | `layers.top_coverlay_openings` | 0.8 / 0.8 |
+| `coverlay_opening_to_trace` | opening to a route of another net; `coverlay.coverlay_opening_to_trace_mm` | 0.15 / 0.15 | `E_COVERLAY_TRACE_CLEARANCE` | `layers.top_coverlay_openings` | 0.150001 / 0.214656 |
 | `contact_exposure` | margin by which each contact and electrode lies inside an opening of its net | 0.0 / 0.0 | `E_CONTACT_EXPOSURE` | `layers.top_coverlay_openings` | 0.05 / 0.05 |
 | `stiffener_inside_outline` | every stiffener inside the outline, clear of cutouts | pass/fail | `E_STIFFENER_OUTLINE` | `layers.bottom_stiffener` | null / null |
 | `stiffener_zone` | connector stiffener flush with the tip and both tail sides, `tail.stiffener_length_mm` long (largest deviation) | 0.0 / 0.0 | `E_STIFFENER_ZONE` | `layers.bottom_stiffener` | 0.0 / 0.0 |
@@ -919,12 +921,12 @@ instead, 0.246 mm, as the traces between the contacts do (measured 0.246 /
 | `concave_fillet_radius` | effective radius of each concave run; R x cos(arc step / 2) from `outline.outline_fillet_radius_mm` and `outline.arc_segment_max_angle_deg` | 0.498097 / 0.498097 | `E_CONCAVE_CORNER` | `outline.points` | 0.517862 / 0.532658 |
 | `neck_width` | narrowest outer-outline cross-section between the rounded tip and the body; the tail width (the slot is covered by the cutout records) | 6.5 / 16.5 | `E_NECK_WIDTH` | `outline.points` | 6.5 / 16.5 |
 | `connectivity` | nets whose tail piece does not start on its contact, whose fan-out piece does not continue from the tail piece's end (the junction) or does not end on its electrode, or that lack exactly one piece of each; NC contacts touching copper; nets without a contact | 0.0 / 0.0 | `E_CONNECTIVITY` | `layers.top_copper.routes` | 0.0 / 0.0 |
-| `min_electrode_width` | narrowest electrode; `routing.min_electrode_width_mm` | 0.1016 / 0.1016 | `E_ELECTRODE_WIDTH` | `layers.top_copper.electrodes` | 1.4 / 1.4 |
+| `min_electrode_width` | narrowest electrode; `routing.min_electrode_width_mm` | 0.1016 / 0.1016 | `E_ELECTRODE_WIDTH` | `layers.top_copper.electrodes` | 1.0 / 1.0 |
 | `route_width` | largest deviation of a route piece from its width (fan-out: the design's `routing.trace_width_mm`, tail: `routing.finger_trace_width_mm`); a piece of neither kind, or narrower than JLC's minimum for the profile's copper (0.1016 mm for 1 oz), also fails | 0.0 / 0.0 | `E_ROUTE_WIDTH` | `layers.top_copper.routes` | 0.0 / 0.0 |
 | `tail_width` | tail width at the contacts minus (P + 1) x pitch; `connector.tail_width_tolerance_mm` | 0.07 / 0.07 | `E_CONNECTOR_TAIL` | `outline.points` | 0.0 / 0.0 |
 | `contact_geometry` | largest deviation of contact size, start from the tip, pitch and outer side offsets | 0.0 / 0.0 | `E_CONNECTOR_TAIL` | `layers.top_copper.pads` | 0.0 / 0.0 |
-| `board_short_side` | short side of the outline; `limits.maximum_outline_short_side_mm` | 234.0 / 234.0 | `E_BOARD_SIZE` | `outline.points` | 41.765841 / 41.765841 |
-| `board_long_side` | long side of the outline; `limits.maximum_outline_long_side_mm` | 490.0 / 490.0 | `E_BOARD_SIZE` | `outline.points` | 67.919595 / 67.919595 |
+| `board_short_side` | short side of the outline; `limits.maximum_outline_short_side_mm` | 234.0 / 234.0 | `E_BOARD_SIZE` | `outline.points` | 41.365841 / 41.365841 |
+| `board_long_side` | long side of the outline; `limits.maximum_outline_long_side_mm` | 490.0 / 490.0 | `E_BOARD_SIZE` | `outline.points` | 67.520543 / 67.520543 |
 
 The concave-fillet requirement is the one value not taken verbatim from the
 profile: it allows the sagitta of the 10 degree polygonal arcs (R0.5 drawn

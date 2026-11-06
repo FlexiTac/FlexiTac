@@ -45,8 +45,17 @@ from engine.layout import apply_tail_side, build_column_board, build_row_board
 
 try:
     from geometry_checks import bounds, edges, inside_or_on, point_in_polygon, segment_box_distance, segment_distance, segments_cross
+    import defaults_of_before
 except ImportError:  # run as tests.test_mask_layout
     from tests.geometry_checks import bounds, edges, inside_or_on, point_in_polygon, segment_box_distance, segment_distance, segments_cross
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
+
 
 SURFACE = "surface_matrix_v1"
 PROFILE = load_profile(SURFACE)

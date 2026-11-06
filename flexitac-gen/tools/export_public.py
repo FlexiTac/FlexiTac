@@ -33,6 +33,8 @@ PUBLIC = (
     "claude/APP_HANDOFF.md", "claude/verification",
     "tools/README.md", "tools/build_static_site.py", "tools/export_public.py", "tools/public",
     "tools/mutation_check.py", "tools/golden_values.py", "tools/compare_easyeda_gerbers.py", "tools/browser",
+    # The Library's writer (web/library/ is in web; its importer, tools/library_import.py, reads the private recipes).
+    "tools/library_write.py",
 )
 
 

@@ -366,10 +366,12 @@ class SurfaceIdentityTests(unittest.TestCase):
     # The surface default build (12 x 32 at 2 mm): pinned like the generic golden build.  Re-pinned by P5-diagonal-bus.md
     # section 23 (2026-10-25): the surface profile's tails to 200 mm, a new profile digest (before: fc86e20497d3, b9bf445b...).
     # Re-pinned by the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes):
-    # a new profile digest and revision (before: 89ad79654dd6, 0cf8782b...).
+    # a new profile digest and revision (before: 89ad79654dd6, 0cf8782b...).  Re-pinned by the user's decision of
+    # 2026-11-06 (the default fill 0.7 -> 0.5): the default electrodes 1.4 -> 1.0 mm, a new design (before: 527bfeafd16e,
+    # d580000c...).
     DEFAULT_IDENTITY = {
-        "build_id": "tactile-fpc-12x32-527bfeafd16e",
-        "design_sha256": "d580000c9c2ed08ee027ea4c01c84bf14c943ab75dfc58a4643a740f4d4e07af",
+        "build_id": "tactile-fpc-12x32-0fa31c3236be",
+        "design_sha256": "87581f25ad863355e1fae87419798e53537e9a403ef900f0122e0a46ac1ff38a",
         "profile_sha256": "308eb3296df3107301f3789d1013421f7ee5dc92e4e4133417bb88a8eee1aa95",
         "template": "surface-matrix/1",
         "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-10-29"},

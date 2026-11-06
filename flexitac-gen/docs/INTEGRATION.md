@@ -115,9 +115,13 @@ physical top board **turned over about its tail axis** (copper facing down),
 so both tails exit the shared connector side; it registers both on their
 taxel fields.  Its exploded 3D view turns with the mouse: drag across to turn
 the stack in its plane and down or up to tilt it (from straight above to under
-the stack); the arrow keys turn it by 5 degrees, and a double click or 0 sets
-it back; each board card's oblique view turns the same way.  The plan view
-keeps still.  Both 3D views draw each single-sided board's two sides: its
+the stack); the arrow keys turn it by 5 degrees, and a double click, 0 or
+**Reset view** (over its top right, 2026-11-06) sets it back; each board
+card's oblique view turns the same way.  The plan view keeps still.  Its
+switch, **3D view** and **2D view**, sits over the figure's top left (the
+board cards' tabs too, and their 2D view's zoom; the user's request of
+2026-11-06), and the plan view's scene shrinks where its boards would reach
+under it.  Both 3D views draw each single-sided board's two sides: its
 copper side where that faces the camera, else its polyimide, with the copper
 seen through it and the PI stiffener outermost (no coverlay window, no ENIG);
 so from above the turned-over top board shows its polyimide side.  Each board
@@ -125,7 +129,8 @@ is as thick as its result's stack-up (`fpc.stackup`: 0.11 mm of core PI,
 copper, coverlay adhesive and coverlay, and the 0.225 mm PI stiffener below),
 behind its copper side, which stays in place; at the views' scale 0.11 mm is
 under a pixel, so the FPC is drawn at least 2 px thick and the stiffener in
-proportion (the captions say so); the walls run along the edges only, so the
+proportion (the oblique views' caption says so; the stacked view has no
+caption since 2026-11-06); the walls run along the edges only, so the
 top board stays see-through over the field.  A coin for
 scale (a US quarter, 24.26 mm and 1.75 mm thick, drawn to scale, its face the
 US Mint's photo) lies on the table 56 px below the bottom board, right of the
@@ -133,7 +138,14 @@ stack and level with its bottom, so no board covers it; each board card has
 one beside its board, at least 2 mm clear of the outline (the 2D view puts
 it at its window's bottom right, the board centred, and shrinks the board a
 little where it would be under the coin there; the oblique view lays it 28 px
-below the board).  Seen from
+below the board).  The exploded view and the oblique views are lit as the
+sensor on the part is (2026-11-05): its lights, fixed to the viewer, shade
+each board's side by the way it faces them (as drawn at the exploded view's
+home), a faint satin sweep of the studio's softboxes slides over the
+coverlay as the view turns, each wall is lit by the way it faces, and the
+shadows fall away from the key, down and to the right on screen, whatever
+the turn; nothing is painted outside a board's outline and the plan view
+stays unlit.  Seen from
 above, through the top board:
 
 - the bottom board looks exactly like its own top view;
@@ -173,6 +185,237 @@ boards stay orthogonal and register; one board's index direction then runs
 the other way in the shared frame, and the tails exit opposite edges), and
 rejects sides a quarter turn apart (`E_TAIL_SIDE_PARALLEL`, the electrodes
 would be parallel).
+
+#### The sensor on the part (CAD mode)
+
+Added 2026-11-05 at the user's request: in CAD mode ("Gen by Surface") the
+stacked card has a second figure beside the registration, the **sensor on the
+part** (`web/cad/drape.js` computes it, `web/cad/onpart.js` draws it with
+three.js).  The loaded part is drawn in a matte light grey.  Outward from it
+along the face's mean normal come the bottom FPC (copper out, glued to the
+part), the film (velostat, satin black, over the taxel field: the Row
+board's `active_outline` when the field is masked) and the top FPC (turned
+over: polyimide out, its copper toward the film).  Seen from outside, this is
+what the finished sensor looks like.  Rectangular mode shows the registration
+alone, as before.
+
+It needs no request of its own.  Once the build is mapped (`cad.map` of the
+shown build: the same `build_id`, mesh and unit) it is built from what the
+page holds:
+
+- the fit's chart (`selection.facets` and `facets_uv` of the fit reply,
+  the strain-limited disk's when limited);
+- the STL's corners;
+- the mapped placement's field frame (`field_origin_base`, `field_origin_uv`,
+  `field_x_uv`, `field_y_uv`);
+- each board SVG's view box and `data-active-region`.
+
+A point of a board SVG (root units `(sx, sy)` after its Y flip, taxel field
+`R = (Rx, Ry, Rw, Rh)`) lies in the base frame as `surface.fit.board_outlines_base`
+places it:
+
+- the bottom board: `bx = ox + (sx - Rx)`;
+- the top board, turned over about its tail axis: `bx = ox + (Rx + Rw - sx)`;
+- both: `by = oy + (Ry + Rh - sy)`.
+
+Then `uv = field_origin_uv + (bx - ox) field_x_uv + (by - oy) field_y_uv`, and
+the 3D point follows barycentrically on the chart's facets, as the map's
+overlay does.  Each board is a grid laid over its SVG's view box; its texture
+coordinate is the point's share of the view box.  Each grid point goes through
+the formulas above, so the copper and the outlines land where
+`/api/surface/map` puts them.  The browser checks hold them within 5 µm of the
+overlay, the field and the taxels.  Beyond the chart (a tail past the face, a
+band over an edge) a board runs flat on the plane of the nearest boundary
+facet.
+
+The art comes from the page (`app.js` answers `fpc:board-art`): each board's
+copper side and polyimide side as standalone SVGs in the page's look, with the
+look's CSS rules and paints inlined.  An SVG drawn as an image sees neither
+the page's CSS nor its `<defs>`.  The SVGs are rasterised through `data:`
+URLs, as the page's CSP (`img-src 'self' data:`) allows.
+
+The exploded spacing is visual only: on the part the stack is
+`stack.contact_offset_mm` (0.47 mm) thick.  The layers are shifted rigidly
+along the normal (on a face whose normals spread more than 60 degrees, along
+their own normals), and **Assembled** lays them on the part.  The figure turns
+with the mouse.  The arrow keys turn it by 5 degrees; 0, a double click or
+**Reset view** (over the view's top right) bring it home.  The wheel scrolls
+the page.  **Exploded** and **Assembled** sit over its top left (no title
+since 2026-11-06: the frame shows the part), and its pane keeps its top
+40 px for them and Reset view, the canvas below.
+
+It opens exploded as the registration's figure beside it opens (the user's
+decision of 2026-11-05): 57 degrees off the stack's normal and turned 20
+degrees about it, one pair of angles for both figures (`app.js`'s
+`ORBIT_HOME`, `styles.css`'s `.assembly-camera` and `drape.js`'s
+`HOME_TILT_DEG` and `HOME_SPIN_DEG`, which `tests/test_surface_web.py` reads
+as one).  The camera's up is the stack's normal, so the screen's up and the
+roll are the left figure's, a drag across turns the stack about its normal
+and a drag down tilts it toward the view from above, and the arrow keys turn
+it the left figure's way.  The two cameras turn alike (their screen
+directions of the board's axes and of the normal agree to 0.01 degrees);
+each figure's lens, 30 degrees high in both, adds its own perspective where
+the field's centre lies in its pane, which the part's framing sets on the
+right: at the field's centre the board's x agrees within 1 degree, its y
+(the tails' direction, the most foreshortened) and the explode within 2.5
+and 0.3 degrees on the UMI finger and up to 9 and 5 degrees on the I2RT
+YAM's 1 mm sensor, whose part puts the stack at the pane's right
+(`cad_checks.py` prints them).
+
+After the review of 2026-11-05:
+
+- The camera frames the sheets and the part within three times the sheets'
+  radius, so a finger or a gripper's tip is shown whole.  A larger part is
+  cut where it reaches farther.
+- **Assembled** has its own home, nearer the face's normal, so the finished
+  sensor's field is seen nearly face-on (since the look of 2026-11-05: 22
+  degrees round and 20 degrees toward the tails, 29.4 degrees off the
+  normal; 25 and 10 before, 26.8 degrees off).  Since the user's decision
+  of 2026-11-05 above, 35 degrees off at the left figure's turn.
+- The sheets' outlines are the art's alpha, which the materials turn into
+  coverage, so the renderer's multisampling antialiases them.
+- The checks' measurements run only with `?probe` in the page's URL:
+  reading the drawn pixels back, and comparing the drape with the map.
+  The browser checks open the page with it.  A visitor's page draws the
+  figure and does no more.
+
+After its second review (2026-11-05):
+
+- A covered sample of an outline keeps the larger of its alpha and what is
+  already there (custom blending: the colour replaces, the alpha takes the
+  maximum), and the sheets are drawn after the part and back to front as
+  the camera sees them.  The coverage's alpha had been written as it was,
+  so the pane's grey showed through round every outline over the part.
+- The camera sits where the sheets and the part just fit the lens with
+  FRAME_MARGIN (1.15) to spare, its line of sight midway between the
+  extremes, so the figure has the same room on both sides of the axis that
+  binds (about 6.5 % of the pane).
+- The figure's cursor is grab (grabbing while it turns), as over the left
+  figure.
+- In the split the registration's caption had run to two lines over the
+  pin-1 rings past the tails' end; it kept 12 px off the pane's right, and
+  the plan view's scene sat 15 px higher (400 px tall at most in the
+  480 px pane).  Since 2026-11-06 the registration has no caption (the
+  user's request), and its plan view is centred in its pane as in the
+  whole card.
+
+The look of 2026-11-05 (the user's feedback: light and shade, not only
+shadows; the flat black film had read as a hole cut in the stack) was built
+in a look lab on a copy of the figure, chosen by two judges and then merged
+into `onpart.js`.  Its parts are sections of their own:
+
+- **Lights** (`studioLights`): the figure's own, no longer the 3D view's
+  old ones; since the 3D view's look of 2026-11-05 they, the studio and the
+  tone mapping are `studio.js`'s, which the 3D view (`viewer.js`) draws in
+  too (its old `addViewLights` gone).  A hemisphere (a
+  bright ceiling and a darker, cooler floor that models the part's faces),
+  a key from the upper left as in the left figure, a rim from behind and a
+  dim sheen lamp, all hung on the camera: a turn turns the sensor under
+  fixed lights, as on a turntable, and nothing jumps on a mode switch.
+- **Environment** (`studio`, `studioFor`): a studio built in code (a grey
+  room, softboxes and rim strips; no image, which the CSP would refuse),
+  prefiltered once by three.js's `PMREMGenerator` and turned with the
+  camera.  The film and the boards take only its reflections; their
+  diffuse light is the lights', as the part's.  Without half-float render
+  targets, or where three.js's shader text has changed, or where making it
+  fails, the sheets are lit by the lights alone, with one console warning.
+  A lost WebGL context that comes back gets the studio made again, and
+  what it drew is dropped without a dispose (see the fix round below).
+- **Tone mapping**: Khronos PBR Neutral, which keeps the art's colours and
+  only rolls off highlights.  The canvas stays transparent over the pane's
+  light gradient, which stays light in dark mode.
+- **Materials**: the part a matte light grey (the 3D view's times 0.9, so
+  its lit faces stand off the pane); the film a satin black with a frosted
+  sheen, a soft gradient from its top to its foot at the Exploded home
+  (about sRGB 85 down to 55 on the default part); since the Exploded home
+  became the left figure's (2026-11-05) the film mirrors the room between
+  the studio's back softbox and sheen lamp there, which were set for the
+  home before, so it has a lamp of its own (`FILM_LAMP`, the user's request
+  of the same day): a light only the film's shader takes, aimed for each
+  drawing where the film seen from the Exploded home mirrors it just past
+  its top, then hung on the camera, about sRGB 88 down to 64 on the default
+  part (44 down to 38 without it); the boards, the part and the 3D view
+  draw as before; the boards their art
+  under a satin coverlay whose weak reflection is tinted toward the art's
+  hue (a faint amber sweep, never a white veil; the top FPC's median stays
+  near the left figure's orange).  At the shared home the left figure
+  draws its upper board at 78 % opacity (the registration shows the lower
+  one through it), so there the top FPC reads lighter: on the default part
+  at 1440 px its face's mean sRGB is 202, 111, 4 on the part and 209, 141,
+  69 on the left, which the same art lit here and laid at 78 % over the
+  left's pane matches within 2 levels in red and green (210, 139, 57).
+- **Edges**: each layer an edge band along its outline and cutouts, wound
+  outward and drawn from the front only, 2.5 CSS px deep at least when
+  exploded; assembled each band reaches down to the layer under it, so the
+  three tile one stack edge standing on the part.
+- **Contact shade**: in Assembled only, the stack's footprint seen along
+  the normal, baked once per drawing into a small texture (a tight line
+  and a soft halo, only on the part's surface near the stack's underside)
+  that darkens the part's light.  There is no shadow map and nothing per
+  frame.  The tight line also reaches one texel (0.25 mm) inside the
+  footprint's edge where that edge faces the camera, so it starts at the
+  stack's edge band.  Assembled also skips the film's face, which both
+  boards cover.
+
+What the merge kept from the figure's reviews, and the choices it made:
+
+- The outlines stay coverage with the custom blending, and the sheets are
+  drawn after the part and back to front: with the edge bands the browser
+  checks still find no seam round the outlines, exploded or assembled, and
+  the film's outline about half antialiased (measured on its face alone,
+  since the band's own edges are smoothed by the multisampling in any case).
+- Each sheet keeps one position buffer, drawn dynamic, into which a mode
+  switch copies the other mode's positions (the look lab had found that a
+  new attribute made the reflective sheets vanish on SwiftShader).
+- The framing is unchanged: the bands lie on the outlines and the shade on
+  the part, so the margins are the same (about 6 % of the pane).
+- Drawing one turn costs 1.7 to 2.3 times what it did on SwiftShader (the
+  studio's reflections and the physically based materials; at a device
+  pixel ratio of 2 the default part 22 to 47 ms, the crank's tip 44 to
+  78 ms).  The studio costs about 30 ms once, and the contact shade 35 to
+  60 ms of JavaScript on the first Assembled of a drawing.  A frame with
+  nothing turned costs what it did.
+
+The look's fix round (2026-11-05, the minor findings of its review):
+
+- A lost WebGL context that comes back: three.js has rebuilt its state
+  for the new context by the time the figure hears of it, so disposing
+  the old studio, sheets or part then deleted the lost context's objects
+  in the new one.  Chrome logged 40 `WebGL: INVALID_OPERATION` warnings
+  after one loss.  The figure now drops them without a dispose, and the
+  page draws it again; `part_on_part_studio` counts the warnings (none,
+  also after a drawing on the restored context).
+- The User Timing measures (`on-part studio`, `on-part contact`) sit
+  outside the studio's build and never throw: in a browser whose
+  `performance.measure` refuses an options object, a measure inside the
+  build's `try` had thrown away a studio that was made, with a wrong
+  warning, and the contact shade's had broken the Assembled click.
+- A stack without a contact footprint keeps that result until its next
+  drawing, so it is not computed again at every Assembled.
+- The unit suite checks every shader edit against the vendored three.js:
+  each anchor occurs once in the text it edits, and every name the
+  inserted GLSL uses (`outgoingLight`, `reflectedLight`'s specular terms,
+  `diffuseColor`, `alphaTest`, `transformed`, `modelMatrix`,
+  `cameraPosition`) is declared before it runs.  A three.js upgrade that
+  renames one fails there first, not as a compile error in a visitor's
+  browser.  `part_on_part_patches` serves the figure with one anchor
+  broken: it is still drawn, with one warning and no seam.
+- On a curved part the stack's footprint can end a texel or so beyond its
+  edge band.  On the Trossen WXAI sock this left a light line about
+  2 device px wide between the band and the contact shade: across its
+  right edge `53 48 70 | 195 195 185 174 163 151 147`.  The core now
+  starts one texel inside the footprint's rings, on the edges facing the
+  camera only (the shader follows the halo's gradient outward), and not
+  round a strip of cells turned from the normal.  The same edge now reads
+  `53 48 70 | 156 150 149 148 147 146 147`.  Beside the soft finger's
+  knuckle in its wrap the part is seen inside the footprint past an edge
+  facing away, and there the light strip keeps its look: 38 of its 2,550
+  device px darker by more than 24 levels, where a core inside every edge
+  had framed it with 836.  The boards and the Exploded view are unchanged
+  pixel for pixel, and on the part only pixels beside the stack's edge
+  change (on the wrap also 32 beside the knuckle's strip, 35 levels at
+  most).  `part_on_part_contact` checks the sock: two fifths or more of
+  the part's pixels along the stack's edge darkened (0.32 before, 0.49).
 
 ## The diagonal Row bus
 
@@ -339,8 +582,9 @@ mask have no copper crossing, so they always read 0; the CAD taxel map
 lists only the active ones and its `readout` gives the row spans
 (`inactive: "always 0"`), and the review bundle's `taxels.csv` lists every
 position with `active`.  They stay 0 while the stack's misregistration is
-below the registration's `inactive_crossing_separation_mm` (0.4 mm at the
-2 mm pitch and fill 0.7, 0.05 mm at the tightest 0.6 mm pitch).
+below the registration's `inactive_crossing_separation_mm` (0.8 mm at the
+2 mm pitch and the default fill 0.5, 0.4 mm at fill 0.7, 0.05 mm at the
+tightest 0.6 mm pitch).
 
 CAD mode's fit option `reader` sizes both tails for a reader of 16 x 16,
 32 x 16 (the FlexiTac above: 16 sense lines on FPC1, 32 drive lines on
@@ -435,6 +679,52 @@ at the connector pin `pinout.csv` lists for it; on a
 [diagonal Row bus](#the-diagonal-row-bus) the Row pins fold, so that pin is
 not *k*.
 
+## A sensor from the Library
+
+The Library (`library.html`, 2026-11-05) holds sensors already fitted to
+open-source gripper fingers, each with an address that does not change:
+`library.html#<id>` shows it (its picture on the part, exploded or
+assembled, and over it the same scene in 3D to turn; its facts, Gerber
+ZIPs, part STL and licence)
+and `./?part=<id>` opens it in Gen by Surface, its part loaded and its sensor
+built from its shipped fit (`web/library/fits/<id>.json`, the request the
+page sends for it and the engine's reply), as the default part is.  `<id>` is
+`<part>-<pitch>mm` (for example `widowx-250-1mm`, `umi-finray-1.5mm`, and
+for the UMI finger's tapered tips `umi-trap-tip13.8-2mm` or
+`umi-convex-tip5.8-2mm`: the shape, the tip width in mm, the pitch); a
+part's id alone (`./?part=widowx-250`) opens its 2 mm sensor and a family's
+(`./?part=umi-tapers`, the tapered tips) its default tip, as
+`library.html#<id>` does, `?debug` may follow, and an unknown id opens the
+UMI finger with a warning.  The tapered tips' card is
+`library.html#umi-tapers`.  Generating
+from there is the usual flow: every setting stays editable, and the user's
+own file or Remove model leaves the Library sensor (`?part` goes from the
+address, the pitch, fill and rotation it set go back to the page's
+defaults).  The 3D view frames the mapped sensor (`main.js`
+`lookAtTaxels`), as for the default part, and the far end of a large part
+may leave it (the user's decision of 2026-11-05: the camera on the
+sensor); the sensor on the part beside the registration shows the part
+whole.  The Library's pictures and its sensor pages' 3D views are that
+figure (`web/cad/onpart.js`), drawn from the Library's own files with no
+engine or API (the user's requests of 2026-11-05;
+[LIBRARY_VIEW.md](LIBRARY_VIEW.md)): the sensor's fit and part, the art of
+its two boards (`web/library/art/<id>.json.gz`) and, for the seven
+grippers, the gripper drawn whole (`web/library/scenes/<part>.json`, its
+bodies in `web/library/bodies/`): a sensor on both fingers, the jaws fully
+open, the far finger's stack exploding into the gap, the near finger
+see-through in both views with its stack assembled (the user's decision of
+2026-11-06).  On a turned pair (Franka Hand,
+WidowX 250, Unitree Dex1, MakerMods) the other finger is the same part and
+carries the same boards; on a mirror pair (Trossen WidowX AI, ARX X5, I2RT
+YAM) it is the mirror-image part and carries the mirror-image boards,
+which are not this sensor's: its Gerber ZIPs are the pictured finger's.
+The UMI finger and its tapered tips keep the fingertip, and Gen by
+Surface's figure is as it was.  Each picture is that view at its Exploded
+and Assembled home, each drawing centred, every sensor's
+(`tools/browser/library_shots.py`).  The sensors use reader none (one tail pin per line); for the
+FlexiTac reader's connectors set Reader in Advanced Customization and fit
+again.
+
 ## Integration checklist
 
 1. Set `connector.row_pins` and `connector.column_pins` to the reader's
@@ -467,7 +757,7 @@ not *k*.
 ## Open items
 
 Product decisions not implemented (D8): the reference design's 0.6 mm
-electrodes (the default stays 1.4 mm), slits between electrodes, alignment
+electrodes (the default stays 1.0 mm), slits between electrodes, alignment
 holes or fiducials, and the canonical 12 x 32 compatibility template.  Not
 verified by this application: a JLCPCB upload of the current outlines,
 windows and stiffener; physical insertion into either connector; continuity

@@ -48,8 +48,17 @@ from exporters import build_exports
 
 try:
     import test_diagonal_bus as T
+    import defaults_of_before
 except ImportError:  # run as tests.test_generic_bus
     from tests import test_diagonal_bus as T
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
+
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERIC = "generic_matrix_v1"
@@ -335,7 +344,8 @@ class GenericDeterminismTests(unittest.TestCase):
         self.assertEqual(_digest_builds(), DIGEST)
 
     def test_the_digest_with_other_hash_seeds(self) -> None:
-        code = "import sys; sys.path.insert(0, 'tests'); import test_generic_bus as t; print(t._digest_builds())"
+        code = ("import sys; sys.path.insert(0, 'tests'); import defaults_of_before; defaults_of_before.start(cleanup=False); "
+                "import test_generic_bus as t; print(t._digest_builds())")
         for seed in ("0", "123"):
             with self.subTest(seed=seed):
                 environment = dict(os.environ, PYTHONHASHSEED=seed, PYTHONPATH=str(ROOT), PYTHONDONTWRITEBYTECODE="1")

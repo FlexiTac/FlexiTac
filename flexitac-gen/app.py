@@ -5,7 +5,7 @@ This server intentionally uses only Python's standard library.  It binds to
 localhost by default, serves no telemetry, and has no chatbot or cloud API
 dependency.  The only design-generation boundary is ``engine.generate_design``.
 
-Routes: ``GET /``, ``/static/*``, ``/api/default``, ``/api/schema``;
+Routes: ``GET /``, ``/library.html`` (the Library), ``/static/*``, ``/api/default``, ``/api/schema``;
 ``POST /api/validate``, ``/api/generate[?view=compact]``,
 ``/api/export/{project,top-gerber,bottom-gerber,easyeda-pro}`` and the CAD-mode routes
 ``/api/surface/{inspect,select,fit,map}`` (a framed body: JSON header plus
@@ -112,8 +112,14 @@ EXPORT_ROUTES = {
 # The EasyEDA Pro projects (exporters/easyeda_pro.py): an archive of its own, so the three above keep their bytes.
 EASYEDA_ROUTES = {"/api/export/easyeda-pro": "easyeda_pro_zip"}
 # Fixed types for the UI's own files: on Windows mimetypes reads the registry, which
-# can map .js to text/plain, and browsers refuse such a script under nosniff.
-STATIC_TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8"}
+# can map .js to text/plain, and browsers refuse such a script under nosniff.  The
+# Library's pictures (web/library/shots/, 2026-11-05) are WebP, which mimetypes does not
+# know on every Python or host (not 3.12 here): they went out as application/octet-stream
+# under nosniff, which Chromium still drew as an image, a browser need not.  The art of its
+# 3D view (web/library/art/<id>.json.gz) goes out as the gzip it is (mimetypes calls it
+# JSON), with no Content-Encoding, as GitHub Pages sends it; the page inflates it.
+STATIC_TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".gz": "application/gzip",
+                ".webp": "image/webp"}
 SURFACE_ROUTES = {
     "/api/surface/inspect": surface_api.inspect,
     "/api/surface/select": surface_api.select_surface,
@@ -121,7 +127,9 @@ SURFACE_ROUTES = {
     "/api/surface/map": surface_api.map_placement,
 }
 POST_ROUTES = frozenset({"/api/validate", "/api/generate", *EXPORT_ROUTES, *EASYEDA_ROUTES, *SURFACE_ROUTES})
-GET_ROUTES = frozenset({"/", "/index.html", "/api/default", "/api/schema"})
+# The two pages (index.html, and the Library of 2026-11-05: library.html), served with the header's counts.
+PAGES = {"/": "index.html", "/index.html": "index.html", "/library.html": "library.html"}
+GET_ROUTES = frozenset({*PAGES, "/api/default", "/api/schema"})
 QUERY_PARAMETERS = {
     "/api/generate": {"view": ("full", "compact")},
     # The design template whose defaults and profile the form uses (CAD mode: the surface template).
@@ -510,7 +518,8 @@ def count_text(number: int) -> str:
 
 
 def fill_github_counts(page: str, counts: Mapping[str, int]) -> str:
-    """web/index.html with the counts in the header's GitHub card; ValueError when the card is not found once."""
+    """A page (web/index.html, or library.html: the same header) with the counts in the header's GitHub card; ValueError
+    when the card is not found once."""
 
     fills = (
         ("<span data-gh-stars></span>", f"<span data-gh-stars>{count_text(counts['stars'])}</span>"),
@@ -687,8 +696,8 @@ class AppHandler(BaseHTTPRequestHandler):
 
     def _get(self) -> None:
         path, query = self._target()
-        if path in ("/", "/index.html"):
-            self._send_page()
+        if path in PAGES:
+            self._send_page(PAGES[path])
         elif path.startswith("/static/"):
             self._send_static(path[len("/static/"):])
         elif path not in GET_ROUTES:
@@ -866,15 +875,16 @@ class AppHandler(BaseHTTPRequestHandler):
             return
         self._send_file(candidate)
 
-    def _send_page(self) -> None:
+    def _send_page(self, name: str = "index.html") -> None:
+        # index.html or library.html: the same header, so the same counts (its query, ./?part=<id>, is the page's own).
         counts = getattr(self.server, "github_counts", None)
         if not counts:
-            self._send_file(WEB_ROOT / "index.html")
+            self._send_file(WEB_ROOT / name)
             return
         try:
-            page = fill_github_counts((WEB_ROOT / "index.html").read_bytes().decode("utf-8"), counts)
+            page = fill_github_counts((WEB_ROOT / name).read_bytes().decode("utf-8"), counts)
         except (OSError, UnicodeDecodeError, ValueError):
-            self._send_file(WEB_ROOT / "index.html")  # the page as it is (or its 404)
+            self._send_file(WEB_ROOT / name)  # the page as it is (or its 404)
             return
         self._send_bytes(HTTPStatus.OK, STATIC_TYPES[".html"], page.encode("utf-8"))
 

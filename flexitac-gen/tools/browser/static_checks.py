@@ -8,8 +8,13 @@ GitHub Pages serves a project site, and checks it against a running app.py (FPC_
   fit of the UMI finger and the error replies (400, 404, 405, 413-free malformed bodies, 415, 422);
 * the page opens under the subpath without a console error, a failed request or a request outside its folder, and
   no request reaches the file server's /api/ (the API never leaves the browser);
+* the Library (part_library_site, 2026-11-05): library.html and a sensor's page without a 4xx or a request for the
+  engine, files.json listing every sensor, four sensors' prebuilt ZIPs app.py's exports (a tapered tip's among them),
+  ./?part=<id> built from its shipped fit in the browser's engine with its own downloads the prebuilt files (three
+  sensors, a tapered tip's among them, timed);
 * the default part's sensor is built (Gen by Surface, the shipped fit) and its downloads equal app.py's exports of
-  the same design, under the same names.
+  the same design, under the same names; the sensor on the part beside the stacked view (2026-11-05) is drawn there
+  too, its art through data: URLs under the site's CSP.
 
     FPC_PORT=18801 python3 tools/browser/static_checks.py [--site DIR | --pyodide-archive pyodide-core-0.27.8.tar.bz2]
 """
@@ -162,7 +167,8 @@ def part_page(browser, timings):
     page.route(build_static_site.GITHUB_API, lambda route: (asked.append(route.request.url), route.fulfill(
         status=200, content_type="application/json", body=json.dumps({"stargazers_count": 1234, "forks_count": 56})))[-1])
     started = time.monotonic()
-    page.goto(SITE_URL)
+    # ?probe: the sensor on the part compared with the map (main.js ON_PART_PROBE; a visitor's page skips it).
+    page.goto(SITE_URL + "?probe")
     wait_until(page, "() => window.apiBackend !== undefined", 20)
     check("the page runs its API in the browser (the build's flexitac-backend meta)", page.evaluate("() => window.apiBackend.mode") == "browser")
     ready = page.evaluate("() => window.apiBackend.ready")
@@ -174,6 +180,12 @@ def part_page(browser, timings):
     check("the default part's sensor is built, with the shipped fit", state.get("default_build") == "done" and state.get("fit_source") == "shipped",
           {key: state.get(key) for key in ("default_part", "default_build", "fit_source")})
     check("the status reports a valid build", "is-ok" in page.get_attribute("#status", "class"), page.inner_text("#status")[:160])
+    wait_until(page, "() => ['drawn', 'failed', 'unavailable', 'empty'].includes(JSON.parse(document.getElementById('cadState').textContent).on_part?.state)", 120)
+    timings["sensor on the part drawn"] = time.monotonic() - started
+    on_part = json.loads(page.evaluate("() => document.getElementById('cadState').textContent"))["on_part"]
+    check("the sensor on the part is drawn for the default build, where the map puts it (within 0.005 mm)",
+          on_part["state"] == "drawn" and on_part["build_id"] == state.get("generated_build_id") and on_part["taxel_error_mm"] < 0.005
+          and max(on_part["outline_error_mm"].values()) < 0.005, {key: on_part.get(key) for key in ("state", "note", "build_id", "taxel_error_mm", "outline_error_mm")})
     downloads = {}
     page.click("#moreFiles > summary")  # the other files are folded (2026-11-02)
     for selector in ('[data-download="design"]', '[data-export="top-gerber"]', '[data-export="bottom-gerber"]', '[data-export="project"]', '[data-export="easyeda-pro"]'):
@@ -200,6 +212,69 @@ def part_page(browser, timings):
     context.close()
 
 
+
+LIBRARY = ROOT / "web" / "library"
+
+
+def part_library_site(browser, site, timings):
+    """The Library on the static site (the user's requests of 2026-11-05): library.html and a sensor's page load with no
+    4xx and no request for the engine (py/); files.json lists every sensor; the prebuilt Gerber ZIPs of four sensors are
+    app.py's exports of their designs, under the same names (one a tapered tip, the narrowest convex arc); ./?part=<id> in
+    Pyodide builds its sensor from the shipped fit and its own two Gerber downloads are the prebuilt files (the WidowX 250
+    at 1 mm, the Trossen sock of 75,400 facets, and the tapered tips' default, the 13.8 mm trapezoid, timed)."""
+    entries = json.loads((LIBRARY / "entries.json").read_text(encoding="utf-8"))
+    files = json.loads((site / "static" / "library" / "files.json").read_text(encoding="utf-8"))
+    check("library: files.json lists every sensor of entries.json with its build id", sorted(files["variants"]) == sorted(entries["variants"])
+          and all(files["variants"][key]["build_id"] == value["build_id"] for key, value in entries["variants"].items()), sorted(files["variants"])[:4])
+    for identifier in ("umi-finray-2mm", "widowx-250-1mm", "i2rt-yam-4mm", "umi-convex-tip5.8-2mm"):
+        design = json.loads((LIBRARY / entries["variants"][identifier]["fit"]).read_text(encoding="utf-8"))["reply"]["proposals"][0]["design"]
+        for kind in ("top-gerber", "bottom-gerber"):
+            record = files["variants"][identifier][kind]
+            reply = server_reply(f"/api/export/{kind}", "POST", "application/json", json.dumps(design).encode("utf-8"))
+            data = (site / "static" / "library" / record["path"]).read_bytes()
+            check(f"library: {identifier}'s prebuilt {kind} is app.py's export of its design, under its name",
+                  reply["status"] == 200 and data == reply["body"] and f'filename="{record["name"]}"' in reply["headers"].get("content-disposition", ""), record["name"])
+    context = browser.new_context(viewport={"width": 1440, "height": 1000}, accept_downloads=True)
+    page = context.new_page()
+    problems, engine = [], []
+    page.on("console", lambda message: problems.append(f"console {message.type}: {message.text}") if message.type == "error" else None)
+    page.on("pageerror", lambda error: problems.append(f"pageerror: {error}"))
+    page.on("response", lambda response: problems.append(f"HTTP {response.status}: {response.url}") if response.status >= 400 else None)
+    page.on("request", lambda request: engine.append(request.url) if "/py/" in request.url or "backend.js" in request.url else None)
+    for fragment in ("", "#umi-tapers", "#widowx-250-1mm"):
+        page.goto(SITE_URL + "library.html" + fragment)
+        wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
+    wait_until(page, "() => document.querySelectorAll('a.lib-pill[data-export]').length === 2", 30)
+    links = page.evaluate("() => [...document.querySelectorAll('a.lib-pill[data-export]')].map(a => [a.getAttribute('href'), a.getAttribute('download')])")
+    record = files["variants"]["widowx-250-1mm"]
+    check("library: library.html and a sensor's page load with no 4xx and no request for the engine; its ZIPs are plain links to the prebuilt files",
+          not problems and not engine and links == [[f"static/library/{record[kind]['path']}", record[kind]["name"]] for kind in ("top-gerber", "bottom-gerber")],
+          (problems[:4], engine[:4], links))
+    for identifier in ("widowx-250-1mm", "trossen-widowx-ai-2mm", "umi-trap-tip13.8-2mm"):
+        started = time.monotonic()
+        page.goto(SITE_URL + f"?part={identifier}")
+        wait_until(page, SETTLED, 300)
+        seconds = time.monotonic() - started
+        timings[f"?part={identifier} built"] = seconds
+        state = json.loads(page.evaluate("() => document.getElementById('cadState').textContent"))
+        check(f"library: ./?part={identifier} in the browser's engine builds its sensor from the shipped fit, its build id [{seconds:.1f} s, at most 240 s]",
+              state.get("default_build") == "done" and state.get("fit_source") == "shipped" and seconds <= 240
+              and (state.get("proposal") or {}).get("build_id") == entries["variants"][identifier]["build_id"],
+              {key: state.get(key) for key in ("default_part", "default_build", "fit_source")})
+        if identifier != "widowx-250-1mm":
+            continue
+        for kind in ("top-gerber", "bottom-gerber"):
+            with page.expect_download(timeout=180000) as info:
+                page.click(f'[data-export="{kind}"]')
+            download = info.value
+            path = Path(SCRATCH) / "downloads" / f"static-library-{download.suggested_filename}"
+            download.save_as(path)
+            check(f"library: the generator's own {kind} download of {identifier} is the prebuilt file, under its name",
+                  path.read_bytes() == (site / "static" / "library" / record[kind]["path"]).read_bytes() and download.suggested_filename == record[kind]["name"],
+                  download.suggested_filename)
+    check("library: no console error or HTTP error on the site's Library and ./?part", not problems, problems[:6])
+    context.close()
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--site", type=Path, default=None, help="a site tools/build_static_site.py built (default: build one)")
@@ -218,6 +293,7 @@ def main(argv=None):
             with sync_playwright() as p:
                 browser = p.chromium.launch(args=["--enable-unsafe-swiftshader", "--use-angle=swiftshader"])
                 part_page(browser, timings)
+                part_library_site(browser, site, timings)  # the Library (2026-11-05)
                 browser.close()
         finally:
             files.shutdown()

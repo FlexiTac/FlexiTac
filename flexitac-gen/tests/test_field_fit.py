@@ -90,9 +90,18 @@ from surface.mesh import read_stl
 try:
     import surface_fixtures as F
     from test_mask_layout import _determinism_problems
+    import defaults_of_before
 except ImportError:  # run as a package
     from tests import surface_fixtures as F
     from tests.test_mask_layout import _determinism_problems
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "asset"
@@ -828,7 +837,8 @@ class FieldFitTests(unittest.TestCase):
         self.assertEqual(_fingerprint(first), FINGERPRINTS["disk"])
 
     def test_the_fingerprint_with_other_hash_seeds(self) -> None:
-        code = "import sys; sys.path.insert(0, 'tests'); import test_field_fit as t; print(t._fingerprint_of('equilateral'))"
+        code = ("import sys; sys.path.insert(0, 'tests'); import defaults_of_before; defaults_of_before.start(cleanup=False); "
+                "import test_field_fit as t; print(t._fingerprint_of('equilateral'))")
         for seed in ("0", "123"):
             with self.subTest(seed=seed):
                 environment = dict(os.environ, PYTHONHASHSEED=seed, PYTHONPATH=str(ROOT), PYTHONDONTWRITEBYTECODE="1")
@@ -1782,11 +1792,9 @@ class ReviewWebClientTests(unittest.TestCase):
         self.assertIn("if (!map.readout || !(map.readout.active < map.readout.positions)) return", csv)
 
     def test_the_row_pins_come_from_the_pads(self) -> None:
-        # Scan order Reverse puts ROW_02 on pin 1: the stacked view and the map panel list the Row nets by pin.
-        note = re.search(r"function rowBusNote\(boards\) \{(.*?)\n  \}", self.app, re.S).group(1)
-        self.assertIn("const order = rowPinOrder(row);", note)
-        pins = re.search(r"function rowPinOrder\(board\) \{(.*?)\n  \}", self.app, re.S).group(1)
-        self.assertIn(".sort((a, b) => a.pin - b.pin).map(pad => pad.net);", pins)
+        # Scan order Reverse puts ROW_02 on pin 1: the map panel and the proposal card list the Row nets by pin (the stacked
+        # view's note, which listed them from the pads too, went with its notes on 2026-11-06).
+        self.assertNotIn("function rowPinOrder(", self.app)
         verify = re.search(r"function renderVerification\(\) \{(.*?)\n\}", self.main, re.S).group(1)
         self.assertIn("const order = cad.map.readout?.row_pin_order || cad.map.readout?.row_contact_order;", verify)
         card = re.search(r"function renderCard\(\) \{(.*?)\n\}", self.main, re.S).group(1)
@@ -2673,7 +2681,8 @@ class SymmetryTests(unittest.TestCase):
         # and any hash seed give the same proposals.
         data, selection, result, _ = _Fits.get(self, "isosceles", FIELD)
         self.assertEqual(_fingerprint(result), FINGERPRINTS["isosceles"])
-        code = "import sys; sys.path.insert(0, 'tests'); import test_field_fit as t; print(t._fingerprint_of('isosceles'))"
+        code = ("import sys; sys.path.insert(0, 'tests'); import defaults_of_before; defaults_of_before.start(cleanup=False); "
+                "import test_field_fit as t; print(t._fingerprint_of('isosceles'))")
         environment = dict(os.environ, PYTHONHASHSEED="7", PYTHONPATH=str(ROOT), PYTHONDONTWRITEBYTECODE="1")
         output = subprocess.run([sys.executable, "-B", "-c", code], cwd=ROOT, env=environment, capture_output=True, text=True, check=True)
         self.assertEqual(output.stdout.strip(), FINGERPRINTS["isosceles"])

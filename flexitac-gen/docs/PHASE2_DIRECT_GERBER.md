@@ -281,9 +281,9 @@ Python 3.9 to 3.13 and hash seeds.  The default build gives:
 
 | Archive | Bytes | SHA-256 |
 | --- | --- | --- |
-| `tactile-fpc-12x32-c2243ebd10c5-top-rows-direct-gerber.zip` | 28740 | `9d0cfae0fe6acee8591dc14cc3a403cee43277d31f2da531a2804696bb78678c` |
-| `tactile-fpc-12x32-c2243ebd10c5-bottom-columns-direct-gerber.zip` | 38331 | `93768ae0419d3f4e1275a377998d7dfb09027a906811c6b018bc90c18e704ab4` |
-| `tactile-fpc-12x32-c2243ebd10c5-project-review.zip` | 216488 | `2a838d9db5b271f0605ebdb3d0d1f419ff572bca75a8e43f4a4daba05c1d1444` |
+| `tactile-fpc-12x32-34a71a29e4d0-top-rows-direct-gerber.zip` | 30097 | `f3edfa708c37455feb74361a9652bf5fe61b9ed13c67d9c86770e1b91288c4bd` |
+| `tactile-fpc-12x32-34a71a29e4d0-bottom-columns-direct-gerber.zip` | 42203 | `45ac29dd2b1551477f0a8243a8bfb8bb349a8b9c79c5cb7e19b2d3954cbe905f` |
+| `tactile-fpc-12x32-34a71a29e4d0-project-review.zip` | 235822 | `420ecf33f8b65d8ecf664e73f2d36a5e58918bf1d9e6a7be58b75bba10dd5e5d` |
 
 (`tests/test_golden_default.py` pins these values; the bundle shown is the
 one of `default_design()` and of the browser's export of the default build,
@@ -293,7 +293,9 @@ surface profile, both boards one outline down to the tail roots;
 `diagonal-bus/9` since section 24, the same boards; `diagonal-bus/10` since
 section 27, the Row tail 0.048 mm east, on the field's centre line; both
 tails 12 mm since section 27.7, the Column board 4.5 mm longer;
-`diagonal-bus/11` since section 27.8, the same boards.)
+`diagonal-bus/11` since section 27.8, the same boards; the 1.0 mm electrodes
+of the default fill 0.5 since the user's decision of 2026-11-06, both boards
+0.4 mm narrower and shorter and a coverlay window per electrode.)
 
 ## Stiffeners
 

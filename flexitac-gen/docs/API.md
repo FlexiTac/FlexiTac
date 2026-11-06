@@ -26,7 +26,7 @@ assert easyeda_filenames(result)["easyeda_pro_zip"].endswith("-easyeda-pro.zip")
 
 | Function | Returns |
 | --- | --- |
-| `default_design()` | a fresh default design (12 x 32, 2.0 mm pitch, 1.4 mm electrodes); `default_design("surface_matrix_v1")` is the same preset on the [surface template](#surface-template-surface_matrix_v1) |
+| `default_design()` | a fresh default design (12 x 32, 2.0 mm pitch, 1.0 mm electrodes); `default_design("surface_matrix_v1")` is the same preset on the [surface template](#surface-template-surface_matrix_v1) |
 | `check_design(data)` | `{ok, design, validation, identity}`: normalization, input rules and feasibility, no geometry and so no DRC; `identity.build_id` is the id `generate_design` would give |
 | `generate_design(data=None, *, cache=None, profile=None)` | the result object; `None` means "no request: the defaults" (the HTTP API and the CLI reject a `null` document); `cache` is a `BuildCache` reused across calls; `profile` replaces the locked profile and is checked like it |
 | `result_view(result, "full" or "compact")` | the HTTP views below |
@@ -53,8 +53,8 @@ Every field is optional; a missing field takes the default.
 | `matrix.columns` | integer | 1-64 and at most 32 with `routing.row_sides` `channel` | 32 | `columns`, `column_num` |
 | `matrix.pitch_x_mm` | number | 0.6-10 | 2.0 | `pitch_x_mm` |
 | `matrix.pitch_y_mm` | number | 0.6-10 | 2.0 | `pitch_y_mm` |
-| `matrix.taxel_width_mm` | number | 0.1016-9.75 and at most `pitch_x_mm - 0.25` | 1.4 | `matrix.column_electrode_width_mm`, `taxel_width_mm`, `column_electrode_width_mm`, `column_electrode_width`, `taxel_size_mm` |
-| `matrix.taxel_height_mm` | number | 0.1016-9.75 and at most `pitch_y_mm - 0.25` | 1.4 | `matrix.row_electrode_width_mm`, `taxel_height_mm`, `row_electrode_width_mm`, `row_electrode_width`, `taxel_size_mm` |
+| `matrix.taxel_width_mm` | number | 0.1016-9.75 and at most `pitch_x_mm - 0.25` | 1.0 | `matrix.column_electrode_width_mm`, `taxel_width_mm`, `column_electrode_width_mm`, `column_electrode_width`, `taxel_size_mm` |
+| `matrix.taxel_height_mm` | number | 0.1016-9.75 and at most `pitch_y_mm - 0.25` | 1.0 | `matrix.row_electrode_width_mm`, `taxel_height_mm`, `row_electrode_width_mm`, `row_electrode_width`, `taxel_size_mm` |
 | `tail.top_length_mm` | number | 7.5-80 and from 7.0 with `routing.row_sides` `channel`; the engine takes the diagonal Row bus's tails to the surface profile's 200 (the schema and the browser's form keep 80) | 12.0 | `tail.length_mm`, `top_tail_length_mm`, `tail_length_mm` |
 | `tail.bottom_length_mm` | number | 7.5-80 and from 7.0 with `routing.row_sides` `channel`; the bus's tails to 200 in the engine | 12.0 (7.0 with `channel`) | `tail.length_mm`, `bottom_tail_length_mm`, `tail_length_mm` |
 | `tail.row_side` | string | `bottom`, `top`, `left`, `right` | `bottom` | `connector_side` |
@@ -650,9 +650,10 @@ characters.  A name without ASCII letters or digits (for example an all-Chinese
 name) gets `tactile-fpc-` plus 8 hex digits of the SHA-256 of the trimmed
 name.  Any change of the design, of profile content or of either version
 gives a new build id; equivalent requests (`2` vs `2.0`, flat vs nested)
-share one.  The default build is `tactile-fpc-12x32-c2243ebd10c5` (the
+share one.  The default build is `tactile-fpc-12x32-34a71a29e4d0` (the
 diagonal Row bus with `both`, `diagonal-bus/11`, both tails 12 mm since
-P5-diagonal-bus.md section 27.7, the profile revision 2026-10-29), for the browser's default form and for
+P5-diagonal-bus.md section 27.7, the profile revision 2026-10-29, the 1.0 mm
+electrodes of the default fill 0.5 since 2026-11-06), for the browser's default form and for
 `default_design()` alike.
 
 **Compatibility.**  The necked routing of 2026-10-15 (generator 0.4.0,
@@ -713,7 +714,7 @@ browsers rewrite before they send them.
 
 | Method and path | Request | Reply |
 | --- | --- | --- |
-| `GET /`, `GET /index.html`, `GET /static/<file>` | | the browser UI from `web/` (paths are contained; anything else is 404) |
+| `GET /`, `GET /index.html`, `GET /library.html`, `GET /static/<file>` | | the browser UI from `web/`: the generator, the Library (2026-11-05; a query such as `./?part=<id>` is the page's own) and their files (paths are contained; anything else is 404) |
 | `GET /api/default` | | `{design, profile}`; `profile` has `id`, `revision`, `name`, `display_rules` (rule text generated from the profile; `Bundle traces` gives the default design's fan-out width and spacing, the other entries the gold-finger width, JLCPCB's trace minimum for the profile's copper and the other locked rules), `limits` (per-field form limits; on the generic template the diagonal Row bus's, with the straight channel's own under each field's `channel`), `issue_codes` and `order_requirements` (the JLCPCB order options and review notes of `ORDER_NOTES.txt`, from `engine.profile.order_requirements`); on the generic template also `row_bus`, the bus's rule set (`id`, `revision`, `name`, `display_rules` of the surface profile, which builds it) |
 | `GET /api/schema` | | the JSON Schema plus `x-http-error-codes` and `x-surface-error-codes` |
 | `POST /api/validate` | design | 200 with the `check_design` result (`ok` true or false) |
@@ -729,7 +730,7 @@ and `template=generic_matrix_v1|surface_matrix_v1` on `/api/default` (that
 template's default design and profile, whose `name` starts with "Generic
 Matrix v1" or "Surface Matrix v1"; without it the generic one, as before);
 anything else is 400.  For the default design the full
-view is about 89 kB and the compact view about 20 kB.
+view is about 100 kB and the compact view about 20 kB.
 
 Every failure is JSON: `{"ok": false, "code": "...", "error": "message"}`,
 plus `field`, `validation` and `manifest` where they apply (a blocked export

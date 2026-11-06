@@ -50,7 +50,7 @@ except ImportError:  # run as a package
 ROOT = Path(__file__).resolve().parents[1]
 PLATE = [(0.0, 0.0), (60.0, 0.0), (60.0, 40.0), (0.0, 40.0)]
 OPTIONS = {"pitch_mm": 2.0}
-WIDTH = fit._electrode(2.0, fit.DEFAULT_OPTIONS["fill"])  # the crossing at 2 mm: 1.4 mm
+WIDTH = fit._electrode(2.0, fit.DEFAULT_OPTIONS["fill"])  # the crossing at 2 mm: 1.0 mm (fill 0.5; 1.4 at 0.7 before 2026-11-06)
 
 
 class _Plate:
@@ -268,7 +268,8 @@ class ValidationTests(unittest.TestCase):
     def test_a_border_too_small_for_a_taxel_says_so(self) -> None:
         data, selection, reply = _Plate.get()
         u0, v0, _, _ = _box(reply)
-        uv = [[u0 + 10, v0 + 10], [u0 + 13.3, v0 + 10], [u0 + 13.3, v0 + 11.3], [u0 + 10, v0 + 11.3]]
+        # 0.1 mm narrower than a crossing.
+        uv = [[u0 + 10, v0 + 10], [u0 + 13.3, v0 + 10], [u0 + 13.3, v0 + 9.9 + WIDTH], [u0 + 10, v0 + 9.9 + WIDTH]]
         with self.assertRaises(SurfaceError) as raised:
             fit.fit_route({"selection": selection, "border": {"uv": uv}, "options": OPTIONS}, data)
         self.assertEqual(raised.exception.code, "E_SURFACE_NO_FIT")
@@ -408,11 +409,13 @@ class InsideTests(unittest.TestCase):
         # P may come up to the border where it lies inside the surface (only F's margin must stay on the surface).
         _, _, reply = _Plate.get()
         u0, v0, _, _ = _box(reply)
-        uv = [(u0 + 10, v0 + 10), (u0 + 33.4, v0 + 10), (u0 + 33.4, v0 + 27.4), (u0 + 10, v0 + 27.4)]
+        # 12 x 9 crossings exactly: 11 and 8 pitches and a crossing across.
+        right, top = u0 + 32 + WIDTH, v0 + 26 + WIDTH
+        uv = [(u0 + 10, v0 + 10), (right, v0 + 10), (right, top), (u0 + 10, top)]
         result = _Plate.fit(uv, options=dict(OPTIONS, rotation="none"))
         self.assertEqual(result["proposals"][0]["metrics"]["taxels"], 12 * 9)
         corners = [p for square in _corners_uv(result["proposals"][0]) for p in square]
-        for k, (low, high) in enumerate(((u0 + 10, u0 + 33.4), (v0 + 10, v0 + 27.4))):
+        for k, (low, high) in enumerate(((u0 + 10, right), (v0 + 10, top))):
             self.assertAlmostEqual(min(p[k] for p in corners), low, places=5)
             self.assertAlmostEqual(max(p[k] for p in corners), high, places=5)
 

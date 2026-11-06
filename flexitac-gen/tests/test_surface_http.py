@@ -85,7 +85,8 @@ class SurfaceRouteTests(HttpTestCase):
         self.assertEqual((fitted["request"]["options"]["shape"], fitted["request"]["options"]["containment"]), ("fill", "field"))
         self.assertNotIn("rectangle_preference_pct", fitted["request"]["options"])
         proposal = fitted["proposals"][0]
-        self.assertEqual((proposal["metrics"]["taxels"], proposal["metrics"]["containment"]), (248, "field"))
+        # 250 at the default fill 0.5 (the user's decision of 2026-11-06; 248 at 0.7 before).
+        self.assertEqual((proposal["metrics"]["taxels"], proposal["metrics"]["containment"]), (250, "field"))
         header = {"selection": selection, "placement": proposal["placement"], "design": proposal["design"]}
         status, mapped = self.post_surface("/api/surface/map", header, mesh=mesh_bytes)
         self.assertEqual(status, 200, mapped)

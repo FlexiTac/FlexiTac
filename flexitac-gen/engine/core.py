@@ -284,8 +284,11 @@ def default_design(template_id: str = TEMPLATE_ID) -> dict[str, Any]:
             "columns": 32,
             "pitch_x_mm": 2.0,
             "pitch_y_mm": 2.0,
-            "taxel_width_mm": 1.4,
-            "taxel_height_mm": 1.4,
+            # Fill (electrode width / pitch) 0.5 since the user's decision of 2026-11-06 ("默认的pitch/trace大小,现在都是0.7,
+            # 直接都改成0.5"): 1.0 mm electrodes, 0.8 mm coverlay bridges, a window per electrode (1.4 mm, one merged
+            # field window, before).
+            "taxel_width_mm": 1.0,
+            "taxel_height_mm": 1.0,
         },
         "tail": {
             "top_length_mm": 12.0,

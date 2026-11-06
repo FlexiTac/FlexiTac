@@ -27,8 +27,9 @@ class SensorCoreTests(unittest.TestCase):
         self.assertEqual(result["boards"]["column"]["physical_side"], "bottom")
         self.assertEqual(len(result["boards"]["row"]["layers"]["top_copper"]["electrodes"]), 12)
         self.assertEqual(len(result["boards"]["column"]["layers"]["top_copper"]["electrodes"]), 32)
-        self.assertEqual(result["boards"]["row"]["grid_registration"]["active_region"]["width"], 63.4)
-        self.assertEqual(result["boards"]["row"]["grid_registration"]["active_region"]["height"], 23.4)
+        # 31 x 2 mm + the 1.0 mm electrode (the default fill 0.5 since the user's decision of 2026-11-06; 1.4 mm before).
+        self.assertEqual(result["boards"]["row"]["grid_registration"]["active_region"]["width"], 63.0)
+        self.assertEqual(result["boards"]["row"]["grid_registration"]["active_region"]["height"], 23.0)
         self.assertIn("<svg", result["boards"]["row"]["svg"])
         self.assertIs(result["derived_layout"]["boards"], result["boards"])
 

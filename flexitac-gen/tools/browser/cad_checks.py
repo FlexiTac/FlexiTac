@@ -53,8 +53,24 @@ Against a running app.py (FPC_PORT) with the example meshes in asset/ (skipped w
   64 and a 58-column proposal builds and maps; without it, Max columns stops at 32.  A design outside the limits never
   overwrites the form.
 - Selection presets: Custom angles send every value (no hidden blend radius); the Surface preset and list.
+- The sensor on the part (the user's request of 2026-11-05; part_on_part): beside the registration the stacked card shows
+  the part with the bottom FPC, the film and the top FPC draped on it and exploded, drawn from the map (its build id),
+  the boards' outlines, the field and the taxels where the map puts them (to 5 um), every sheet facing out, the top FPC
+  mirrored (its polyimide outward, the bottom FPC's copper), the art in the page's look on both sides (Diagram: copper
+  at the taxels; Photo: ENIG gold), split beside the left figure at 1440, 1100 and 900 and stacked at 1000 and 390, a
+  drag, the arrow keys, 0, a double click and Reset view, the wheel scrolling the page, Exploded and Assembled, hidden
+  in Rectangular mode and empty after Remove model; on the masked crank and the curved soft-finger wrap too.
 - A tail edit keeps the placement download in step with the mapped build; a rounded pad takes a picked point as
   the base; empty, oversized and odd ASCII files; double Generate submits once.
+- The 3D view's look (part_view_look; the user's request of 2026-11-05: the sensor on the part's light and shade in every
+  3D view, web/cad/studio.js): the default part's selected area at its home view mirrors the studio, tone mapped, in its
+  orange about as light as before; the markers (the border, the base edge, the taxels, the hover, the handles) unlit in
+  their own colours over the view's grey; at Fit its grey faces toward the key lighter than those turned from it, a faint
+  soft reflection; the look again after a drag; light in dark mode; no texture left by three models; a lost context back
+  with its studio; without half-float render targets one warning and the lights alone.
+- The Library (part_library, 2026-11-05): every sensor of web/library/entries.json opens at ./?part=<id> from its
+  shipped fit with its build id, the file note naming it; ./?part=<part>, an unknown id, the mode switch, the user's
+  own file and Remove model (?part and the options it set dropped, the user's own edits kept), a click and Undo.
 Screenshots go to $FPC_BROWSER_OUT/shots (cad_*.png).
 """
 from __future__ import annotations
@@ -76,17 +92,33 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DONE, RECT_URL, SCRATCH, SHOTS, URL, check, pin1_shapes, pin1_strokes, stacked_pin1, summary, unfold, wait_until  # noqa: E402
+from rp import DONE, RECT_URL, SCRATCH, SHOTS, URL, check, figure_controls, pin1_shapes, pin1_strokes, set_look, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SOFT = ROOT / "asset" / "soft_gripper_finger.stl"
 CRANK = ROOT / "asset" / "crank_gripper" / "tip_left.stl"
+WXAI = ROOT / "asset" / "Trossen-WidowXAI" / "WXAI-LEFT-Gripper-sock.stl"
 DOWNLOADS = Path(SCRATCH) / "downloads"
 WEBGL_ARGS = ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"]
 # A trace width and spacing (mm) at which the crank's masked proposal no longer routes (E_MASK_ROUTING).
 MASK_BREAKING_TRACE = "0.127"
 STATE = "() => JSON.parse(document.getElementById('cadState').textContent)"
 IDLE = "() => { const s = JSON.parse(document.getElementById('cadState').textContent); return s.busy.length === 0; }"
+# The sensor on the part (main.js 7b): drawn, or settled on a state with nothing to draw.
+ON_PART_DRAWN = "() => JSON.parse(document.getElementById('cadState').textContent).on_part?.state === 'drawn'"
+ON_PART_SETTLED = ("() => ['drawn', 'unavailable', 'failed', 'empty', 'off'].includes("
+                   "JSON.parse(document.getElementById('cadState').textContent).on_part?.state)")
+ON_PART_DRAWN_CHECK = "on part: drawn for the generated build"
+# Files served in place of the page's own on every page of new_page: (URL pattern, content type, body); tools/browser/
+# mutants.py's "cad" kind serves a mutated web/cad/drape.js through it.
+ROUTES = []
+
+
+def served(content_type, body):
+    # A route handler of one argument (Playwright passes the request too to a handler that takes two).
+    def handler(route):
+        route.fulfill(status=200, content_type=content_type, body=body)
+    return handler
 
 
 def new_page(browser, width=1440, height=900, folded=False):
@@ -94,6 +126,8 @@ def new_page(browser, width=1440, height=900, folded=False):
     if not folded:
         unfold(context)
     page = context.new_page()
+    for pattern, content_type, body in ROUTES:
+        page.route(pattern, served(content_type, body))
     page.logs = []
     page.surface = []
     page.generate = []
@@ -166,10 +200,11 @@ def open_cad(page, caps=64, default_part=False):
     """CAD mode at #cad as the checks were written: without the default part (its request answered 404: no mesh, no
     surface request, no build of its own; part_default_cad checks it), the fit's caps at ``caps`` (64, the template's
     maximum, as before the user's default of 32; None keeps the default).  ``default_part=True``: the default part loaded
-    and its sensor built first."""
+    and its sensor built first.  ?probe: the sensor on the part's figure measured for the checks (main.js ON_PART_PROBE:
+    its comparison with the map, its pixels read; a visitor's page does neither, the review of 2026-11-05)."""
     if not default_part:
         page.route(DEFAULT_PART, lambda route: route.fulfill(status=404, content_type="text/plain", body="not in this check"))
-    page.goto(URL + "#cad")
+    page.goto(URL + "?probe#cad")
     wait_until(page, DONE, 60)
     wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).webgl !== 'not loaded'", 30)
     wait_until(page, DEFAULT_SETTLED, 120)
@@ -220,6 +255,10 @@ def part_remove_model(browser):
           status["text"] == "UMI-Soft-Gripper-Finger.stl removed." and all(page.is_disabled(f"#{name}") for name in ("cadRemove", "cadEditBorder", "cadUndo", "cadClear")), status)
     shown = page.evaluate("() => !document.body.classList.contains('cad-no-build')")
     check("remove: the build already generated stays below (its results shown)", s["generated_build_id"] == built and shown, (s["generated_build_id"], shown))
+    figure = page.evaluate("() => [document.querySelector('#sensorOnPart canvas')?.hidden ?? true, document.querySelector('#sensorOnPart .on-part-note').textContent]")
+    check("remove: the sensor on the part is gone with the part (its note asks for one), the registration stays",
+          s["on_part"]["state"] == "empty" and figure == [True, "Load a part to see the sensor on it."]
+          and page.evaluate("() => document.querySelectorAll('#stackedPreview .assembly-board').length") == 2, (s["on_part"], figure))
     page.click("label:has(#modeRect)")
     page.wait_for_timeout(200)
     page.click("label:has(#modeCad)")
@@ -433,6 +472,10 @@ def part_rect_unchanged(browser):
     check("rect: no canvas (no WebGL context) and three.js not loaded", info["canvases"] == 0 and info["state"]["webgl"] == "not loaded", info)
     check("rect: no surface request, one /api/generate at boot", not page.surface and len(page.generate) == 1, (page.surface, len(page.generate)))
     check("rect: six labelled SVGs and the four preview tablists, as before", info["labelled"] == 6 and info["tablists"] == 2, info)
+    figure = page.evaluate("() => [document.querySelector('.stack-figure.is-on-part').checkVisibility(), document.getElementById('sensorOnPart').checkVisibility(),"
+                           " getComputedStyle(document.querySelector('.stacked-review')).containerType]")
+    check("rect: the stacked card as before: no sensor on the part beside it, no container to split it (2026-11-05)",
+          figure == [False, False, "normal"] and info["state"]["on_part"]["state"] == "off", (figure, info["state"]["on_part"]))
     body = page.generate[0][0] if page.generate else {}
     check("rect: the boot payload keeps its keys, and the Row traces (both: the diagonal Row bus, section 18)",
           list(body) == ["schema_version", "template_id", "name", "rows", "columns", "pitch_x_mm", "pitch_y_mm",
@@ -769,6 +812,9 @@ def part_soft(browser):
     check("soft: map overlay has the proposal's taxels and every verification record passes",
           s["overlay"] and s["overlay"]["source"] == "build" and s["overlay"]["taxels"] == taxels and s["verification"]["ok"]
           and s["verification"]["passed"] == s["verification"]["total"] > 0, s)
+    on_part_exact(page, "soft", s["generated_build_id"])
+    on_part_aligned(page, "soft")
+    on_part_film(state(page)["on_part"].get("pixels") or {}, "soft: Exploded home")
     check("soft: the verification table shows all checks passing", "checks pass" in page.inner_text("#cadVerify") and not page.query_selector("#cadVerifyTable tr.is-fail"),
           page.inner_text("#cadVerify")[:200])
     check("soft: the stack note gives the contact offset in mm (no raw key)", "contact_offset_mm" not in page.inner_text("#cadVerify")
@@ -808,15 +854,20 @@ def part_soft(browser):
     disabled = page.evaluate("() => ['cadSavePlacement', 'cadSaveMap', 'cadSaveCsv', 'cadSaveWrap'].map(id => document.getElementById(id).disabled)")
     check("soft: editing the form marks CAD stale and disables its downloads", s["stale"] and not s["downloads"] and all(disabled)
           and page.evaluate("() => document.getElementById('cadVerify').classList.contains('is-stale')"), (s["stale"], disabled))
+    faded = page.evaluate("() => getComputedStyle(document.getElementById('sensorOnPart')).opacity")
+    check("soft: stale, the sensor on the part stays drawn, faded as the registration is", s["on_part"]["state"] == "drawn" and faded == "0.5", (s["on_part"]["state"], faded))
     page.click("#regenerate")
     wait_until(page, "() => { const s = JSON.parse(document.getElementById('cadState').textContent); return s.busy.length === 0 && s.map_error !== null; }", 120)
     s = state(page)
     check("soft: a changed design reports E_SURFACE_PLACEMENT_MISMATCH: fit again", s["map_error"] == "E_SURFACE_PLACEMENT_MISMATCH"
           and "fit again" in page.inner_text("#cadStatus") and "fit again" in page.inner_text("#cadVerify"), (s["map_error"], page.inner_text("#cadStatus")))
+    check("soft: the unmapped build leaves no sensor on the part (the earlier build's is gone)", s["on_part"]["state"] == "empty"
+          and page.evaluate("() => document.querySelector('#sensorOnPart canvas').hidden"), s["on_part"])
     page.click("#cadGenerate")
     wait_until(page, "() => { const s = JSON.parse(document.getElementById('cadState').textContent); return s.busy.length === 0 && s.verification !== null; }", 120)
     s = state(page)
     check("soft: Generate again restores the mapped, verified build", s["verification"]["ok"] and s["downloads"] and s["generated_build_id"] == build, s)
+    on_part_exact(page, "soft, generated again", build)
     # 422s on purpose: the empty selection (Subtract) and the placement mismatch.
     check("soft part: no unexpected console errors", not errors_of(page, allowed=("status of 422",)), errors_of(page, allowed=("status of 422",)))
     page.close()
@@ -904,6 +955,8 @@ def part_crank_fill(browser):
           result.get("validation", {}).get("errors"))
     check("crank fill: the map overlay has the N taxels and every record passes", s["overlay"] and s["overlay"]["source"] == "build" and s["overlay"]["taxels"] == taxels
           and s["verification"]["ok"] and s["verification"]["passed"] == s["verification"]["total"] > 0, s)
+    on_part_exact(page, "crank fill", s["generated_build_id"])
+    on_part_framed(page, "crank fill")
     badge = page.inner_text("#maskBadge") if page.query_selector("#maskBadge") else ""
     check("crank fill: the summary badge reads 'N of R x C taxels active'", badge.startswith(f"{taxels} of {rows} × {columns} taxels active"), badge)
     check("crank fill: the form's note names the masked field", not page.evaluate("() => document.getElementById('maskNote').hidden")
@@ -1156,18 +1209,14 @@ def part_field_soft(browser):
     check("field soft: the overlay has the taxels, the routing report its shares and the readout the folded Row order", s["overlay"]["taxels"] == taxels
           and s["map_routing"] == proposal["on_surface"] and s["map_row_contact_order"] == rows and "Routing on the surface" in page.inner_text("#cadRoutingNote")
           and "ROW_01, ROW_03" in page.inner_text("#cadRowOrderNote"), (s["map_routing"], s["map_row_contact_order"]))
-    legend = page.inner_text("#assemblyRowBus") if page.query_selector("#assemblyRowBus") else ""
+    # The stacked view without its notes since the user's request of 2026-11-06 (they had said the tails' stacking, the Row
+    # pins and the shared outline, which the proposal card and the map panel say): both boards drawn, and the build's Row
+    # bus the proposal's (one outline down to the tail roots, the tails stacked).
     boxes = page.evaluate("() => [...document.querySelectorAll('#stackedPreview .assembly-board')].map(b => b.dataset.role)")
-    check("field soft: the stacked view shows both boards with the tails stacked, the Row tail over the Column tail", sorted(boxes) == ["columns", "rows"]
-          and "both tails leave bottom, stacked: the Row tail over the Column tail, 6.500 mm of their width on each other, both centred on the "
-          "field, ending together, their contacts in line" in legend
-          and "they part to their own connectors" in legend and "side by side" not in legend and "Row pins 1–59: ROW_01, ROW_03" in legend, (boxes, legend))
-    # The note's lengths to three decimals, as its other figures (P5-diagonal-bus.md section 27.5: "1.893896 mm below the
-    # taxel field" beside "1.500 mm of their width" before).
-    check("field soft: the stacked view says the boards share one outline down to their tail roots and align by it",
-          f"Both boards share one outline down to their tail roots ({shared:.3f} mm below the taxel field), so they "
-          "align by their edges; only the tails differ" in legend
-          and abs(float(page.get_attribute("#assemblyRowBus", "data-shared-outline") or "nan") - shared) < 1e-6, legend)
+    bus = ((result.get("boards") or {}).get("row") or {}).get("construction", {}).get("row_bus") or {}
+    check("field soft: the stacked view shows both boards, and the build's Row bus shares one outline down to the tail roots, its tails stacked",
+          sorted(boxes) == ["columns", "rows"] and bus.get("tails") == "stacked" and bus.get("tail_position") == "centred"
+          and abs(float(bus.get("shared_outline_below_field_mm", "nan")) - shared) < 1e-6, (boxes, bus.get("tails"), bus.get("shared_outline_below_field_mm"), shared))
     page.click('[data-assembly-mode="plan"]')
     page.wait_for_timeout(200)
     page.locator(".stacked-review").screenshot(path=f"{SHOTS}/cad_field_soft_stack_plan.png")
@@ -1253,11 +1302,9 @@ def part_review_fixes(browser):
     wait_until(page, mapped % json.dumps(forward), 120)
     page.wait_for_timeout(300)
     s = state(page)
-    legend = page.inner_text("#assemblyRowBus") if page.query_selector("#assemblyRowBus") else ""
     order = page.inner_text("#cadRowOrderNote") if page.query_selector("#cadRowOrderNote") else ""
     check("review: with Scan order Reverse the map's Row pins start at ROW_02 (from the pads)", (s["map_row_pin_order"] or [None])[0] == "ROW_02"
           and "Row pins 1–59 (from the pads" in order and ": ROW_02, ROW_04" in order, (s["map_row_pin_order"][:3] if s["map_row_pin_order"] else None, order))
-    check("review: and the stacked view's Row pins too", "Row pins 1–59: ROW_02, ROW_04" in legend, legend)
     reverse = s["generated_build_id"]
     page.select_option("#scanOrder", "forward")
     page.wait_for_timeout(200)
@@ -1389,10 +1436,10 @@ def part_row_sides(browser):
               (sent.get("routing") or {}).get("row_sides") == side and result.get("manifest", {}).get("build_id") == s["proposal"]["build_id"] == s["generated_build_id"]
               and s["generated_row_sides"] == side and page.input_value("#rowSides") == side and s["verification"]["ok"],
               (sent.get("routing"), result.get("manifest", {}).get("build_id"), s["proposal"]["build_id"], page.input_value("#rowSides")))
-        legend = page.inner_text("#assemblyRowBus") if page.query_selector("#assemblyRowBus") else ""
-        check(f"row sides: the stacked view names the {side} side and an unfolded Row order, the traces fanning in under the field into the "
-              "centred Row tail", f"the {side} side" in legend and "folded" not in legend
-              and "fan in under the field into the Row tail centred under it" in legend and "both centred on the field" in legend, legend)
+        # The build's Row bus (the stacked view's note that named it went on 2026-11-06).
+        bus = ((result.get("boards") or {}).get("row") or {}).get("construction", {}).get("row_bus") or {}
+        check(f"row sides: the build's Row bus is the {side} side's, its Row tail centred under the field",
+              bus.get("sides") == side and bus.get("tail_position") == "centred", {key: bus.get(key) for key in ("sides", "tail_position", "tails")})
         page.click('[data-assembly-mode="plan"]')
         page.wait_for_timeout(200)
         problems, rings = stacked_pin1(page)
@@ -1515,6 +1562,7 @@ def part_wrap_flexitac(browser):
     check("wrap: the build maps onto the curved surface and passes", s["verification"] and s["verification"]["ok"]
           and s["overlay"]["taxels"] == s["proposal"]["taxels"], s)
     check("wrap: the proposal reports the FlexiTac reader (32 x 16)", s["proposal"]["reader"] == "32x16", s["proposal"])
+    on_part_exact(page, "wrap", s["generated_build_id"])
     name, data = save(page, "#cadSaveCsv")
     lines = list(csv.reader(data.decode().splitlines()))
     header = lines[0]
@@ -1605,13 +1653,21 @@ CAD_STEP = ["cadFile", "cadFileNote", "cadTools", "cadRemove", "cadQuickGenerate
 CAD_BASIC = ["cadPitch", "cadFill", "cadRowSides", "cadTailExtension", "cadMaxRows", "cadMaxColumns", "cadFit", "cadGenerate", "cadSides"]
 CAD_FOLDED = ["cadUnit", "cadPreset", "cadThetaD", "cadObjective", "cadContainment", "cadReader", "cadStrainLimit"]
 SHOWN = """(ids) => ids.map(id => { const node = document.getElementById(id); return [id, Boolean(node && node.checkVisibility())]; })"""
+# The 3D view's help line: shown or not, its text, the view's description, and the room between the view and Generate
+# sensor's row (the help line's height while it shows, else none).
+HELP_LINE = """() => { const help = document.getElementById('cadHelp'); const wrap = document.querySelector('.cad-view-wrap').getBoundingClientRect();
+    const quick = document.getElementById('cadQuick').getBoundingClientRect();
+    return {shown: help.checkVisibility(), text: help.textContent, described: document.getElementById('cadView').getAttribute('aria-describedby'),
+            gap: Math.round((quick.top - wrap.bottom) * 10) / 10, height: Math.round(help.getBoundingClientRect().height * 10) / 10}; }"""
 
 
 def part_clean_cad(browser):
     """CAD mode as the user sees it (no unfold()): the rectangular form hidden (CAD mode has its own steps) and the shared
     results (a rectangular build) hidden until CAD mode generates; the file, the view's tools and the sensor's line in
     sight, the rest under Advanced Customization (2026-11-02); opened, its basic options in sight, File details, Selection
-    settings and More options folded; after Fit and Generate on the soft finger the results in sight, step 7 one line
+    settings and More options folded; the 3D view's help line hidden, folded and open (2026-11-06: Generate sensor's row
+    right under the view; the line the view's description still), shown with the border editor's keys only while the
+    border is edited; after Fit and Generate on the soft finger the results in sight, step 7 one line
     ("all N checks pass") with its checks folded, the proposal's details folded; back in Rectangular mode the form."""
     if not SOFT.exists():
         print("SKIP clean CAD: asset/soft_gripper_finger.stl is absent")
@@ -1620,6 +1676,10 @@ def part_clean_cad(browser):
     open_cad(page)
     check("clean CAD: the rectangular form and the results (the rectangular default build) are hidden before a CAD build",
           not page.is_visible("#designForm") and not page.is_visible("#results") and not page.is_visible("#status"))
+    quick = page.evaluate(HELP_LINE)
+    check("clean CAD: folded, the 3D view's help line takes no row either (2026-11-06): hidden, Generate sensor's row right under the view, "
+          "the line (the quick mode's) still the view's description", not quick["shown"] and quick["gap"] == 0 and quick["described"] == "cadHelp"
+          and quick["text"].endswith("click the face the sensor goes on."), quick)
     shown = dict(page.evaluate(SHOWN, CAD_STEP + CAD_BASIC + CAD_FOLDED))
     check("clean CAD: the file, its drag hint, the view's tools and the sensor's line in sight; the options, Fit and Generate under "
           "Advanced Customization, folded", all(shown[name] for name in CAD_STEP) and not any(shown[name] for name in CAD_BASIC + CAD_FOLDED)
@@ -1633,8 +1693,20 @@ def part_clean_cad(browser):
     page.click("#cadConfigMore > summary"); page.wait_for_timeout(100)
     check("clean CAD: More options shows the other fit options", page.is_visible("#cadContainment") and page.is_visible("#cadStrainLimit"))
     page.click("#cadConfigMore > summary"); page.wait_for_timeout(100)
+    help_line = page.evaluate(HELP_LINE)
+    check("clean CAD: the 3D view's help line takes no row (the user's request of 2026-11-06): hidden, Generate sensor's row right "
+          "under the view, the line (Advanced Customization's) still the view's description", not help_line["shown"] and help_line["gap"] == 0
+          and help_line["described"] == "cadHelp" and help_line["text"].startswith("Drag: rotate")
+          and help_line["text"].endswith("click it again to deselect it."), help_line)
     load(page, SOFT)
     candidate(page, 1)
+    page.click("#cadEditBorder"); page.wait_for_timeout(200)
+    editing = page.evaluate(HELP_LINE)
+    page.click("#cadEditBorder"); page.wait_for_timeout(200)
+    done = page.evaluate(HELP_LINE)
+    check("clean CAD: while the border is edited the help line shows its keys in a row under the view, hidden again on Done editing",
+          editing["shown"] and editing["text"].startswith("Editing the border:") and editing["gap"] == editing["height"] > 20
+          and not done["shown"] and done["gap"] == 0 and done["text"].startswith("Drag: rotate"), (editing, done))
     page.check('input[name=cadSide][value="0"]'); page.wait_for_timeout(100)
     page.click("#cadFit"); settle(page)
     wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).preview_taxels !== null", 30)
@@ -1964,6 +2036,871 @@ def part_files(browser):
     page.close()
 
 
+def on_part_exact(page, label, build_id):
+    """The sensor on the part drawn for ``build_id`` where the map puts it: the outlines, the field and the taxels within
+    5 um, every sheet over the field facing out, no tear, the bottom FPC above the part; returns on_part."""
+    wait_until(page, ON_PART_SETTLED, 120)
+    op = state(page)["on_part"]
+    # tools/browser/mutants.py counts a run without this as invalid (nothing of the figure was checked).
+    check(f"{ON_PART_DRAWN_CHECK} ({label})", op["state"] == "drawn" and op["build_id"] == build_id, {key: op.get(key) for key in ("state", "build_id", "note")})
+    errors = [op.get("taxel_error_mm"), op.get("field_error_mm"), *(op.get("outline_error_mm") or {}).values()]
+    check(f"{label}: the sensor on the part is drawn for the build, its outlines, field and taxels where the map puts them "
+          "(within 0.005 mm), every sheet over the field facing out, no cell torn (stretch under 3), the bottom FPC above the part",
+          op["state"] == "drawn" and op["build_id"] == build_id and len(errors) == 4 and all(isinstance(e, (int, float)) and e < 0.005 for e in errors)
+          and op["front_out"] == 1 and op["max_stretch"] < 3 and op["min_clearance_mm"] > 0 and op["normal_agrees"],
+          {key: op.get(key) for key in ("state", "build_id", "outline_error_mm", "field_error_mm", "taxel_error_mm", "front_out", "max_stretch",
+                                        "min_clearance_mm", "normal_agrees", "explode", "note")})
+    return op
+
+
+def on_part_framed(page, label):
+    """The sensor on the part framed whole as it opens, exploded and assembled: nothing drawn on the pane's outermost
+    pixels (the crank's tip, the I2RT YAM recipe's part, ran off the pane: the review of 2026-11-05); no seam round the
+    outlines over the part and the look's pixels (on_part_look), exploded and assembled."""
+    exploded = state(page)["on_part"].get("pixels") or {}
+    page.click("button[data-on-part-mode=assembled]")
+    wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).on_part?.mode === 'assembled'", 10)
+    assembled = state(page)["on_part"].get("pixels") or {}
+    page.locator("#sensorOnPart").screenshot(path=f"{SHOTS}/cad_on_part_{label.replace(' ', '_')}_assembled.png")
+    page.click("button[data-on-part-mode=exploded]")
+    check(f"{label}: the sensor on the part framed whole at home, exploded and assembled (no drawn pixel on the pane's edge)",
+          exploded.get("edge_px") == 0 and assembled.get("edge_px") == 0, (exploded, assembled))
+    check(f"{label}: no seam round the outlines over the part, exploded and assembled", exploded.get("seam_px") == 0 and assembled.get("seam_px") == 0,
+          (exploded.get("seam_px"), assembled.get("seam_px")))
+    on_part_look(exploded, f"{label}: Exploded home", exploded=True)
+    on_part_look(assembled, f"{label}: Assembled home", exploded=False)
+    on_part_aligned(page, label)
+
+
+# The left figure as it opens (app.js's exploded stack; the sensor on the part opens as it does, the user's decision of
+# 2026-11-05): its tilt and spin and the screen directions (x right, y down) of the bottom FPC's SVG x and y and of the
+# stack's normal by .assembly-camera's composed CSS transform (its computed matrix, rotateX(tilt) rotateZ(spin) scale:
+# the image of each unit vector), and, through its perspective, the bottom FPC's field centre, a step either side of it
+# along its SVG x and y (CENTRE_STEP_SHARE of the field's narrower side, drape.js's) and the top FPC's field centre (the
+# turned-over board's own, mirrored about its flip axis), each a probe point read back by getBoundingClientRect.
+CENTRE_STEP_SHARE = 0.05
+LEFT_AXES = """(share) => {
+  const pane = document.getElementById('stackedPreview');
+  const lower = pane.querySelector('.assembly-board.is-lower'); const upper = pane.querySelector('.assembly-board.is-upper');
+  const camera = pane.querySelector('.assembly-camera');
+  if (!lower || !upper || !camera || pane.dataset.mode === 'plan') return null;
+  const m = new DOMMatrix(getComputedStyle(camera).transform);
+  const numbers = text => text.trim().split(/[\\s,]+/).map(Number);
+  const centre = board => { const svg = board.querySelector('.assembly-face > svg'); const box = numbers(svg.getAttribute('viewBox'));
+    const field = numbers(svg.getAttribute('data-active-region'));
+    return {x: (field[0] + field[2] / 2 - box[0]) / box[2], y: (field[1] + field[3] / 2 - box[1]) / box[3], step: share * Math.min(field[2], field[3]) * board.offsetWidth / box[2]}; };
+  const low = centre(lower); const high = centre(upper);
+  const x = upper.classList.contains('flip-y') ? 1 - high.x : high.x; const y = upper.classList.contains('flip-x') ? 1 - high.y : high.y;
+  const made = [];
+  const dot = (board, at, transform) => { const node = document.createElement('div');
+    node.style.cssText = `position:absolute; left:calc(${100 * at[0]}% - 0.5px); top:calc(${100 * at[1]}% - 0.5px); width:1px; height:1px; transform:${transform}; pointer-events:none;`;
+    board.append(node); made.push(node); return node; };
+  const at = [low.x, low.y]; const s = low.step;
+  const dots = {centre: dot(lower, at, 'none'), x0: dot(lower, at, `translateX(${-s}px)`), x1: dot(lower, at, `translateX(${s}px)`),
+    y0: dot(lower, at, `translateY(${-s}px)`), y1: dot(lower, at, `translateY(${s}px)`), top: dot(upper, [x, y], 'none')};
+  const box = pane.getBoundingClientRect();
+  const screen = Object.fromEntries(Object.entries(dots).map(([name, node]) => { const r = node.getBoundingClientRect();
+    return [name, [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top]]; }));
+  made.forEach(node => node.remove());
+  const degrees = Math.PI / 180;
+  return {tilt_deg: Math.atan2(-m.m32, m.m33) / degrees, spin_deg: Math.atan2(-m.m21, m.m11) / degrees,
+    axes: {x: [m.m11, m.m12], y: [m.m21, m.m22], n: [m.m31, m.m32]}, screen, orbit: pane.dataset.orbit || null};
+}"""
+AXES = ("x", "y", "n")
+
+
+def screen_angle(vector):
+    # The direction of a screen vector (x right, y down), degrees.
+    return math.degrees(math.atan2(vector[1], vector[0]))
+
+
+def angle_apart(a, b):
+    return abs((a - b + 180) % 360 - 180)
+
+
+def lens_axes(screen):
+    """Through a figure's lens at the field's centre (LEFT_AXES's screen, onpart.js cameraRead's): the directions of the
+    bottom FPC's SVG x and y and of the explode (its field centre to the top FPC's), degrees, and the field's
+    foreshortening there (the smaller over the larger singular value of the 2 x 2 map from the field's x and y to the
+    screen: the cosine of the tilt in a lens without perspective)."""
+    sub = lambda a, b: [a[0] - b[0], a[1] - b[1]]
+    x, y, n = sub(screen["x1"], screen["x0"]), sub(screen["y1"], screen["y0"]), sub(screen["top"], screen["centre"])
+    a, c, b, d = x[0], x[1], y[0], y[1]
+    total = a * a + b * b + c * c + d * d; det = abs(a * d - b * c)
+    big = math.sqrt((total + math.sqrt(max(0.0, total * total - 4 * det * det))) / 2)
+    return {"x": screen_angle(x), "y": screen_angle(y), "n": screen_angle(n), "foreshortening": det / (big * big) if big else 0.0}
+
+
+def on_part_aligned(page, label):
+    """The sensor on the part at its Exploded home as the left figure opens (the user's decision of 2026-11-05, 初始角度
+    和左边的对齐; drape.js HOME_TILT_DEG and HOME_SPIN_DEG, app.js ORBIT_HOME): both at their homes, its tilt and spin the
+    left figure's, and the screen directions of the bottom FPC's SVG x and y and of the stack's normal by each camera's
+    rotation within 2 degrees of each other.  Through each lens at the field's centre the directions also bear each
+    figure's own perspective (the 30 degree lens of both, the field's centre at its own place in each pane, the right's
+    set by the part's framing): printed with the field's foreshortening in both, not checked.  Returns the camera read."""
+    left = page.evaluate(LEFT_AXES, CENTRE_STEP_SHARE)
+    op = state(page)["on_part"]
+    camera = op.get("camera") or {}
+    ok = bool(left and camera.get("axes")) and not op.get("moved")
+    apart = {axis: round(angle_apart(screen_angle(camera["axes"][axis]), screen_angle(left["axes"][axis])), 3) for axis in AXES} if ok else None
+    check(f"{label}: the sensor on the part opens as the left figure (both at their homes): its tilt and spin the left's (within 0.01 "
+          "degrees), the screen directions of the bottom FPC's SVG x and y and of the stack's normal by each camera's rotation within 2 degrees",
+          ok and abs(camera["tilt_deg"] - left["tilt_deg"]) <= 0.01 and abs(camera["spin_deg"] - left["spin_deg"]) <= 0.01
+          and max(apart.values()) <= 2, {"left": left and {key: left[key] for key in ("tilt_deg", "spin_deg", "axes", "orbit")},
+                                         "right": {key: camera.get(key) for key in ("tilt_deg", "spin_deg", "axes")}, "apart": apart, "moved": op.get("moved")})
+    if ok and camera.get("screen"):
+        ours, theirs = lens_axes(camera["screen"]), lens_axes(left["screen"])
+        print(f"    {label}: through each lens at the field's centre (right - left, degrees): x {screen_angle_delta(ours['x'], theirs['x'])}, "
+              f"y {screen_angle_delta(ours['y'], theirs['y'])}, explode {screen_angle_delta(ours['n'], theirs['n'])}; the field's foreshortening "
+              f"{ours['foreshortening']:.3f} on the part, {theirs['foreshortening']:.3f} on the left (cos {left['tilt_deg']:.0f} degrees = "
+              f"{math.cos(math.radians(left['tilt_deg'])):.3f} without perspective)", flush=True)
+    return camera
+
+
+def screen_angle_delta(a, b):
+    return round((a - b + 180) % 360 - 180, 2)
+
+
+def on_part_camera(page):
+    """onpart.js cameraRead's tilt and spin (degrees) and whether the view is turned from its home."""
+    op = state(page)["on_part"]
+    camera = op.get("camera") or {}
+    return camera.get("tilt_deg"), camera.get("spin_deg"), op.get("moved")
+
+
+def split_rings(page, label):
+    """The registration in the split's half-width pane, in the plan and the exploded view: its pin-1 rings right
+    (rp.stacked_pin1: apart, neither taking in the other's triangle, each round its own, within the view), no caption
+    (rp.stacked_bare; the user's request of 2026-11-06, "“Exploded 3D registration review…” 小字去掉") and the scene
+    centred in the pane (the room the plan view kept at the pane's foot for the caption's two lines, the review of
+    2026-11-05, gone with it).  Ends in the exploded view."""
+    seen = {}
+    for view in ("plan", "exploded"):
+        page.click(f'[data-assembly-mode="{view}"]')
+        page.wait_for_timeout(250)
+        problems, _ = stacked_pin1(page)
+        bare, pane = stacked_bare(page)
+        pane.update(page.evaluate("""() => { const pane = document.getElementById('stackedPreview'); const box = pane.getBoundingClientRect();
+            const scene = pane.querySelector(':scope > .assembly-scene').getBoundingClientRect();
+            return {padding: getComputedStyle(pane).paddingBottom,
+                    off_centre: Math.round(Math.abs((scene.top + scene.bottom) / 2 - (box.top + box.bottom) / 2) * 10) / 10}; }"""))
+        seen[view] = (problems, bare, pane)
+    check(f"{label}: the registration's pin-1 rings right in the plan and the exploded view, no caption in either, the scene "
+          "centred in the pane", all(problems == [] and bare and pane["padding"] == "0px" and pane["off_centre"] <= 1
+                                     for problems, bare, pane in seen.values()), seen)
+
+
+def boxes(page, selectors):
+    return page.evaluate("""(selectors) => selectors.map(s => { const n = document.querySelector(s); if (!n) return null;
+        const r = n.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; })""", selectors)
+
+
+def part_on_part(browser):
+    """The sensor on the part (the user's request of 2026-11-05): Gen by Surface's stacked card holds, beside the
+    registration, the part with the bottom FPC, the film and the top FPC draped on it and exploded (web/cad/drape.js,
+    onpart.js), drawn from the map; the default part as the page opens, folded, 1440 x 900."""
+    page = new_page(browser, folded=True)
+    open_cad(page, caps=None, default_part=True)
+    wait_until(page, ON_PART_SETTLED, 120)
+    s = state(page)
+    # tools/browser/mutants.py counts a run without this as invalid (the figure was not drawn: nothing was checked).
+    check(ON_PART_DRAWN_CHECK, s["on_part"]["state"] == "drawn" and s["on_part"]["build_id"] == s["generated_build_id"], s["on_part"])
+    op = on_part_exact(page, "on part", s["generated_build_id"])
+    check("on part: four layers (the part, the bottom FPC, the film, the top FPC; the Row FPC on top), each board's art "
+          "a texture of its view box at 12 px/mm, the art's look rules ASCII and small",
+          op["top_board"] == "rows" and op["bottom_board"] == "columns" and all(op["vertices"][k] > 100 for k in ("bottom", "film", "top"))
+          and op["texture_px"]["row"] == [423, 1732] and op["art_css"]["ascii"] and 200 < op["art_css"]["bytes"] < 4096,
+          {key: op.get(key) for key in ("top_board", "bottom_board", "vertices", "texture_px", "art_css")})
+    routing = s["map_routing"]
+    check("on part: each board's share on the surface as the map's (within 0.03)", routing and all(abs(op["on_surface"][k] - routing[k]) < 0.03 for k in ("row", "column")),
+          (op["on_surface"], routing))
+    check("on part: one rigid explode along the face's normal (13 mm or more per layer on the UMI finger), nested 0.25 mm",
+          op["explode"] == "shift" and op["gap_mm"] > 13 and op["nest_mm"] == 0.25 and op["spread_deg"] < 10, op)
+    ratio = lambda rgba: rgba[1] / max(1, rgba[0])
+    faces = op["faces"] or {}
+    check("on part: from outside, the bottom FPC shows its copper side (ENIG gold at the first taxel) and the top FPC, turned "
+          "over, its polyimide (the copper seen through it: orange)", faces.get("bottom", [0, 0, 0, 0])[3] == 255 and faces.get("top", [0, 0, 0, 0])[3] == 255
+          and ratio(faces["bottom"]) > 0.75 and ratio(faces["top"]) < 0.65, faces)
+    check("on part: Photo: the art's ENIG at a taxel (green 120 or more; the bare copper's is 106): the look's rules and paints reach the texture",
+          op["look"] == "photo" and op["look_rgb"][1] >= 120 and op["look_rgb"][3] == 255, op["look_rgb"])
+    pixels = op.get("pixels") or {}
+    check("on part: the outlines antialiased (a quarter or more of the film's outline pixels drawn in part: alpha to coverage; "
+          "an alpha test alone draws none so) and nothing on the pane's edge at home",
+          (pixels.get("film_soft") or 0) >= 0.25 and pixels.get("film_outline_px", 0) > 100 and pixels.get("edge_px") == 0, pixels)
+    # The review of 2026-11-05: the coverage's alpha had let the pane's grey through round every outline over the part
+    # (a light seam, 191 such pixels exploded and 1,205 assembled); and the tails' end had come 18 px off the pane.
+    margin = pixels.get("margin_px") or [0, 0, 0, 0]
+    check("on part: no seam (no pixel the part covers whole left in part transparent by an outline over it), and framed "
+          "with room: 4 % of the pane or more on every side, as much above the figure as below it (within a quarter)",
+          pixels.get("seam_px") == 0 and min(margin) >= 0.04 * min(pixels.get("buffer") or [0])
+          and abs(margin[1] - margin[3]) <= 0.25 * max(margin[1], margin[3]), pixels)
+    # The look (the look lab of 2026-11-05: the film's flat black had read as a hole cut in the stack).
+    on_part_look(pixels, "on part: Exploded home", exploded=True)
+    # The user's decision of 2026-11-05: the Exploded home is the left figure's as it opens.
+    home = on_part_aligned(page, "on part")
+    layout = page.evaluate("""() => ({first: document.querySelector('.stacked-canvas').id, boards: document.querySelectorAll('#stackedPreview .assembly-board').length,
+        rings: document.querySelectorAll('#stackedPreview .pin1-ring').length, labelled: document.querySelectorAll('svg[aria-label]').length,
+        view: document.querySelectorAll('#cadView canvas').length, figure: document.querySelectorAll('#sensorOnPart canvas').length,
+        touch: getComputedStyle(document.querySelector('#sensorOnPart canvas')).touchAction, reset: document.getElementById('onPartReset').disabled,
+        cursor: getComputedStyle(document.querySelector('#sensorOnPart canvas')).cursor})""")
+    check("on part: the registration's figure as before (the first lightbox, its two boards and pin-1 rings), still six labelled SVGs, "
+          "one canvas each in the 3D view and the sensor on the part (a vertical swipe scrolls the page, a grab cursor as over "
+          "the left figure), Reset view enabled",
+          layout == {"first": "stackedPreview", "boards": 2, "rings": 2, "labelled": 6, "view": 1, "figure": 1, "touch": "pan-y", "reset": False,
+                     "cursor": "grab"}, layout)
+    left, right, card = boxes(page, ["#stackedPreview", "#sensorOnPart", ".stacked-review"])
+    check("on part: 1440: the two figures side by side and level, each at least 340 px wide and 560 px tall",
+          abs(left[1] - right[1]) <= 1 and right[0] >= left[0] + left[2] - 1 and min(left[2], right[2]) >= 340 and min(left[3], right[3]) >= 560, (left, right, card))
+    split_rings(page, "on part: 1440")
+    page.locator(".stacked-review").scroll_into_view_if_needed()
+    page.wait_for_timeout(200)
+    page.locator(".stacked-review").screenshot(path=f"{SHOTS}/cad_on_part_1440.png")
+    page.locator("#sensorOnPart").screenshot(path=f"{SHOTS}/cad_on_part_figure.png")
+    # The look: Diagram's copper at every taxel's centre on both boards' copper sides; back in Photo.
+    draws = op["draws"]
+    page.click("button[data-look=diagram]")
+    wait_until(page, "() => { const s = JSON.parse(document.getElementById('cadState').textContent).on_part; return s.state === 'drawn' && s.look === 'diagram'; }", 60)
+    op = state(page)["on_part"]
+    check("on part: Diagram: drawn again in that look, the copper (#d9672b) at the taxels' centres on both boards' art (95 % or more)",
+          op["draws"] == draws + 1 and op["copper_share"] and min(op["copper_share"].values()) >= 0.95, (op["draws"], op["copper_share"]))
+    # Exploded and Assembled: Assembled clicked while the Photo drawing is under way, its art loading, holds once it is
+    # drawn (show() had put back the mode of its start: the review of 2026-11-05).  The art's images held here
+    # (HTMLImageElement.decode) until the check lets them go, after the click and its read: the click lands while show()
+    # waits for them whatever the load (a hold of 800 ms had let a drawing on a loaded host end first, the review of
+    # 2026-11-05).
+    page.evaluate("""() => { const decode = HTMLImageElement.prototype.decode; window.__decode = decode;
+        const gate = new Promise(open => { window.__releaseDecode = open; });
+        HTMLImageElement.prototype.decode = function () { return decode.call(this).then(value => gate.then(() => value)); }; }""")
+    page.click("button[data-look=photo]")
+    wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).on_part?.state === 'drawing'", 10)
+    page.click("button[data-on-part-mode=assembled]")
+    during = state(page)["on_part"]["state"]
+    page.evaluate("() => { HTMLImageElement.prototype.decode = window.__decode; window.__releaseDecode(); }")
+    wait_until(page, "() => { const s = JSON.parse(document.getElementById('cadState').textContent).on_part; return s.state === 'drawn' && s.look === 'photo'; }", 60)
+    page.wait_for_timeout(300)
+    op = state(page)["on_part"]
+    pressed = page.evaluate("() => [...document.querySelectorAll('[data-on-part-mode]')].map(b => b.getAttribute('aria-pressed'))")
+    check("on part: Assembled clicked while it is drawn again: once drawn, the layers on the part as the switch says (no legend under it "
+          "since 2026-11-06)", during == "drawing" and op["mode"] == "assembled" and op["drawn_mode"] == "assembled" and pressed == ["false", "true"]
+          and op["draws"] == draws + 2 and page.query_selector("#onPartLegend") is None, (during, op["mode"], op.get("drawn_mode"), pressed, op["draws"]))
+    check("on part: Assembled: no seam round the boards' outlines on the part", (op.get("pixels") or {}).get("seam_px") == 0, op.get("pixels"))
+    tilt, spin, moved = on_part_camera(page)
+    check("on part: Assembled's home the left figure's spin, nearer the stack's normal (30 to 40 degrees off it: the field nearly face-on)",
+          home.get("spin_deg") is not None and abs(spin - home["spin_deg"]) <= 0.01 and 30 <= tilt <= 40 and not moved, (tilt, spin, moved, home.get("spin_deg")))
+    on_part_look(op.get("pixels") or {}, "on part: Assembled home", exploded=False)
+    page.locator("#sensorOnPart").screenshot(path=f"{SHOTS}/cad_on_part_assembled.png")
+    page.click("button[data-on-part-mode=exploded]")
+    page.wait_for_timeout(200)
+    again = state(page)["on_part"]
+    check("on part: Exploded again, as drawn, no new drawing", again["drawn_mode"] == "exploded" and again["draws"] == draws + 2,
+          again.get("drawn_mode"))
+    check("on part: Exploded again: no contact shade, though Assembled made it (the layers float clear of the part)",
+          (again.get("pixels") or {}).get("contact_px") == 0, {key: (again.get("pixels") or {}).get(key) for key in ("contact_px", "contact_max")})
+    # Turning: a drag, Reset view, the arrow keys, 0, a double click; the wheel scrolls the page.
+    box = page.locator("#sensorOnPart").bounding_box()
+    centre = (box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+    page.mouse.move(*centre)
+    page.mouse.down()
+    page.mouse.move(centre[0] + 120, centre[1] + 50, steps=6)
+    page.mouse.up()
+    page.wait_for_timeout(200)
+    turned = state(page)["on_part"]["moved"]
+    dragged = on_part_camera(page)
+    page.click("#onPartReset")
+    page.wait_for_timeout(150)
+    reset = state(page)["on_part"]["moved"]
+    reset_camera = on_part_camera(page)
+    page.focus("#sensorOnPart")
+    page.keyboard.press("ArrowLeft")
+    page.wait_for_timeout(150)
+    keyed = state(page)["on_part"]["moved"]
+    left_key = on_part_camera(page)
+    page.keyboard.press("0")
+    page.wait_for_timeout(150)
+    zero = state(page)["on_part"]["moved"]
+    page.keyboard.press("ArrowUp")
+    page.wait_for_timeout(150)
+    up_key = on_part_camera(page)
+    page.mouse.dblclick(*centre)
+    page.wait_for_timeout(150)
+    double = state(page)["on_part"]["moved"]
+    double_camera = on_part_camera(page)
+    check("on part: a drag turns it, Reset view brings it home, the arrow keys turn it, 0 and a double click bring it home",
+          [turned, reset, keyed, zero, double] == [True, False, True, False, False], [turned, reset, keyed, zero, double])
+    # The left figure's sense (app.js attachOrbit), the same drag over it: across turns the stack about its normal (the
+    # spin), down tilts it toward the view from above; ArrowLeft raises the spin by 5 degrees, ArrowUp the tilt.
+    stack = page.locator("#stackedPreview").bounding_box()
+    middle = (stack["x"] + stack["width"] / 2, stack["y"] + stack["height"] / 2)
+    page.mouse.move(*middle)
+    page.mouse.down()
+    page.mouse.move(middle[0] + 120, middle[1] + 50, steps=6)
+    page.mouse.up()
+    page.wait_for_timeout(200)
+    orbit = [float(value) for value in (page.evaluate("() => document.getElementById('stackedPreview').dataset.orbit") or "nan,nan").split(",")]
+    page.mouse.dblclick(*middle)
+    page.wait_for_timeout(200)
+    home_tilt, home_spin = home.get("tilt_deg"), home.get("spin_deg")
+    sense = lambda value: (value > 0) - (value < 0)
+    check("on part: turned as the left figure: the same drag lowers the spin and the tilt of both, ArrowLeft raises the spin by 5 degrees "
+          "and ArrowUp the tilt by 5, as the left's keys, Reset view and a double click back at its home",
+          home_tilt is not None and sense(dragged[1] - home_spin) == sense(orbit[1] - home_spin) == -1 and sense(dragged[0] - home_tilt) == sense(orbit[0] - home_tilt) == -1
+          and abs(left_key[1] - home_spin - 5) <= 0.01 and abs(left_key[0] - home_tilt) <= 0.01 and abs(up_key[0] - home_tilt - 5) <= 0.01
+          and abs(up_key[1] - home_spin) <= 0.01 and all(abs(read[0] - home_tilt) <= 0.01 and abs(read[1] - home_spin) <= 0.01 for read in (reset_camera, double_camera)),
+          {"home": (home_tilt, home_spin), "dragged": dragged, "left figure dragged": orbit, "ArrowLeft": left_key, "ArrowUp": up_key, "reset": reset_camera,
+           "double click": double_camera})
+    before = page.evaluate("() => scrollY")
+    page.mouse.move(*centre)
+    page.mouse.wheel(0, 300)
+    page.wait_for_timeout(300)
+    after = page.evaluate("() => scrollY")
+    check("on part: the wheel over it scrolls the page (no zoom)", after > before and not state(page)["on_part"]["moved"], (before, after))
+    page.locator("#sensorOnPart").scroll_into_view_if_needed()
+    page.focus("#sensorOnPart")
+    for key in ("ArrowLeft", "ArrowLeft", "ArrowDown"):
+        page.keyboard.press(key)
+    page.wait_for_timeout(150)
+    kept = [on_part_camera(page)]
+    for mode in ("assembled", "exploded"):
+        page.click(f"button[data-on-part-mode={mode}]")
+        page.wait_for_timeout(300)
+        kept.append(on_part_camera(page))
+    page.click("#onPartReset")
+    page.wait_for_timeout(150)
+    kept.append(on_part_camera(page))
+    page.click("button[data-on-part-mode=assembled]")
+    page.wait_for_timeout(300)
+    kept.append(on_part_camera(page))
+    page.click("button[data-on-part-mode=exploded]")
+    page.wait_for_timeout(300)
+    kept.append(on_part_camera(page))
+    check("on part: a turned view kept through Assembled and back (the camera where it was), Reset view at the Exploded home, "
+          "Assembled from there its own home, and Exploded the left figure's again",
+          home_tilt is not None and kept[0][2] and all(read == kept[0] for read in kept[1:3]) and abs(kept[0][1] - home_spin - 10) <= 0.01 and abs(kept[0][0] - home_tilt + 5) <= 0.01
+          and kept[3] == kept[5] == (kept[3][0], kept[3][1], False) and abs(kept[3][0] - home_tilt) <= 0.01 and abs(kept[3][1] - home_spin) <= 0.01
+          and not kept[4][2] and abs(kept[4][1] - home_spin) <= 0.01 and kept[4][0] < home_tilt, kept)
+    # Widths: the card's container query (split at 720 px or more).
+    for width, split in ((1100, True), (1000, False), (900, True), (390, False)):
+        page.set_viewport_size({"width": width, "height": 900})
+        page.wait_for_timeout(500)
+        left, right = boxes(page, ["#stackedPreview", "#sensorOnPart"])
+        overflow = page.evaluate("() => document.documentElement.scrollWidth - document.documentElement.clientWidth")
+        placed = (abs(left[1] - right[1]) <= 1 and right[0] >= left[0] + left[2] - 1) if split else (right[1] >= left[1] + left[3] and abs(left[0] - right[0]) <= 1)
+        check(f"on part: {width} px: {'side by side' if split else 'one under the other'}, no horizontal overflow, the figure "
+              "still drawn", placed and overflow <= 0 and state(page)["on_part"]["state"] == "drawn" and right[2] > 0, (left, right, overflow))
+        if split:
+            split_rings(page, f"on part: {width} px")
+        if width == 390:
+            framed = []
+            for mode in ("assembled", "exploded"):
+                page.click(f"button[data-on-part-mode={mode}]")
+                page.wait_for_timeout(400)
+                framed.append((state(page)["on_part"].get("pixels") or {}).get("edge_px"))
+            check("on part: 390 px: framed whole at home, assembled and exploded (no drawn pixel on the pane's edge)", framed == [0, 0], framed)
+            on_part_aligned(page, "on part: 390 px")
+            page.locator("#sensorOnPart").scroll_into_view_if_needed()
+            page.wait_for_timeout(300)
+            page.screenshot(path=f"{SHOTS}/cad_on_part_390.png")
+    page.set_viewport_size({"width": 1440, "height": 900})
+    page.wait_for_timeout(300)
+    # Dark mode (the header's toggle on, 2026-11-06): the figure's pane stays a light lightbox, its drawing on it unchanged
+    # (the canvas transparent over it).  The pane centred in the window (scrolled "if needed" from the 390 px run it had
+    # stayed 6 px above the window's top since its controls went into its frame on 2026-11-06, its top rows black in the shot).
+    set_look(page, "dark")
+    page.evaluate("() => document.getElementById('sensorOnPart').scrollIntoView({block: 'center'})")
+    page.wait_for_timeout(400)
+    corners = pane_corners(page, "#sensorOnPart", f"{SHOTS}/cad_on_part_dark.png")
+    set_look(page, "light")
+    page.wait_for_timeout(200)
+    check("on part: dark: the figure's pane stays light (its four corners' mean sRGB 220 or more), the figure drawn over it",
+          len(corners) == 4 and min(corners) >= 220 and state(page)["on_part"]["state"] == "drawn", corners)
+    # Rectangular mode: the registration alone at the card's width; back in Gen by Surface, drawn again at once.
+    draws = state(page)["on_part"]["draws"]
+    page.click("label:has(#modeRect)")
+    page.wait_for_timeout(300)
+    rect = page.evaluate("() => [document.querySelector('.stack-figure.is-on-part').checkVisibility(), document.getElementById('stackedPreview').getBoundingClientRect().width,"
+                         " document.querySelector('.stacked-review').getBoundingClientRect().width]")
+    off = state(page)["on_part"]["state"]
+    check("on part: Rectangular mode hides it (off), the registration at the card's width", not rect[0] and rect[1] >= rect[2] - 4 and off == "off", (rect, off))
+    page.click("label:has(#modeCad)")
+    wait_until(page, ON_PART_SETTLED, 60)
+    back = state(page)["on_part"]
+    check("on part: back in Gen by Surface it is shown again, the same drawing (not drawn again)", back["state"] == "drawn" and back["draws"] == draws, back)
+    check("on part: no console errors", not errors_of(page), errors_of(page))
+    check("on part: no console warning of the figure's or three.js's (the studio's extensions exist here: no fallback, no shader edit missed)",
+          not look_warnings(page), look_warnings(page))
+    page.close()
+
+
+def part_figure_controls(browser):
+    """The figures' controls in their frames (the user's request of 2026-11-06), Gen by Surface with its default part as
+    the page opens at 1440, 900, 390 and 360 px wide (side by side at 1440 and 900, one under the other below): each
+    frame's controls in one row 12 px from its top left (the board cards' "3D view" and "2D view" and the zoom, the
+    registration's "3D view" and "2D view", the sensor on the part's Exploded and Assembled, its title gone), Reset view
+    12 px from both stacked figures' top right, 24 px targets, and at each view's home nothing drawn under them
+    (rp.figure_controls): the finger's tall boards' 2D windows start under the controls (their band), the plan view's
+    scene shrinks off them where it must (--plan-fit), the sensor on the part's canvas starts under its controls (its
+    pane's 40 px band at the top, the pane's size as before); no layer legend under the board cards and no caption under
+    the registration (2026-11-06)."""
+    for width in (1440, 900, 390, 360):
+        page = new_page(browser, width=width, height=900, folded=True)
+        open_cad(page, caps=None, default_part=True)
+        wait_until(page, ON_PART_SETTLED, 120)
+        page.wait_for_timeout(400)
+        problems, data = figure_controls(page)
+        labels = {name: item["labels"] for name, item in data.items()}
+        check(f"figure controls {width}: Gen by Surface: in one row 12 px in, Reset view top right on both stacked figures, 24 px targets, nothing "
+              "drawn under them", problems == [] and labels == {"row": [["3D view", "2D view"], ["−", "+", "Reset"]], "column": [["3D view", "2D view"], ["−", "+", "Reset"]],
+                                                              "registration": [["3D view", "2D view"]], "onPart": [["Exploded", "Assembled"]]}
+              and len(data["registration"]["reset"]) == len(data["onPart"]["reset"]) == 1 and state(page)["on_part"]["state"] == "drawn", (problems, labels, data))
+        pane = page.evaluate("""() => { const pane = document.getElementById('sensorOnPart').getBoundingClientRect(); const canvas = document.querySelector('#sensorOnPart canvas').getBoundingClientRect();
+            return {pane: [Math.round(pane.width), Math.round(pane.height)], canvas: [Math.round(canvas.width), Math.round(canvas.height), Math.round(canvas.top - pane.top)],
+                    bands: ['#rowPreview svg', '#columnPreview svg'].map(s => document.querySelector(s).style.paddingTop), title: document.querySelector('.on-part-title'),
+                    legends: document.querySelectorAll('.layer-legend, #rowLegend, #columnLegend, .swatch').length}; }""")
+        check(f"figure controls {width}: the sensor on the part's pane as before ({'560' if width > 980 else '480'} px tall), its canvas the 40 px under its "
+              "controls' band; the finger's 2D views start 52 px down (under the controls' row); no layer legend under the board cards",
+              pane["pane"][1] == (560 if width > 980 else 480)
+              and pane["canvas"] == [pane["pane"][0], pane["pane"][1] - 40, 40] and pane["bands"] == ["52px", "52px"] and pane["title"] is None
+              and pane["legends"] == 0, pane)
+        page.click('[data-assembly-mode="plan"]'); page.wait_for_timeout(300)
+        problems, data = figure_controls(page)
+        fit = page.evaluate("() => document.querySelector('#stackedPreview .assembly-scene').style.getPropertyValue('--plan-fit')")
+        check(f"figure controls {width}: the plan view's boards off its switch (its scene {fit or 'as styles.css sizes it'}), no Reset view",
+              problems == [] and data["registration"]["reset"] == [] and (fit == "" or 0.9 < float(fit) < 1), (problems, fit, data["registration"]))
+        bare = [stacked_bare(page)]
+        if width == 900:
+            page.locator(".stacked-review").screenshot(path=f"{SHOTS}/cad_figure_controls_plan_900.png")
+        page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(150)
+        bare.append(stacked_bare(page))
+        check(f"figure controls {width}: no caption under the registration in the plan or the exploded view (2026-11-06)", all(ok for ok, _ in bare), bare)
+        page.click("#rowTab3d"); page.click("#columnTab3d"); page.wait_for_timeout(400)
+        problems, data = figure_controls(page)
+        check(f"figure controls {width}: the oblique views' tabs alone, nothing drawn under them", problems == [] and data["row"]["labels"] == [["3D view", "2D view"]], (problems, data["row"]))
+        page.click("#rowTab2d"); page.click("#columnTab2d"); page.wait_for_timeout(150)
+        if width in (1440, 390):
+            page.locator(".stacked-review").screenshot(path=f"{SHOTS}/cad_figure_controls_stacked_{width}.png")
+        check(f"figure controls {width}: no console errors", not errors_of(page), errors_of(page))
+        page.close()
+
+
+def look_warnings(page):
+    # The figure's own warnings (onpart.js warnOnce: "On the part: ...") and three.js's ("THREE.").
+    return [entry[1] for entry in page.logs if entry[0] == "warning" and (entry[1].startswith("On the part:") or "THREE." in entry[1])]
+
+
+def pane_corners(page, selector, path):
+    # The mean sRGB level of 8 x 8 device px at each corner of a pane, 6 px in (a screenshot of it, saved at ``path``).
+    from PIL import Image
+    page.locator(selector).screenshot(path=path)
+    image = Image.open(path).convert("RGB")
+    width, height = image.size
+    means = []
+    for x, y in ((6, 6), (width - 14, 6), (6, height - 14), (width - 14, height - 14)):
+        values = list(image.crop((x, y, x + 8, y + 8)).tobytes())
+        means.append(round(math.fsum(values) / len(values), 1))
+    return means
+
+
+def on_part_look(pixels, label, exploded):
+    """The look's pixels (onpart.js pixels, ?probe; the look lab of 2026-11-05): the boards' colours, the edge bands drawn,
+    the contact shade in Assembled only, and exploded the film a satin sheet (a gradient from its top to its foot), not
+    the flat black that read as a hole."""
+    ratio = lambda rgb: rgb[1] / max(1, rgb[0]) if rgb else 0
+    median = pixels.get("board_median") or {}; taxels = pixels.get("taxel_median") or {}
+    area = (pixels.get("buffer") or [0, 0])[0] * (pixels.get("buffer") or [0, 0])[1]
+    check(f"{label}: the top FPC's polyimide amber (its median G/R under 0.65), the bottom FPC's ENIG pale at its taxels "
+          "(their median G/R over 0.75), both mirroring the studio", ratio(median.get("top")) < 0.65 and ratio(taxels.get("bottom")) > 0.75
+          and pixels.get("studio") is True, {key: pixels.get(key) for key in ("board_median", "taxel_median", "studio")})
+    check(f"{label}: the edge bands drawn (they change {'0.4' if exploded else '0.1'} % of the pane or more)",
+          (pixels.get("band_px") or 0) >= (0.004 if exploded else 0.001) * area, (pixels.get("band_px"), area))
+    if exploded:
+        on_part_film(pixels, label)
+        check(f"{label}: no contact shade (the layers float clear of the part)", pixels.get("contact_px") == 0, pixels.get("contact_px"))
+    else:
+        check(f"{label}: the contact shade beside the stack's edge on the part (0.15 % of the pane or more darker by 8 levels "
+              "or more than without it, the darkest by 20 or more)", (pixels.get("contact_px") or 0) >= 0.0015 * area and (pixels.get("contact_max") or 0) >= 20,
+              {key: pixels.get(key) for key in ("contact_px", "contact_max")})
+
+
+def on_part_film(pixels, label):
+    """The film at the Exploded home (onpart.js pixels, ?probe): a satin black sheet catching its own lamp (FILM_LAMP; the
+    user's of 2026-11-05, 再调一下你说的黑色压阻膜), a soft highlight at its top fading toward its foot, not the flat black
+    that read as a hole, nor a glossy spot.  Its face's mean sRGB level in six bands from its top to its foot: above 45 on
+    average, falling by 15 or more, its brightest band under 120.  At the left figure's home (the user's decision of
+    2026-11-05) without the lamp (its studio's reflections at 0.8 then) the film had mirrored the room between the
+    studio's back softbox and its sheen lamp, set for the home before: 44 to 38 on the UMI finger and 39 to 35 on the masked crank (85 to 54 and 64 to 47 at the home
+    before; above 30, falling by 3 or more, was the check in between); with it 88 to 64, 74 to 47, 84 to 42 on the soft
+    finger and 99 to 70, 88 to 46 and 95 to 62 on the Library's I2RT YAM 1 mm, Trossen WidowX AI 2 mm and 13.8 mm tapered
+    UMI tip.  The flat unlit black of F/on-part-film-flat reads 6.3 in every band, the film without its lamp
+    (F/on-part-film-unlit) 50 to 44 on the UMI finger, 45 to 40 on the crank and 49 to 38 on the soft finger."""
+    bands = pixels.get("film_bands") or []
+    level = math.fsum(bands) / len(bands) if bands and None not in bands else 0
+    check(f"{label}: the film a satin black catching its lamp, not flat, not glossy: its face's mean sRGB level in six bands from its "
+          "top to its foot above 45 on average, falling by 15 or more, the brightest under 120",
+          len(bands) == 6 and level > 45 and bands[0] - bands[-1] >= 15 and max(bands) < 120,
+          {"film_bands": bands, "mean": round(level, 1)})
+
+
+HIDE_HALF_FLOAT = """(() => {
+  const hidden = new Set(['EXT_color_buffer_float', 'EXT_color_buffer_half_float']);
+  for (const proto of [WebGL2RenderingContext.prototype, WebGLRenderingContext.prototype]) {
+    const get = proto.getExtension; const list = proto.getSupportedExtensions;
+    proto.getExtension = function (name) { return hidden.has(name) ? null : get.call(this, name); };
+    proto.getSupportedExtensions = function () { return (list.call(this) || []).filter(name => !hidden.has(name)); };
+  }
+})();"""
+STUDIO_MEASURES = "() => performance.getEntriesByType('measure').filter(m => m.name === 'on-part studio').length"
+
+
+def gl_invalid(page, since=0):
+    # The browser's WebGL errors of a delete in the wrong context ("WebGL: INVALID_OPERATION: delete: object does not
+    # belong to this context", and any other INVALID_OPERATION) logged since entry ``since``: the 3D view's context is
+    # never lost here, so they are the figure's.
+    return [entry[1] for entry in page.logs[since:] if "INVALID_OPERATION" in entry[1]]
+
+
+def part_on_part_studio(browser):
+    """The look's studio (onpart.js studioFor; the look lab of 2026-11-05): made once as the figure is made, and again
+    when a lost WebGL context comes back (the figure drawn again, as before; what the lost context drew dropped, not
+    disposed: no INVALID_OPERATION of a delete in the new context, the review of 2026-11-05, also after a drawing that
+    disposes the new context's); on a device without half-float render targets, skipped with one warning, the sheets lit
+    by the lights alone and still drawn.  The default part, folded."""
+    page = new_page(browser, folded=True)
+    open_cad(page, caps=None, default_part=True)
+    wait_until(page, ON_PART_DRAWN, 120)
+    before = page.evaluate(STUDIO_MEASURES)
+    logged = len(page.logs)
+    lost = page.evaluate("""async () => {
+      const gl = document.querySelector('#sensorOnPart canvas').getContext('webgl2');
+      const lose = gl && gl.getExtension('WEBGL_lose_context');
+      if (!lose) return 'no WEBGL_lose_context';
+      lose.loseContext();
+      await new Promise(resolve => setTimeout(resolve, 400));
+      const state = JSON.parse(document.getElementById('cadState').textContent).on_part.state;
+      lose.restoreContext();
+      return state;
+    }""")
+    page.wait_for_timeout(500)
+    wait_until(page, ON_PART_DRAWN, 120)
+    op = state(page)["on_part"]
+    after = page.evaluate(STUDIO_MEASURES)
+    check("on part studio: made once with the figure; the context lost (the figure unavailable), then back: the studio made "
+          "again and the figure drawn again with it", before == 1 and lost == "unavailable" and after == 2 and op["state"] == "drawn"
+          and (op.get("pixels") or {}).get("studio") is True, (before, lost, after, op["state"], (op.get("pixels") or {}).get("studio")))
+    page.wait_for_timeout(300)
+    restored = gl_invalid(page, logged)
+    # A drawing on the restored context (the Diagram look): it disposes what that context drew, which is its own.
+    draws = op["draws"]
+    page.click("button[data-look=diagram]")
+    wait_until(page, "() => { const s = JSON.parse(document.getElementById('cadState').textContent).on_part; return s.state === 'drawn' && s.look === 'diagram'; }", 60)
+    page.click("button[data-on-part-mode=assembled]")
+    page.wait_for_timeout(300)
+    again = state(page)["on_part"]
+    invalid = gl_invalid(page, logged)
+    check("on part studio: the lost context's sheets, part and studio dropped, not disposed: no INVALID_OPERATION of a delete "
+          "logged after the context came back, nor after a drawing on it (Diagram, then Assembled)",
+          not restored and not invalid and again["draws"] == draws + 1 and again["drawn_mode"] == "assembled", (len(restored), len(invalid), invalid[:3], again["draws"], draws))
+    check("on part studio: no console error and no warning of the figure's", not errors_of(page) and not look_warnings(page), (errors_of(page), look_warnings(page)))
+    page.close()
+    page = new_page(browser, folded=True)
+    page.add_init_script(HIDE_HALF_FLOAT)
+    open_cad(page, caps=None, default_part=True)
+    wait_until(page, ON_PART_SETTLED, 120)
+    op = state(page)["on_part"]
+    pixels = op.get("pixels") or {}
+    warnings = look_warnings(page)
+    ours = [text for text in warnings if text.startswith("On the part:")]
+    # three.js's own note of the missing extension is expected here; nothing else.
+    others = [text for text in warnings if not text.startswith("On the part:") and "EXT_color_buffer_float extension not supported" not in text]
+    bands = pixels.get("film_bands") or []
+    check("on part studio: no half-float render target: one warning of the figure's, no studio, the sheets still drawn (lit by the lights)",
+          op["state"] == "drawn" and len(ours) == 1 and "half-float" in ours[0] and not others and pixels.get("studio") is False
+          and page.evaluate(STUDIO_MEASURES) == 0 and len(bands) == 6 and None not in bands, (op["state"], warnings, pixels.get("studio"), bands))
+    check("on part studio: no half-float: no console error", not errors_of(page), errors_of(page))
+    page.locator("#sensorOnPart").screenshot(path=f"{SHOTS}/cad_on_part_no_studio.png")
+    page.close()
+
+
+def onpart_served():
+    """web/cad/onpart.js as these checks serve it: tools/browser/mutants.py's (ROUTES) when it serves one, else the tree's."""
+    for pattern, _content_type, body in ROUTES:
+        if pattern.endswith("/onpart.js"):
+            return body
+    return (ROOT / "web" / "cad" / "onpart.js").read_text(encoding="utf-8")
+
+
+# onpart.js's outlines' coverage (its patched() edit of three.js's alphatest_fragment) and its contact footprint.
+COVERAGE_ANCHOR = 'const COVERAGE_EDITS = [["#include <alphatest_fragment>",'
+CONTACT_FIELD = "function contactField(sheets, footprints, nest) {\n"
+CONTACT_FIELDS = "() => window.__contactFields || 0"
+
+
+def part_on_part_patches(browser):
+    """The look's fallbacks (onpart.js patched(); the review of 2026-11-05), with onpart.js served altered: one of the
+    shader texts it edits worded otherwise (the outlines' coverage, as a later three.js might word it), the figure still
+    drawn, with exactly one warning of the figure's (once for every material it compiles), no seam and no console error
+    (three.js's own alpha test then; a GLSL compile error would be one); and a stack without a contact footprint
+    (contactField's null, counted) whose none is made once a drawing, not again at each Assembled, and made again for
+    the next drawing.  The default part, folded."""
+    body = onpart_served()
+    assert body.count(COVERAGE_ANCHOR) == 1 and body.count(CONTACT_FIELD) == 1
+    body = body.replace(COVERAGE_ANCHOR, COVERAGE_ANCHOR.replace("<alphatest_fragment>", "<alphatest_fragment_of_a_later_three>"))
+    body = body.replace(CONTACT_FIELD, CONTACT_FIELD + "  window.__contactFields = (window.__contactFields || 0) + 1;\n  return null;\n")
+    page = new_page(browser, folded=True)
+    page.route("**/static/cad/onpart.js", served("text/javascript", body))
+    open_cad(page, caps=None, default_part=True)
+    wait_until(page, ON_PART_SETTLED, 120)
+    op = state(page)["on_part"]
+    pixels = op.get("pixels") or {}
+    warnings = look_warnings(page)
+    ours = [text for text in warnings if text.startswith("On the part:")]
+    check(f"{ON_PART_DRAWN_CHECK}: with the outlines' coverage text not found, the figure still drawn, with one warning of the "
+          "figure's naming it, nothing else of three.js's, no seam, no console error",
+          op["state"] == "drawn" and len(ours) == 1 and "alphatest_fragment_of_a_later_three" in ours[0] and "the outlines' coverage" in ours[0]
+          and len(warnings) == 1 and pixels.get("seam_px") == 0 and not errors_of(page), (op["state"], warnings, pixels.get("seam_px"), errors_of(page)))
+    exploded = page.evaluate(CONTACT_FIELDS)
+    counts = []
+    for mode in ("assembled", "exploded", "assembled"):
+        page.click(f"button[data-on-part-mode={mode}]")
+        page.wait_for_timeout(300)
+        counts.append(page.evaluate(CONTACT_FIELDS))
+    shaded = (state(page)["on_part"].get("pixels") or {}).get("contact_px")
+    draws = state(page)["on_part"]["draws"]
+    page.click("button[data-look=diagram]")
+    wait_until(page, "() => { const s = JSON.parse(document.getElementById('cadState').textContent).on_part; return s.state === 'drawn' && s.look === 'diagram'; }", 60)
+    redrawn = state(page)["on_part"]
+    counts.append(page.evaluate(CONTACT_FIELDS))
+    check("on part patches: no contact footprint: looked for on the first Assembled only, not again at the next Assembled, "
+          "and again for the next drawing (Diagram, drawn assembled); no shade drawn",
+          exploded == 0 and counts == [1, 1, 1, 2] and shaded == 0 and redrawn["draws"] == draws + 1 and redrawn["drawn_mode"] == "assembled",
+          (exploded, counts, shaded, redrawn["draws"], draws, redrawn.get("drawn_mode")))
+    check("on part patches: no console error, still one warning of the figure's", not errors_of(page) and len(look_warnings(page)) == 1,
+          (errors_of(page), look_warnings(page)))
+    page.close()
+
+
+# The keys that turn the sensor on the part from its Exploded home (57, -20) to spin 45 and tilt 32, the direction of
+# the Assembled home before the user's decision of 2026-11-05 (part_on_part_contact).
+CONTACT_TURN = (("ArrowLeft", 13), ("ArrowDown", 5))
+
+
+def part_on_part_contact(browser):
+    """The contact shade along the stack's edge on a curved part (the review of 2026-11-05): the Trossen WXAI sock, its
+    candidate #1, whose footprint ends a texel or so beyond the stack's edge band, so that a core outside the footprint
+    only had left a light line 2 device px wide between the band and its shade.  In Assembled, the part's pixels along
+    the stack's edge darkened by the shade (onpart.js pixels' contact_edge, ?probe), no seam; exploded, none.  Seen as
+    the Assembled home before the user's decision of 2026-11-05 saw it (spin 45, tilt 32: CONTACT_TURN from the Exploded
+    home, which Assembled keeps): from the new home, at the left figure's spin, less of the part along the stack's edge
+    lies where the shade's core reaches, and the light line moves the share by little (0.32 with the fix, 0.29 without)."""
+    if not WXAI.exists():
+        print("SKIP on part contact: asset/Trossen-WidowXAI/WXAI-LEFT-Gripper-sock.stl is absent")
+        return
+    page = new_page(browser)
+    open_cad(page)
+    load(page, WXAI)
+    candidate(page, 1)
+    page.click("#cadFit"); settle(page)
+    wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).preview_taxels !== null", 60)
+    s = generate_and_wait(page)
+    wait_until(page, ON_PART_SETTLED, 120)
+    s = state(page)
+    check(f"{ON_PART_DRAWN_CHECK}: the WXAI sock's candidate #1", s["on_part"]["state"] == "drawn" and s["on_part"]["build_id"] == s["generated_build_id"], s["on_part"])
+    page.locator("#sensorOnPart").scroll_into_view_if_needed()
+    page.focus("#sensorOnPart")
+    for key, count in CONTACT_TURN:
+        for _ in range(count):
+            page.keyboard.press(key)
+    page.wait_for_timeout(150)
+    page.click("button[data-on-part-mode=assembled]")
+    page.wait_for_timeout(300)
+    pixels = state(page)["on_part"].get("pixels") or {}
+    turned = on_part_camera(page)
+    # Measured at 1440 x 900, so turned: 0.29 with the core outside the footprint only (the light line), 0.46 with it
+    # (0.32 and 0.49 at the Assembled home before the user's decision of 2026-11-05, 22 / -20 about the field's y).
+    check("on part contact: the WXAI sock assembled, turned to spin 45 and tilt 32 (kept from Exploded): two fifths or more of the "
+          "part's pixels along the stack's edge darkened by the contact shade (no light line between the edge band and the shade), "
+          "the shade drawn, no seam", turned[0] is not None and abs(turned[0] - 32) <= 0.01 and abs(turned[1] - 45) <= 0.01 and turned[2]
+          and (pixels.get("contact_edge") or 0) >= 0.4 and (pixels.get("contact_px") or 0) > 0 and pixels.get("seam_px") == 0,
+          {"camera": turned, **{key: pixels.get(key) for key in ("contact_edge", "contact_px", "contact_max", "seam_px")}})
+    page.click("button[data-on-part-mode=exploded]")
+    page.wait_for_timeout(300)
+    pixels = state(page)["on_part"].get("pixels") or {}
+    check("on part contact: exploded, no contact shade along the edge", pixels.get("contact_edge") == 0 and pixels.get("contact_px") == 0,
+          {key: pixels.get(key) for key in ("contact_edge", "contact_px")})
+    check("on part contact: no console errors", not errors_of(page), errors_of(page))
+    page.close()
+
+
+# The 3D view's look (viewer.js pixels, ?probe: main.js answers "fpc:view-look" with them), its studio's measures, and
+# viewer.js COLORS of the markers in sRGB (drawn unlit: their own colours).
+VIEW_LOOK = "() => { const detail = {}; document.dispatchEvent(new CustomEvent('fpc:view-look', {detail})); return detail.result ?? null; }"
+VIEW_STUDIO_MEASURES = "() => performance.getEntriesByType('measure').filter(m => m.name === '3d-view studio').length"
+MARKER_RGB = {"border": [30, 136, 229], "side": [194, 24, 91], "overlay": [26, 127, 60], "handles": [255, 255, 255]}
+VIEW_GREY = [245, 245, 247]
+
+
+def luma(rgb):
+    """The sRGB luma (Rec. 709 weights) of an [r, g, b] (None for None)."""
+    return None if rgb is None else round(0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2], 1)
+
+
+def view_warnings(page):
+    # The 3D view's own warnings (viewer.js through studio.js lookOf: "3D view: ...").
+    return [entry[1] for entry in page.logs if entry[0] == "warning" and entry[1].startswith("3D view:")]
+
+
+def view_drag(page, dx=120, dy=40, steps=10):
+    """A left drag across the middle of the 3D view (OrbitControls turns it), the view then at rest."""
+    page.locator("#cadView").scroll_into_view_if_needed()
+    box = page.locator("#cadView").bounding_box()
+    x, y = box["x"] + 0.55 * box["width"], box["y"] + 0.55 * box["height"]
+    page.mouse.move(x, y)
+    page.mouse.down()
+    page.mouse.move(x + dx, y + dy, steps=steps)
+    page.mouse.up()
+    page.wait_for_timeout(300)
+
+
+def part_view_look(browser):
+    """The 3D view's look (viewer.js, studio.js; the user's request of 2026-11-05: the sensor on the part's light and shade
+    in every 3D view): the default part as the page opens (folded, ?probe), its selection framed face-on.  At the home view
+    the part mirrors the studio and is tone mapped, the selected area keeps its orange about as light as before the look
+    (its luma 160 to 190; 178.6 before: the old sun lay along the view), the markers are drawn unlit in their own colours
+    (the border, the base edge, the taxels) over the view's grey; at Fit (the iso camera) the part is not flat (its grey
+    faces toward the key, up and to the left, lighter by 50 levels or more than those turned from it, which stay out of the
+    dark: luma 110 or more, and under the view's grey), and its reflection faint and soft (the studio lightens half its
+    pixels or more, by 1 to 10 levels on average and 40 at most); the hover (the Base edge tool) and the handles (Edit
+    border) in their colours; after a drag the look again (a software renderer draws a drag's frames without the studio's
+    reflections: viewer.js SOFTWARE_RENDERER); the drawing stays light in dark mode; three models loaded leave no texture
+    behind (renderer.info); a lost context comes back with its studio made again, nothing deleted in the wrong context;
+    and on a device without half-float render targets one warning of the view's, the part still drawn, lit by the lights
+    alone.  No console error, no warning of the view's otherwise."""
+    page = new_page(browser, folded=True)
+    open_cad(page, caps=None, default_part=True)
+    wait_until(page, ON_PART_SETTLED, 120)
+    page.locator("#cadView").scroll_into_view_if_needed()
+    page.wait_for_timeout(300)
+    home = page.evaluate(VIEW_LOOK) or {}
+    page.locator("#cadView").screenshot(path=f"{SHOTS}/cad_view_look_home.png")
+    selected = (home.get("classes") or {}).get("selected") or {}
+    rgb = selected.get("rgb") or [0, 0, 0]
+    check("view look: at the home view the part mirrors the studio and the tone mapping draws it (every pixel of the selected area "
+          "changed by the tone mapping, the studio's reflection on half of them or more)",
+          home.get("studio") is True and selected.get("px", 0) > 5000 and (selected.get("toned") or 0) >= 0.9
+          and ((selected.get("sheen") or {}).get("share") or 0) >= 0.5, {"studio": home.get("studio"), "buffer": home.get("buffer"), "selected": selected})
+    check("view look: the selected area in its orange at the home view, about as light as before the look (R over G over B, R - B 110 or "
+          "more; luma 160 to 190, 178.6 before)", rgb[0] > rgb[1] > rgb[2] and rgb[0] - rgb[2] >= 110 and 160 <= luma(rgb) <= 190, (rgb, luma(rgb)))
+    markers = home.get("markers") or {}
+    drawn = {name: (markers.get(name) or {}).get("rgb") for name in ("border", "side", "overlay")}
+    check("view look: the markers drawn unlit in their own colours (the border, the base edge, the taxels: viewer.js COLORS in sRGB, within "
+          "a level) over the view's grey (#f5f5f7)",
+          all(drawn[name] and max(abs(a - b) for a, b in zip(drawn[name], MARKER_RGB[name])) <= 1 for name in drawn)
+          and home.get("background") == VIEW_GREY, (drawn, home.get("background")))
+    page.click('[data-cad-view="iso"]')
+    page.wait_for_timeout(300)
+    fit = page.evaluate(VIEW_LOOK) or {}
+    page.locator("#cadView").screenshot(path=f"{SHOTS}/cad_view_look_fit.png")
+    base = (fit.get("classes") or {}).get("base") or {}
+    toward, away = luma(base.get("toward")), luma(base.get("away"))
+    check("view look: the part is not flat: at Fit its grey faces toward the key (up and to the left) lighter by 50 levels or more than "
+          "those turned from it, those under the view's grey, these out of the dark (luma 110 or more)",
+          toward is not None and away is not None and base.get("toward_px", 0) > 500 and base.get("away_px", 0) > 500
+          and toward - away >= 50 and toward < luma(VIEW_GREY) - 3 and away >= 110, {"toward": toward, "away": away, "px": [base.get("toward_px"), base.get("away_px")]})
+    sheen = base.get("sheen") or {}
+    check("view look: a faint soft reflection on the part's grey at Fit: the studio lightens half its pixels or more, by 1 to 10 levels on "
+          "average and 40 at most", (sheen.get("share") or 0) >= 0.5 and 1 <= (sheen.get("mean") or 0) <= 10 and 0 < (sheen.get("max") or 0) <= 40, sheen)
+    page.click('[data-cad-view="selection"]')
+    page.wait_for_timeout(300)
+    # The hover: the Base edge tool over a side of the selection's outline (border_checks' way); the handles: Edit border.
+    page.click("#cadCustomize > summary")
+    page.wait_for_timeout(300)
+    ends = side_ends(page)
+    page.click('#cadTools label:has(input[value="edge"])')
+    hovered = None
+    for k, (start, end) in enumerate(ends):
+        middle = probe(page, [(a + b) / 2 for a, b in zip(start, end)])
+        if middle:
+            page.mouse.move(middle[0] + 1, middle[1] + 1)
+            page.wait_for_timeout(250)
+            if state(page)["hover_edge"] is not None:
+                hovered = k
+                break
+    hover = (page.evaluate(VIEW_LOOK) or {}).get("markers", {}).get("hover") or {}
+    page.locator("#cadView").screenshot(path=f"{SHOTS}/cad_view_look_hover.png")
+    # The hover's pink at its opacity 0.55 over the black part of the read: 0.55 x (255, 79, 163).
+    check("view look: the hover drawn in its own colour, unlit (its pink at 0.55 over the read's black part, within 2 levels)",
+          hovered is not None and hover.get("px", 0) > 50 and hover.get("rgb") and max(abs(a - b) for a, b in zip(hover["rgb"], [140, 43, 90])) <= 2,
+          (hovered, hover))
+    page.mouse.move(5, 5)
+    page.click('#cadTools label:has(input[value="grow"])')
+    page.click("#cadEditBorder")
+    page.wait_for_timeout(400)
+    handles = (page.evaluate(VIEW_LOOK) or {}).get("markers", {}).get("handles") or {}
+    page.locator("#cadView").screenshot(path=f"{SHOTS}/cad_view_look_handles.png")
+    check("view look: the border's handles drawn white, unlit", handles.get("px", 0) > 100 and handles.get("rgb") == MARKER_RGB["handles"], handles)
+    page.click("#cadEditBorder")
+    page.wait_for_timeout(200)
+    # After a drag: the look again (the studio's reflection on the selected area, tone mapped).
+    view_drag(page)
+    after = (page.evaluate(VIEW_LOOK) or {}).get("classes", {})
+    shown = [cls for cls in after.values() if cls.get("px", 0) > 2000]
+    check("view look: after a drag the part drawn with its look again (the studio's reflection on half its pixels or more, tone mapped)",
+          shown and all(((cls.get("sheen") or {}).get("share") or 0) >= 0.5 and (cls.get("toned") or 0) >= 0.9 for cls in shown),
+          {name: (cls.get("px"), cls.get("sheen"), cls.get("toned")) for name, cls in after.items()})
+    set_look(page, "dark")  # the header's toggle (2026-11-06)
+    page.wait_for_timeout(300)
+    dark = page.evaluate(VIEW_LOOK) or {}
+    page.locator("#cadView").screenshot(path=f"{SHOTS}/cad_view_look_dark.png")
+    check("view look: dark mode: the drawing stays light (the view's grey behind the part)", dark.get("background") == VIEW_GREY, dark.get("background"))
+    set_look(page, "light")
+    # Three models loaded (the asset meshes), then the first again: no texture left behind (the studio made once).
+    memory = [(page.evaluate(VIEW_LOOK) or {}).get("memory")]
+    for path in (SOFT, CRANK, SOFT):
+        if path.exists():
+            load(page, path)
+            page.wait_for_timeout(300)
+            memory.append((page.evaluate(VIEW_LOOK) or {}).get("memory"))
+    check("view look: models loaded one after another leave no texture behind (renderer.info's textures the same after each; the studio "
+          "made once, never with a model)", len(memory) >= 2 and all(entry and entry["textures"] == memory[0]["textures"] for entry in memory)
+          and page.evaluate(VIEW_STUDIO_MEASURES) == 1, (memory, page.evaluate(VIEW_STUDIO_MEASURES)))
+    # A lost context comes back: the studio made again, the lost one dropped (no delete in the wrong context).
+    logged = len(page.logs)
+    lost = page.evaluate("""async () => {
+      const gl = document.querySelector('#cadView canvas').getContext('webgl2');
+      const lose = gl && gl.getExtension('WEBGL_lose_context');
+      if (!lose) return 'no WEBGL_lose_context';
+      lose.loseContext();
+      await new Promise(resolve => setTimeout(resolve, 400));
+      lose.restoreContext();
+      await new Promise(resolve => setTimeout(resolve, 600));
+      return 'restored';
+    }""")
+    page.wait_for_timeout(300)
+    again = page.evaluate(VIEW_LOOK) or {}
+    lit = [cls for cls in (again.get("classes") or {}).values() if cls.get("px", 0) > 2000]
+    check("view look: the context lost and back: the studio made again (its second measure) and mirrored, nothing deleted in the wrong "
+          "context (no INVALID_OPERATION logged)", lost == "restored" and again.get("studio") is True and page.evaluate(VIEW_STUDIO_MEASURES) == 2
+          and lit and all(((cls.get("sheen") or {}).get("share") or 0) >= 0.5 for cls in lit) and not gl_invalid(page, logged),
+          (lost, again.get("studio"), page.evaluate(VIEW_STUDIO_MEASURES), [cls.get("sheen") for cls in lit], gl_invalid(page, logged)[:3]))
+    check("view look: no console error and no warning of the view's", not errors_of(page) and not view_warnings(page), (errors_of(page), view_warnings(page)))
+    page.close()
+    # No half-float render target: one warning of the view's, the part drawn by the lights alone (no studio, no reflection).
+    page = new_page(browser, folded=True)
+    page.add_init_script(HIDE_HALF_FLOAT)
+    open_cad(page, caps=None, default_part=True)
+    wait_until(page, ON_PART_SETTLED, 120)
+    page.locator("#cadView").scroll_into_view_if_needed()
+    page.wait_for_timeout(300)
+    plain = page.evaluate(VIEW_LOOK) or {}
+    selected = (plain.get("classes") or {}).get("selected") or {}
+    ours = view_warnings(page)
+    check("view look: no half-float render target: one warning of the view's naming it, the part still drawn (its selected area, tone "
+          "mapped) without the studio's reflection", len(ours) == 1 and "half-float" in ours[0] and plain.get("studio") is False
+          and selected.get("px", 0) > 5000 and (selected.get("toned") or 0) >= 0.9 and (selected.get("sheen") or {}).get("share") == 0
+          and page.evaluate(VIEW_STUDIO_MEASURES) == 0, (ours, plain.get("studio"), selected))
+    check("view look: no half-float: no console error", not errors_of(page), errors_of(page))
+    page.close()
+
+
 def part_no_webgl(playwright):
     if not SOFT.exists():
         return
@@ -1977,9 +2914,200 @@ def part_no_webgl(playwright):
     page.click("#cadFit"); settle(page)
     s = state(page)
     check("no WebGL: candidates and fit still work", s["selection"] and s["proposals"] >= 1, s)
+    page.click("#cadGenerate")
+    wait_until(page, "() => { const s = JSON.parse(document.getElementById('cadState').textContent); return s.busy.length === 0 && (s.verification !== null || s.map_error !== null); }", 120)
+    wait_until(page, ON_PART_SETTLED, 60)
+    s = state(page)
+    note = page.evaluate("() => [document.querySelector('#sensorOnPart .on-part-note').textContent, document.querySelectorAll('#sensorOnPart canvas').length]")
+    check("no WebGL: the sensor on the part says it needs WebGL (no canvas, no error of its own), the build maps",
+          s["on_part"]["state"] == "unavailable" and note == ["This view needs WebGL, which is off in this browser.", 0] and s["verification"]["ok"], (s["on_part"], note))
     errors = errors_of(page, allowed=("WebGL", "THREE.WebGLRenderer"))
     check("no WebGL: no other console errors", not errors, errors)
     browser.close()
+
+
+# -- the Library's sensors (library.html; the user's requests of 2026-11-05) ------------------------------------------
+LIBRARY_ENTRIES = json.loads((ROOT / "web" / "library" / "entries.json").read_text(encoding="utf-8"))
+# Step 1's file note: its text (its no-break space before 'mm' read as a space), its link, and its lines (the distinct
+# tops of its text's boxes).
+FILE_NOTE = """() => { const note = document.getElementById('cadFileNote'); const link = note.querySelector('a'); const range = document.createRange();
+    range.selectNodeContents(note); const tops = new Set([...range.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top)));
+    return {text: note.textContent.replace(/\u00a0/g, ' '), href: link?.getAttribute('href') || null, target: link?.target || null, rel: link?.rel || null, lines: tops.size,
+            search: location.search, generate: Math.round(document.getElementById('cadQuickGenerate').getBoundingClientRect().bottom * 10) / 10}; }"""
+OPTIONS = "() => ['cadPitch', 'cadFill', 'cadRotation'].map(id => document.getElementById(id).value)"
+# The Library's sensors whose figure part_library compares with the left figure's (on_part_aligned): a gripper's tip
+# whose part reaches far beside the stack, a curved sock, a tapered tip.
+LIBRARY_ALIGNED = ("i2rt-yam-1mm", "trossen-widowx-ai-2mm", "umi-trap-tip13.8-2mm")
+
+
+def open_part(page, query):
+    """Gen by Surface at ./<query> (?part=<id>...), its Library sensor (or the default part) loaded and built."""
+    page.surface.clear()
+    page.goto("about:blank")  # a new document each time (the same address with a hash would only scroll)
+    page.goto(URL + query)
+    wait_until(page, DONE, 60)
+    wait_until(page, DEFAULT_SETTLED, 180)
+    page.wait_for_timeout(200)
+    return state(page)
+
+
+def part_library(browser):
+    """./?part=<id> (web/cad/main.js; the Library's Open in Gen by Surface): every sensor of web/library/entries.json loads its
+    part and builds its sensor from its shipped fit (fit_source shipped, no fit request; the entry's build id and mesh
+    name), drawn on its part beside the stacked view (the two lines' integration of 2026-11-05), step 1's file note
+    "From the Library: <label>" on one line with the Library in a new tab; ?part=<part> its
+    2 mm sensor, ?part=<family> (umi-tapers) its default tip's (the review of 2026-11-05); an unknown id the UMI finger
+    with a warning and ?part dropped; ?part kept across Rectangular and back (and ?part=<id>#rect loads on the first
+    switch); the user's own file and Remove model drop ?part and put back the options the sensor set (pitch, fill,
+    rotation), a fill the user changed kept, the note its own again, and so with a restored form too (the controls
+    holding the sensor's values before main.js runs, as Firefox's reload leaves them; the review of 2026-11-05); on the
+    WidowX 250 (eight disk operations) a click on the face and Undo behave, no request refused."""
+    page = new_page(browser, folded=True)
+    page.refused = []
+    page.on("response", lambda response: page.refused.append((response.status, response.url)) if "/api/" in response.url and response.status >= 400 else None)
+    misses, timings, figures, cut = [], [], [], []
+    for identifier, variant in LIBRARY_ENTRIES["variants"].items():
+        started = time.monotonic()
+        s = open_part(page, f"?part={identifier}&debug&probe")
+        timings.append((identifier, round(time.monotonic() - started, 1)))
+        # The sensor on the part (fpc-stack-on-part, merged with the Library on 2026-11-05) drawn for the entry's build,
+        # framed whole at its Exploded home (the left figure's since the user's decision of 2026-11-05; the Library's cards
+        # will show it).
+        wait_until(page, ON_PART_SETTLED, 60)
+        figure = state(page)["on_part"]
+        if (figure["state"], figure["build_id"]) != ("drawn", variant["build_id"]):
+            figures.append([identifier, figure["state"], figure["build_id"], figure["note"]])
+        elif (figure.get("pixels") or {}).get("edge_px") != 0:
+            cut.append([identifier, (figure.get("pixels") or {}).get("edge_px"), (figure.get("pixels") or {}).get("margin_px")])
+        if identifier in LIBRARY_ALIGNED:
+            on_part_aligned(page, f"library: {identifier}")
+            on_part_film(figure.get("pixels") or {}, f"library: {identifier}: Exploded home")
+        s = state(page)
+        note = page.evaluate(FILE_NOTE)
+        mesh = LIBRARY_ENTRIES["parts"][variant["part"]]["mesh"]
+        got = (s["default_part"], s["default_build"], s["fit_source"], (s["proposal"] or {}).get("build_id"), s["generated_build_id"], (s["mesh"] or {}).get("name"),
+               note["text"], note["href"], note["target"], note["lines"], any(url.endswith("/api/surface/fit") for url in page.surface), (s["verification"] or {}).get("ok"))
+        want = ("loaded", "done", "shipped", variant["build_id"], variant["build_id"], mesh["name"], f"From the Library: {variant['label']}",
+                f"library.html#{identifier}", "_blank", 1, False, True)
+        if got != want:
+            misses.append([identifier, [pair for pair in zip(got, want) if pair[0] != pair[1]]])
+    print("    timings:", ", ".join(f"{name} {seconds} s" for name, seconds in timings), flush=True)
+    check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors opens at ./?part=<id> from its shipped fit (no fit request), "
+          "its build id and mesh the entry's, built and mapped (every check passes), the note 'From the Library: <label>' on one line, "
+          "the Library in a new tab at it", misses == [], misses[:6])
+    check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors drawn on its part beside the stacked view (on_part drawn for its build)",
+          figures == [], figures[:6])
+    check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors framed whole on its part at the Exploded home, 1440 px "
+          "(no drawn pixel on the pane's edge)", cut == [], cut[:6])
+    widest = max(LIBRARY_ENTRIES["variants"], key=lambda key: len(LIBRARY_ENTRIES["variants"][key]["label"]))
+    open_part(page, f"?part={widest}")
+    note = page.evaluate(FILE_NOTE)
+    check(f"library: with the longest label ({widest}) Generate sensor's bottom at most 857.1 px (850.1 without the Library)",
+          note["lines"] == 1 and note["generate"] <= 857.1, note)
+    page.screenshot(path=f"{SHOTS}/cad_library_{widest}.png")
+    # At 390 px (reported, not checked: the file bar's line there is a phone's): each label's note, as libraryNote writes it.
+    page.set_viewport_size({"width": 390, "height": 900}); page.wait_for_timeout(200)
+    wrapped = page.evaluate("""(labels) => { const note = document.getElementById('cadFileNote'); const kept = [...note.childNodes];
+        const out = labels.filter(label => { note.replaceChildren('From the ', Object.assign(document.createElement('a'), {href: '#', textContent: 'Library'}), `: ${label.replace(/ mm$/, '\u00a0mm')}`);
+          const range = document.createRange(); range.selectNodeContents(note);
+          return new Set([...range.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top))).size > 1; });
+        note.replaceChildren(...kept); return out; }""", sorted({variant["label"] for variant in LIBRARY_ENTRIES["variants"].values()}))
+    print(f"    the file note on two lines at 390 px: {', '.join(wrapped) or 'none'}", flush=True)
+    page.set_viewport_size({"width": 1440, "height": 900}); page.wait_for_timeout(200)
+    s = open_part(page, "?part=widowx-250")
+    check("library: ?part=widowx-250 opens its 2 mm sensor", s["proposal"] and s["proposal"]["build_id"] == LIBRARY_ENTRIES["variants"]["widowx-250-2mm"]["build_id"]
+          and page.evaluate(FILE_NOTE)["text"] == "From the Library: WidowX 250, 2 mm", s["proposal"])
+    # A family's id, as library.html#<family> takes it: its default sensor (the tapered tips' 13.8 mm trapezoid).
+    family = LIBRARY_ENTRIES["families"]["umi-tapers"]["default"]
+    s = open_part(page, "?part=umi-tapers")
+    note = page.evaluate(FILE_NOTE)
+    check(f"library: ?part=umi-tapers opens the tapered tips' default ({family}) from its shipped fit, no warning",
+          (s["proposal"] or {}).get("build_id") == LIBRARY_ENTRIES["variants"][family]["build_id"] and s["fit_source"] == "shipped"
+          and s["status"]["kind"] != "warning" and note["text"] == f"From the Library: {LIBRARY_ENTRIES['variants'][family]['label']}"
+          and note["href"] == f"library.html#{family}" and note["search"] == "?part=umi-tapers", (s["proposal"], s["fit_source"], s["status"], note))
+    s = open_part(page, "?part=bogus&debug")
+    # The warning comes once the build is mapped (main.js loadDefaultPart waits for the map on a 40 ms timer, after the
+    # map's own status): settled, the page may still be drawing (with the sensor on the part, three.js in SwiftShader
+    # held that timer back up to 1.2 s; the review of 2026-11-05), so it is waited for, up to 10 s, and its delay said.
+    started = time.monotonic()
+    try:
+        wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).status.kind === 'warning'", 10)
+    except TimeoutError:
+        pass
+    print(f"    ?part=bogus: the warning {round(1000 * (time.monotonic() - started))} ms after the build settled", flush=True)
+    s = state(page)
+    note = page.evaluate(FILE_NOTE)
+    check("library: ?part=bogus shows the UMI finger with a warning, ?part dropped (?debug kept as written), the note its own",
+          (s["mesh"] or {}).get("name") == "UMI-Soft-Gripper-Finger.stl" and s["default_build"] == "done" and s["status"]["kind"] == "warning"
+          and s["status"]["shown"] == "No library sensor is named bogus; the UMI finger is shown." and note["search"] == "?debug"
+          and note["text"] == "or drag an STL file onto the 3D view below", (s["status"], note))
+    s = open_part(page, "?part=widowx-250-1mm")
+    page.click("label:has(#modeRect)"); page.wait_for_timeout(300)
+    rect = page.evaluate("() => [location.search, location.hash]")
+    page.click("label:has(#modeCad)"); page.wait_for_timeout(500)
+    s = state(page)
+    check("library: ?part survives Rectangular and back (the sensor still the Library's)", rect == ["?part=widowx-250-1mm", "#rect"]
+          and page.evaluate(FILE_NOTE)["search"] == "?part=widowx-250-1mm" and s["fit_source"] == "shipped" and page.evaluate(OPTIONS) == ["1", "0.5", "none"], (rect, s["fit_source"]))
+    page.surface.clear()
+    page.goto("about:blank")
+    page.goto(URL + "?part=widowx-250-1mm#rect")
+    wait_until(page, DONE, 60)
+    page.wait_for_timeout(300)
+    idle = state(page)["default_part"]
+    page.click("label:has(#modeCad)")
+    wait_until(page, DEFAULT_SETTLED, 180)
+    s = state(page)
+    check("library: ?part=<id>#rect loads the sensor on the first switch to Gen by Surface", idle == "idle" and s["fit_source"] == "shipped"
+          and s["proposal"]["build_id"] == LIBRARY_ENTRIES["variants"]["widowx-250-1mm"]["build_id"], (idle, s["fit_source"]))
+    # The user's own file, and Remove model: ?part goes, the options the sensor set come back, the note is its own (the
+    # 1 mm sensor's fill is the page's default 0.5 since the user's decision of 2026-11-06: its pitch and rotation).
+    own = DOWNLOADS / "my-finger.stl"
+    own.write_bytes(DEFAULT_PART_FILE.read_bytes())
+    for leave in ("file", "remove"):
+        open_part(page, "?part=widowx-250-1mm&debug#cad")
+        before = page.evaluate(OPTIONS)
+        if leave == "file":
+            load(page, own)
+        else:
+            page.click("#cadRemove"); page.wait_for_timeout(300)
+        note = page.evaluate(FILE_NOTE)
+        check(f"library: {'the user’s own file' if leave == 'file' else 'Remove model'} drops ?part (?debug and the hash kept), puts back pitch, fill and "
+              "rotation (2.0, 0.5, auto) and the note", before == ["1", "0.5", "none"] and page.evaluate(OPTIONS) == ["2.0", "0.5", "auto"]
+              and note["search"] == "?debug" and page.evaluate("() => location.hash") == "#cad" and note["text"] == "or drag an STL file onto the 3D view below",
+              (before, page.evaluate(OPTIONS), note))
+    open_part(page, "?part=widowx-250-1mm")
+    page.evaluate("() => { const fill = document.getElementById('cadFill'); fill.value = '0.6'; fill.dispatchEvent(new Event('input', {bubbles: true})); fill.dispatchEvent(new Event('change', {bubbles: true})); }")
+    load(page, own)
+    check("library: a fill the user changed stays (pitch and rotation back)", page.evaluate(OPTIONS) == ["2.0", "0.6", "auto"], page.evaluate(OPTIONS))
+    # A restored form (the review of 2026-11-05): Firefox puts a reloaded page's control values back while it parses,
+    # before main.js runs, so the sensor's pitch, fill and rotation are there already; here they are set when parsing
+    # ends (readyState interactive, before the deferred module scripts).  The user's own file still puts back the defaults.
+    restored = new_page(browser, folded=True)
+    restored.add_init_script("""document.addEventListener('readystatechange', () => { if (document.readyState !== 'interactive') return;
+        for (const [id, value] of [['cadPitch', '1'], ['cadFill', '0.5'], ['cadRotation', 'none']]) {
+          const control = document.getElementById(id); if (control) control.value = value; } });""")  # about:blank (open_part goes there first) has none
+    s = open_part(restored, "?part=widowx-250-1mm")
+    before = restored.evaluate(OPTIONS)
+    load(restored, own)
+    check("library: with a restored form (the sensor's values in the controls before main.js runs) the user's own file still puts back "
+          "pitch, fill and rotation (2.0, 0.5, auto)", s["fit_source"] == "shipped" and before == ["1", "0.5", "none"]
+          and restored.evaluate(OPTIONS) == ["2.0", "0.5", "auto"], (s["fit_source"], before, restored.evaluate(OPTIONS)))
+    check("library: no console errors with a restored form", not errors_of(restored), errors_of(restored)[:5])
+    restored.close()
+    page.reload(); wait_until(page, DONE, 60)
+    # The WidowX 250's face is eight disk operations: a click on it (quick mode: that face alone) and Undo back to them.
+    page.refused.clear()
+    s = open_part(page, "?part=widowx-250-2mm")
+    facets = s["selection"]["facets"]
+    pick(page, s["candidates"]["flat"][0])
+    clicked = state(page)
+    page.click("#cadUndo"); settle(page)
+    undone = state(page)
+    check("library: on the WidowX 250 (eight disk operations) a click on the face and Undo behave, no request refused",
+          s["ops"] == 8 and clicked["selection"] is not None and clicked["error"] is None and undone["ops"] == 8
+          and undone["selection"]["facets"] == facets and not page.refused, (s["ops"], clicked["ops"], clicked["error"], undone["ops"], page.refused[:4]))
+    check("library: no console errors", not errors_of(page), errors_of(page)[:5])
+    page.close()
 
 
 def main():
@@ -1989,9 +3117,11 @@ def main():
     print(f"/api/default?template= {'served' if SERVED else 'not served (app.js keeps the default limits)'}", flush=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(args=WEBGL_ARGS)
-        parts = (part_rect_unchanged, part_default_cad, part_one_step, part_remove_model, part_clean_cad, part_soft, part_crank, part_crank_fill, part_no_rectangle_controls, part_field_soft, part_row_sides, part_review_fixes, part_tail_card, part_wrap_flexitac,
+        parts = (part_rect_unchanged, part_default_cad, part_on_part, part_on_part_studio, part_on_part_patches, part_on_part_contact, part_view_look, part_one_step, part_remove_model, part_clean_cad, part_soft, part_crank, part_crank_fill, part_no_rectangle_controls, part_field_soft, part_row_sides, part_review_fixes, part_tail_card, part_wrap_flexitac,
                  part_ascii_and_narrow, part_drop, part_template_roundtrip, part_columns, part_presets, part_tail_edit, part_rounded_base,
                  part_rounded_corners, part_files)
+        parts += (part_library,)  # the Library's ./?part=<id> (2026-11-05)
+        parts += (part_figure_controls,)  # the figures' controls in their frames (2026-11-06)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
         for part in chosen:
             print(f"--- {part.__name__}", flush=True)

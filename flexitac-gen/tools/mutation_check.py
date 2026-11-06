@@ -821,7 +821,7 @@ TESTS_AND_DOCS = (
       (WEB, "      schema_version: state.design?.schema_version, template_id: state.design?.template_id,\n",
        "      template_id: state.design?.template_id,\n")),
     m("T/doc-build-id", "M12", "README names a stale default build id",
-      ("README.md", "tactile-fpc-12x32-c2243ebd10c5", "tactile-fpc-12x32-ac8bac358de6")),
+      ("README.md", "tactile-fpc-12x32-34a71a29e4d0", "tactile-fpc-12x32-ac8bac358de6")),
     m("T/doc-code", "M12", "an issue code missing from the documented catalogue",
       ("docs/LAYOUT_SCHEMA.md", "| `E_NECK_WIDTH` | drc |", "| `E_NECK_WIDTH_GONE` | drc |")),
     m("T/doc-check", "M12", "a DRC record missing from the documented list",
@@ -867,7 +867,7 @@ TESTS_AND_DOCS = (
     m("T/doc-ci", "L13/M12", "README: CI described on Python versions the workflow does not run",
       ("README.md", "runs the suite on Python 3.9 and 3.12", "runs the suite on Python 3.8 and 3.12")),
     m("T/doc-test-count", "M12", "handoff: a stale test count",
-      ("claude/APP_HANDOFF.md", " tests in 46 modules", "0 tests in 46 modules")),
+      ("claude/APP_HANDOFF.md", " tests in 48 modules", "0 tests in 48 modules")),
     m("T/doc-mutation-summary", "M12", "handoff: a mutation summary that the catalogue does not give",
       ("claude/APP_HANDOFF.md", "3 equivalent (`E/F1-inputs`,", "4 equivalent (`E/F1-inputs`,")),
     m("F/stale-banner", "M4", "browser: the 'Form changed' banner is never shown",
@@ -1976,8 +1976,6 @@ FIELD_FIT = (
       (GERBER, '    return "folded" if board["construction"]["row_bus"]["sides"] == "both" else "one side"\n', '    return "folded"\n')),
     m("M/web-badge-full", "mask P5e review", "a full diagonal-bus field gets the masked badge (\"708 of 59 x 12 taxels active (masked field ...)\")",
       (WEB, "    if (!mask || !(registration.active_taxel_count < mask.rows * mask.columns)) return null;\n", "    if (!mask) return null;\n")),
-    m("M/web-pins-positions", "mask P5e review", "the stacked view lists the Row contact positions as pins (wrong with Scan order Reverse)",
-      (WEB, "    const order = rowPinOrder(row);\n", "    const order = Array.isArray(row.tail?.row_contact_order) ? row.tail.row_contact_order : [];\n")),
     m("M/web-map-pins-positions", "mask P5e review", "the map panel lists the Row contact positions as pins (wrong with Scan order Reverse)",
       (CAD_MAIN, "    const order = cad.map.readout?.row_pin_order || cad.map.readout?.row_contact_order;\n", "    const order = cad.map.readout?.row_contact_order;\n")),
     m("M/web-generate-stale", "mask P5e review", "Generate builds the proposal of the old settings after an option change",
@@ -2305,7 +2303,474 @@ EASYEDA = (
       (COMPARE, "    _pairs(segments, intervals)\n", "    _pairs({k: [min(xs), max(xs)] for k, xs in segments.items()}, intervals)\n")),
 )
 
-MUTANTS = AUDIT + ENGINE + API + EXPORT + TESTS_AND_DOCS + GOLD_FINGERS + SURFACE + MASKED_FIELD + DIAGONAL + FIELD_FIT + BORDER + EASYEDA
+# --------------------------------------------------------------------------
+# The sensor on the part beside the stacked view (the user's request of
+# 2026-11-05): Gen by Surface's second figure, its gate and its art (the
+# stdlib suite), and its geometry in web/cad/drape.js (the Playwright checks:
+# tools/browser/mutants.py's "cad" kind kills both drape.js mutants with
+# cad_checks.py part_on_part).  Its review of 2026-11-05: the checks' reads
+# and its buffers (the stdlib suite), its antialiased outlines and its framing
+# of a large part (the "cad" kind: part_on_part and part_crank_fill).  Its
+# second review: the figure's cursor (the stdlib suite; its mutant of the
+# split's room for the registration's caption went with the caption on
+# 2026-11-06), and no seam round an outline over the part (the "cad" kind).  Its
+# look of 2026-11-05 (the look lab's, merged): its own lights, the tone
+# mapping, the studio's single warning and fallback, the edge bands drawn
+# from the front, the contact shade made and drawn in Assembled only and the
+# film's face not drawn there (the stdlib suite); the film no longer a flat
+# black, the contact shade drawn at all and the edge bands drawn (the "cad"
+# kind: part_on_part).  The look's fix round of 2026-11-05 (its review's
+# minors): a lost context's objects dropped, not disposed, when it comes back
+# (the stdlib suite, and the "cad" kind: part_on_part_studio's
+# INVALID_OPERATION count), the measures out of the studio's try and guarded,
+# a stack without a contact footprint looked for once a drawing (the stdlib
+# suite, and the "cad" kind: part_on_part_patches), the shader edits' anchors
+# in the vendored three.js (the stdlib suite), and the contact shade's core
+# inside the footprint's edge on an edge facing the camera (the stdlib suite,
+# and the "cad" kind: part_on_part_contact's shade along the WXAI sock's stack edge).
+# The user's decision of 2026-11-05 (its Exploded home the left figure's as
+# it opens): the home's tilt the left's, its spin's sign, the camera's up the
+# stack's normal and the arrow keys' sense the left's (the stdlib suite:
+# test_surface_web; the "cad" kind kills the last three with part_on_part's
+# comparison with the left figure).
+# The 3D view in the same light (the user's request of 2026-11-05): the
+# figure's lights, studio, tone mapping and warnings moved to web/cad/studio.js
+# (the figure drawing the same pixels), whose mutants above now edit it; the
+# 3D view's part in the studio, its markers unlit, the studio made once a
+# renderer and again (never disposed) when a lost context comes back, its
+# reads with ?probe only and a drag's diffuse material on a software
+# renderer only (the stdlib suite, and tools/browser/mutants.py's "cad" kind:
+# cad_checks part_view_look).
+# --------------------------------------------------------------------------
+
+DRAPE = "web/cad/drape.js"
+ONPART = "web/cad/onpart.js"
+STUDIO = "web/cad/studio.js"
+VIEWER = "web/cad/viewer.js"
+ON_PART = (
+    m("M/web-on-part-gate", "2026-11-05", "styles.css: the sensor on the part not hidden outside Gen by Surface (Rectangular mode shows an empty second figure)",
+      ("web/styles.css", ".stack-figure.is-on-part { display:none; }", ".stack-figure.is-on-part { display:block; }")),
+    m("M/web-board-art-listener", "2026-11-05", "app.js: no answer to fpc:board-art (the sensor on the part never gets the boards' art)",
+      (WEB, '  document.addEventListener("fpc:board-art", event => { if (event.detail) event.detail.result = boardArt(event.detail); });\n', "")),
+    m("F/on-part-mirror", "2026-11-05", "browser: the top FPC laid on the part unmirrored (its copper side's art as if seen from outside)",
+      (DRAPE, "  const bx = isTop(art) ? ox + (Rx + Rw - sx) : ox + (sx - Rx);\n", "  const bx = isTop(art) ? ox + (sx - Rx) : ox + (sx - Rx);\n"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    m("F/on-part-texture-rows", "2026-11-05", "browser: the boards' art upside down on their sheets (the texture's rows not flipped)",
+      (DRAPE, "  return [(sx - vx) / vw, 1 - (sy - vy) / vh];\n", "  return [(sx - vx) / vw, (sy - vy) / vh];\n"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    m("M/web-on-part-probe-gate", "2026-11-05 review", "main.js: the sensor on the part compared with the map on every page, not with ?probe only",
+      (CAD_MAIN, "const metrics = ON_PART_PROBE ? D.metrics(stack, plan.map, result.boards) : {};", "const metrics = D.metrics(stack, plan.map, result.boards);")),
+    m("M/web-on-part-buffers", "2026-11-05 review", "onpart.js: Exploded / Assembled gives each sheet a new position attribute (its old GL buffer left to the garbage collector)",
+      (ONPART, "      attribute.copyArray(view.mode === \"assembled\" ? sheet.assembled : sheet.positions);\n",
+       "      geometry.setAttribute(\"position\", new THREE.BufferAttribute(view.mode === \"assembled\" ? sheet.assembled : sheet.positions, 3));\n")),
+    m("F/on-part-coverage", "2026-11-05 review", "browser: the sheets' alpha test not turned into coverage (their outlines in hard steps)",
+      (ONPART, "function coverage(material) {\n  material.alphaToCoverage = true;\n", "function coverage(material) {\n  return material;\n  material.alphaToCoverage = true;\n"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    m("F/on-part-framing", "2026-11-05 review", "browser: the part framed within 1.3 times the sheets' radius again (the crank's tip runs off the pane)",
+      (DRAPE, "export const PART_FRAME_SHARE = 3;\n", "export const PART_FRAME_SHARE = 1.3;\n"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    m("M/web-on-part-cursor", "2026-11-05 review 2", "onpart.js: OrbitControls' inline cursor left at auto (no grab over the figure)",
+      (ONPART, '  controls.cursorStyle = "grab";\n', "")),
+    m("F/on-part-seams", "2026-11-05 review 2", "browser: the sheets' coverage alpha written as it is (the pane seen through every outline over the part)",
+      (ONPART, "  Object.assign(material, {blending: THREE.CustomBlending,", "  Object.assign(material, {blending: THREE.NormalBlending,"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    m("M/web-on-part-tone", "2026-11-05 look", "studio.js: ACES filmic tone mapping instead of Khronos PBR Neutral (the art's colours shifted; the 3D view's too)",
+      (STUDIO, "  renderer.toneMapping = THREE.NeutralToneMapping;\n", "  renderer.toneMapping = THREE.ACESFilmicToneMapping;\n")),
+    m("M/web-on-part-warn-once", "2026-11-05 look", "studio.js: the look's fallbacks warn on every shader compiled, not once a cause",
+      (STUDIO, "    warned.add(key);\n", "")),
+    m("M/web-on-part-studio-fallback", "2026-11-05 look", "studio.js: the studio made without half-float render targets (no fallback to the lights alone)",
+      (STUDIO, '    if (!(extensions.has("EXT_color_buffer_float") || extensions.has("EXT_color_buffer_half_float"))) {\n', "    if (false) {\n")),
+    m("M/web-on-part-bands-side", "2026-11-05 look", "onpart.js: the film's edge band drawn from both sides (its far wall over the stack)",
+      (ONPART, "roughness: FILM_LOOK.roughness, side: THREE.FrontSide})", "roughness: FILM_LOOK.roughness, side: THREE.DoubleSide})")),
+    m("M/web-on-part-contact-lazy", "2026-11-05 look", "onpart.js: the contact shade's footprint made on every drawing, Exploded too (34-55 ms of JS for a view not shown)",
+      (ONPART, '    if (view.contact !== null || view.mode !== "assembled" || !view.sheets || !PATCHES.contact) return;\n',
+       "    if (view.contact !== null || !view.sheets || !PATCHES.contact) return;\n")),
+    m("M/web-on-part-contact-mode", "2026-11-05 look", "onpart.js: the contact shade drawn in Exploded too, once Assembled has made it",
+      (ONPART, '    if (view.mode === "assembled" && view.contact && !view.shadeOff) contact', "    if (view.contact && !view.shadeOff) contact")),
+    m("M/web-on-part-film-face", "2026-11-05 look", "onpart.js: the film's face drawn assembled, under both boards (8-17 ms a frame on SwiftShader for nothing)",
+      (ONPART, '    if (film) film.children[0].visible = view.mode !== "assembled";\n', "    if (film) film.children[0].visible = true;\n")),
+    m("M/web-on-part-restore-dispose", "2026-11-05 fixes", "onpart.js: the lost context's studio disposed when the context comes back (its GL objects deleted in the new one: INVALID_OPERATION)",
+      (ONPART, "    look.environment = studioFor(renderer);\n    clear({lost: true});\n",
+       "    look.environment?.dispose();\n    look.environment = studioFor(renderer);\n    clear({lost: true});\n")),
+    m("M/web-on-part-restore-sheets", "2026-11-05 fixes", "onpart.js: the lost context's sheets and part disposed when the context comes back (INVALID_OPERATION in the new one)",
+      (ONPART, "    clear({lost: true});\n", "    clear();\n")),
+    m("M/web-on-part-measure-in-try", "2026-11-05 fixes", "studio.js: the studio's measure inside its build's try again (a measure that throws throws away the studio made)",
+      (STUDIO, "      target = studio(renderer);\n    } catch (error) {", "      target = studio(renderer);\n      performance.measure?.(studied, {start: started});\n    } catch (error) {")),
+    m("M/web-on-part-measure-unguarded", "2026-11-05 fixes", "studio.js: a measure unguarded (User Timing Level 3's options throw in an older browser, through show() and setMode())",
+      (STUDIO, "  try {\n    performance.measure?.(name, {start: started});\n  } catch {\n    // No measure; nothing else lost.\n  }\n",
+       "  performance.measure?.(name, {start: started});\n")),
+    m("M/web-on-part-contact-none", "2026-11-05 fixes", "onpart.js: a stack without a contact footprint has it looked for again at every Assembled (35-60 ms of JS each time)",
+      (ONPART, '    if (view.contact !== null || view.mode !== "assembled"', '    if (view.contact || view.mode !== "assembled"')),
+    m("M/web-on-part-anchor", "2026-11-05 fixes", "onpart.js: the contact shade's anchor in three.js's text misspelt (no shade, and a warning, on every visitor's page)",
+      (ONPART, '["#include <opaque_fragment>", `if ( contactStrength', '["#include <opaque_fragment >", `if ( contactStrength')),
+    m("M/web-on-part-contact-inner", "2026-11-05 fixes", "onpart.js: the contact shade's core outside the footprint only again (the WXAI sock's light line between the stack's edge and its shade)",
+      (ONPART, "Math.max(0, core[t] - Math.min(cover[t], inner[t]))", "Math.max(0, core[t] - cover[t])")),
+    m("M/web-on-part-contact-facing", "2026-11-05 fixes", "onpart.js: the core inside the footprint on every edge, those facing away too (the part seen past them darkened, beside the wrap's knuckle)",
+      (ONPART, "				core *= mix( 1.0, smoothstep( 0.0, 1e-3, dot( outward, cameraPosition.xy - vContactWorld.xy ) ), inside );\n", "")),
+    m("M/web-on-part-contact-turned", "2026-11-05 fixes", "onpart.js: the core's band inside the footprint round the cells turned from the normal too (a dark frame beside the wrap's knuckle)",
+      (ONPART, "  const inner = eroded(cover, width, height, Math.max(1, Math.round(CONTACT.innerMm * k)));\n  for (let t = 0; t < cover.length; t += 1) if (!Number.isFinite(lift[t])) cover[t] = 0;\n",
+       "  for (let t = 0; t < cover.length; t += 1) if (!Number.isFinite(lift[t])) cover[t] = 0;\n  const inner = eroded(cover, width, height, Math.max(1, Math.round(CONTACT.innerMm * k)));\n")),
+    m("M/web-on-part-home-left", "2026-11-05 alignment", "drape.js: the sensor on the part's Exploded home tilted its own way, not as the left figure opens (app.js ORBIT_HOME)",
+      (DRAPE, "export const HOME_TILT_DEG = 57;\n", "export const HOME_TILT_DEG = 50;\n")),
+    m("M/web-on-part-home-spin", "2026-11-05 alignment", "drape.js: the Exploded home turned the other way about the stack's normal (the spin's sign: the left figure's mirror image)",
+      (DRAPE, "  return [Math.sin(spin) * Math.sin(tilt), -Math.cos(spin) * Math.sin(tilt), Math.cos(tilt)];\n",
+       "  return [-Math.sin(spin) * Math.sin(tilt), -Math.cos(spin) * Math.sin(tilt), Math.cos(tilt)];\n")),
+    m("M/web-on-part-camera-up", "2026-11-05 alignment", "onpart.js: the camera's up the world's y again (the left figure's roll out of reach, a drag turning about the field's y)",
+      (ONPART, "  camera.up.set(...HOME_UP);\n", "  camera.up.set(0, 1, 0);\n")),
+    m("M/web-on-part-keys", "2026-11-05 alignment", "onpart.js: the arrow keys turning the figure the other way from the left figure's (OrbitControls' own sense)",
+      (ONPART, "    const turn = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[event.key];\n",
+       "    const turn = {ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1]}[event.key];\n")),
+    m("F/on-part-film-flat", "2026-11-05 look", "browser: the film a flat unlit black again (it reads as a hole cut in the stack)",
+      (ONPART, "coverage(new THREE.MeshPhysicalMaterial({color: new THREE.Color(...rgb), map, alphaTest: ALPHA_TEST, side: THREE.DoubleSide, ...film,\n"
+       "    sheenColor: new THREE.Color(...sheenRGB)}))",
+       "coverage(new THREE.MeshBasicMaterial({color: new THREE.Color(...rgb), map, alphaTest: ALPHA_TEST, side: THREE.DoubleSide}))"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    m("F/on-part-contact-never", "2026-11-05 look", "browser: the contact shade never drawn (no line where the stack meets the part)",
+      (ONPART, "strength: [0.85, 0.4], most: 0.85};", "strength: [0, 0], most: 0.85};"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    m("F/on-part-bands-off", "2026-11-05 look", "browser: the layers' edge bands not drawn (each sheet a paper-thin face again)",
+      (ONPART, "    if (band?.geometry) {\n", "    if (false) {\n"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+    # The 3D view in the studio's light (2026-11-05; tests/test_surface_web.py, and the "cad" kind's part_view_look).
+    m("M/web-view-own-lights", "2026-11-05 view look", "viewer.js: the 3D view's old lights again (a hemisphere and a sun) in place of the studio's",
+      (VIEWER, "  camera.up.set(0, 0, 1);\n  const lights = studioLights(scene, camera);\n",
+       "  camera.up.set(0, 0, 1);\n  scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.7));\n  const sun = new THREE.DirectionalLight(0xffffff, 1.3);\n"
+       "  sun.position.set(0.3, 0.6, 1);\n  camera.add(sun);\n  scene.add(camera);\n  const lights = {place() {}, turn() {}};\n")),
+    m("M/web-view-tone", "2026-11-05 view look", "viewer.js: the 3D view without the tone mapping (the studio's lights clip its faces toward the key)",
+      (VIEWER, "  toneMap(renderer);\n  renderer.domElement.className = \"cad-canvas\";\n", "  renderer.domElement.className = \"cad-canvas\";\n")),
+    m("M/web-view-markers-lit", "2026-11-05 view look", "viewer.js: the markers tone mapped (the border, the taxels and the handles off their own colours)",
+      (VIEWER, "const markerMaterial = parameters => new THREE.MeshBasicMaterial({...parameters, toneMapped: false});",
+       "const markerMaterial = parameters => new THREE.MeshBasicMaterial({...parameters});")),
+    m("M/web-view-studio-per-model", "2026-11-05 view look", "viewer.js: the studio made again with each model (a PMREM render target per load, the last ones never disposed)",
+      (VIEWER, "    const mesh = new THREE.Mesh(geometry, partMaterial(look));\n",
+       "    look.environment = studioFor(renderer);\n    const mesh = new THREE.Mesh(geometry, partMaterial(look));\n")),
+    m("M/web-view-restore-dispose", "2026-11-05 view look", "viewer.js: the lost context's studio disposed when it comes back (its GL objects deleted in the new one)",
+      (VIEWER, "    look.environment = studioFor(renderer);\n    if (groups.mesh)",
+       "    look.environment?.dispose();\n    look.environment = studioFor(renderer);\n    if (groups.mesh)")),
+    m("M/web-view-restore-none", "2026-11-05 view look", "viewer.js: the studio not made again when a lost context comes back (the part mirrors a lost render target: black)",
+      (VIEWER, "    look.environment = studioFor(renderer);\n    if (groups.mesh) groups.mesh.userData.look.envMap = look.environment?.texture || null;\n", "")),
+    m("M/web-view-probe-gate", "2026-11-05 view look", "viewer.js: the 3D view's reads of its pixels without ?probe too (a render and a gl.readPixels each)",
+      (VIEWER, "    if (!probe || !groups.mesh) return null;\n", "    if (!groups.mesh) return null;\n")),
+    m("M/web-view-drag-everywhere", "2026-11-05 view look", "viewer.js: a drag's diffuse material on a GPU too (the look's reflections gone while turning, for nothing)",
+      (VIEWER, "  dragMaterial = SOFTWARE_RENDERER.test(info.renderer) ? diffuseMaterial() : null;\n", "  dragMaterial = diffuseMaterial();\n")),
+    # The film's own lamp (the user's of 2026-11-05, 再调一下你说的黑色压阻膜: tests/test_surface_web.py, and the "cad"
+    # kind's part_on_part with the film's satin check at discriminating levels again).
+    m("M/web-on-part-film-lamp-anchor", "2026-11-05 film", "onpart.js: the film's lamp's anchor in three.js's text misspelt (the film nearly a flat black again, and a warning, on every visitor's page)",
+      (ONPART, '["#include <lights_fragment_end>", `{', '["#include <lights_fragment_end >", `{')),
+    m("F/on-part-film-unlit", "2026-11-05 film", "browser: the film's own lamp out (at the left figure's home it mirrors the room between the softboxes: nearly a flat black)",
+      (ONPART, "const FILM_LAMP = {aim: 1.5, out: 0.3, intensity: 0.2};", "const FILM_LAMP = {aim: 1.5, out: 0.3, intensity: 0};"),
+      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+)
+
+MUTANTS = AUDIT + ENGINE + API + EXPORT + TESTS_AND_DOCS + GOLD_FINGERS + SURFACE + MASKED_FIELD + DIAGONAL + FIELD_FIT + BORDER + EASYEDA + ON_PART
+
+
+# The Library's writer (tools/library_write.py, the user's requests of 2026-11-05): the request the page sends for each
+# sensor and the product rules on its proposal #1, which tests/test_library.py checks on the committed fits.
+LIBRARY_WRITE = "tools/library_write.py"
+LIBRARY = (
+    m("S/library-unit", "2026-11-05 Library", "the Library's writer sends a unit (the page sends none: its Auto unit, the engine's guess)",
+      (LIBRARY_WRITE, '    request = {"name": part["mesh"]["name"][:200], "selection"',
+       '    request = {"name": part["mesh"]["name"][:200], "unit": "mm", "selection"'), killers=("test_library.",)),
+    m("S/library-numbers", "2026-11-05 Library", "the Library's writer keeps integral floats (20.0, which the browser writes 20)",
+      (LIBRARY_WRITE, "    if isinstance(value, float) and value.is_integer():\n        return int(value)\n",
+       "    if isinstance(value, float) and value.is_integer():\n        return value\n"), killers=("test_library.",)),
+    m("S/library-tails-rule", "2026-11-05 Library", "the Library's product rules let tails off the centre of the base edge through",
+      (LIBRARY_WRITE, '    if bus.get("tail_position") != "centred":\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-symmetry-rule", "2026-11-05 Library", "the Library's product rules let an off-centre sensor on a symmetric face through",
+      (LIBRARY_WRITE, '    if symmetry.get("face") and not symmetry.get("field"):\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-round6", "2026-11-05 Library", "the Library's writer takes a base point that main.js choosePoint rounds (round6): the page would send another request",
+      (LIBRARY_WRITE, "        if [round6(value) for value in point] != point:\n", "        if False:\n"), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY
+# The Library's page (2026-11-05): the site build's gate, the generator's ./?part, app.py's route.
+LIBRARY_PAGE = (
+    m("S/library-gate-reply", "2026-11-05 Library", "the site build publishes a Library sensor whose committed reply the engine no longer gives",
+      ("tools/build_static_site.py", '    if reply != document["reply"] or not proposals or proposals[0]["build_id"] != variant["build_id"]:\n',
+       '    if not proposals or proposals[0]["build_id"] != variant["build_id"]:\n'), killers=("test_library.",)),
+    m("S/library-gate-request", "2026-11-05 Library", "the site build publishes a Library sensor whose fit's request the page no longer sends",
+      ("tools/build_static_site.py", '    if library_write.canonical(document["request"]) != sent:\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-own-file", "2026-11-05 Library", "the user's own file keeps a Library sensor's ?part and options",
+      (CAD_MAIN, "  if (!isDefault) leaveLibrary();  // the user's own file: a Library sensor's ?part and options go\n", ""), killers=("test_library.",)),
+    m("S/library-route", "2026-11-05 Library", "app.py no longer serves library.html",
+      (APP, '"/library.html": "library.html"}', '}'), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_PAGE
+# The Library's tapered tips (2026-11-05): a family of parts as one card on its shelf's part.
+LIBRARY_TAPERS = (
+    m("S/library-family-grid", "2026-11-05 Library", "the Library's writer takes a family whose grid misses or adds a choice of its axes",
+      (LIBRARY_WRITE, '    if sorted(record["grid"]) != sorted(keys):\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-family-start", "2026-11-05 Library", "a family's parts get entries of their own in entries.json's start (each gripper's default)",
+      (LIBRARY_WRITE, "        if part_id in grippers:\n            document[\"start\"].append(default)\n",
+       "        document[\"start\"].append(default)\n"), killers=("test_library.",)),
+    m("S/library-tip-label", "2026-11-05 Library", "a tapered tip's file note names the part's title and pitch, not the tip",
+      (LIBRARY_WRITE, '    return part.get("label") or f"{part[\'title\']}, {js_string(variant[\'pitch_mm\'])} mm"\n',
+       '    return f"{part[\'title\']}, {js_string(variant[\'pitch_mm\'])} mm"\n'), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_TAPERS
+# The Library's minors, fixed on the integration of 2026-11-05 (fpc-library merged into fpc-stack-on-part): the options
+# leaveLibrary puts back, ./?part=<family>, the deny-list (the writer's, which the private importer takes: a
+# mutant's file is public, since the public copy's CI runs --check), the UMI shelf's one-line heading.  Since the
+# shelves' one wording (the user's decision of 2026-11-05) the writer has no branch for a shelf with families, so
+# S/library-shelf-family (that branch off: the long range on the UMI shelf too) is retargeted to its regression: the
+# two wordings again, the long range on every shelf without a family.
+LIBRARY_MINORS = (
+    m("S/library-options-written-only", "2026-11-05 integration", "the generator records only the Library options it wrote, so a restored form keeps them after the user's own file",
+      (CAD_MAIN, "    if (!same(control.value)) control.value = value;\n    if (!same(controlDefault(control))) changed[control.id] = control.value;\n",
+       "    if (!same(control.value)) { control.value = value; changed[control.id] = control.value; }\n"), killers=("test_library.",)),
+    m("S/library-family-part", "2026-11-05 integration", "the generator's ./?part takes no family id (./?part=umi-tapers opens the UMI finger with a warning)",
+      (CAD_MAIN, "index.parts[id].default\n      : Object.hasOwn(index.families || {}, id) ? index.families[id].default : \"\";",
+       "index.parts[id].default : \"\";"), killers=("test_library.",)),
+    m("S/library-deny-list", "2026-11-05 integration", "the Library's deny-list (the writer's, which the private importer takes) lacks an xArm split mesh the test's has",
+      (LIBRARY_WRITE, '    "a61abac9746d0319a6e6ab82ba27a7d16afe6f303bc2bac863449b05c27c0661": "xArm (finger_l.stl)",\n', ""), killers=("test_library.",)),
+    m("S/library-shelf-family", "2026-11-05 integration", "the shelf headings in two wordings again: 'from fine 1 mm to coarse 3 mm' on a shelf without a family, the range on the UMI finger's",
+      (LIBRARY_WRITE, '    else:\n        text = f"{count} pitches, {js_string(pitches[0])} to {js_string(pitches[-1])} mm"\n',
+       '    elif families:\n        text = f"{count} pitches, {js_string(pitches[0])} to {js_string(pitches[-1])} mm"\n'
+       '    else:\n        text = f"{count} pitches, from fine {js_string(pitches[0])} mm to coarse {js_string(pitches[-1])} mm"\n'), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_MINORS
+# The Library's polish of 2026-11-05 (the user's decisions of that day): a sensor's picture 3:1 in one column, so Open
+# is in a 390 x 844 phone's first screen ("可压扁", it may be squashed), and one wording for every shelf heading, its
+# families after the range ("最好统一", best unified).
+LIBRARY_POLISH = (
+    m("S/library-detail-shot", "2026-11-05 polish", "a sensor's picture 16:10 below 900 px again (the Tapered tips' Open 88 px below a 390 x 844 phone's first screen)",
+      ("web/library.css", "@media (max-width:899px) { .lib-shot-detail { aspect-ratio:3 / 1; } }\n", ""), killers=("test_library.",)),
+    m("S/library-shelf-families-unsaid", "2026-11-05 polish", "a shelf closing with families leaves them out of its heading (the UMI shelf's tapered tips unsaid)",
+      (LIBRARY_WRITE, "    for family in families:\n        text += f\", and {family['title'].lower()}\"\n", ""), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_POLISH
+# The 3D views' light (2026-11-05: the user's "the new light on every 3D view"; app.js lightBoard, lightView, styles.css
+# .board-light, .board-shadow): the numbers app.js copies from web/cad/studio.js (the lights and the studio, onpart.js's
+# until the merge of 2026-11-05) and web/cad/onpart.js (the coverlay, the edge bands; a classic script cannot import
+# them), the sweep's tints from the coverlay's, nothing on the views' 3D elements that flattens them, the veils' paths the
+# outline less its cutouts; each killed by test_surface_web alone on a scratch copy (tools/browser/mutants.py's
+# part_view_light mutants see the light itself).
+CSS = "web/styles.css"
+VIEW_LIGHT = (
+    m("M/web-view-light-key", "2026-11-05 views' light", "app.js: the 3D views' key light brighter than the sensor on the part's (the two figures lit apart)",
+      (WEB, "    key: {at: [-0.5, 0.65, 0.55], intensity: 1.25},\n", "    key: {at: [-0.5, 0.65, 0.55], intensity: 1.5},\n")),
+    m("M/web-view-light-softbox", "2026-11-05 views' light", "app.js: the key's softbox dimmer in the 3D views' studio than in the sensor on the part's",
+      (WEB, "      {at: [-0.49, 0.78, 0.39], size: [6, 4], radiance: 1.2},   // key\n", "      {at: [-0.49, 0.78, 0.39], size: [6, 4], radiance: 1},     // key\n")),
+    m("M/web-view-light-band", "2026-11-05 views' light", "app.js: the walls' shade not the sensor on the part's edge bands' (BAND.shade)",
+      (WEB, "  const VIEW_BAND_SHADE = 0.82;\n", "  const VIEW_BAND_SHADE = 0.9;\n")),
+    m("M/web-view-light-tint", "2026-11-05 views' light", "styles.css: the sweep in Photo a white veil, not tinted toward the art's amber",
+      (CSS, 'body[data-look="photo"] .look-scope svg.board-light { --sheen:#ffbc90; }', 'body[data-look="photo"] .look-scope svg.board-light { --sheen:#ffffff; }')),
+    m("M/web-view-light-flatten", "2026-11-05 views' light", "styles.css: an opacity on the stacked boards' faces (each flattened into one picture, its other side lost)",
+      (CSS, ".assembly-face { position:relative; width:100%; height:100%; transform-style:preserve-3d; backface-visibility:visible; }",
+       ".assembly-face { position:relative; width:100%; height:100%; transform-style:preserve-3d; backface-visibility:visible; opacity:.99; }")),
+    m("M/web-view-light-outline-twice", "2026-11-05 views' light", "app.js: outlineRings deaf to its selector (the cutouts' rings the outline's again: an even-odd veil of one ring twice paints nothing)",
+      (WEB, "    return [...(group?.querySelectorAll(`:scope > ${selector}`) || [])].map(polygon => {\n",
+       '    return [...(group?.querySelectorAll(":scope > .outline") || [])].map(polygon => {\n')),
+    m("M/web-view-light-unclipped", "2026-11-05 views' light", "app.js: the light's paths over their whole view box (the veils and the shadow painted outside the board)",
+      (WEB, '      const d = rings.map(ring => `M${ring.map(([x, y]) => `${round6(x)} ${round6(y)}`).join("L")}Z`).join("");\n',
+       '      const d = `M${box[0]} ${box[1]}h${box[2]}v${box[3]}h${-box[2]}Z`;\n')),
+)
+MUTANTS += VIEW_LIGHT
+# The Library's pictures (the user's request of 2026-11-05: the cards show the finger with the sensor on it):
+# tools/browser/library_shots.py shoots them into web/library/shots/, the writer's pictures() reads its manifest
+# (entries.json's "image"), the site build's gate refuses a picture of another fit; tests/test_library.py's fixture of
+# two tiny WebPs kills each.
+LIBRARY_SHOTS = (
+    m("S/library-picture-other-fit", "2026-11-05 pictures", "the Library pictures a sensor with a shot of another fit (the wrong sensor pictured)",
+      (LIBRARY_WRITE, '        if (shot.get("fit_sha256"), shot.get("build_id")) != (variant["fit_sha256"], variant["build_id"]):\n',
+       "        if False:\n"), killers=("test_library.",)),
+    m("S/library-picture-sources-error", "2026-11-05 pictures", "a picture of older figure sources refused, not a warning (the public CI, which runs no browser, fails on every change of the figure)",
+      (LIBRARY_WRITE, '        if shot.get("figure_sha256") != figure:\n            older.append(identifier)\n',
+       '        if shot.get("figure_sha256") != figure:\n            problems.append((identifier, f"{identifier}: {RESHOOT}"))\n'), killers=("test_library.",)),
+    m("S/library-picture-bytes", "2026-11-05 pictures", "a picture whose bytes are not the manifest's taken (only its WebP header read)",
+      (LIBRARY_WRITE, "            if (record.get(\"path\"), record.get(\"bytes\"), record.get(\"sha256\")) != (relative, len(data), hashlib.sha256(data).hexdigest()):\n",
+       "            if False:\n"), killers=("test_library.",)),
+    m("S/library-picture-alpha", "2026-11-05 pictures", "a WebP of the extended layout read as having alpha whatever its flag (a picture on an opaque background taken)",
+      (LIBRARY_WRITE, '        return 1 + int.from_bytes(body[4:7], "little"), 1 + int.from_bytes(body[7:10], "little"), bool(body[0] & 0x10)\n',
+       '        return 1 + int.from_bytes(body[4:7], "little"), 1 + int.from_bytes(body[7:10], "little"), True\n'), killers=("test_library.",)),
+    m("S/library-image-card", "2026-11-05 pictures", "entries.json's image names the 1280 x 800 Exploded picture as the grid's card (four times the card's pixels)",
+      (LIBRARY_WRITE, '"card": files["card"][0], "width": SHOT_SIZE[0]', '"card": files["exploded"][0], "width": SHOT_SIZE[0]'), killers=("test_library.",)),
+    m("S/library-gate-pictures", "2026-11-05 pictures", "the site build publishes the pictures of another fit (its gate's pictures unchecked)",
+      ("tools/build_static_site.py", "    if unpictured:\n        raise BuildError(f\"the library's pictures are stale", "    if False:\n        raise BuildError(f\"the library's pictures are stale"),
+      killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_SHOTS
+# The Library's pictures of 2026-11-05 (the user's request: the cards show the finger and the sensor on it, the
+# generator's on-part figure): the contract's card file lazily and sized on the cards, the placeholder for a picture
+# that does not load, and a sensor's page's Exploded | Assembled control (named for a screen reader, Exploded on each
+# page opened, the phone's page tighter with it so Open stays in the first screen).  library_checks part_pictures and
+# part_first_screen see each in the browser.
+LIBRARY_JS = "web/library.js"
+LIBRARY_PICTURES = (
+    m("S/library-picture-eager", "2026-11-05 pictures", "the cards' pictures load at once, every card's as the page opens (not lazily)",
+      (LIBRARY_JS, '      loading: kind === "detail" ? null : "lazy"});', "      loading: null});"), killers=("test_library.",)),
+    m("S/library-picture-unsized", "2026-11-05 pictures", "a picture without its width and height (its box sized only when it arrives)",
+      (LIBRARY_JS, 'el("img", {src: BASE + src, width, height, alt:', 'el("img", {src: BASE + src, alt:'), killers=("test_library.",)),
+    m("S/library-picture-card-full", "2026-11-05 pictures", "the cards load the 1280 x 800 Exploded picture, not its 640 x 400 card file",
+      (LIBRARY_JS, 'image?.[view]?.src : image?.exploded?.card;', 'image?.[view]?.src : image?.exploded?.src;'), killers=("test_library.",)),
+    m("S/library-picture-broken", "2026-11-05 pictures", "a picture whose file does not load stays a broken image (no placeholder)",
+      (LIBRARY_JS, "      shown.replaceWith(field(variant));\n      missed?.(view);\n", "      missed?.(view);\n"), killers=("test_library.",)),
+    m("S/library-view-unnamed", "2026-11-05 pictures", "the Exploded | Assembled control without its legend (a screen reader hears two radios of no group)",
+      (LIBRARY_JS, 'el("fieldset", {className: "lib-view"}, el("legend", {}, "View"),', 'el("fieldset", {className: "lib-view"},'), killers=("test_library.",)),
+    m("S/library-view-kept", "2026-11-05 pictures", "a sensor's page opened anew keeps the view of the page before (Assembled where Exploded opens)",
+      (LIBRARY_JS, "    state.picture = VIEWS[0][0];\n    setNote(\"\");", "    setNote(\"\");"), killers=("test_library.",)),
+    m("S/library-view-phone-room", "2026-11-05 pictures", "the phone's page not tighter with the view control (the Tapered tips' Open 25 px below a 390 x 844 first screen)",
+      ("web/library.css", "@media (max-width:899px) { .lib-detail:has(.lib-view) { padding-top:16px; } .lib-detail:has(.lib-view) .lib-detail-body { margin-top:12px; gap:16px; }\n"
+       "  .lib-detail:has(.lib-view) .lib-info { gap:12px; } }\n", ""), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_PICTURES
+# The Library's grid of 2026-11-06 (the user's requests: the grippers once each, four to a row, each card naming its
+# pitches; the UMI finger's shelf alone, after the grippers' section): the shelved parts, a family's shelf, the back
+# link, the columns and where they turn, the restore on Back against a back link, the history's mark, the order; each
+# killed alone on a scratch copy by test_library (PageTests' grid pins); library_checks part_layout, part_grid and
+# part_routes see each in the browser.
+LIBRARY_GRID = (
+    m("S/library-grid-shelves", "2026-11-06 grid", "every gripper on a shelf of its own again (the grippers' section empty)",
+      (LIBRARY_JS, 'const SHELVED = ["umi-finray"];',
+       'const SHELVED = ["umi-finray", "franka-hand", "widowx-250", "trossen-widowx-ai", "arx-x5", "i2rt-yam", "unitree-dex1", "makermods-metal"];'),
+      killers=("test_library.",)),
+    m("S/library-grid-family-shelf", "2026-11-06 grid", "a part a family closes gets no shelf unless SHELVED names it (its family's card unreachable)",
+      (LIBRARY_JS, "const isShelved = part => SHELVED.includes(part) || familiesOf(part).length > 0;", "const isShelved = part => SHELVED.includes(part);"),
+      killers=("test_library.",)),
+    m("S/library-grid-back-shelf", "2026-11-06 grid", "a gripper's page's back link at #shelf-<part> (the older address, not its card)",
+      (LIBRARY_JS, 'el("a", {className: "lib-back", href: `#${placeOf(home)}`}', 'el("a", {className: "lib-back", href: `#shelf-${home}`}'),
+      killers=("test_library.",)),
+    m("S/library-grid-three", "2026-11-06 grid", "the grippers three to a row (3 + 3 + 1)",
+      ("web/library.css", ".lib-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr));", ".lib-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr));"),
+      killers=("test_library.",)),
+    m("S/library-grid-767", "2026-11-06 grid", "the grippers two to a row below 768 px, not 735 px (wider than the UMI shelf's cards from 735 to 767 px)",
+      ("web/library.css", "@media (max-width:734px) { .lib-cards {", "@media (max-width:767px) { .lib-cards {"), killers=("test_library.",)),
+    m("S/library-grid-wrong-card", "2026-11-06 grid", "a back link restores the grid with the card that opened the page focused, whichever card it names",
+      (LIBRARY_JS, "(traversed || !target || target.contains(state.opener))", "(traversed || !target || true)"), killers=("test_library.",)),
+    m("S/library-grid-history", "2026-11-06 grid", "Back and Forward not told from a link (the history entries unmarked)",
+      (LIBRARY_JS, "const traversed = history.state?.library === true;", "const traversed = false;"), killers=("test_library.",)),
+    m("S/library-grid-umi-first", "2026-11-06 grid", "the UMI finger's shelf before the grippers' section again",
+      (LIBRARY_JS, "      ...(parts.length ? [grippers(parts)] : []),\n      ...shelvedParts().map(part => shelf(`shelf-${part}`, `${index.parts[part].title}.`, index.parts[part].shelf, index.parts[part].variants, familiesOf(part))));\n",
+       "      ...shelvedParts().map(part => shelf(`shelf-${part}`, `${index.parts[part].title}.`, index.parts[part].shelf, index.parts[part].variants, familiesOf(part))),\n      ...(parts.length ? [grippers(parts)] : []));\n"),
+      killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_GRID
+# The pictures served by app.py (the merge of 2026-11-05 of the shots tool and the Library's display): image/webp under
+# nosniff, not the host's mimetypes' guess; test_library's RouteTests kills it.
+LIBRARY_SERVED = (
+    m("S/library-picture-type", "2026-11-05 pictures", "app.py: the Library's pictures sent as the host's mimetypes guesses (application/octet-stream under nosniff here)",
+      (APP, '                ".webp": "image/webp"}\n', "                }\n"), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_SERVED
+# The Library's set of pictures (2026-11-05, shot once on the integration with the approved look): every sensor
+# pictured, which tools/library_write.py --check wants (test_library on a copy of the Library with one shot gone), and
+# each drawing centred in its picture by the shots tool (frameView balances only the axis that binds).
+LIBRARY_SHOT_SET = (
+    m("S/library-picture-required", "2026-11-05 pictures", "library_write --check passes a sensor with no picture (the Library's card falls back to the field's drawing unnoticed)",
+      (LIBRARY_WRITE, "    unshot = [identifier for identifier, image in images.items() if image is None and identifier not in broken]\n",
+       "    unshot = []\n"), killers=("test_library.",)),
+    m("S/library-shot-uncentred", "2026-11-05 pictures", "the shots tool leaves each drawing where frameView put it (the UMI finger 72 px left of the card's middle)",
+      ("tools/browser/library_shots.py", "    return (right - left) // 2, (bottom - top) // 2\n", "    return 0, 0\n"), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_SHOT_SET
+# The Library's 3D view (the user's requests of 2026-11-05: the grippers drawn whole, each sensor's page a 3D view to
+# turn; docs/LIBRARY_VIEW.md): the writer's checks of each record's art and a gripper's stage (pictures()), of the
+# grippers' scenes (scenes()), entries.json's view and the alt text of a whole gripper, and Gen by Surface's figure as it
+# was (main.js passing no stage, onpart.js's homes hook) and library.js loading the view on a sensor's page only; each
+# killed alone on a scratch copy by test_library (test_surface_web for main.js and onpart.js), the writer's on the tiny
+# scenes and art it builds.
+LIBRARY_VIEW = (
+    m("S/library-view-art-build", "2026-11-05 3D view", "an art drawn from another build (or of another sensor) taken: the wrong boards on a sensor's page",
+      (LIBRARY_WRITE, '    if (record.get("build_id"), document.get("id"), document.get("build_id")) != (variant["build_id"], identifier, variant["build_id"]):\n',
+       "    if False:\n"), killers=("test_library.",)),
+    m("S/library-view-art-bytes", "2026-11-05 3D view", "an art file whose bytes are not the record's taken (only its document compared)",
+      (LIBRARY_WRITE, '    if (record.get("bytes"), record.get("sha256")) != (len(data), hashlib.sha256(data).hexdigest()):\n', "    if False:\n"),
+      killers=("test_library.",)),
+    m("S/library-view-unrecorded", "2026-11-05 3D view", "a record without its art accepted once the 3D view is required (a sensor page with no 3D view after the shoot)",
+      (LIBRARY_WRITE, '        elif require_view:\n            broken.append(f"no 3D view: its record names no art: {fix}")\n',
+       '        elif False:\n            broken.append(f"no 3D view: its record names no art: {fix}")\n'), killers=("test_library.",)),
+    # The shoot of 2026-11-06 wrote every sensor's art and each gripper's stage and set VIEW_REQUIRED.
+    m("S/library-view-transition", "2026-11-06 shoot", "the 3D view no longer required after the shoot (a record without its art, or a gripper's without its stage, pictured with no 3D view: a warning, not refused)",
+      (LIBRARY_WRITE, "\nVIEW_REQUIRED = True\n", "\nVIEW_REQUIRED = False\n"), killers=("test_library.",)),
+    m("S/library-view-scene-hash", "2026-11-05 3D view", "a gripper's stage of another scene taken (its scene_sha256 not compared: a picture of the old scene)",
+      (LIBRARY_WRITE, '    if stage.get("scene_sha256") != scene_sha256(data, rules):\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-view-rules-hash", "2026-11-05 3D view", "the rules left out of scene_sha256 (a picture shot under other homes, explode or see-through taken)",
+      (LIBRARY_WRITE, "             f\"{hashlib.sha256(canonical_json(rules).encode('ascii')).hexdigest()}  rules\\n\")\n", '             "")\n'),
+      killers=("test_library.",)),
+    m("S/library-view-older-error", "2026-11-05 3D view", "a picture of older 3D view modules refused, not a warning (the public CI, which runs no browser, fails on every change of the view)",
+      (LIBRARY_WRITE, '            if shot.get("view_sha256") != view and identifier not in older:\n                older.append(identifier)\n',
+       '            if shot.get("view_sha256") != view and identifier not in older:\n                problems.append((identifier, f"{identifier}: {RESHOOT}"))\n'),
+      killers=("test_library.",)),
+    m("S/library-view-rule", "2026-11-05 3D view", "a gripper's recorded stage numbers unchecked (a stack hidden by the other finger, or the stacks touching, taken)",
+      (LIBRARY_WRITE, '    found = [f"its stage breaks a rule of {SCENES_INDEX}: {message}: {fix}"\n'
+                      '             for message in stage_problems(stage.get("numbers"), rules.get("checks") or {}, see_through, rules.get("explode_stacks"))]\n',
+       "    found = []\n"),
+      killers=("test_library.",)),
+    # The user's decision of 2026-11-06 (one stack exploded, the sensor finger's; the near finger see-through in both
+    # views, its stack assembled): the new checks of the stage's numbers and the rules' two keys.
+    m("S/library-view-stacks-floor", "2026-11-06 one explode", "the exploded stack's floor in mm to the other finger's stack unchecked (a small gripper's stacks 2 mm apart taken)",
+      (LIBRARY_WRITE, '             ("clearance_mm.stacks", clearance.get("stacks"), ">=", "stacks_apart_min_mm", checks.get("stacks_apart_min_mm")),\n', ""),
+      killers=("test_library.",)),
+    m("S/library-view-screen-apart", "2026-11-06 one explode", "the two stacks' silhouettes apart on screen unchecked (I2RT's near stack and exploded top touching in the picture taken)",
+      (LIBRARY_WRITE, '             ("stacks_apart_px", numbers["stacks_apart_px"], ">=", "stacks_apart_min_px", checks.get("stacks_apart_min_px"))]\n',
+       "             ]\n"), killers=("test_library.",)),
+    m("S/library-view-near-seen", "2026-11-06 one explode", "the near stack's share seen unchecked (the roles swapped, or the near stack hidden, taken)",
+      (LIBRARY_WRITE, '        rules.append(("near_seen", numbers["near_seen"], ">=", "near_seen_min", checks.get("near_seen_min")))\n', "        pass\n"),
+      killers=("test_library.",)),
+    m("S/library-view-near-seen-null", "2026-11-06 one explode", "a near_seen taken with the mate's stack exploding too (a number where the record must say null)",
+      (LIBRARY_WRITE, '            found.append(f"near_seen is {numbers[\'near_seen\']}, with the mate\'s stack exploding")\n', "            pass\n"),
+      killers=("test_library.",)),
+    m("S/library-view-explode-rules", "2026-11-06 one explode", "scenes.json's explode_stacks and see_through_modes unchecked (no sensor stack exploding, or an unknown mode, taken)",
+      (LIBRARY_WRITE, '    if not (isinstance(stacks, list) and all(isinstance(name, str) for name in stacks) and len(set(stacks)) == len(stacks)\n'
+                      '            and "sensor" in stacks and set(stacks) <= set(FINGERS)):\n', "    if False:\n"),
+      (LIBRARY_WRITE, '    if not (isinstance(modes, list) and modes and all(isinstance(mode, str) for mode in modes) and len(set(modes)) == len(modes)\n'
+                      '            and set(modes) <= set(CAMERA_MODES)):\n', "    if False:\n"),
+      killers=("test_library.",)),
+    m("S/library-view-umi-stage", "2026-11-05 3D view", "a stage recorded for the UMI finger or a tapered tip taken (their fingertip scene)",
+      (LIBRARY_WRITE, "        if stage is not None and scene is None:\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/library-view-mirror-kind", "2026-11-05 3D view", "a scene's mate kind not its matrix's determinant (a mirror pair said to carry the same board)",
+      (LIBRARY_WRITE, '        elif mate["kind"] != ("turned" if determinant(mate["matrix"]) > 0 else "mirror"):\n', "        elif False:\n"),
+      killers=("test_library.",)),
+    m("S/library-view-mesh-hash", "2026-11-05 3D view", "a scene's bodies not checked against their files (SHA-256, bytes, triangles)",
+      (LIBRARY_WRITE, '        if (body["sha256"], body["bytes"], body["triangles"]) != (digest, len(data), stl_triangles(data)):\n', "        if False:\n"),
+      killers=("test_library.",)),
+    m("S/library-view-part-pin", "2026-11-05 3D view", "a scene drawn about another mesh of its part taken (part_mesh_sha256 unchecked)",
+      (LIBRARY_WRITE, '    if document["part_mesh_sha256"] != parts["parts"][part_id]["mesh"]["sha256"]:\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-view-denied", "2026-11-05 3D view", "the deny-list not applied to the scenes' bodies (the MakerMods body, not cleared, could be committed)",
+      (LIBRARY_WRITE, "        if digest in DENIED_SHA256 or DENIED_NAME.search(mesh):\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/library-view-alt", "2026-11-05 3D view", "a whole gripper's picture described as 'on the part' (its alt text not its scene's words)",
+      (LIBRARY_WRITE, "            \"alt\": f\"{label_text} {picture or 'on the part'}\"}", "            \"alt\": f\"{label_text} on the part\"}"),
+      killers=("test_library.",)),
+    m("S/library-view-entry", "2026-11-05 3D view", "entries.json's view written for a sensor whose art is stale (its problems reported, its view kept)",
+      (LIBRARY_WRITE, "            broken += art_problems(identifier, variant, art, library)\n",
+       '            problems += [(identifier, f"{identifier}: {message}") for message in art_problems(identifier, variant, art, library)]\n'),
+      killers=("test_library.",)),
+    m("M/web-on-part-stage-main", "2026-11-05 3D view", "main.js: Gen by Surface's figure made with a stage (its homes and scene no longer drape.js's alone)",
+      (CAD_MAIN, "{onViewChange: renderState, onContext: onPartContext, probe: ON_PART_PROBE});",
+       "{onViewChange: renderState, onContext: onPartContext, probe: ON_PART_PROBE, stage: (internals, figure) => figure});"),
+      killers=("test_surface_web.",)),
+    m("S/library-view-lazy", "2026-11-05 3D view", "library.js: the 3D view's module (and three.js) loaded as the page loads, on the grid too, not on a sensor's page",
+      (LIBRARY_JS, "const live = {host: null, view: null, load: null,", 'const live = {host: null, view: null, load: import("./cad/library_view.js"),'),
+      killers=("test_library.",)),
+    m("M/web-on-part-stage-home", "2026-11-05 3D view", "onpart.js: each mode's home drape.js's whatever a stage sets (the Library's grippers at the fingertip's angles)",
+      ("web/cad/onpart.js", "  const homeVector = () => new THREE.Vector3(...(view.homes?.[view.mode] || homeDirection(view.mode)));\n",
+       "  const homeVector = () => new THREE.Vector3(...homeDirection(view.mode));\n"), killers=("test_surface_web.",)),
+)
+MUTANTS += LIBRARY_VIEW
+# The look light by default and dark on the header's toggle (the user's request of 2026-11-06, web/theme.js; its review
+# of the same day): the page dark unless light is stored, a dark rule outranking more than it did under the system's
+# scheme, the toggle's state unsaid, a page following the system's scheme by a color-scheme meta, another tab's clear()
+# ignored; each killed alone by test_web_theme (ThemeToggleTests) on a scratch copy; theme_checks part_toggle sees the
+# first, the third and the last in the browser.
+THEME_JS = "web/theme.js"
+THEME_TOGGLE = (
+    m("M/web-theme-default-dark", "2026-11-06 theme", "theme.js: the page dark unless light is stored (a first visit, or one with cleared storage, opens dark)",
+      (THEME_JS, '      return window.localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light";',
+       '      return window.localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";'), killers=("test_web_theme.",)),
+    m("M/web-theme-hook-specificity", "2026-11-06 theme", "library.css: a dark rule on :root[data-theme] without :where() (it outranks the light rules it did not beat under the system's scheme)",
+      ("web/library.css", ':where(:root[data-theme="dark"]) .lib .lib-card:hover {', ':root[data-theme="dark"] .lib .lib-card:hover {'),
+      killers=("test_web_theme.",)),
+    m("M/web-theme-no-pressed", "2026-11-06 theme", "theme.js: the toggle's aria-pressed never set (a screen reader hears Dark mode off in dark)",
+      (THEME_JS, '    button.setAttribute("aria-pressed", String(theme === "dark"));\n', ""), killers=("test_web_theme.",)),
+    m("M/web-theme-system-meta", "2026-11-06 theme", "index.html: a color-scheme meta of light and dark (a light visitor's first frame and form controls dark on a dark system)",
+      ("web/index.html", '    <meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+       '    <meta name="viewport" content="width=device-width, initial-scale=1" />\n    <meta name="color-scheme" content="light dark" />\n'),
+      killers=("test_web_theme.",)),
+    m("M/web-theme-clear-ignored", "2026-11-06 theme", "theme.js: another tab's clear() of the storage ignored (this tab stays dark with nothing stored)",
+      (THEME_JS, "    if (event.key === THEME_KEY || event.key === null) show(stored());", "    if (event.key === THEME_KEY) show(stored());"),
+      killers=("test_web_theme.",)),
+)
+MUTANTS += THEME_TOGGLE
 
 
 # --------------------------------------------------------------------------

@@ -24,11 +24,12 @@ ROOT = Path(__file__).resolve().parents[1]
 # in): the version header of the default design, the flat form aliases and
 # the nested connector section (an empty input is null), in that order.
 # JavaScript writes integral numbers without a fraction.  The bottom tail 12 mm since P5-diagonal-bus.md section 27.7
-# (the rectangular mode's tails 12 / 12; 7.5 before).
+# (the rectangular mode's tails 12 / 12; 7.5 before); the electrodes 1 mm since the user's decision of 2026-11-06 (the
+# default fill 0.5; 1.4 mm, fill 0.7, before).
 BROWSER_DEFAULT_PAYLOAD = (
     '{"schema_version":"tactile-fpc-design/v1","template_id":"generic_matrix_v1",'
     '"name":"Tactile FPC 12x32","rows":12,"columns":32,"pitch_x_mm":2,"pitch_y_mm":2,'
-    '"row_electrode_width_mm":1.4,"column_electrode_width_mm":1.4,"top_tail_length_mm":12,'
+    '"row_electrode_width_mm":1,"column_electrode_width_mm":1,"top_tail_length_mm":12,'
     '"bottom_tail_length_mm":12,"connector_side":"bottom","row_fpc_position":"top","scan_order":"forward",'
     '"trace_width_mm":0.127,"trace_space_mm":0.127,"connector":{"row_pins":null,"column_pins":null}}'
 )

@@ -39,9 +39,18 @@ from exporters.ipc356 import read_netlist
 try:
     from test_api_http import HttpTestCase
     from test_mask_layout import _straight_mask
+    import defaults_of_before
 except ImportError:  # run as tests.test_mask_export
     from tests.test_api_http import HttpTestCase
     from tests.test_mask_layout import _straight_mask
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SURFACE = "surface_matrix_v1"

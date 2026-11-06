@@ -57,6 +57,25 @@ def unfold(target):
     target.add_init_script(OPEN_FOLDS)
 
 
+# The page's look (the user's request of 2026-11-06): light for every visitor whatever the system's scheme, dark once the
+# header's toggle (#themeToggle, web/theme.js) is turned on, the choice kept in localStorage under THEME_KEY for both
+# pages.  The checks turn the toggle (set_look) or store its choice (DARK_CHOICE, an init script: the page opens dark as
+# after a visit that turned it on), never the system's scheme.
+THEME_KEY = "fpc-customizer.theme"
+DARK_CHOICE = f"try {{ window.localStorage.setItem('{THEME_KEY}', 'dark'); }} catch (error) {{ /* no storage: light */ }}"
+SET_LOOK = """(look) => { if (document.documentElement.dataset.theme !== look) document.getElementById('themeToggle').click();
+    return document.documentElement.dataset.theme; }"""
+
+
+def set_look(page, look):
+    """The header's toggle clicked (its own click, the page not scrolled) until the page's look is ``look``."""
+    theme = page.evaluate(SET_LOOK, look)
+    if theme != look:
+        raise RuntimeError(f"the header's toggle left the page {theme}, not {look}")
+    page.wait_for_timeout(100)
+    return theme
+
+
 def check(name, condition, detail=""):
     """Record one check; print PASS/FAIL with an optional detail."""
     ok = bool(condition)
@@ -157,12 +176,10 @@ STACKED_PIN1 = """() => [...document.querySelectorAll('#stackedPreview .pin1-rin
     const box = ring.getBoundingClientRect(); const board = ring.closest('.assembly-board');
     const marker = ring.ownerSVGElement.querySelector('.pin1-marker')?.getBoundingClientRect();
     const frame = document.getElementById('stackedPreview').getBoundingClientRect();
-    const caption = document.querySelector('#stackedPreview .assembly-caption')?.getBoundingClientRect();
     return {layer: ring.classList.contains('is-upper') ? 'upper' : ring.classList.contains('is-lower') ? 'lower' : '', side: board?.dataset.physicalSide,
             x: box.left + box.width / 2, y: box.top + box.height / 2, d: box.width, h: box.height, stroke: getComputedStyle(ring).stroke,
             step: ring.dataset.step ?? null, triangle: marker ? [marker.left, marker.top, marker.right, marker.bottom] : null,
-            frame: [frame.left, frame.top, frame.right, frame.bottom],
-            caption: caption && caption.width ? [caption.left, caption.top, caption.right, caption.bottom] : null}; })"""
+            frame: [frame.left, frame.top, frame.right, frame.bottom]}; })"""
 
 
 def stacked_pin1(page, margin=0.0):
@@ -172,12 +189,11 @@ def stacked_pin1(page, margin=0.0):
     more than their radii and strokes (no overlap), neither taking in any of the other board's pin-1 triangle (its box),
     each round its own triangle (its centre within one ring radius of the triangle's: section 27.5, the plan view's
     rings stepped a ring diameter off their triangles had left them marking nothing) and nearer its own triangle's
-    centre than the other's, so each marks its own pin-1 pad only, both within the view (it clips) and neither under its
-    caption by more than a third of its radius both ways.  The exploded view tilts
-    the boards about the screen's x axis, so its rings are ellipses along the screen's axes, alike: distances are
-    measured with y scaled by their aspect.  ``margin`` (px): the gap the rings keep beyond their strokes and a ring
-    beyond the other triangle (app.js steps them at 2, half its PIN1_RING_GAP_PX: apart by the gap, each by half of it
-    clear of the other triangle)."""
+    centre than the other's, so each marks its own pin-1 pad only, and both within the view (it clips; the view has no
+    caption since 2026-11-06).  The exploded view tilts the boards about the screen's x axis, so its rings are ellipses
+    along the screen's axes, alike: distances are measured with y scaled by their aspect.  ``margin`` (px): the gap the
+    rings keep beyond their strokes and a ring beyond the other triangle (app.js steps them at 2, half its
+    PIN1_RING_GAP_PX: apart by the gap, each by half of it clear of the other triangle)."""
     rings = page.evaluate(STACKED_PIN1)
     problems = []
     if sorted((ring["layer"], ring["side"]) for ring in rings) != [("lower", "bottom"), ("upper", "top")]:
@@ -213,10 +229,23 @@ def stacked_pin1(page, margin=0.0):
         left, top, right, bottom = ring["frame"]
         if box[0] < left or box[1] < top or box[2] > right or box[3] > bottom:
             problems.append(("outside the view", ring["layer"]))
-        caption = ring["caption"]
-        if caption and min(box[2], caption[2]) - max(box[0], caption[0]) > ring["d"] / 6 and min(box[3], caption[3]) - max(box[1], caption[1]) > ring["h"] / 6:
-            problems.append(("under the caption", ring["layer"]))
     return problems, rings
+
+
+# The stacked view's own children and what it shows outside its scene: the scene and the rings' overlay only, no caption
+# (the user's request of 2026-11-06, "“Exploded 3D registration review…” 小字去掉": the small caption at its bottom left,
+# in both modes and both views).
+STACKED_BARE = """() => { const pane = document.getElementById('stackedPreview');
+    return {children: [...pane.children].map(node => node.getAttribute('class')), captions: document.querySelectorAll('.assembly-caption').length,
+            text: [...pane.children].filter(node => !node.matches('.assembly-scene, .pin1-overlay')).map(node => node.textContent),
+            words: ['registration review', 'visual spacing only', 'Plan view ·'].filter(word => document.body.innerText.includes(word))}; }"""
+
+
+def stacked_bare(page):
+    """``(ok, data)``: the stacked view holds its scene and its rings' overlay only, no caption, and the page says none of
+    the caption's words (STACKED_BARE)."""
+    data = page.evaluate(STACKED_BARE)
+    return data == {"children": ["assembly-scene", "pin1-overlay"], "captions": 0, "text": [], "words": []}, data
 
 
 # Each ring as the overlay draws it: ``samples`` points along its centre line on screen (frame pixels), its stroke.
@@ -375,6 +404,75 @@ def pin1_shapes(page, size=0.05, centre=1.0):
         if math.hypot(drawn[0] - ring[0], drawn[1] - ring[1]) > centre:
             problems.append(("centre", layer, round(math.hypot(drawn[0] - ring[0], drawn[1] - ring[1]), 2)))
     return problems, shapes
+
+
+# The figures' controls in their frames (the user's request of 2026-11-06, index.html .figure-tools): per frame shown,
+# its box, its chips (the controls' groups) and Reset view (where shown) relative to it, every button's size, and the
+# boxes of what the figure draws under its controls' row (a 2D view's outline, label and pin-1 ring; a 3D view's
+# outlines as projected; the plan view's outlines and drawn rings; the sensor on the part's canvas), all in CSS px.
+FIGURE_CONTROLS = """() => { const box = node => { const r = node.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; };
+  const shown = node => node && !node.hidden && node.checkVisibility() && node.getBoundingClientRect().width > 0;
+  const boxes = (scope, selector) => [...(scope ? scope.querySelectorAll(selector) : [])].filter(shown).map(box);
+  const front = '.assembly-face > svg:not(.board-shadow)';
+  const frames = {
+    row: ['#rowCard .canvas-wrap', () => boxes(document.querySelector('#rowPreview:not([hidden])'), 'svg .outline, svg .view-label, svg > .pin1-ring')
+      .concat(boxes(document.querySelector('#rowPreview3d:not([hidden])'), '.oblique-board > svg:not(.board-shadow) .outline'))],
+    column: ['#columnCard .canvas-wrap', () => boxes(document.querySelector('#columnPreview:not([hidden])'), 'svg .outline, svg .view-label, svg > .pin1-ring')
+      .concat(boxes(document.querySelector('#columnPreview3d:not([hidden])'), '.oblique-board > svg:not(.board-shadow) .outline'))],
+    registration: ['.stack-figure.is-registration', () => boxes(document.getElementById('stackedPreview'), `${front} .outline, .pin1-overlay .pin1-ring-drawn`)],
+    onPart: ['.stack-figure.is-on-part', () => boxes(document.getElementById('sensorOnPart'), 'canvas')],
+  };
+  const out = {};
+  for (const [name, [selector, drawn]] of Object.entries(frames)) {
+    const frame = document.querySelector(selector);
+    if (!shown(frame)) continue;
+    const [fl, ft] = box(frame); const rel = ([l, t, r, b]) => [l - fl, t - ft, r - fl, b - ft].map(v => Math.round(v * 10) / 10);
+    const chips = [...frame.querySelectorAll(':scope > .figure-tools > *')].filter(shown);
+    const reset = [...frame.querySelectorAll(':scope > .figure-reset')].filter(shown);
+    out[name] = {frame: rel(box(frame)), chips: chips.map(chip => rel(box(chip))), reset: reset.map(node => rel(box(node))),
+      buttons: [...chips, ...reset].flatMap(node => node.matches('button') ? [node] : [...node.querySelectorAll('button')]).filter(shown)
+        .map(button => [button.textContent.trim(), Math.round(button.getBoundingClientRect().width * 10) / 10, Math.round(button.getBoundingClientRect().height * 10) / 10]),
+      labels: chips.map(chip => [...chip.querySelectorAll('button')].filter(shown).map(button => button.textContent.trim())),
+      drawn: drawn().map(rel)};
+  }
+  return out; }"""
+
+
+def figure_controls(page, wrap=False):
+    """The figures' controls in their frames (FIGURE_CONTROLS), ``(problems, data)``: each frame's chips in one row (two
+    where ``wrap``), the first 12 px from its top and left, all inside it; Reset view 12 px from its top and right; every
+    button 24 x 24 px or more; nothing the figure draws under a chip or Reset view (the sensor on the part's canvas
+    starting under them)."""
+    data = page.evaluate(FIGURE_CONTROLS)
+    problems = []
+    for name, item in data.items():
+        frame, chips, reset = item["frame"], item["chips"], item["reset"]
+        if not chips:
+            problems.append((name, "no controls"))
+            continue
+        if abs(chips[0][0] - 12) > 1 or abs(chips[0][1] - 12) > 1:
+            problems.append((name, "first chip not 12 px in", chips[0]))
+        rows = sorted({round(chip[1]) for chip in chips})
+        if len(rows) > (2 if wrap else 1):
+            problems.append((name, "rows", rows))
+        if any(chip[2] > frame[2] - 12 + 1 or chip[0] < 11 for chip in chips):
+            problems.append((name, "chip outside the frame's 12 px", chips, frame))
+        for node in reset:
+            if abs(node[1] - 12) > 1 or abs(frame[2] - node[2] - 12) > 1:
+                problems.append((name, "Reset view not 12 px from the top right", node, frame))
+        small = [button for button in item["buttons"] if button[1] < 24 or button[2] < 24]
+        if small:
+            problems.append((name, "buttons under 24 x 24 px", small))
+        over = [[drawn, control] for drawn in item["drawn"] for control in chips + reset
+                if drawn[0] < control[2] and drawn[2] > control[0] and drawn[1] < control[3] and drawn[3] > control[1]]
+        if name == "onPart":
+            over = [[drawn, control] for drawn in item["drawn"] for control in chips + reset if drawn[1] < control[3] - 0.5]
+        if over:
+            problems.append((name, "drawn under the controls", over[:3]))
+        if not item["drawn"]:
+            problems.append((name, "nothing drawn"))
+    return problems, data
+
 
 if __name__ == "__main__":
     sys.exit(0)

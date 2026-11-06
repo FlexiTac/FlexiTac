@@ -189,7 +189,7 @@ map).
 | --- | --- | --- |
 | `objective` | `fixed_pitch` | `fixed_pitch` (the resolution: most taxels at `pitch_mm`), `max_taxels` (most taxels at a pitch of at least `min_pitch_mm`, then the largest pitch), `max_area` (the largest field: the rows x columns staircase at the pitches `min_pitch_mm` x 1.15^k up to 10 mm, the best grown in 0.01 mm steps; the first such fit in a server process takes a few seconds while the board extents are computed) |
 | `pitch_mm`, `min_pitch_mm` | 2.0, 1.0 | 0.6-10 mm |
-| `fill` | 0.7 | electrode width / pitch, at most pitch - 0.25 mm |
+| `fill` | 0.5 | electrode width / pitch, at most pitch - 0.25 mm (0.7 until the user's decision of 2026-11-06) |
 | `edge_margin_mm` | 0 | clearance of the boards from the surface's edge (the board outline already keeps its copper 0.3 mm in) |
 | `routing` | `auto` | `default` (0.127/0.127 mm), `tight` (0.1016/0.1016 mm), `auto` (both) |
 | `role_mapping` | `auto` | `rows_top`, `columns_top`; it decides which board is glued to the part and on which side the Row channel lies |
@@ -795,7 +795,7 @@ option `row_sides`), which builds any row- and column-convex field:
   (only field-only fits build one), `board` otherwise, so a placement saved
   before the option maps as it was fitted.  An explicit `field` maps a
   straight-channel design too (F of its full field is its active region).
-- **Measured** (default pitch 2 mm, fill 0.7; `containment: board` in
+- **Measured** (default pitch 2 mm, fill 0.7, the default fill until 2026-11-06; `containment: board` in
   brackets; since the user's correction of 2026-10-25, coverage first,
   P5-diagonal-bus.md section 21, and symmetric faces, section 22): the
   soft finger's contact face through its mount end 708 as 59 x 12,
@@ -1008,8 +1008,8 @@ proposal's files:
   column-convex field (the diagonal Row bus).  Masked fields are at most
   `max_rows` x `max_columns` (64 x 64), as the rectangles.
 - Inactive positions read 0 only while the stack's misregistration stays
-  below the registration's `inactive_crossing_separation_mm` (0.4 mm at the
-  2 mm default pitch and fill 0.7).
+  below the registration's `inactive_crossing_separation_mm` (0.8 mm at the
+  2 mm default pitch and the default fill 0.5; 0.4 mm at fill 0.7).
 - With `containment: board` everything above the tail roots must lie on
   the selected surface, so on narrow faces the Row channel and the Column
   fan-out take a large share of the width, and the tails must cross the
@@ -1074,7 +1074,8 @@ The page (titled "FlexiTac-Gen") opens in CAD mode, which it calls "Gen by
 Surface" and never "CAD" (the user's requests of 2026-10-30: its workspace
 is "Pick a surface on a 3D model"); the
 "Rectangular" switch beside the title (on one line with it and, at the
-header's right, FlexiTac's GitHub, with the repository's stars and forks,
+header's right, the look's toggle (light by default, dark once turned on:
+2026-11-06), then FlexiTac's GitHub, with the repository's stars and forks,
 and Discord, as on flexitac.github.io:
 2026-11-02), or `#rect` in the address, shows the
 rectangular form, and `#cad` still names CAD mode.  CAD mode shows the
@@ -1096,7 +1097,49 @@ user's request of 2026-11-04; "Customize the sensor" before) is one with the fol
 the right (main.js `syncGuideCustomize`): either one opens both, the
 guide then listing step 2's own steps, Fit and Generate, each done or next
 and scrolling to its part.  Under
-980 px the guide stands above the workspace.  In the view's top right the
+980 px the guide stands above the workspace.  Under its steps, "Try a
+sample" (the user's request of 2026-11-06; `index.html` `#samplePalette`,
+`web/samples/samples.json`) holds eight tiles in two columns: two of the UMI
+finger's tapered tips, four other Library fingers and two whole grippers.
+The palette moves nothing else (the review of 2026-11-06): on a desktop
+window under 920 px high (a laptop's) its tiles are compact, each picture
+beside its name, so it fits the guide's window-high column down to 720 px;
+over 980 px the guide is a flex column whose palette, its grid then
+scrolling inside it, gives way before the steps (Advanced Customization's
+steps open, a shorter window); from 760 to 980 px it stands beside the
+steps (they keep their own width, the guide its height, so the workspace
+and the page's scroll after the first build stay where they were); under
+760 px it is one row that scrolls sideways under the steps, about 70 px
+high.  A tile dragged onto the 3D view's window (its id in the drag's
+`application/x-flexitac-sample` data; the listeners on `.cad-view-wrap`, so
+over the tools drawn on the view too, the surface menu, the camera row and
+the status; the view lit as for a file until the drag leaves the window,
+the dashed frame drawn over the part too) or pressed
+(a click, Enter, Space, a tap; the view brought into sight when less than
+half of it is) loads its part as the default part is and builds its sensor
+at once (main.js `loadSample`, `buildDefaultSensor`): a Library finger from
+its shipped fit, so the sensor is the Library's own; a whole gripper (one
+STL, its finger's facets first) from the same Library sensor's request
+(its selection, base, border and options) fitted by the engine, its sensor
+then seen past the other finger from the sample's `camera`, and its 3D
+markers (the exit's and the border's tubes, the boards' end markers) sized
+as on that finger alone (`viewer.js` `setMarkScale`: they go with the
+model's size, and a whole hand's had covered the sensor's corners).  The address
+becomes `./?sample=<id>` (`?part` goes; a reload shows the sample again, an
+unknown id the UMI finger with a warning); the user's own file and Remove
+model drop it, with the options the sample set, as they drop `?part`.  The
+newest press wins: another sample, a file or Remove model on the way stops
+it, but the part shown keeps its sensor and its build until the sample's
+mesh is in hand, so a sample that cannot be loaded (its files refused,
+Rectangular chosen meanwhile) leaves the page as it was, with a warning
+(said again once the shown build lands).  A sample dropped while the last
+one's build is under way waits for that build to land.  The sample on its
+way is not asked again until its build returns; the one shown, pressed
+again, is framed again, not reloaded (the visitor's changes stay).
+`buildDefaultSensor` settles its own state, done or stopped however it ends,
+so a build superseded never leaves Generate sensor busy.  The tile of the
+sample shown is edged (`aria-current`), the one on its way busy.  In Rectangular mode the guide,
+and so the palette, is hidden.  In the view's top right the
 camera (Fit, Selection, the six axes); the camera frames the part, the
 selection and the sensor clear of these tools (viewer.js `setClearance`:
 the bands they cover at the view's top and sides; farther than before by as
@@ -1113,7 +1156,21 @@ loaded" after a success (its full report on hover), a warning, an error or
 the work under way in full (main.js `setStatus`, `setLoading`).  There is no candidate list since 2026-10-30 (the
 server's candidates stay in the inspect reply; the default part's sensor
 uses its first flat one, and the Diagnostics fold's "Select a surface by its
-seed facet" picks one for the browser checks), and no Clean up.  The steps:
+seed facet" picks one for the browser checks), and no Clean up.  The 3D
+view is lit as the sensor on the part is (the user's request of
+2026-11-05: every 3D view in the same light; `web/cad/studio.js`, which
+both draw with): a product shot's lights hung on the camera (a large key
+from the upper left, a bright ceiling over a cooler floor, a rim from
+behind), the faint reflection of a studio built in code and Khronos PBR
+Neutral tone mapping.  The part's facets keep their meaning colours (its
+grey, the selected area's orange, a refused selection's red, the hidden
+facets' darker grey), lit as a matte surface; the selection's outline, the
+base edge, the border and its handles, the hover, the overlay and the axes
+are drawn unlit in their own colours, and the view stays light in the dark
+scheme.  Where a device draws no half-float render target the part is lit
+by the lights alone (one console warning); on a software renderer (no
+GPU) a drag's frames show the part's diffuse light alone, the look again as
+the drag ends.  The steps:
 
 1. **Load.**  Drop or open an STL; until then the UMI fin-ray finger is
    loaded (`web/vendor/umi/UMI-Soft-Gripper-Finger.stl`, the HandUMI mesh,
@@ -1224,7 +1281,45 @@ seed facet" picks one for the browser checks), and no Clean up.  The steps:
    `readout`; the CSV of a masked field lists every readout position with
    its pins, reader lines and `active` (0: no crossing, always reads 0; the
    geometry only for the taxels), that of a full field its taxels as
-   before.
+   before.  Once the build is mapped, the stacked card shows the **sensor
+   on the part** beside the registration (2026-11-05, the user's request).
+   The part is drawn with the bottom FPC, the film (velostat, black, over
+   the taxel field or the masked outline) and the top FPC draped on its
+   surface where the map puts them, exploded along the face's normal.  The
+   spacing is visual only (**Assembled** lays them on the part).  Where a
+   board leaves the surface (a tail past the base edge, a band past a side)
+   it runs flat on the plane of the nearest facet.  The figure is drawn in
+   the browser from the map, the fit's chart and the board SVGs, with no
+   request of its own (see [INTEGRATION.md](INTEGRATION.md#the-sensor-on-the-part-cad-mode)).
+   Since the review of 2026-11-05 the view frames the part whole up to
+   three times the sensor's size, and **Assembled** opens nearly face-on;
+   since its second review the figure has the same room above as below
+   and no light seam round the outlines over the part.  Since its look of
+   2026-11-05 it has lights and a studio of its own (the film a satin
+   black, not a hole; the boards a faint amber sweep; each layer an edge),
+   and **Assembled** a soft contact shade where the stack meets the part;
+   since the user's request of the same day the film has a lamp of its
+   own, aimed for each drawing, so at the home described below it still
+   catches a soft highlight at its top.
+   Since the user's decision of 2026-11-05 it opens exploded as the
+   registration beside it opens: 57 degrees off the face, turned 20
+   degrees about its normal, the tails toward the lower right (one pair
+   of angles for both figures: `app.js`'s `ORBIT_HOME`, `drape.js`'s
+   `HOME_TILT_DEG` and `HOME_SPIN_DEG`).  A drag turns the stack about its
+   normal and tilts it, and the arrow keys turn it, as on the left;
+   **Assembled** opens at the same turn, 35 degrees off the face (29
+   before, from the tails' side).  The 3D view of step 1 keeps framing the
+   mapped sensor, for a Library sensor too (the user's decision of the
+   same day): the part's far end may leave it there, where the figure
+   beside the registration shows the part whole.  The figure is also the
+   Library's (its pictures and its sensor pages' 3D view, the user's
+   requests of 2026-11-05): `onpart.js`'s `createOnPartView` takes an
+   optional `stage`, a function given the figure's own objects that may
+   add a scene (the gripper drawn whole) and set each mode's home
+   (`view.homes`); `main.js` passes none, so Gen by Surface's figure and
+   its homes are the ones described here, the fingertip only
+   ([LIBRARY_VIEW.md](LIBRARY_VIEW.md); `tests/test_surface_web.py` pins
+   that `main.js` passes no stage).
 
 The browser checks are `tools/browser/cad_checks.py` (see
 [tools/browser/README.md](../tools/browser/README.md)).

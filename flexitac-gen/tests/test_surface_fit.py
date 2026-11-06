@@ -24,6 +24,9 @@ ASSETS = Path(__file__).resolve().parents[1] / "asset"
 # The whole stack on the surface (containment board): the fit these tests pinned before masked-field phase P5e made
 # field-only containment the default with shape fill.
 BOARD = {"containment": "board"}
+# The fill these tests' fits were measured at: the default 0.7 until the user's decision of 2026-11-06 made it 0.5
+# (tests/defaults_of_before.py); each names it, beside the options it tests.
+MEASURED = {"fill": 0.7}
 
 
 class _Replica:
@@ -40,7 +43,7 @@ class _Replica:
             mesh = F.mesh(triangles)
             seed = select.nearest_facet(mesh, (0.0, -12.9, -62.7))
             selection = {"ops": [{"op": "grow", "seed_facet": seed}]}
-            header = {"selection": selection, "base": base or {"point_xyz": [0.0, -12.9, -3.0]}, "options": options or {}}
+            header = {"selection": selection, "base": base or {"point_xyz": [0.0, -12.9, -3.0]}, "options": {**MEASURED, **(options or {})}}
             cls._cache[key] = (data, mesh, selection, fit.fit_route(header, data))
         return cls._cache[key]
 
@@ -124,7 +127,7 @@ class FitTests(unittest.TestCase):
         mesh = F.mesh(triangles)
         seed = select.nearest_facet(mesh, (1.1, 1.1, 2.2))
         with self.assertRaises(SurfaceError) as raised:
-            fit.fit_route({"selection": {"ops": [{"op": "grow", "seed_facet": seed}]}, "options": {"pitch_mm": 2.0}}, data)
+            fit.fit_route({"selection": {"ops": [{"op": "grow", "seed_facet": seed}]}, "options": {"pitch_mm": 2.0, **MEASURED}}, data)
         self.assertEqual(raised.exception.code, "E_SURFACE_NO_FIT")
         self.assertTrue(raised.exception.details["rejected"])
 
@@ -773,7 +776,7 @@ class AssetFitTests(unittest.TestCase):
         mesh = read_stl(data)
         seed = select.nearest_facet(mesh, (1.812, -213.721, 138.929))
         selection = {"ops": [{"op": "grow", "seed_facet": seed}]}
-        result = fit.fit_route({"selection": selection, "base": {"side": 6}, "options": {"rotation": "none"}}, data)
+        result = fit.fit_route({"selection": selection, "base": {"side": 6}, "options": {"rotation": "none", **MEASURED}}, data)
         best = result["proposals"][0]
         # shape fill with containment field (the defaults from masked-field phase P5e on): 666 of 32 x 32 on the
         # diagonal Row bus, 683 of 34 x 34 since shaped fields take the rectangles' caps (P5-diagonal-bus.md section
@@ -786,7 +789,8 @@ class AssetFitTests(unittest.TestCase):
         mapped = place.map_route({"selection": selection, "placement": best["placement"], "design": best["design"]}, data)
         self.assertTrue(mapped["ok"])
         self.assertEqual(mapped["taxel_count"], 688)
-        board = fit.fit_route({"selection": selection, "base": {"side": 6}, "options": {"rotation": "none", "containment": "board"}}, data)["proposals"][0]
+        board = fit.fit_route({"selection": selection, "base": {"side": 6}, "options": {"rotation": "none", "containment": "board", **MEASURED}},
+                              data)["proposals"][0]
         self.assertEqual((board["metrics"]["rows"], board["metrics"]["columns"], board["metrics"]["taxels"]), (30, 32, 546))
         mapped = place.map_route({"selection": selection, "placement": board["placement"], "design": board["design"]}, data)
         self.assertEqual((mapped["ok"], mapped["taxel_count"]), (True, 546))

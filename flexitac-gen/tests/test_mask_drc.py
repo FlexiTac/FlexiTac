@@ -38,9 +38,18 @@ from engine.geometry import rect_bounds
 try:
     from geometry_checks import edges, point_in_polygon, point_segment_distance
     from test_mask_layout import _determinism_problems, _straight_mask
+    import defaults_of_before
 except ImportError:  # run as tests.test_mask_drc
     from tests.geometry_checks import edges, point_in_polygon, point_segment_distance
     from tests.test_mask_layout import _determinism_problems, _straight_mask
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SURFACE = "surface_matrix_v1"

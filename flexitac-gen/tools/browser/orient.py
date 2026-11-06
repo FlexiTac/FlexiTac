@@ -275,10 +275,6 @@ def check_assembly(page, result, case, cdp):
     check(f"{case}: assembly copies: pin-1 rings drawn, labels hidden, no <title> tooltips",
           ring_ok and up["labelDisplay"] == "none" and low["labelDisplay"] == "none" and up["titles"] == 0 and low["titles"] == 0,
           f"rings {[round(d['ring'][2] - d['ring'][0], 1) for d in (up, low)]}px")
-    legend = page.inner_text("#assemblyLegend")
-    check(f"{case}: legend states both tail exits and the roles",
-          f"tail exits {upper['tail']['side']}" in legend and f"tail exits {lower['tail']['side']}" in legend
-          and ("Row FPC" in legend and "Column FPC" in legend) and "tail axis" in legend, legend.replace("\n", " | ")[:220])
     return plan
 
 

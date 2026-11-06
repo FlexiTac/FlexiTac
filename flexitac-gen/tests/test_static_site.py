@@ -142,8 +142,9 @@ class SiteBuildTests(unittest.TestCase):
         server = dict(app.SECURITY_HEADERS)["Content-Security-Policy"]
         # The server's policy, with WebAssembly and GitHub's API (the header's star and fork counts) allowed.
         self.assertEqual(policy.group(1).replace("script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.github.com; ", ""), server)
-        # The policy comes first after the charset, before anything it governs.
+        # The policy comes first after the charset, before anything it governs (the look's script in <head> too).
         self.assertLess(head.index("Content-Security-Policy"), head.index("<link"))
+        self.assertLess(head.index("Content-Security-Policy"), head.index('<script src="static/theme.js"></script>'))
         self.assertTrue(head.startswith('<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta http-equiv="Content-Security-Policy"'))
 
     def test_the_header_carries_the_repositorys_counts_when_built_with_them(self) -> None:
@@ -258,8 +259,13 @@ class PublicExportTests(unittest.TestCase):
                     self.assertTrue(covered(destination.relative_to(ROOT).as_posix()))
         for source in (*build_static_site.ENGINE_SOURCES, "web", "tools/build_static_site.py", "LICENSE"):
             self.assertTrue(covered(source), source)
-        for private in ("claude/sessions", "claude/specs", "asset", "outputs/x", "tools/gripper_scene.py", "tools/umi_tip_video.py"):
+        # The Library's private tools (its importer, its tips' cutter and, since 2026-11-05, the grippers' scene builder:
+        # they read the private recipes or need numpy and trimesh); their outputs are public with web/library/.
+        for private in ("claude/sessions", "claude/specs", "asset", "outputs/x", "tools/gripper_scene.py", "tools/umi_tip_video.py",
+                        "tools/library_import.py", "tools/library_tips.py", "tools/library_scenes.py"):
             self.assertFalse(covered(private), private)
+        for shipped in ("web/library/scenes/scenes.json", "web/library/bodies/x.stl", "web/library/art/x.json.gz", "web/cad/library_view.js"):
+            self.assertTrue(covered(shipped), shipped)
 
     def test_an_export_writes_the_commits_public_files_and_the_workflow(self) -> None:
         def run(*args: str, cwd: Path) -> None:

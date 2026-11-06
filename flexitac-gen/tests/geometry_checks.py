@@ -200,7 +200,8 @@ def same_ring(first: Sequence[Sequence[float]], second: Sequence[Sequence[float]
 def straight_channel(design: Any = None) -> Any:
     """A request for the straight Row channel: ``design`` (None: the default design) with ``routing.row_sides``
     ``channel`` where it names none, on the generic template (whose default is the diagonal Row bus since
-    claude/specs/masked-field/P5-diagonal-bus.md section 18; ``channel`` builds the boards of before byte for byte).
+    claude/specs/masked-field/P5-diagonal-bus.md section 18; ``channel`` builds the boards of before byte for byte, with
+    the electrodes the request builds with: the default's 1.0 mm since the user's decision of 2026-11-06, 1.4 before).
     Anything else (another template, a value given, not an object) is returned as it is."""
 
     if design is None:

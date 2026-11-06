@@ -34,11 +34,11 @@ from exporters import artifact_filenames, build_exports
 
 # Re-pinned for the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes):
 # the identity, the profile revision and the archives; the layout and every measurement held.
-BUILD_ID = "tactile-fpc-12x32-c2243ebd10c5"
+BUILD_ID = "tactile-fpc-12x32-34a71a29e4d0"
 IDENTITY = {
     "build_id": BUILD_ID,
-    "build_sha256": "c2243ebd10c5387329e61a457837aa7073e274cda207526057d057273748841e",
-    "design_sha256": "45589a3d7b5cdd6f777cf48b8f1085f67f4b21cd5d2b2f0a182df2852c907df1",
+    "build_sha256": "34a71a29e4d0ff4923f432bcfaa4a8cb7c997edf4b171ca9c3762843188c614e",
+    "design_sha256": "1e0001a8705c5453ecb598d34939d9f3123511a34f0b71597c6fc4bed6655a72",
     "profile_sha256": "308eb3296df3107301f3789d1013421f7ee5dc92e4e4133417bb88a8eee1aa95",
     "generator": "deterministic-sensor-core/0.4.0",
     "exporter": "direct-gerber-pure-stdlib/0.3.0",
@@ -52,11 +52,11 @@ IDENTITY = {
     "production_ready": False,
 }
 # sha256 of the canonical JSON of {"format", "units", "boards"} (= derived-layout.json without its newline).
-LAYOUT_SHA256 = "091fbbaea613b1df13468c26f33a080c690e56f5e78287d703aeee81f3ee3785"
+LAYOUT_SHA256 = "6e20c9f42212fba7dc318aa97a5d0b2ed6e41f9160bfc098b29b36d780978460"
 ARTIFACTS = {
-    "top_fpc_gerber_zip": (f"{BUILD_ID}-top-rows-direct-gerber.zip", 28740, "9d0cfae0fe6acee8591dc14cc3a403cee43277d31f2da531a2804696bb78678c"),
-    "bottom_fpc_gerber_zip": (f"{BUILD_ID}-bottom-columns-direct-gerber.zip", 38331, "93768ae0419d3f4e1275a377998d7dfb09027a906811c6b018bc90c18e704ab4"),
-    "project_review_bundle_zip": (f"{BUILD_ID}-project-review.zip", 216488, "2a838d9db5b271f0605ebdb3d0d1f419ff572bca75a8e43f4a4daba05c1d1444"),
+    "top_fpc_gerber_zip": (f"{BUILD_ID}-top-rows-direct-gerber.zip", 30097, "f3edfa708c37455feb74361a9652bf5fe61b9ed13c67d9c86770e1b91288c4bd"),
+    "bottom_fpc_gerber_zip": (f"{BUILD_ID}-bottom-columns-direct-gerber.zip", 42203, "45ac29dd2b1551477f0a8243a8bfb8bb349a8b9c79c5cb7e19b2d3954cbe905f"),
+    "project_review_bundle_zip": (f"{BUILD_ID}-project-review.zip", 235822, "420ecf33f8b65d8ecf664e73f2d36a5e58918bf1d9e6a7be58b75bba10dd5e5d"),
 }
 # Since 2026-10-24 (P5-diagonal-bus.md section 18) the default design is the diagonal Row bus with both sides: the Row
 # traces leave both ends of their rows (ROW_01, 03, ... on the stack's right), fan into a Row tail centred under the
@@ -82,36 +82,43 @@ ARTIFACTS = {
 # section 27.8 (diagonal-bus/11, one side's convex flank, the multi-gripper video's notch): the construction's version
 # in the identity, the layout and the archives (the build id, its hashes, the layout digest, the archives' digests); the
 # default has both sides, whose flanks have lanes, so its boards, their outlines and the archives' sizes are the same.
+# Rewritten by the user's decision of 2026-11-06 ("默认的pitch/trace大小,现在都是0.7,直接都改成0.5": the default fill, electrode
+# width / pitch, 0.7 -> 0.5): the electrodes 1.4 -> 1.0 mm at the 2 mm pitch, so the active region 63.4 x 23.4 -> 63.0 x
+# 23.0 mm and both outlines 0.4 mm narrower and shorter (67.919595 x 41.765841 -> 67.520543 x 41.365841 mm), the tails
+# with the field's centre; the coverlay bridges between the electrode windows 0.4 -> 0.8 mm, at least the profile's 0.5,
+# so each electrode has its own window (12 Row and 32 Column windows of 1.2 mm, one merged field window each before),
+# the electrode clearance 0.6 -> 1.0 mm; the design and with it the build id, its hashes, the layout digest and the
+# archives' digests and sizes.
 BOARDS = {
     "row": {
         "id": 'top_rows_fpc',
         "physical_side": 'top',
         "route_pieces": {'tail': (12, [0.254]), 'fanout': (12, [0.127])},
-        "outline_mm": (67.919595, 41.765841),
+        "outline_mm": (67.520543, 41.365841),
         "outline_vertices": 80,
-        "tail": {"length_mm": 12.0, "width_mm": 6.5, "connector_pins": 12, "bounds": {"x": 30.758177, "y": 0.0, "width": 6.5, "height": 12.0}},
-        "pin_1": {"net": "ROW_01", "x": 31.258177, "y": 2.3, "width_mm": 0.3, "height_mm": 4.0},
-        "active_region": {"x": 2.308177, "y": 17.865841, "width": 63.4, "height": 23.4},
-        "electrode_field": {"x": 2.108177, "y": 17.865841, "width": 63.8, "height": 23.4},
-        "stiffener_bbox": (30.758177, 0.0, 37.258177, 6.0),
-        "openings": [('electrode_field_opening', 2.008177, 17.765841, 64.0, 23.6), ('connector_contact_opening', 31.058177, 0.0, 5.9, 4.4)],
-        "construction": {"minimum_concave_fillet_radius_mm": 0.5, "fanout_bundle_pitch_mm": 0.254, "row_bus": {"kind": "diagonal-bus/11", "sides": "both", "near_side": "right", "split": "alternate", "near_rows": [1, 3, 5, 7, 9, 11], "far_rows": [2, 4, 6, 8, 10, 12], "contact_order": ["ROW_01", "ROW_03", "ROW_05", "ROW_07", "ROW_09", "ROW_11", "ROW_12", "ROW_10", "ROW_08", "ROW_06", "ROW_04", "ROW_02"], "tail_position": "centred", "tails": "stacked", "shared_outline_below_field_mm": 5.865841, "fans": [{"rows": [11, 9, 7, 5, 3, 1], "move": "east", "angle_deg": 85.0, "height_mm": 3.852595}, {"rows": [12, 10, 8, 6, 4, 2], "move": "west", "angle_deg": 85.0, "height_mm": 3.844111}], "tip_width_mm": 64.900857, "tip_excess_mm": 0.500857, "band_mm": {"near": 1.716127, "far": 1.588676}, "lane_angle_deg": {"near": [3.646302, 17.188135], "far": [3.646304, 17.188183]}, "flat_lane_rows": [], "widest_mm": 67.919595, "tip_is_narrowest_relative": True}, "mask_class": {"row": "diagonal", "column": "straight"}},
-        "measured": {"route_route_clearance": 0.127, "pad_trace_clearance": 0.223, "pad_pad_clearance": 0.2, "electrode_electrode_clearance": 0.6, "electrode_route_clearance": 0.250001, "copper_to_outline": 0.3, "route_to_outline": 0.300999, "copper_to_cutout": None, "active_field_margin": 0.5, "contact_exposure": 0.05, "neck_width": 6.5, "stiffener_end_clearance": 5.5, "concave_fillet_radius": 0.517862, "route_width": 0.0, "tail_width": 0.0, "board_short_side": 41.765841, "board_long_side": 67.919595},
+        "tail": {"length_mm": 12.0, "width_mm": 6.5, "connector_pins": 12, "bounds": {"x": 30.558639, "y": 0.0, "width": 6.5, "height": 12.0}},
+        "pin_1": {"net": "ROW_01", "x": 31.058639, "y": 2.3, "width_mm": 0.3, "height_mm": 4.0},
+        "active_region": {"x": 2.308639, "y": 17.865841, "width": 63.0, "height": 23.0},
+        "electrode_field": {"x": 2.108639, "y": 17.865841, "width": 63.4, "height": 23.0},
+        "stiffener_bbox": (30.558639, 0.0, 37.058639, 6.0),
+        "openings": [('sensor_electrode_opening', 2.008639, 17.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 19.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 21.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 23.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 25.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 27.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 29.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 31.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 33.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 35.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 37.765841, 63.6, 1.2), ('sensor_electrode_opening', 2.008639, 39.765841, 63.6, 1.2), ('connector_contact_opening', 30.858639, 0.0, 5.9, 4.4)],
+        "construction": {"minimum_concave_fillet_radius_mm": 0.5, "fanout_bundle_pitch_mm": 0.254, "row_bus": {"kind": "diagonal-bus/11", "sides": "both", "near_side": "right", "split": "alternate", "near_rows": [1, 3, 5, 7, 9, 11], "far_rows": [2, 4, 6, 8, 10, 12], "contact_order": ["ROW_01", "ROW_03", "ROW_05", "ROW_07", "ROW_09", "ROW_11", "ROW_12", "ROW_10", "ROW_08", "ROW_06", "ROW_04", "ROW_02"], "tail_position": "centred", "tails": "stacked", "shared_outline_below_field_mm": 5.865841, "fans": [{"rows": [11, 9, 7, 5, 3, 1], "move": "east", "angle_deg": 85.0, "height_mm": 3.835097}, {"rows": [12, 10, 8, 6, 4, 2], "move": "west", "angle_deg": 85.0, "height_mm": 3.824528}], "tip_width_mm": 64.526246, "tip_excess_mm": 0.526246, "band_mm": {"near": 1.729476, "far": 1.601966}, "lane_angle_deg": {"near": [3.647927, 21.075296], "far": [3.647927, 21.075366]}, "flat_lane_rows": [], "widest_mm": 67.520543, "tip_is_narrowest_relative": True}, "mask_class": {"row": "diagonal", "column": "straight"}},
+        "measured": {"route_route_clearance": 0.127, "pad_trace_clearance": 0.223, "pad_pad_clearance": 0.2, "electrode_electrode_clearance": 1.0, "electrode_route_clearance": 0.250001, "copper_to_outline": 0.3, "route_to_outline": 0.300999, "copper_to_cutout": None, "active_field_margin": 0.5, "contact_exposure": 0.05, "neck_width": 6.5, "stiffener_end_clearance": 5.5, "concave_fillet_radius": 0.517862, "route_width": 0.0, "tail_width": 0.0, "board_short_side": 41.365841, "board_long_side": 67.520543},
     },
     "column": {
         "id": 'bottom_columns_fpc',
         "physical_side": 'bottom',
         "route_pieces": {'tail': (32, [0.254]), 'fanout': (32, [0.127])},
-        "outline_mm": (67.919595, 41.765841),
+        "outline_mm": (67.520543, 41.365841),
         "outline_vertices": 60,
-        "tail": {"length_mm": 12.0, "width_mm": 16.5, "connector_pins": 32, "bounds": {"x": 25.661418, "y": 0.0, "width": 16.5, "height": 12.0}},
-        "pin_1": {"net": "COL_01", "x": 26.161418, "y": 2.3, "width_mm": 0.3, "height_mm": 4.0},
-        "active_region": {"x": 2.211418, "y": 17.865841, "width": 63.4, "height": 23.4},
-        "electrode_field": {"x": 2.211418, "y": 17.665841, "width": 63.4, "height": 23.8},
-        "stiffener_bbox": (25.661418, 0.0, 42.161418, 6.0),
-        "openings": [('electrode_field_opening', 2.111418, 17.565841, 63.6, 24.0), ('connector_contact_opening', 25.961418, 0.0, 15.9, 4.4)],
+        "tail": {"length_mm": 12.0, "width_mm": 16.5, "connector_pins": 32, "bounds": {"x": 25.461904, "y": 0.0, "width": 16.5, "height": 12.0}},
+        "pin_1": {"net": "COL_01", "x": 25.961904, "y": 2.3, "width_mm": 0.3, "height_mm": 4.0},
+        "active_region": {"x": 2.211904, "y": 17.865841, "width": 63.0, "height": 23.0},
+        "electrode_field": {"x": 2.211904, "y": 17.665841, "width": 63.0, "height": 23.4},
+        "stiffener_bbox": (25.461904, 0.0, 41.961904, 6.0),
+        "openings": [('sensor_electrode_opening', 2.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 4.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 6.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 8.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 10.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 12.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 14.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 16.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 18.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 20.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 22.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 24.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 26.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 28.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 30.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 32.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 34.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 36.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 38.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 40.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 42.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 44.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 46.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 48.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 50.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 52.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 54.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 56.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 58.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 60.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 62.111904, 17.565841, 1.2, 23.6), ('sensor_electrode_opening', 64.111904, 17.565841, 1.2, 23.6), ('connector_contact_opening', 25.761904, 0.0, 15.9, 4.4)],
         "construction": {"minimum_concave_fillet_radius_mm": 0.5, "fanout_bundle_pitch_mm": 0.254, "bend_stagger_mm": 0.213131, "entry_taper_angle_deg": 79.999381, "entry_transition_height_mm": 4.099862, "merger_taper_angle_deg": 0.0, "merger_height_mm": 0.0, "slot_bounds": None, "mask_class": {"row": "diagonal", "column": "straight"}, "shared_outline_below_field_mm": 5.865841},
-        "measured": {"route_route_clearance": 0.169721, "pad_trace_clearance": 0.223, "pad_pad_clearance": 0.2, "electrode_electrode_clearance": 0.6, "electrode_route_clearance": 0.950101, "copper_to_outline": 0.3, "route_to_outline": 0.364499, "copper_to_cutout": None, "active_field_margin": 0.5, "contact_exposure": 0.05, "neck_width": 16.5, "stiffener_end_clearance": 6.0, "concave_fillet_radius": 0.532658, "route_width": 0.0, "tail_width": 0.0, "board_short_side": 41.765841, "board_long_side": 67.919595},
+        "measured": {"route_route_clearance": 0.169721, "pad_trace_clearance": 0.223, "pad_pad_clearance": 0.2, "electrode_electrode_clearance": 1.0, "electrode_route_clearance": 0.984833, "copper_to_outline": 0.3, "route_to_outline": 0.364499, "copper_to_cutout": None, "active_field_margin": 0.5, "contact_exposure": 0.05, "neck_width": 16.5, "stiffener_end_clearance": 6.0, "concave_fillet_radius": 0.532658, "route_width": 0.0, "tail_width": 0.0, "board_short_side": 41.365841, "board_long_side": 67.520543},
     },
 }
 
@@ -215,6 +222,8 @@ class GoldenDefaultBuildTests(unittest.TestCase):
         # The straight channel's default bottom tail is the generic profile's 7.0 mm (the bus's 12 since section 27.7, 7.5
         # from section 20).
         design["tail"]["bottom_length_mm"] = 7.0
+        # ... and its electrodes the 1.4 mm of before (the default fill 0.7 until the user's decision of 2026-11-06).
+        design["matrix"].update(taxel_width_mm=1.4, taxel_height_mm=1.4)
         result = generate_design(design)
         self.assertTrue(result["ok"], result["validation"]["errors"])
         layout = {"format": IDENTITY["layout_format"], "units": "mm", "boards": result["boards"]}

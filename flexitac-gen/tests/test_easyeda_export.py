@@ -80,9 +80,11 @@ SOFT_BASE = {"point_xyz": [0.0, -12.9, -3.0]}
 # construction's version, their boards not (both sides; before: 9628c953..., c573b4ed...).  All four re-pinned by the
 # profile revision 2026-10-29 (the gold-finger thickness order option, listed in README_EASYEDA.txt's order options, and the
 # coverlay-window notes): their build ids change with the profiles' digests, their boards not (before: a12b04c8...,
-# 6d7035e5..., a1e63ad3..., 31569177...).
+# 6d7035e5..., a1e63ad3..., 31569177...).  The default re-pinned by the user's decision of 2026-11-06 (the default fill
+# 0.7 -> 0.5: its electrodes 1.0 mm, a coverlay window per electrode; before: 15c169e4...); the other three keep theirs,
+# built with the electrodes of before (_builds()).
 DIGESTS = {
-    "default": "15c169e4766f340c8d1a8d42d673579ce514c0117f84e2a1b85f3b82468878e5",
+    "default": "ccb42d6fffb7fe8acc62335bbbfed95cc540b39fd5c0307c881cbab363cc11f0",
     "soft finger": "d25579132032ab5fde9f76bde77bac91c7fe7cd26d0edbc472510a85d92bde08",
     "masked triangle": "76152d5f71b4b219fde4721f54e3140dca0d1ed459c924d0c7903d451c978151",
     "straight channel with a cutout": "5a00b531a7a7417598392bc88dd191c917c2f691097ba54b370809f8221674c2",
@@ -105,7 +107,9 @@ def _soft_finger_design() -> dict:
 
     data = F.stl_bytes(F.soft_finger_replica())
     seed = select.nearest_facet(read_stl(data), SOFT_SEED)
-    result = fit.fit_route({"selection": {"ops": [{"op": "grow", "seed_facet": seed}]}, "base": SOFT_BASE, "options": {"shape": "fill"}}, data)
+    # At the fill of its pinned archive (0.7, the default until the user's decision of 2026-11-06).
+    result = fit.fit_route({"selection": {"ops": [{"op": "grow", "seed_facet": seed}]}, "base": SOFT_BASE, "options": {"shape": "fill", "fill": 0.7}},
+                           data)
     return result["proposals"][0]["design"]
 
 
@@ -116,11 +120,14 @@ def _builds() -> dict:
     """Each case's result, Direct Gerber archives, EasyEDA archive and its projects (built once)."""
 
     if not _BUILDS:
+        # The cases but the default with the electrodes of their pinned archives (1.4 mm at 2 mm, the default until the
+        # user's decision of 2026-11-06): the masked triangle's polygon field window is the merged window of those.
+        before = {"taxel_width_mm": 1.4, "taxel_height_mm": 1.4}
         cases = {
             "default": default_design(),
             "soft finger": _soft_finger_design(),
-            "masked triangle": _request(10, 10, TRIANGLE),
-            "straight channel with a cutout": straight_channel({"columns": 32}),
+            "masked triangle": _request(10, 10, TRIANGLE, before),
+            "straight channel with a cutout": straight_channel({"matrix": {"columns": 32, **before}}),
         }
         for name, design in cases.items():
             result = generate_design(design)

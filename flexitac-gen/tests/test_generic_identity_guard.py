@@ -103,6 +103,18 @@ boards (layout digests) and validation reports are checked below to have
 held.  ``tests/fixtures/generic_channel_exports.json`` was rewritten in its
 ``ORDER_NOTES.txt`` and ``profile.json`` digests only (the two order notes
 and the profile they quote); every other member kept its bytes.
+
+It was rewritten by the user's decision of 2026-11-06 ("默认的pitch/trace大小,
+现在都是0.7,直接都改成0.5": the default fill, electrode width / pitch, 0.7 ->
+0.5, so the default electrodes 1.4 -> 1.0 mm at the 2 mm pitch).  The 6
+requests that leave an electrode width to the default (``default_design()``
+itself, now naming 1.0 mm, the empty request and four partial ones) changed
+their designs, build ids and manifests, the 5 built ones their layout digests
+and the one refused (its 1.9 mm Column electrode) nothing else; their
+verdicts, error codes and validation reports held.  The 194 others kept their
+records byte for byte.  ``ChannelIdentityTests`` builds the records of before
+with the default electrodes of before (tests/defaults_of_before.py: 1.4 mm), so
+the straight channel stays byte for byte the generic geometry of before.
 """
 
 from __future__ import annotations
@@ -116,6 +128,11 @@ from pathlib import Path
 from typing import Any
 
 from engine import check_design, default_design, generate_design
+
+try:
+    import defaults_of_before
+except ImportError:  # run as a package
+    from tests import defaults_of_before
 
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "generic_builds.json"
 # The records before section 18 (the straight Row channel everywhere) and the masked export members of 8a4b2f1.
@@ -245,7 +262,9 @@ def write_fixture() -> None:
     entries = [{"request": request, "expected": record(generate_design(request))} for request in requests()]
     document = {
         "format": "tactile-fpc-generic-guard/v1",
-        "written_from": "engine of the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window "
+        "written_from": "engine of the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: the default electrodes 1.4 -> 1.0 "
+                        "mm, in the requests that leave them to the default), 2026-11-06; before it, the profile revision 2026-10-29 "
+                        "(the gold-finger thickness order option and the coverlay-window "
                         "notes, in every build id), 2026-10-29; before it, P5-diagonal-bus.md section 27.8's (diagonal-bus/11: one side's "
                         "convex flank, in the generic bus's build ids and layouts), 2026-10-28, section 27.7's (the rectangular mode's default tails 12 / 12 "
                         "mm), section 27's (diagonal-bus/10: the Row tail centred on the field, in the "
@@ -343,17 +362,20 @@ class ChannelIdentityTests(unittest.TestCase):
 
     def test_every_request_of_before_keeps_its_boards_and_report_on_the_channel(self) -> None:
         fixture = json.loads(CHANNEL_FIXTURE.read_text(encoding="utf-8"))
-        # The same requests but the first, default_design(), which now names its Row traces (routing.row_sides both) and
-        # its 12 mm bottom tail (section 27.7; their rule set's 7.5 mm from section 20).
+        # The same requests but the first, default_design(), which now names its Row traces (routing.row_sides both), its
+        # 12 mm bottom tail (section 27.7; their rule set's 7.5 mm from section 20) and its 1.0 mm electrodes (the user's
+        # decision of 2026-11-06, the default fill 0.5).
         guarded = requests(fixture["seed"], fixture["random_count"])
         self.assertEqual([entry["request"] for entry in fixture["entries"]][1:], guarded[1:])
         first = json.loads(json.dumps(guarded[0]))
         self.assertEqual(first["routing"].pop("row_sides"), "both")
         self.assertEqual(first["tail"]["bottom_length_mm"], 12.0)
         first["tail"]["bottom_length_mm"] = 7.0
+        self.assertEqual((first["matrix"]["taxel_width_mm"], first["matrix"]["taxel_height_mm"]), (1.0, 1.0))
+        first["matrix"].update(taxel_width_mm=1.4, taxel_height_mm=1.4)
         self.assertEqual(fixture["entries"][0]["request"], first)
         for index, entry in enumerate(fixture["entries"]):
-            with self.subTest(index=index, build_id=entry["expected"]["build_id"]):
+            with self.subTest(index=index, build_id=entry["expected"]["build_id"]), defaults_of_before.electrodes():
                 found = record(generate_design(_channel(entry["request"])))
                 for key in ("ok", "error_codes", "layout_sha256", "validation_sha256"):
                     self.assertEqual(found[key], entry["expected"][key], key)
@@ -370,7 +392,7 @@ class ChannelIdentityTests(unittest.TestCase):
         fixture = json.loads(CHANNEL_EXPORTS.read_text(encoding="utf-8"))
         self.assertEqual(len(fixture["entries"]), 8)
         for entry in fixture["entries"]:
-            with self.subTest(request=entry["request"]):
+            with self.subTest(request=entry["request"]), defaults_of_before.electrodes():
                 result = generate_design(_channel(entry["request"]))
                 expected = entry["expected"]
                 self.assertEqual(result["ok"], expected["ok"])

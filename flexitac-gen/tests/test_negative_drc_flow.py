@@ -29,8 +29,16 @@ from exporters import ExportError, build_exports
 
 try:
     from geometry_checks import straight_channel
+    import defaults_of_before
 except ImportError:  # run as a package
     from tests.geometry_checks import straight_channel
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
 
 
 def generate_design(design=None, *args, **kwargs):

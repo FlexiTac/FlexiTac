@@ -38,6 +38,16 @@ thickness ordered in total and the coverlay windows against JLC's general
 20 mm for one opening: two sources, a coverlay and an order value, the file
 hash re-pinned): all entries changed their build ids and manifests; every
 verdict, error code, board (layout digest) and validation report held.
+
+It was rewritten by the user's decision of 2026-11-06 ("默认的pitch/trace大小,
+现在都是0.7,直接都改成0.5": the default fill, electrode width / pitch, 0.7 ->
+0.5, so the default electrodes 1.4 -> 1.0 mm at the 2 mm pitch).  The 10
+requests that leave the electrode widths to the default (the probe's four
+partial ones, this guard's two partial ones, its three rejected ones and its
+oversize one) changed their designs, build ids and manifests, the 6 built ones
+their layout digests and the oversize one its validation report (E_BOARD_SIZE quotes the outline's
+size); every verdict and error code held.  The 82 others kept their records
+byte for byte.
 """
 
 from __future__ import annotations
@@ -126,7 +136,9 @@ def write_fixture() -> None:
     entries = [{"request": request, "expected": record(generate_design(request))} for request in requests()]
     document = {
         "format": "tactile-fpc-surface-guard/v1",
-        "written_from": "engine of the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window "
+        "written_from": "engine of the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: the default electrodes 1.4 -> 1.0 "
+                        "mm, in the requests that leave them to the default), 2026-11-06; before it, the profile revision 2026-10-29 "
+                        "(the gold-finger thickness order option and the coverlay-window "
                         "notes, in every build id), 2026-10-29; before it, P5-diagonal-bus.md section 23's (the surface profile's tails "
                         "to 200 mm), 2026-10-25, and before that the "
                         "working tree of 2026-10-21 (858064a plus the uncommitted CAD-mode work), before the masked field",

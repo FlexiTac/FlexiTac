@@ -14,14 +14,37 @@ The output:
     index.html                 web/index.html, with a Content-Security-Policy meta and the browser-backend flag, and the
                                FlexiTac repository's star and fork counts from GitHub's API (none with --no-github or
                                when it does not answer; the page refreshes them, web/backend.js)
+    library.html               web/library.html (the Library, 2026-11-05), with the same head tags and counts (it loads
+                               no backend.js: its counts are the build's)
     .nojekyll                  GitHub Pages serves the files as they are
     static/                    web/ (the page's scripts, styles and vendored files), as app.py serves it
-    static/py/engine.zip       app.py, engine/, exporters/, surface/, profiles/ and bridge.py (byte-reproducible)
+    static/library/files/      each Library sensor's Top and Bottom FPC Gerber ZIPs, app.answer's exports of its design
+    static/library/files.json  their names, sizes, SHA-256s and build ids (library.html links them)
+    static/library/shots/      the sensors' pictures (web/library/shots/, tools/browser/library_shots.py), with web/
+    static/library/art/, scenes/, bodies/
+                               each sensor's 3D view: its boards' art, the grippers' scenes and their bodies (web/library/,
+                               docs/LIBRARY_VIEW.md), with web/
+    static/py/engine.zip      app.py, engine/, exporters/, surface/, profiles/ and bridge.py (byte-reproducible)
     static/py/pyodide/         the Pyodide core files the worker loads, from the pinned release
     static/py/BUILD.json       versions and SHA-256s of the above
 
 Every URL in the page is relative, so the site works under any path (https://<org>.github.io/<repo>/).  An
 existing output folder is replaced only when an earlier build wrote it (it holds BUILD_MARKER).
+
+The Library's gate: every sensor of web/library/entries.json is fitted again (surface.api.fit of its fit's request)
+and must give the committed reply with the entry's build id, and that request must still be the one the page sends
+(library_write.compose of parts.json and index.html's defaults: else Gen by Surface would fit it again in place of
+the shipped fit, while the Library offered the old build's ZIPs), else the build fails ("the library is stale: run
+tools/library_write.py") and nothing is published; then its two Gerber ZIPs are built (the gate with its 84 ZIPs about
+11 s for the 42 sensors with --jobs 8, in parallel processes; about 40 s in one).  The ZIPs are deterministic: an
+unchanged library rebuilds the same bytes.  Its pictures (shots/manifest.json, library_write.pictures) are checked
+first: a picture of another fit (the wrong sensor pictured), a broken file or an "image" in entries.json that is not
+its shot's fails the build too; a picture of older figure sources is published with a warning (re-shoot it with
+tools/browser/library_shots.py: this build runs no browser).  So are each sensor's 3D view (the user's request of
+2026-11-05, docs/LIBRARY_VIEW.md): an art or a gripper's stage that is not the sensor's own, a "view" in entries.json
+that is not the one the manifest gives, or a gripper's scene that library_write.scenes refuses fails the build; a
+picture with no 3D view yet (before the shoot that writes every sensor's art) is published with a warning, its page
+showing the picture only.
 """
 from __future__ import annotations
 
@@ -30,20 +53,26 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import tarfile
 import tempfile
 import urllib.request
 import zipfile
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 import app  # noqa: E402
-from engine import GENERATOR_VERSION  # noqa: E402
+from engine import GENERATOR_VERSION, BuildCache  # noqa: E402
 
 WEB = ROOT / "web"
+# The two pages: the generator and the Library (2026-11-05); every other file of web/ is copied under static/.
+PAGES = ("index.html", "library.html")
+LIBRARY_FILES_FORMAT = "flexitac-library-files/v1"
+LIBRARY_KINDS = ("top-gerber", "bottom-gerber")
 PYODIDE_VERSION = "0.27.8"
 PYODIDE_URL = f"https://github.com/pyodide/pyodide/releases/download/{PYODIDE_VERSION}/pyodide-core-{PYODIDE_VERSION}.tar.bz2"
 PYODIDE_SHA256 = "b7ed9d0eb44499578403d9c67935510f76c4534de3cac2fef03da4ac274ac294"
@@ -123,19 +152,156 @@ def github_counts(timeout: float = 15) -> dict | None:
     return app.github_counts(timeout, token=os.environ.get("GITHUB_TOKEN"))
 
 
-def page(counts: dict | None = None) -> str:
-    """web/index.html with the site's head tags and, given, the repository's counts in the header's GitHub card."""
+def page(counts: dict | None = None, name: str = "index.html") -> str:
+    """A page of web/ (index.html, or library.html) with the site's head tags and, given, the repository's counts in the
+    header's GitHub card (the two pages share the header)."""
 
-    text = (WEB / "index.html").read_text(encoding="utf-8")
+    text = (WEB / name).read_text(encoding="utf-8")
     if text.count(HEAD_ANCHOR) != 1:
-        raise BuildError("web/index.html: the charset meta tag the site's head tags follow was not found once")
+        raise BuildError(f"web/{name}: the charset meta tag the site's head tags follow was not found once")
     text = text.replace(HEAD_ANCHOR, HEAD_ANCHOR + HEAD_TAGS, 1)
     if counts:
         try:
             text = app.fill_github_counts(text, counts)
         except ValueError as error:
-            raise BuildError(f"web/index.html: {error}") from None
+            raise BuildError(f"web/{name}: {error}") from None
     return text
+
+
+def copy_web(static: Path) -> None:
+    """web/ under static/ as app.py serves it: not the pages (the site's own, with its head tags), no Python."""
+
+    shutil.copytree(WEB, static, ignore=shutil.ignore_patterns(*PAGES, "*.py", "__pycache__"))
+
+
+def _library_write():
+    """tools/library_write.py (the request the page sends, the fit), imported from beside this file."""
+
+    if str(ROOT / "tools") not in sys.path:
+        sys.path.insert(0, str(ROOT / "tools"))
+    import library_write
+
+    return library_write
+
+
+def _library_job(job: tuple) -> tuple:
+    """One Library sensor: (id, its problem or None, {kind: (name, ZIP bytes)}): fitted again, compared with the
+    committed reply, then its two Gerber ZIPs exported by app.answer (a worker process's job)."""
+
+    identifier, variant, fit_path, mesh_path, mesh_sha256, sent = job
+    library_write = _library_write()
+    stale = f"the library is stale ({identifier}): run tools/library_write.py"
+    data = Path(fit_path).read_bytes()
+    mesh = Path(mesh_path).read_bytes()
+    if hashlib.sha256(data).hexdigest() != variant["fit_sha256"]:
+        return identifier, f"{stale} (its fit is not the one entries.json names)", {}
+    document = json.loads(data.decode("utf-8"))
+    if hashlib.sha256(mesh).hexdigest() != mesh_sha256 or document.get("mesh_sha256") != mesh_sha256:
+        return identifier, f"{stale} (its mesh is not the one its fit was made of)", {}
+    # The request the page sends now (``sent``, canonical): a fit of another request is not the page's shipped fit
+    # (the review of 2026-11-05: a changed page default passed the gate while library_write --check flagged it).
+    if library_write.canonical(document["request"]) != sent:
+        return identifier, f"{stale} (its request is not the one the page sends)", {}
+    reply = library_write.fit(document["request"], mesh)
+    proposals = document["reply"].get("proposals") or []
+    if reply != document["reply"] or not proposals or proposals[0]["build_id"] != variant["build_id"]:
+        return identifier, stale, {}
+    design = json.dumps(proposals[0]["design"], ensure_ascii=True, allow_nan=False).encode("ascii")
+    cache = BuildCache(2)  # the two exports of one build
+    files = {}
+    for kind in LIBRARY_KINDS:
+        answer = app.answer("POST", f"/api/export/{kind}", "application/json", design, cache=cache)
+        headers = dict(answer.headers)
+        name = re.fullmatch(r'attachment; filename="([^"/\\]+)"', headers.get("Content-Disposition", ""))
+        if answer.status != 200 or headers.get("X-Build-Id") != variant["build_id"] or not name:
+            return identifier, f"{identifier}: the {kind} export answered {answer.status} for build {headers.get('X-Build-Id')}, not {variant['build_id']}", {}
+        files[kind] = (name.group(1), answer.body)
+    return identifier, None, files
+
+
+def library(static: Path, source: Path = WEB / "library", only=None, jobs: int = 1, index: Path = WEB / "index.html") -> dict:
+    """The Library's gate and downloads: every sensor of ``source``/entries.json (or the ids ``only``) fitted again,
+    its reply the committed one and its request the one the page (``index``) sends (else BuildError, the library is
+    stale), and its Top and Bottom FPC Gerber ZIPs written to ``static``/library/files/<id>/<the exporter's name> with
+    files.json; returns BUILD.json's record of it."""
+
+    library_write = _library_write()
+    entries = json.loads((source / "entries.json").read_text(encoding="utf-8"))
+    chosen = list(entries["variants"]) if only is None else list(only)
+    unknown = [identifier for identifier in chosen if identifier not in entries["variants"]]
+    if unknown:
+        raise BuildError(f"the library has no sensor named {', '.join(unknown)}")
+    # Each sensor's request as the page sends it now: parts.json's setup and variant over index.html's defaults.
+    options = library_write.page_options(index.read_text(encoding="utf-8"))
+    parts = json.loads((source / "parts.json").read_text(encoding="utf-8"))
+    try:
+        sent = {identifier: library_write.canonical(library_write.compose(part, variant, options))
+                for identifier, _, part, variant in library_write.plan(parts)}
+    except library_write.LibraryError as error:
+        # A setup the page would send otherwise (compose refuses it): the writer says the same.
+        raise BuildError(f"the library is stale ({error}): run tools/library_write.py") from error
+    missing = [identifier for identifier in chosen if identifier not in sent]
+    if missing:
+        raise BuildError(f"the library is stale ({', '.join(missing)}: not in parts.json): run tools/library_write.py")
+    # The pictures (shots/, tools/browser/library_shots.py; the user's request of 2026-11-05: the cards show the sensor
+    # on its part): none of another fit (the wrong sensor pictured) or broken, each sensor's "image" the one its shot
+    # gives (null without one), else the build fails; a shot of older figure sources is published with a warning only
+    # (this build runs no browser to shoot it again).  copy_web publishes shots/ with the rest of web/.
+    images, unpictured, older, views = library_write.pictures(entries["variants"], source)
+    unpictured = [problem for identifier, problem in unpictured if identifier is None or identifier in chosen]
+    if unpictured:
+        raise BuildError(f"the library's pictures are stale ({'; '.join(unpictured)})")
+    # The grippers' scenes the 3D view draws (scenes/, bodies/; library_write.scenes, the user's request of 2026-11-05):
+    # those of the chosen sensors' parts, and the index's own, else the build fails (copy_web publishes them).
+    shown = {entries["variants"][identifier]["part"] for identifier in chosen}
+    _, unscened = library_write.scenes(parts, source)
+    unscened = [problem for part, problem in unscened if part is None or part in shown]
+    if unscened:
+        raise BuildError(f"the library's scenes are stale ({'; '.join(unscened)})")
+    unwritten = [identifier for identifier in chosen if entries["variants"][identifier].get("image") != images[identifier]]
+    if unwritten:
+        raise BuildError(f"the library is stale ({', '.join(unwritten)}: its image is not the one {library_write.SHOTS_MANIFEST} "
+                         "gives): run tools/library_write.py")
+    unwritten = [identifier for identifier in chosen if entries["variants"][identifier].get("view") != views[identifier]]
+    if unwritten:
+        raise BuildError(f"the library is stale ({', '.join(unwritten)}: its 3D view is not the one {library_write.SHOTS_MANIFEST} "
+                         "gives): run tools/library_write.py")
+    older = [identifier for identifier in older if identifier in chosen]
+    if older:
+        print(f"build_static_site: warning: {library_write.older_note(older)}", file=sys.stderr, flush=True)
+    unviewed = [identifier for identifier in chosen if images[identifier] is not None and views[identifier] is None]
+    if unviewed:
+        print(f"build_static_site: warning: {library_write.view_note(unviewed)}", file=sys.stderr, flush=True)
+    work = []
+    for identifier in chosen:
+        variant = entries["variants"][identifier]
+        mesh = entries["parts"][variant["part"]]["mesh"]
+        work.append((identifier, variant, str(source / variant["fit"]), str(source / mesh["file"]), mesh["sha256"], sent[identifier]))
+    if jobs > 1 and len(work) > 1:
+        with ProcessPoolExecutor(max_workers=jobs) as pool:
+            results = list(pool.map(_library_job, work))
+    else:
+        results = [_library_job(job) for job in work]
+    problems = [problem for _, problem, _ in results if problem]
+    if problems:
+        raise BuildError("; ".join(problems))
+    folder = static / "library"
+    records = {}
+    for identifier, _, files in results:
+        record = {"build_id": entries["variants"][identifier]["build_id"]}
+        for kind, (name, data) in files.items():
+            path = f"files/{identifier}/{name}"
+            (folder / path).parent.mkdir(parents=True, exist_ok=True)
+            (folder / path).write_bytes(data)
+            record[kind] = {"path": path, "name": name, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+        records[identifier] = record
+    document = {"format": LIBRARY_FILES_FORMAT, "generator_version": GENERATOR_VERSION, "variants": records}
+    text = json.dumps(document, indent=1, sort_keys=True, ensure_ascii=True) + "\n"
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "files.json").write_text(text, encoding="utf-8")
+    return {"variants": len(records), "files_json_sha256": hashlib.sha256(text.encode("ascii")).hexdigest(),
+            "pictured": len([identifier for identifier in chosen if images[identifier]]),
+            "viewed": len([identifier for identifier in chosen if views[identifier]])}
 
 
 def prepare(out: Path) -> None:
@@ -149,16 +315,18 @@ def prepare(out: Path) -> None:
     out.mkdir(parents=True, exist_ok=True)
 
 
-def build(out: Path, archive: Path | None = None, github: bool = True) -> dict:
+def build(out: Path, archive: Path | None = None, github: bool = True, jobs: int = 1) -> dict:
     pyodide = pyodide_files(pyodide_archive(archive))
     engine = engine_zip()
     counts = github_counts() if github else None
     prepare(out)
     (out / BUILD_MARKER).write_text("Written by tools/build_static_site.py; the next build replaces this folder.\n", encoding="utf-8")
     (out / ".nojekyll").write_bytes(b"")
-    (out / "index.html").write_text(page(counts), encoding="utf-8")
+    for name in PAGES:
+        (out / name).write_text(page(counts, name), encoding="utf-8")
     static = out / "static"
-    shutil.copytree(WEB, static, ignore=shutil.ignore_patterns("index.html", "*.py", "__pycache__"))
+    copy_web(static)
+    shelf = library(static, jobs=jobs)
     (static / "py" / "engine.zip").write_bytes(engine)
     folder = static / "py" / "pyodide"
     folder.mkdir()
@@ -169,6 +337,9 @@ def build(out: Path, archive: Path | None = None, github: bool = True) -> dict:
         "engine_zip_sha256": hashlib.sha256(engine).hexdigest(),
         # The header's counts as built (the page refreshes them); null when GitHub's API did not answer.
         "github": counts,
+        # The Library's sensors, each fitted again and its Gerber ZIPs built (static/library/files.json), how many
+        # pictured and how many with a 3D view (entries.json's image and view).
+        "library": shelf,
         "pyodide": {"version": PYODIDE_VERSION, "archive": PYODIDE_URL, "archive_sha256": PYODIDE_SHA256,
                     "files": {name: hashlib.sha256(data).hexdigest() for name, data in pyodide.items()}},
     }
@@ -186,9 +357,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--no-github", action="store_true", help="leave the header's star and fork counts to the page (no request to GitHub's API)")
     parser.add_argument("--pyodide-archive", type=Path, default=None,
                         help=f"a local pyodide-core-{PYODIDE_VERSION}.tar.bz2 (default: download it); checked by its SHA-256 either way")
+    parser.add_argument("--jobs", type=int, default=max(1, min(8, os.cpu_count() or 1)), help="the Library's fits in parallel processes")
     args = parser.parse_args(argv)
     try:
-        record = build(args.out.resolve(), args.pyodide_archive, github=not args.no_github)
+        record = build(args.out.resolve(), args.pyodide_archive, github=not args.no_github, jobs=args.jobs)
     except (BuildError, OSError) as error:
         print(f"build_static_site: {error}", file=sys.stderr)
         return 1
@@ -196,7 +368,9 @@ def main(argv: list[str] | None = None) -> int:
     counts = record["github"]
     github = f"{counts['stars']} stars, {counts['forks']} forks" if counts else "counts left to the page"
     print(f"built {args.out} ({size / 1048576:.1f} MiB): generator {record['generator_version']}, "
-          f"Pyodide {PYODIDE_VERSION}, engine.zip {record['engine_zip_sha256'][:12]}, GitHub {github}")
+          f"Pyodide {PYODIDE_VERSION}, engine.zip {record['engine_zip_sha256'][:12]}, GitHub {github}, "
+          f"the Library's {record['library']['variants']} sensors current, {record['library']['pictured']} pictured, "
+          f"{record['library']['viewed']} with a 3D view")
     return 0
 
 

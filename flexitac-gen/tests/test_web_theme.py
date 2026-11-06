@@ -17,8 +17,16 @@
 - Colour: the palette's text pairs reach WCAG's 4.5:1 and its control edges and focus ring 3:1, light and dark, with
   more contrast too, computed from the hex values; the drawing areas (lightboxes) take the light palette in every
   scheme; the 3D view's background is viewer.js's clear colour.
+- Light by default, dark on the header's toggle (the user's request of 2026-11-06): no style sheet or script of web/
+  follows the system's prefers-color-scheme; every dark rule hangs on <html data-theme="dark"> through a zero-
+  specificity :where() (so each outranks what it did under the system's dark scheme), every selector of its list;
+  web/theme.js sets the attribute, loaded by both pages in <head> before their style sheets, without defer (no flash
+  of the light page), its choice in localStorage behind try/catch; the toggle the same button on both pages, first in
+  the header's right before the community links, its marks filled shapes swapped by the attribute in styles.css.
 - web/'s JavaScript has no IntersectionObserver or scroll timeline, and every smooth scroll is guarded by
   prefers-reduced-motion.
+- The sensor on the part (2026-11-05): its 3D view draws on demand over its lightbox (transparent, no clear colour of
+  its own, no frame loop), and the stacked card splits in Gen by Surface only.
 
 The page itself is checked in a browser by tools/browser/theme_checks.py.
 """
@@ -34,7 +42,13 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
 THEME = WEB / "theme.css"
 STYLES = WEB / "styles.css"
-LIGHTBOXES = (".cad-view-wrap", ".canvas-wrap", ".stacked-canvas", ".cad-flat")
+# The dark look's hooks (2026-11-06): :root's own rules, and the prefix of every other dark selector; :where() adds no
+# specificity, so each rule outranks what it did under @media (prefers-color-scheme: dark).
+DARK_ROOT = ':root:where([data-theme="dark"])'
+DARK = ':where(:root[data-theme="dark"]) '
+# The drawings' areas, and the figures' controls over them (2026-11-06: in their frames, the stacked card's outside its
+# .stacked-canvas), in the light palette in every scheme.
+LIGHTBOXES = (".cad-view-wrap", ".canvas-wrap", ".stacked-canvas", ".cad-flat", ".figure-tools", ".figure-reset")
 
 
 # --- a small CSS reader: rules with their selectors, declarations and enclosing at-rules ------------------------------
@@ -47,6 +61,18 @@ class Rule:
 
     def __repr__(self):
         return "Rule(%r, %r)" % (", ".join(self.selectors), self.conditions)
+
+
+def _js_body(source, name):
+    """The body of ``function name(`` in a script, between its braces (no braces in its strings)."""
+    match = re.search(r"function %s\(([^)]*)\)\s*\{" % re.escape(name), source)
+    if not match:
+        raise AssertionError("function %s not found" % name)
+    depth, index = 1, match.end()
+    while depth:
+        depth += {"{": 1, "}": -1}.get(source[index], 0)
+        index += 1
+    return source[match.end():index - 1]
 
 
 def _strip_comments(text):
@@ -204,6 +230,8 @@ def contrast(first, second):
 def _holds(condition, media):
     """Whether an at-rule prelude holds for ``media`` (a dict of media features; a wide desktop window)."""
     kind, _, query = condition.partition(" ")
+    if "prefers-color-scheme" in query:
+        raise AssertionError("the look no longer follows the system's scheme: %s" % condition)
     if kind == "@supports":
         return not query.strip().startswith("not")  # the browsers of the checks support what the theme asks for
     if kind != "@media":
@@ -218,10 +246,12 @@ def _holds(condition, media):
 
 
 def palette(rules, media, target=":root"):
-    """The custom properties ``target`` gets for ``media``, in source order (later rules win), var() resolved."""
+    """The custom properties ``target`` gets for ``media`` (and its "theme", the toggle's: "dark" or none), in source
+    order (later rules win), var() resolved."""
     tokens = {}
+    targets = {target} | ({DARK_ROOT} if target == ":root" and media.get("theme") == "dark" else set())
     for rule in rules:
-        if target in rule.selectors and all(_holds(condition, media) for condition in rule.conditions):
+        if targets & set(rule.selectors) and all(_holds(condition, media) for condition in rule.conditions):
             tokens.update({name: value for name, value, _ in rule.declarations if name.startswith("--")})
 
     def resolve(value, seen=()):
@@ -237,10 +267,10 @@ def palette(rules, media, target=":root"):
 
 
 MEDIA = {
-    "light": {"prefers-color-scheme": "light"},
-    "dark": {"prefers-color-scheme": "dark"},
-    "light, more contrast": {"prefers-color-scheme": "light", "prefers-contrast": "more"},
-    "dark, more contrast": {"prefers-color-scheme": "dark", "prefers-contrast": "more"},
+    "light": {},
+    "dark": {"theme": "dark"},
+    "light, more contrast": {"prefers-contrast": "more"},
+    "dark, more contrast": {"theme": "dark", "prefers-contrast": "more"},
 }
 
 # Text and what it sits on (WCAG 1.4.3, 4.5:1).  A translucent fill is taken over the surface it lies on: a tuple, the
@@ -442,7 +472,7 @@ class ThemeFileTests(unittest.TestCase):
                  for selector in rule.selectors if ".is-stale" in selector}
         self.assertIn((".workbench.is-stale .canvas-wrap", "filter"), fades, "styles.css's stale fade as the theme knows it")
         for selector, name, value in self._declared(lambda name: name in flattening):
-            if (selector, name) in fades and (name != "opacity" or value == "1"):
+            if (selector.replace(DARK, "", 1), name) in fades and (name != "opacity" or value == "1"):
                 continue
             last = subject(selector)
             self.assertFalse(any(_has_class(last, item) for item in chain) or ".assembly-" in last
@@ -505,7 +535,8 @@ class ThemeFileTests(unittest.TestCase):
                     self.assertEqual(palette(self.rules, MEDIA[dark_media], box)["--surface"], "#fff")
         schemes = {(rule.selectors, rule.conditions): value for rule in self.rules for name, value, _ in rule.declarations if name == "color-scheme"}
         self.assertEqual(schemes.get(((":root",) + LIGHTBOXES, ())), "light")
-        self.assertEqual(schemes.get(((":root",), ("@media (prefers-color-scheme: dark)",))), "dark")
+        self.assertEqual(schemes.get(((DARK_ROOT,), ())), "dark")
+        self.assertEqual(dark["--surface"], "#1c1c1e", "the dark palette is the toggle's")
         # Every token the theme uses is defined (by its palette or by styles.css).
         defined = set(light) | {name for rule in self.rules + self.styles_rules for name, _, _ in rule.declarations if name.startswith("--")}
         used = set(re.findall(r"var\((--[\w-]+)", self.source))
@@ -518,6 +549,65 @@ class ThemeFileTests(unittest.TestCase):
         backgrounds = [value for selector, name, value in self._declared(lambda name: name in ("background", "background-color"))
                        if selector == ".cad-view"]
         self.assertEqual(backgrounds, ["#" + clear[0]])
+
+    def test_the_on_part_view_is_drawn_over_the_lightbox(self):
+        # The sensor on the part (web/cad/onpart.js; 2026-11-05): a transparent renderer over its pane's light gradient
+        # (.stacked-canvas), so viewer.js keeps the page's one clear colour, and drawn on demand only (a frame loop would
+        # run under SwiftShader through every browser check).
+        onpart = (WEB / "cad" / "onpart.js").read_text(encoding="utf-8")
+        self.assertNotIn("scene.background", onpart)
+        self.assertIn("new THREE.WebGLRenderer({antialias: true, alpha: true})", onpart)
+        self.assertIn("renderer.setClearColor(0x000000, 0);", onpart)
+        # On demand: one requestAnimationFrame, in requestRender, whose callback renders and requests nothing; render()
+        # requests no frame nor timer (a loop, however written, needs one of these; the review of 2026-11-05: the
+        # check had rejected two spellings of one).
+        for word in ("setAnimationLoop", "setInterval", "setTimeout"):
+            self.assertNotIn(word, onpart, word)
+        self.assertEqual(onpart.count("requestAnimationFrame("), 1)
+        request = _js_body(onpart, "requestRender")
+        callback = request[request.index("requestAnimationFrame("):]
+        self.assertNotIn("requestRender", callback)
+        render = _js_body(onpart, "render")
+        for word in ("requestRender", "requestAnimationFrame"):
+            self.assertNotIn(word, render, word)
+
+    def test_the_split_is_gen_by_surface_only(self):
+        # Rectangular mode shows the stacked card as before: its second figure hidden, and the container that splits the
+        # card declared in Gen by Surface only.
+        hidden = [rule for rule in self.styles_rules if rule.selectors == (".stack-figure.is-on-part",) and not rule.conditions]
+        self.assertEqual([rule.declarations for rule in hidden], [[("display", "none", False)]])
+        containers = [(selector, value) for rule in self.styles_rules for name, value, _ in rule.declarations
+                      if name in ("container", "container-type", "container-name") for selector in rule.selectors
+                      if "stacked-review" in selector or "stack-card" in value]
+        self.assertEqual(containers, [('body[data-mode="cad"] .stacked-review', "stack-card / inline-size")])
+        shown = [rule for rule in self.styles_rules if any("is-on-part" in selector for selector in rule.selectors)
+                 and any(name == "display" and value != "none" for name, value, _ in rule.declarations)]
+        self.assertTrue(shown)
+        for rule in shown:
+            for selector in rule.selectors:
+                self.assertTrue(selector.startswith('body[data-mode="cad"] '), selector)
+        # A rule of the figures under an at-rule is the split's: the container query (the 480 px pane's plan view nests it
+        # in the window's media query, the review of 2026-11-05).
+        self.assertTrue(all(any("stack-card" in condition for condition in rule.conditions) for rule in self.styles_rules
+                            if rule.conditions and any(".stack-figure" in selector for selector in rule.selectors)))
+
+    def test_the_split_sizes_the_registration_s_plan_view_as_the_whole_card(self):
+        # The user's request of 2026-11-06 ("“Exploded 3D registration review…” 小字去掉"): the registration has no caption,
+        # so the split keeps nothing that only kept its pin-1 rings off one (the review of 2026-11-05: the caption's right
+        # margin, the plan view's 30 px at the pane's foot and its 400 px scene in the 480 px pane).  The plan view's scene
+        # is the window's rules' alone, centred in its pane as in the whole card, scaled by --plan-fit (1 unless app.js
+        # clearPlanOfControls shrinks it off the frame's controls, 2026-11-06).
+        split = [rule for rule in self.styles_rules if any("stack-card" in condition for condition in rule.conditions)]
+        self.assertEqual(sorted(selector for rule in split for selector in rule.selectors),
+                         ['.stack-figure', '.stack-figures', 'body[data-mode="cad"] .stack-figure.is-on-part'])
+        self.assertTrue(all(len(rule.conditions) == 1 for rule in split), split)
+        for rules in (self.styles_rules, self.rules):
+            self.assertEqual([rule for rule in rules if any("assembly-caption" in selector for selector in rule.selectors)], [])
+            self.assertEqual([(selector, name) for selector, name, _ in self._declared(lambda name: name.startswith("padding"), rules)
+                              if "stacked-canvas" in selector], [])
+        scenes = [(rule.conditions, rule.declarations) for rule in self.styles_rules if ".stacked-canvas.is-plan .assembly-scene" in rule.selectors]
+        self.assertEqual(scenes, [((), [("width", "calc(min(80%,680px,calc(470px * var(--assembly-ratio))) * var(--plan-fit,1))", False)]),
+                                  (("@media (max-width:980px)",), [("width", "calc(min(86%,570px,calc(420px * var(--assembly-ratio))) * var(--plan-fit,1))", False)])])
 
     def test_the_page_s_javascript_neither_observes_nor_smooths_the_scroll_unguarded(self):
         scripts = _scripts()
@@ -544,6 +634,162 @@ class ThemeFileTests(unittest.TestCase):
         self.assertGreaterEqual(guarded, 3, "main.js's three guided scrolls were seen")
 
 
+class _Head(HTMLParser):
+    """A page's elements in order: (tag, attributes, whether inside <head>), and each element's parent's tag."""
+
+    def __init__(self):
+        super().__init__()
+        self.elements, self._open, self._head = [], [], False
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "head":
+            self._head = True
+        self.elements.append((tag, dict(attrs), self._head, self._open[-1] if self._open else None))
+        if tag not in ("meta", "link", "input", "br", "img", "path", "circle", "rect"):
+            self._open.append((tag, dict(attrs).get("class")))
+
+    def handle_startendtag(self, tag, attrs):
+        self.elements.append((tag, dict(attrs), self._head, self._open[-1] if self._open else None))
+
+    def handle_endtag(self, tag):
+        if tag == "head":
+            self._head = False
+        while self._open:
+            if self._open.pop()[0] == tag:
+                break
+
+
+class ThemeToggleTests(unittest.TestCase):
+    """Light by default, dark on the header's toggle (the user's request of 2026-11-06); in the browser:
+    tools/browser/theme_checks.py's part_toggle."""
+
+    PAGES = ("index.html", "library.html")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.html = {name: (WEB / name).read_text(encoding="utf-8") for name in cls.PAGES}
+        cls.script = (WEB / "theme.js").read_text(encoding="utf-8")
+        cls.sheets = {name: (WEB / name).read_text(encoding="utf-8") for name in ("styles.css", "theme.css", "library.css")}
+
+    def test_nothing_follows_the_systems_scheme(self):
+        for name, text in self.sheets.items():
+            with self.subTest(sheet=name):
+                rules, at_rules = parse_css(text)
+                self.assertEqual([at for at in at_rules if "prefers-color-scheme" in at], [])
+                self.assertNotIn("prefers-color-scheme", _strip_comments(text))
+        for path in _scripts():
+            with self.subTest(script=path.name):
+                self.assertIsNone(re.search(r"prefers-color-scheme|colorScheme", path.read_text(encoding="utf-8")))
+        # Nor the pages (the review of 2026-11-06): a <meta name="color-scheme" content="light dark"> would paint a light
+        # visitor's first frame dark on a dark system, a media="(prefers-color-scheme: dark)" on a link or a source follow it.
+        for name, html in self.html.items():
+            with self.subTest(page=name):
+                self.assertNotIn("prefers-color-scheme", html)
+                page = _Head()
+                page.feed(html)
+                self.assertEqual([attributes for tag, attributes, _, _ in page.elements
+                                  if tag == "meta" and (attributes.get("name") or "").lower() == "color-scheme"], [])
+                self.assertFalse([attributes for _, attributes, _, _ in page.elements if "color-scheme" in (attributes.get("style") or "")])
+
+    def test_every_dark_rule_hangs_on_the_attribute_without_adding_specificity(self):
+        seen = 0
+        for name, text in self.sheets.items():
+            rules, _ = parse_css(text)
+            for rule in rules:
+                themed = [selector for selector in rule.selectors if "data-theme" in selector]
+                if not themed:
+                    continue
+                seen += 1
+                with self.subTest(sheet=name, rule=", ".join(rule.selectors)[:120]):
+                    # Every selector of the list (a bare one would be dark in light too), each the exact hook.
+                    self.assertEqual(themed, list(rule.selectors))
+                    for selector in rule.selectors:
+                        self.assertTrue(selector == DARK_ROOT or (selector.startswith(DARK) and "data-theme" not in selector[len(DARK):]), selector)
+                    self.assertFalse([condition for condition in rule.conditions if "color-scheme" in condition])
+        # theme.css: the palette, the lightboxes' text and paper, more contrast, less transparency, the border bar's press,
+        # the stale lightboxes; library.css: the cards' edge; styles.css: the toggle's sun.
+        self.assertGreaterEqual(seen, 9)
+        for name, text in self.sheets.items():
+            self.assertEqual(set(re.findall(r'data-theme="?([\w-]*)', _strip_comments(text))) - {"dark"}, set(), name)
+
+    def test_both_pages_load_theme_js_in_the_head_before_their_style_sheets(self):
+        for name in self.PAGES:
+            with self.subTest(page=name):
+                page = _Head()
+                page.feed(self.html[name])
+                head = [(tag, attributes) for tag, attributes, in_head, _ in page.elements if in_head]
+                scripts = [attributes for tag, attributes in head if tag == "script"]
+                self.assertEqual(scripts, [{"src": "static/theme.js"}], "once, in <head>, no defer, async or module")
+                tags = [tag if tag != "link" else attributes.get("rel") for tag, attributes in head]
+                self.assertLess(tags.index("script"), tags.index("stylesheet"), "before the style sheets")
+                self.assertEqual(sum(1 for tag, attributes, _, _ in page.elements if tag == "script" and attributes.get("src") == "static/theme.js"), 1)
+
+    def test_the_toggle_is_the_same_button_on_both_pages_before_the_community_links(self):
+        blocks = []
+        for name in self.PAGES:
+            with self.subTest(page=name):
+                page = _Head()
+                page.feed(self.html[name])
+                found = [(index, attributes, parent) for index, (tag, attributes, _, parent) in enumerate(page.elements)
+                         if attributes.get("id") == "themeToggle"]
+                self.assertEqual(len(found), 1)
+                index, attributes, parent = found[0]
+                self.assertEqual(page.elements[index][0], "button")
+                self.assertEqual({key: attributes.get(key) for key in ("type", "class", "aria-pressed", "aria-label", "title")},
+                                 {"type": "button", "class": "masthead-theme", "aria-pressed": "false", "aria-label": "Dark mode",
+                                  "title": "Turn dark mode on"})
+                self.assertEqual(parent, ("div", "masthead-end"))
+                # Its two marks, hidden from the accessibility tree, filled shapes (no stroke: a stroked one changed how
+                # Chromium rastered the whole page), then the community links right after it in the same box.
+                inside = []
+                for tag, child, _, _ in page.elements[index + 1:]:
+                    if tag == "nav" or child.get("class") == "masthead-link masthead-github":
+                        break
+                    inside.append((tag, child))
+                marks = [child.get("class") for tag, child in inside if tag == "svg"]
+                self.assertEqual(marks, ["theme-moon", "theme-sun"])
+                self.assertTrue(all(child.get("aria-hidden") == "true" and child.get("focusable") == "false" for tag, child in inside if tag == "svg"))
+                self.assertFalse([child for _, child in inside if "stroke" in child or "stroke-width" in child])
+                after = [(tag, child) for tag, child, _, _ in page.elements[index + 1:] if tag == "nav"][0]
+                self.assertEqual(after, ("nav", {"class": "masthead-links", "aria-label": "FlexiTac community"}))
+                start = self.html[name].index('      <div class="masthead-end">')
+                blocks.append(self.html[name][start:self.html[name].index("\n      </div>\n", start)])
+                self.assertIn('<nav class="masthead-links"', blocks[-1])
+        self.assertEqual(blocks[0], blocks[1], "the header's right byte for byte on both pages")
+
+    def test_the_marks_follow_the_attribute_in_styles_css(self):
+        rules, _ = parse_css(self.sheets["styles.css"])
+        shown = {(selector, value) for rule in rules for name, value, _ in rule.declarations if name == "display"
+                 for selector in rule.selectors if "theme-moon" in selector or "theme-sun" in selector}
+        self.assertEqual(shown, {(".masthead-theme .theme-sun", "none"), (DARK + ".masthead-theme .theme-moon", "none"),
+                                 (DARK + ".masthead-theme .theme-sun", "block")})
+        # The toggle's look is the community's pill (theme.css), its ring the page's one.
+        theme, _ = parse_css(self.sheets["theme.css"])
+        looks = {selector: dict((name, value) for name, value, _ in rule.declarations) for rule in theme for selector in rule.selectors
+                 if selector.startswith(".masthead-theme") and not rule.conditions}
+        self.assertEqual(looks[".masthead-theme"]["background"], "var(--fill)")
+        self.assertEqual(looks[".masthead-theme:focus-visible"]["outline"], "2px solid var(--focus)")
+
+    def test_theme_js_keeps_the_choice_light_by_default(self):
+        script = self.script
+        self.assertIn('const THEME_KEY = "fpc-customizer.theme";', script)
+        # Light unless the stored value is "dark"; every storage call guarded (private windows, blocked site data).
+        self.assertIn('window.localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light"', script)
+        calls = [match.start() for match in re.finditer(r"localStorage\.", script)]
+        self.assertEqual(len(calls), 2)
+        for start in calls:
+            before = script[:start]
+            self.assertGreater(before.rfind("try {"), before.rfind("}"), "each storage call inside its own try")
+        self.assertIn("root.dataset.theme = theme;", script)
+        self.assertIn('button.setAttribute("aria-pressed", String(theme === "dark"));', script)
+        self.assertIn('event.target.closest("#themeToggle")', script)
+        # Another tab's flip, and its localStorage.clear() (the storage event's key null: nothing stored, light).
+        self.assertIn("if (event.key === THEME_KEY || event.key === null) show(stored());", script)
+        self.assertNotIn("matchMedia", script)
+        # It runs in <head>: no module syntax, nothing that waits for the page's other scripts.
+        self.assertNotRegex(script, r"^\s*(import|export)\b")
+
+
 class ThemeReaderTests(unittest.TestCase):
     """The small CSS reader and the contrast arithmetic above, on known values."""
 
@@ -563,11 +809,15 @@ class ThemeReaderTests(unittest.TestCase):
         self.assertAlmostEqual(contrast(_colour("#ffffff"), _colour("#0071e3")), 4.70, places=2)
         self.assertEqual(_over(_colour("rgba(0,0,0,.5)"), _colour("#fff"))[:3], (127.5, 127.5, 127.5))
 
-    def test_palette_follows_the_media(self):
-        rules, _ = parse_css(":root { --a:#fff; --b:var(--a) } @media (prefers-color-scheme: dark) { :root { --a:#000 } }"
-                             " @media (max-width:500px) { :root { --a:#f00 } }")
+    def test_palette_follows_the_theme_and_the_media(self):
+        rules, _ = parse_css(':root { --a:#fff; --b:var(--a) } :root:where([data-theme="dark"]) { --a:#000 }'
+                             " @media (prefers-contrast: more) { :root { --b:#eee } } @media (max-width:500px) { :root { --a:#f00 } }")
         self.assertEqual(palette(rules, MEDIA["light"]), {"--a": "#fff", "--b": "#fff"})
         self.assertEqual(palette(rules, MEDIA["dark"]), {"--a": "#000", "--b": "#000"})
+        self.assertEqual(palette(rules, MEDIA["dark, more contrast"]), {"--a": "#000", "--b": "#eee"})
+        self.assertEqual(palette(rules, MEDIA["dark"], ".box"), {})
+        with self.assertRaises(AssertionError):
+            palette(parse_css("@media (prefers-color-scheme: dark) { :root { --a:#000 } }")[0], MEDIA["dark"])
 
 
 if __name__ == "__main__":

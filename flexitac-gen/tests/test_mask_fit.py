@@ -48,10 +48,19 @@ try:
     import surface_fixtures as F
     from test_diagonal_bus import _stray_from_field
     from test_mask_layout import _determinism_problems
+    import defaults_of_before
 except ImportError:  # run as a package
     from tests import surface_fixtures as F
     from tests.test_diagonal_bus import _stray_from_field
     from tests.test_mask_layout import _determinism_problems
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "asset"

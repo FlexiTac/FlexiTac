@@ -61,11 +61,14 @@ DEFAULT_REQUIREMENTS = {
         "those longer)"
     ),
 }
-# The default 12 x 32 board's coverlay windows (each board's line of ORDER_NOTES.txt): the merged electrode field over
-# 32 x 2 mm columns and the gang window of its contacts.
+# The default 12 x 32 board's coverlay windows (each board's line of ORDER_NOTES.txt): a window per electrode (the 1.0 mm
+# electrodes of the default fill 0.5 since the user's decision of 2026-11-06 leave 0.8 mm bridges; the 1.4 mm ones of
+# before, 0.4 mm, so one merged electrode-field window of 64 x 23.6 mm) and the gang window of its contacts.
 DEFAULT_WINDOW_LINES = {
-    "rows": "Coverlay windows: electrode field 64 x 23.6 mm, contacts 5.9 x 4.4 mm; longer than JLC's general 20 mm for "
-            "one opening: the electrode field window (64 mm).",
+    "rows": "Coverlay windows: 12 electrode windows up to 63.6 x 1.2 mm, contacts 5.9 x 4.4 mm; longer than JLC's general "
+            "20 mm for one opening: 12 electrode windows (up to 63.6 mm).",
+    "columns": "Coverlay windows: 32 electrode windows up to 1.2 x 23.6 mm, contacts 15.9 x 4.4 mm; longer than JLC's "
+               "general 20 mm for one opening: 32 electrode windows (up to 23.6 mm).",
 }
 
 
@@ -489,8 +492,9 @@ class CoverlayWindowNoteTests(unittest.TestCase):
         line = re.search(r"Coverlay windows: (.*?(?:opening|mm\)))\.", _flat(notes)).group(1)
         return board, line
 
-    def test_the_default_boards_name_their_windows_and_the_long_field_window(self) -> None:
-        result = generate_design()
+    def test_the_boards_name_their_windows_and_the_long_merged_field_window(self) -> None:
+        # The merged field window of 1.4 mm electrodes at 2 mm (0.4 mm bridges; the default until 2026-11-06).
+        result = generate_design({"matrix": {"taxel_width_mm": 1.4, "taxel_height_mm": 1.4}})
         for role in ("rows", "columns"):
             board, line = self._line(result, role)
             sizes = dict((kind, (width, height)) for kind, width, height in _window_sizes(board))
@@ -541,7 +545,9 @@ class OrderNotesSelfCheckTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.result = generate_design({"rows": 3, "columns": 17, "connector": {"row_pins": 5}, "connector_side": "left"})
+        # The merged field window of 1.4 mm electrodes (the default until 2026-11-06), whose line the edits change.
+        cls.result = generate_design({"rows": 3, "columns": 17, "row_electrode_width_mm": 1.4, "column_electrode_width_mm": 1.4,
+                                      "connector": {"row_pins": 5}, "connector_side": "left"})
         assert cls.result["ok"], cls.result["validation"]["errors"]
 
     def test_notes_that_drop_or_change_an_entry_are_refused(self) -> None:

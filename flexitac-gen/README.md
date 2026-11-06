@@ -77,15 +77,95 @@ python3 tools/build_static_site.py --out site/   # downloads Pyodide 0.27.8 and 
 python3 -m http.server -d site 8010              # a local look on port 8010
 ```
 
+### The Library
+
+`library.html` (the header's Library link, in a new tab) lists sensors
+already fitted to open-source gripper fingers, grouped by gripper: seven
+gripper parts (Franka Hand, WidowX 250, Trossen WidowX AI, ARX X5, I2RT YAM,
+Unitree Dex1-1, MakerMods Metal Arm), each at four pitches from a fine 1 mm,
+and the UMI fin-ray finger at four pitches with its tapered tips (its last
+75 mm narrowed to a trapezoid or a convex arc, five tip widths from 21.8 to
+5.8 mm, 2 mm pitch; Shape and Tip width on their page).  The seven grippers
+come first, one card each, four to a row (two on a phone), each with its
+pitch range ("1 to 3 mm") and "Pick your pitch": it opens the gripper's
+2 mm sensor, whose Pitch switch offers the others.  The UMI finger's shelf
+follows, a card per pitch and one for the tapered tips, its heading naming
+its pitches ("Four pitches, 1 to 3 mm, and tapered tips.").
+Each sensor has its own address,
+`library.html#<id>` (for example `library.html#widowx-250-1mm`; `#<part>`
+shows its 2 mm sensor), with its Top and Bottom FPC Gerber ZIPs, the part's
+STL and its licence, and opens in Gen by Surface at `./?part=<id>`, built at
+once from its shipped fit and editable from there (on a phone the sensor's
+page shows its picture as a 3:1 band, so Open in Gen by Surface is in a
+390 x 844 phone's first screen).  The pictures are the generator's figure
+of the sensor on its part: the seven grippers drawn whole, a sensor on both
+fingers and the jaws fully open (the other finger is the same part turned,
+carrying the same board, or a mirror-image part carrying the mirror-image
+board, which is not the sensor's Gerbers; the finger nearer the viewer is
+see-through in both views and its sensor stays assembled, the other
+finger's sensor explodes into the gap; the MakerMods Metal Arm's two tips
+stand on a plain rail drawn by this project, not MakerMods hardware), the
+UMI finger and its tapered tips as the fingertip.  Each card shows it
+exploded; a sensor's page shows its picture and, drawn over it, the same
+scene in 3D to turn (drag it, or the arrow keys; 0 or a double click
+brings it back; the Exploded | Assembled switch under it drives both)
+where its entry names its 3D view (`view`); without one, without WebGL or
+when a file does not load the picture stays.  Every sensor has its
+picture, and where its file does not load a drawing of the sensor's taxel
+grid takes its place.  On the static site the ZIPs are built with the
+site; under `app.py` the page asks the server for them.  The page loads no
+engine or Pyodide, and three.js only on a sensor's page.
+
+The sensors are data in `web/library/`: `parts.json` (each part's mesh,
+licence, the face the page selects and its pitches; edited by hand, the
+tapered tips' parts and family written with their meshes by a private
+cutting tool), the meshes and licence texts with their `NOTICE.md`, the
+grippers' scenes of the 3D view (`scenes/`, with the rules every scene is
+drawn by, and their bodies in `bodies/`: the grippers' open models,
+decimated, each tabled in `NOTICE.md`; written by a private scene
+builder), each sensor's art (`art/`, the generator's art of its two boards,
+written by the shots tool), and what
+`tools/library_write.py` writes from them: `fits/<id>.json` (the request the
+page sends for the sensor and the engine's reply) and `entries.json` (the
+index the page reads, with each sensor's picture and 3D view; the formats
+are frozen in [docs/LIBRARY_VIEW.md](docs/LIBRARY_VIEW.md)).  After any
+change of the page's defaults (a sensor's request changes with them) or a
+change of the engine or the profile that moves a build id, refit and commit
+them:
+
+```bash
+python3 tools/library_write.py            # fit every sensor, write what changed
+python3 tools/library_write.py --check    # write nothing; exit 1 listing the stale sensors
+```
+
+The static site's build is the gate: it fits every sensor again and stops
+("the library is stale: run tools/library_write.py") when a reply or a build
+id differs from the committed one, or a fit's request is no longer the one
+the page sends, so a stale library is never published.
+
+The pictures are the Library's own 3D view (Gen by Surface's figure of the
+sensor on its part, with the gripper's scene) at its Exploded and
+Assembled homes: `tools/browser/library_shots.py` shoots them in a browser
+into `web/library/shots/` (WebP with alpha, each drawing centred in its
+picture, with a manifest of the fit each was shot from, its art and a
+gripper's measured stage) and `tools/library_write.py` writes them and
+each sensor's 3D view into `entries.json`; a picture of another fit, an
+art of another build, a gripper's stage of another scene or one breaking
+the scenes' rules fails `--check` and the site build, and so does a scene
+the writer refuses; a sensor without its picture fails `--check` and the
+tests.  After a refit, a new sensor, a change of the figure or of a scene,
+write, shoot the changed sensors again and write again.
+
 ## What it does
 
 - **CAD mode** (browser: the page's default, the "Gen by Surface" switch
   beside the title, "FlexiTac-Gen" (the page itself never says "CAD": its
   workspace is "Pick a surface on a 3D model"); the "Rectangular" switch or
   `#rect` for the rectangular mode; CLI: `cli.py surface`; HTTP:
-  `/api/surface/*`).  The header holds the title, the mode switch and
-  FlexiTac's GitHub (with the repository's stars and forks) and Discord on
-  one line, centred on the title, with the line on FlexiTac under them.
+  `/api/surface/*`).  The header holds the title, the mode switch, the
+  look's toggle and FlexiTac's GitHub (with the repository's stars and
+  forks) and Discord on one line, centred on the title, with the line on
+  FlexiTac under them.
   - The workflow: drop in an STL, rotate it, click a surface, set the
     resolution, Generate.  The browser opens with the UMI fin-ray finger
     loaded (`web/vendor/umi`, HandUMI, Apache 2.0) and its sensor already
@@ -93,6 +173,30 @@ python3 -m http.server -d site 8010              # a local look on port 8010
     first proposal: 32 x 12; its fit shipped, so it shows at once) until a
     file is chosen, and fits at most 32 rows and 32 columns by default (Max
     rows, Max columns, up to 64).
+  - Samples to try (the user's request of 2026-11-06): under the step
+    guide, "Try a sample" holds eight parts in two columns (on a laptop's
+    window compact, each picture beside its name; beside the steps on a
+    narrow page; one row that scrolls sideways on a phone, so the page
+    around it does not move): two of the UMI finger's tapered tips (the
+    5.8 mm trapezoid and the 13.8 mm convex arc), four other Library
+    fingers (ARX X5, I2RT YAM, Unitree Dex1-1, MakerMods Metal Arm) and two
+    whole grippers with their jaws open (Franka Hand, WidowX 250).  Drag one
+    onto the 3D view, or click it (Enter, Space or a tap): the part loads
+    and its sensor is generated at once, the Library's own sensor of that
+    finger at 2 mm (a whole gripper's fitted by the engine on its own mesh),
+    and the address becomes `./?sample=<id>`, so a reload shows it again.
+    A tile or a file may be dropped anywhere on the 3D view's window, its
+    tools included.  The sample shown, pressed again, is only framed again;
+    one that cannot be loaded leaves the part shown and its sensor as they
+    were, with a warning.  Your own file, dropped or chosen, works as before.
+    The samples are
+    static files in `web/samples/`: `samples.json` (each one's Library
+    sensor), the thumbnails (drawn by `tools/browser/sample_thumbs.py` in
+    the 3D view's look) and the two whole grippers, each one binary STL
+    assembled from the Library's scene of that gripper (the MuJoCo
+    Menagerie's Franka Hand, Apache-2.0, and WidowX 250, BSD-3-Clause), its
+    finger's facets first; their sources, changes and licences are in
+    [web/samples/NOTICE.md](web/samples/NOTICE.md).
   - The surface may be flat, creased or singly curved (cylinders, cones,
     extrusions, bands opened along a seam).  A doubly curved surface is cut
     down to the disk a flat sheet covers within 0.3% stretch.
@@ -143,14 +247,15 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   and tails from 7.0 mm).  On the surface template `matrix.mask` gives a
   masked field.  Unknown keys are errors with their JSON path; the
   documented aliases are reported; numbers are taken on a 1e-6 mm grid.
-  Default: 12 x 32 at 2.0 mm pitch with 1.4 mm electrodes and 0.127 mm
-  fan-out traces at 0.127 mm spacing, the diagonal Row bus with `both` and
+  Default: 12 x 32 at 2.0 mm pitch with 1.0 mm electrodes and 0.127 mm
+  fan-out traces at 0.127 mm spacing (the electrodes at fill 0.5, the user's
+  decision of 2026-11-06; 1.4 mm before), the diagonal Row bus with `both` and
   both tails 12 mm, so the stacked tails end together (the user's decision
   of 2026-10-27; the bottom tail 7.5 mm before; on the generic template
   `routing.row_sides` defaults to `both`, or to `channel` where the tails
   leave on opposite sides or the field is a single row or column, the
   bottom tail then 7.0 mm; on the surface template to `channel`, its bottom
-  tail 7.5 mm), build `tactile-fpc-12x32-c2243ebd10c5`.
+  tail 7.5 mm), build `tactile-fpc-12x32-34a71a29e4d0`.
 - **Geometry** (layout `tactile-fpc-layout/v3`): the traces leave the sensor
   thin, converge into a bundle at the trace width + spacing (0.254 mm by
   default) and expand again to the 0.5 mm contact pitch, with bus-style
@@ -213,7 +318,9 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   the polyimide, the copper under it, the darker gaps between traces, ENIG
   where the coverlay is open, the stiffener darkening what lies above it)
   and **Diagram** (the server SVG's own colours).  The stack's exploded 3D
-  view and each board's oblique view turn with the mouse, and draw each
+  view and each board's oblique view turn with the mouse (**Reset view**
+  over the stacked view's top right, as 0 or a double click, brings it
+  home), and draw each
   single-sided board's two sides: its copper side, or its polyimide with the
   copper seen through it and the stiffener outermost, each board as thick
   as its stack-up (0.11 mm, the PI stiffener 0.225 mm more; drawn at least
@@ -224,7 +331,33 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   the US Mint's photo (`web/vendor/coin`, public domain), with its shadow; in
   the 3D views it lies on the table below the boards, as thick as a quarter
   (1.75 mm, its reeded side), with a gleam that keeps to the light as the
-  view turns.
+  view turns.  The 3D views are lit as the sensor on the part is (below;
+  2026-11-05): the same lights, fixed to the viewer, shade each board's side
+  by the way it faces them, a faint satin sweep slides over the coverlay as
+  the view turns, the walls are lit by the way they face and the shadows fall
+  away from the key whatever the turn; the plan view stays a flat plan.  In CAD mode the stacked view has a second figure beside it
+  (the user's request of 2026-11-05; one under the other where the card is
+  narrower than 720 px): the sensor on the part.  The loaded part is drawn
+  in a matte light grey, and outward from it, along the face's normal, come
+  the bottom FPC (copper out), the film (velostat, black, over the taxel
+  field or its masked outline) and the top FPC (turned over: polyimide out).
+  Each layer is draped on the part's surface where the map puts it, and
+  where a board leaves the surface (a tail, a band past an edge) it runs
+  flat on the plane of the nearest facet.  The boards show their art in
+  the page's look on both sides; **Exploded** and **Assembled** switch the
+  spacing.  A drag turns it, as the other 3D views do, and **Reset view**
+  (over the view's top right; also 0 or a double click) brings it home.
+  The view frames a finger or a gripper's tip whole, with the same room
+  above it as below (since the second review of 2026-11-05; its outlines
+  no longer show a light seam where they cross the part).  Since the look
+  of 2026-11-05 it is lit like a product shot under a soft studio that
+  turns with the view: the film is a satin black with a soft gradient from
+  top to bottom (a flat black had read as a hole in the stack), the boards'
+  coverlay shows a faint amber sweep, each layer has a thin edge, and
+  **Assembled**, which opens about 29 degrees off the face, shows a soft
+  contact shade where the stack meets the part, starting at the stack's
+  edge on a curved part too.  It is drawn in
+  the browser from the map, with no request of its own.
 - **Interface**: one step to a sensor.  In CAD mode ("Gen by Surface") the
   default part's sensor is generated as the page opens; a model loaded
   gets its largest flat face selected, a click selects another face, and
@@ -240,12 +373,25 @@ python3 -m http.server -d site 8010              # a local look on port 8010
   one line ("all N checks pass"), opening on a failure with only the
   failing rules listed; the other files and the ordering notes are folded
   (the stacked view stays open).  CAD mode hides the rectangular form and shows the
-  results once it has generated a build.
+  results once it has generated a build.  Each figure's controls sit in
+  its frame, top left in one row (the user's request of 2026-11-06): the
+  board cards' **3D view** and **2D view** (with the 2D view its zoom, the
+  level alone in sight, the scale in its tooltip), the stacked view's
+  **3D view** and **2D view**, the sensor on the part's **Exploded** and
+  **Assembled**; what a figure draws at its home stays clear of them.
+  The stacked view has no caption since 2026-11-06 (it had read
+  "Exploded 3D registration review · ..."); the board cards' oblique
+  view keeps its own.
 - **Look**: the page is `web/index.html` with `web/app.js` and `web/cad/`,
   styled by `web/styles.css` and, linked right after it, `web/theme.css`
-  (2026-11-04): an Apple-style look in the system's fonts, light or dark
-  with the system, the drawings' areas (the 3D view, the previews, the
-  stacked view, the map) light in either.  Blue fills only each region's
+  (2026-11-04): an Apple-style look in the system's fonts, light for
+  every visitor whatever the system's setting, dark once the visitor turns
+  it on with the small toggle in the header right before GitHub (a moon,
+  a sun while dark; 2026-11-06, `web/theme.js`: the choice is kept in the
+  browser for both pages and applies before the page first shows, with no
+  flash of the other look), the drawings' areas (the 3D view, the previews,
+  the stacked view and the sensor on the part beside it, the map) light in
+  either.  Blue fills only each region's
   primary action and what is chosen; motion is only feedback to the
   pointer and the keyboard (none under the system's reduced motion), and
   nothing moves with the scroll.
@@ -325,6 +471,8 @@ narrower than 0.1016 mm (accepted down to 0.1 mm before) are now rejected.
 ```bash
 PYTHONPATH=. python3 -B -m unittest discover -s tests   # stdlib unittest suite
 node --check web/app.js                                  # browser script syntax (optional)
+node --check web/library.js                              # the Library's script (optional)
+node --check web/theme.js                                # the look's toggle, both pages' <head> (optional)
 python3 -B tools/mutation_check.py                       # the suite against known defects (minutes)
 ```
 
@@ -346,6 +494,13 @@ Apache License 2.0 ([LICENSE](LICENSE)).  The vendored files under `web/vendor/`
 keep their own licences, each named in its folder's `NOTICE.md`: three.js
 (MIT), the UMI finger (Apache-2.0) and the US Mint photo of the quarter
 (public domain); the static site adds Pyodide (MPL-2.0, `static/py/pyodide/NOTICE.md`).
+The Library's gripper parts, the bodies of its 3D view's grippers and their
+licence texts (Apache-2.0, MIT and BSD-3-Clause, from their pinned upstream
+commits; the Franka pad's hull, the UMI finger's tapered tips and the
+decimated bodies are modified files, so stated; the MakerMods rail is this
+project's own) are listed with
+their sources in [web/library/NOTICE.md](web/library/NOTICE.md); part names are
+their makers' trademarks, and FlexiTac is not affiliated with them.
 
 ## Documentation
 

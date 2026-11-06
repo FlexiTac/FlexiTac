@@ -42,6 +42,18 @@ from engine.schema import ERROR_CODES, WARNING_CODES, cross_field_rules
 from exporters import EXPORTER_VERSION, ExportError, build_exports
 from exporters import direct_gerber
 
+try:
+    import defaults_of_before
+except ImportError:  # run as a package
+    from tests import defaults_of_before
+
+
+def setUpModule() -> None:
+    # The default electrodes of before (1.4 mm at 2 mm, fill 0.7): this module's pinned numbers were measured with them
+    # (tests/defaults_of_before.py; the user's decision of 2026-11-06 made the default fill 0.5).
+    defaults_of_before.start()
+
+
 ROOT = Path(__file__).resolve().parents[1]
 SURFACE = "surface_matrix_v1"
 GENERIC = "generic_matrix_v1"
@@ -65,11 +77,13 @@ _OPPOSITE = {"bottom": "top", "top": "bottom", "left": "right", "right": "left"}
 # the surface documents unchanged (its preset keeps 7.5 mm).  And with the profile revision 2026-10-29 (the gold-finger
 # thickness order option and the coverlay-window notes): the generic schema's x-profile and x-row-bus-profile name both
 # profiles' new revision and digest (before: a79e66ad...), the surface schema's x-profile the surface profile's (before:
-# ebb2976c...); the limits unchanged.
-GENERIC_SCHEMA_SHA256 = "e495f1c6439c3adfcc9d034a498f91b3f8a930e22d81920ff9534358e8b6d137"
-GENERIC_LIMITS_SHA256 = "8154a3c0b7e5447c5f5e6ee6f3abb49424afe1058e3a27600ae3a0bf292c9499"
-SURFACE_SCHEMA_SHA256 = "938f3f6fc48f5f8488ad492f1d90764101c527aebfdb5c2f4124b0954f6beb43"
-SURFACE_LIMITS_SHA256 = "13345dbc72b4d58aeb3dc67dfcbe81ff084d86a89ae343b0dd9450b6413bb72a"
+# ebb2976c...); the limits unchanged.  And with the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5): every
+# schema's and limits' default electrode widths 1.0 mm (1.4 before: e495f1c6..., 8154a3c0..., 938f3f6f... and
+# 13345dbc...).
+GENERIC_SCHEMA_SHA256 = "45c0b8e38e70c89652d8d47c64a9ea0f14557711169b893d326a689fbbe1a041"
+GENERIC_LIMITS_SHA256 = "8eb88e9e6031676226c4db419c7a6fe1b62b9b0c4dc4df7678ec73fea42233f8"
+SURFACE_SCHEMA_SHA256 = "61d8f76ac73a743f2b349a133d2cec3eb7a935b7384d52c24b2c307668b71c10"
+SURFACE_LIMITS_SHA256 = "e143c63fbddc5ce488df0780f9f52755899a66a21d62fb472ffce1fbc55b0f5e"
 
 
 def _surface(rows: int, columns: int, mask=None, **sections) -> dict:

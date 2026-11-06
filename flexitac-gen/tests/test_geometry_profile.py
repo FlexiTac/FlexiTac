@@ -239,10 +239,16 @@ class CoverlayOverhangAnchorTests(unittest.TestCase):
     def test_coverlay_openings_merge_when_bridges_would_be_removed(self) -> None:
         profile = load_profile()
         bridge = profile["coverlay"]["coverlay_min_bridge_mm"]
-        merged = generate_design()  # 2.0 mm pitch, 1.4 mm electrodes: 0.4 mm bridges
+        # 2.0 mm pitch, 1.4 mm electrodes (the default until the user's decision of 2026-11-06): 0.4 mm bridges.
+        merged = generate_design({"matrix": {"taxel_width_mm": 1.4, "taxel_height_mm": 1.4}})
         for board in merged["boards"].values():
             kinds = [opening["kind"] for opening in board["layers"]["top_coverlay_openings"]]
             self.assertEqual(sorted(kinds), ["connector_contact_opening", "electrode_field_opening"])
+        # The default since: 1.0 mm electrodes, 0.8 mm bridges, a window per electrode.
+        for board in generate_design()["boards"].values():
+            kinds = [opening["kind"] for opening in board["layers"]["top_coverlay_openings"]]
+            self.assertEqual(kinds.count("sensor_electrode_opening"), len(board["layers"]["top_copper"]["electrodes"]))
+            self.assertNotIn("electrode_field_opening", kinds)
         separate = generate_design({"matrix": {"taxel_width_mm": 1.3, "taxel_height_mm": 1.3}})  # exactly 0.5 mm bridges
         for board in separate["boards"].values():
             openings = board["layers"]["top_coverlay_openings"]
@@ -260,7 +266,7 @@ class CoverlayOverhangAnchorTests(unittest.TestCase):
         for key, axis in (("row", 0), ("column", 1)):
             board = result["boards"][key]
             active = board["grid_registration"]["active_region"]
-            self.assertEqual((active["width"], active["height"]), (63.4, 23.4))
+            self.assertEqual((active["width"], active["height"]), (63.0, 23.0))  # the default 1.0 mm electrodes
             field = board["grid_registration"]["electrode_field"]
             low, size = (active["x"], active["width"]) if axis == 0 else (active["y"], active["height"])
             for electrode in board["layers"]["top_copper"]["electrodes"]:

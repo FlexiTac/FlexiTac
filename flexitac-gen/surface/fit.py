@@ -114,7 +114,7 @@ DEFAULT_OPTIONS: dict = {
     "objective": "fixed_pitch",  # fixed_pitch | max_taxels | max_area
     "pitch_mm": 2.0,
     "min_pitch_mm": 1.0,
-    "fill": 0.7,
+    "fill": 0.5,  # electrode width / pitch; 0.7 until the user's decision of 2026-11-06 (web/index.html #cadFill the same)
     "max_rows": MAX_ROWS,
     "max_columns": MAX_COLUMNS,
     "template": "surface",  # fixed: CAD mode builds on the surface template (CAD_ONLY)
