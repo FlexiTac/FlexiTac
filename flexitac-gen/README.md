@@ -485,7 +485,7 @@ PYTHONPATH=. python3 -B -m unittest discover -s tests   # stdlib unittest suite
 node --check web/app.js                                  # browser script syntax (optional)
 node --check web/library.js                              # the Library's script (optional)
 node --check web/theme.js                                # the look's toggle, both pages' <head> (optional)
-python3 -B tools/mutation_check.py                       # the suite against known defects (minutes)
+python3 -B tools/mutation_check.py                       # the suite against known defects (hours: a suite run per mutant)
 ```
 
 `tests/test_docs_consistency.py` checks the tables and Python snippets of
@@ -498,7 +498,8 @@ browser UI that need their own virtual environment; none of them is part of
 the unittest suite.  CI (`.github/workflows/fpc-agentic-customization.yml`
 at the repository root) runs the suite on Python 3.9 and 3.12, checks that
 the mutation catalogue still applies to the code and checks the syntax of
-`web/app.js`; the full mutation run is a manual job of the same workflow.
+`web/app.js`; a manual job of the same workflow runs the mutants named
+(`--only`), as many as fit a hosted runner's 6 hours.
 
 ## License
 

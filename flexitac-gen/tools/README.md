@@ -23,8 +23,17 @@ and each sensor's art, `web/library/art/`).
   `test_static_site`'s public export asks for (the review of 2026-11-06:
   without it the baseline failed and every kill read as a false alarm); a
   kill whose failing tests all fail in the unmutated copy too is reported
-  `SURVIVED (baseline failures only)`.  A full run takes about 17 minutes with `--jobs 16` on
-  a 48-core host; in CI it is a manual job.
+  `SURVIVED (baseline failures only)`.  Each mutant is one run of the whole
+  suite: on 2026-11-06 one run took 670 to 1900 s on the development host
+  (the baseline 1393 s) and about 1700 s on a GitHub runner (931 to 1723 s
+  in the public copy's site workflow of 2026-11-04 to 2026-11-06), the
+  longer runs on a loaded host, so the default `--timeout` is 5400 s per run
+  (at the 900 s of before every mutant read `KILLED` by its timeout).  A
+  full run of the catalogue is some 850 suite
+  runs: about 20 hours at `--jobs 16` (the 17 minutes of 2026-10-21 were 369
+  mutants against a suite of 460 tests).  In CI it is a manual job that runs
+  the mutants named in its `only` input (`--only`), as many as fit the hosted
+  runner's 6 hours.
 - `golden_values.py`: prints the default-build values pinned by
   `tests/test_golden_default.py`, for review after a deliberate change.
 - `compare_easyeda_gerbers.py`: compares the Gerber ZIP EasyEDA Pro exports

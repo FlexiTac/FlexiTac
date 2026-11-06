@@ -1032,6 +1032,32 @@ class HandoffTests(unittest.TestCase):
             with self.subTest(document=path.name):
                 self.assertEqual(set(re.findall(r"audit's (\d+) baseline mutants", _prose(_text(path)))), {str(len(baseline))})
 
+    def test_the_runner_s_timeout_outlasts_a_suite_run(self) -> None:
+        # The verification of 2026-11-06: mutation_check's default --timeout (900 s) was below one run of the suite
+        # (1200 to 1900 s on the development host, about 1700 s on a GitHub runner), so every mutant read KILLED by its
+        # timeout; and CI's unittest job (15 minutes) ended before the suite did.  tools/README.md quotes the runs'
+        # times and the default; the default and the unittest job's limit are twice the longest run or more.
+        catalogue = _mutation_catalogue()
+        prose = _prose(_text(ROOT / "tools" / "README.md"))
+        low, high, runner = _quoted(self, prose, r"one run took (\d+) to (\d+) s on the development host \(the baseline \d+ s\) and about (\d+) s on a GitHub runner")
+        (timeout,) = _quoted(self, prose, r"the default --timeout is (\d+) s per run")
+        self.assertEqual(timeout, catalogue.SUITE_TIMEOUT)
+        self.assertLessEqual(low, high)
+        self.assertGreaterEqual(timeout, 2 * max(high, runner))
+        parser_default = re.search(r'add_argument\("--timeout", type=float, default=(\w+)', (ROOT / "tools" / "mutation_check.py").read_text(encoding="utf-8"))
+        self.assertEqual(parser_default.group(1), "SUITE_TIMEOUT")
+        if not WORKFLOW.is_file():
+            self.skipTest("the CI workflow lives at the repository root, outside this copy of the project")
+        jobs = re.split(r"^  (?=[\w-]+:$)", _text(WORKFLOW).split("\njobs:\n", 1)[1], flags=re.M)
+        unittest_job = next(job for job in jobs if job.startswith("unittest:"))
+        (minutes,) = map(int, re.findall(r"\n    timeout-minutes: (\d+)\n", unittest_job))
+        self.assertGreaterEqual(minutes * 60, 2 * runner, "CI's unittest job outlasts the suite on a runner")
+        mutation_job = next(job for job in jobs if job.startswith("mutation:"))
+        (command,) = [line for line in mutation_job.splitlines() if "tools/mutation_check.py" in line and not line.lstrip().startswith("#")]
+        self.assertNotIn("--timeout", command, "the job keeps mutation_check's default")
+        self.assertIn("--only", command, "the job runs the mutants named: the whole catalogue does not fit a hosted runner's 6 hours")
+        self.assertLessEqual(int(re.search(r"\n    timeout-minutes: (\d+)\n", mutation_job).group(1)), 360)
+
 
 class SnippetTests(unittest.TestCase):
     def test_python_snippets_of_the_documents_run(self) -> None:

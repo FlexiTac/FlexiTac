@@ -2102,6 +2102,51 @@ class PageTests(unittest.TestCase):
                 self.assertEqual(min(entries["variants"][key]["pitch_mm"] for key in record["variants"]), 1)
         self.assertEqual(len(grid_cards(entries)), 12, "the grippers' seven cards, the UMI shelf's four and its Tapered tips card")
 
+    def test_a_page_opened_at_its_address_paints_no_frame_of_the_grid_s_title(self) -> None:
+        # The reviews of 2026-11-06: a sensor's page shared or reloaded had first painted the grid's title and tagline
+        # over the footer; library.js, deferred, hid them too late, and nothing checked that its first route shows the
+        # footer again.  Now theme.js, the one script before the first paint, marks <html data-lib-place> on the
+        # Library (its meta) at an address of its own, library.css hides the title and the footer under it, and the
+        # first route (or entries.json's failure) clears it (library_checks part_routes, with library.js late).
+        head = self.html[:self.html.index("</head>")]
+        self.assertLess(head.index('<meta name="flexitac-page" content="library" />'), head.index('<script src="static/theme.js"></script>'))
+        self.assertNotIn("flexitac-page", self.index_html, "Gen by Surface is never marked")
+        theme = (WEB / "theme.js").read_text(encoding="utf-8")
+        self.assertIn("""  if (location.hash.length > 1 && document.querySelector('meta[name="flexitac-page"][content="library"]')) root.dataset.libPlace = "";\n""", theme)
+        rules, _ = parse_css(self.style)
+        hidden = [(rule.conditions, rule.declarations) for rule in rules if rule.selectors == (":root[data-lib-place] #libHero", ":root[data-lib-place] .lib-footer")]
+        self.assertEqual(hidden, [((), [("display", "none", False)])])
+        script = self.script
+        self.assertIn('  const ROOT = document.documentElement;\n  if (location.hash.length > 1) ROOT.dataset.libPlace = "";\n', script)
+        self.assertEqual(_inner(script, "opened"), "  function opened() {\n    delete ROOT.dataset.libPlace;\n  }")
+        self.assertTrue(_inner(script, "route").startswith("  function route() {\n    if (!state.index) return;\n    opened();\n"))
+        self.assertIn('      $("libHero").hidden = false;\n      opened();\n      $("libStatus").textContent', _inner(script, "start"))
+        self.assertEqual(script.count("opened();"), 2)
+
+    def test_a_card_tabbed_to_is_shown_whole_in_its_row(self) -> None:
+        # The review of 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so at 390 px
+        # a UMI card Tabbed to that its row showed in part stayed cut.  The row moves the least that shows it whole inside
+        # its gutters, for the keyboard's focus alone and sideways alone (library_checks part_layout).
+        rows = _inner(self.script, "scroller")
+        self.assertIn('    track.addEventListener("focusin", event => {\n'
+                      '      const card = [...track.children].find(child => child.contains(event.target));\n'
+                      '      if (!card || !event.target.matches(":focus-visible")) return;\n', rows)
+        self.assertIn("      if (shift) track.scrollBy({left: shift});\n", rows)
+        self.assertNotIn("scrollIntoView", rows, "the row only: the page stays put")
+
+    def test_a_card_tabbed_to_comes_into_the_window_with_room_round_it(self) -> None:
+        # The verification of 2026-11-06: at 390 and 360 px the UMI shelf's card Tabbed to stopped flush with the window's
+        # bottom, its focus ring (2 px, 2 px off) cut.  The shelves' cards have the grippers' cards' room above and below
+        # (scroll-margin 16 px, none sideways: they snap at the gutter as before), at every width (library_checks
+        # part_layout).
+        rules, _ = parse_css(self.style)
+        margins = {rule.selectors: [(rule.conditions, value) for name, value, _ in rule.declarations if name == "scroll-margin"]
+                   for rule in rules if any(name == "scroll-margin" for name, _, _ in rule.declarations)}
+        self.assertEqual(margins.get((".lib-track > .lib-card",)), [((), "16px 0")])
+        self.assertEqual(margins.get((".lib .lib-cards > .lib-card",)), [((), "16px 0")])
+        snapping = [rule.declarations for rule in rules if rule.selectors == (".lib-track > *",)]
+        self.assertEqual(snapping, [[("flex", "none", False), ("scroll-snap-align", "start", False)]])
+
     @unittest.skipUnless(shutil.which("node"), "node is not installed")
     def test_node_check(self) -> None:
         # A classic script: any node can check it (main.js's ES modules need node 22, test_surface_web).

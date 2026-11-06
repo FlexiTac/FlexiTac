@@ -15,9 +15,11 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   tapered tips' family card, four cards in view from 1100 px, three from 735 px, 78 % of the row below, its five
   overflowing with their arrows at 1440 px, 56 px below the grid's last row; at 390 px its row overflows (never the
   page), '<' is off at its start and '>' moves it by one card, and an arrow Tabbed to shows its focus ring inside the
-  window at 390 and 360 px; both headings in the shelves' one wording ('UMI Fin-Ray Gripper. Four pitches, 1 to 3 mm,
-  and tapered tips.'; the user's decision of 2026-11-05), one line at 1440 and 1280 px, never splitting a range or a
-  family's clause, at most two lines at 900 px broken between phrases.
+  window at 390 and 360 px, each of its cards Tabbed to whole inside the row's gutters (the review of 2026-11-06) and its
+  focus ring inside the window with room under it (the verification of 2026-11-06);
+  both headings in the shelves' one wording ('UMI Fin-Ray Gripper. Four pitches, 1 to 3 mm, and tapered tips.'; the
+  user's decision of 2026-11-05), one line at 1440 and 1280 px, never splitting a range or a family's clause, at most
+  two lines at 900 px broken between phrases.
 - part_first_screen (the user's decision of 2026-11-05: the picture may be squashed): below 900 px a sensor's picture
   is 3:1 above Open (16:10 beside it from 900 px), shown, its drawing contained and centred; Open's bottom in the
   window at 390 x 844 on every sensor's page and the Tapered tips page, at 360 x 740 on every gripper's sensor page,
@@ -84,7 +86,10 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   WidowX card, Back and Forward to the grid where it was, WidowX focused); #shelf-widowx-250 typed on the ARX X5 page
   its card; #<part> shows its 2 mm sensor with the address kept, #shelf-arx-x5 opened anew its card, #bogus the grid
   with a note, an unknown id typed with the grid scrolled down its note in sight; the back link of a page opened
-  directly goes to its card.
+  directly goes to its card; opened at an address of its own with library.js 0.8 s and entries.json 0.4 s late (the
+  reviews of 2026-11-06), every frame from the first paint read: a sensor's page never paints the grid's title, nor
+  the footer before it, then shows its footer; #gripper-<part> and #shelf-umi-finray the title and the footer;
+  library.html alone its title at once, as before; entries.json at 500 the title, the footer and the status.
 - part_downloads: under app.py the two Gerber ZIPs are app.py's exports of the sensor's design (the fit's proposal #1),
   byte for byte under its names; on the site they are the prebuilt files (files.json, which lists every sensor);
   the part's STL is the mesh, the licence is served (a tapered tip's ZIPs too).
@@ -377,6 +382,13 @@ PICTURE_SETTLED = """() => { const shot = document.querySelector('#libDetail .li
   return Boolean(shot) && (!img || (img.complete && img.naturalWidth > 0)); }"""
 FOCUS = """() => { const node = document.activeElement; return {id: node.id, variant: node.dataset?.variant || null,
   shelf: node.closest('.lib-shelf, .lib-section')?.id || null}; }"""
+# The card focused in its row: how far inside the row's gutters (its padding) it lies on either side, and its focus ring
+# (4 px round it) inside the window above and below (px; negative: cut).
+CARD_IN_ROW = """() => { const card = document.activeElement; const track = card.closest('.lib-track'); if (!track) return null;
+  const style = getComputedStyle(track); const row = track.getBoundingClientRect().left + track.clientLeft; const box = card.getBoundingClientRect();
+  return {card: card.dataset.variant || card.getAttribute('href'), left: Math.round(box.left - row - parseFloat(style.paddingLeft)),
+          right: Math.round(row + track.clientWidth - parseFloat(style.paddingRight) - box.right), scroll: Math.round(track.scrollLeft),
+          top: Math.round(box.top - 4), bottom: Math.round(innerHeight - box.bottom - 4)}; }"""
 # A card of the grid in the window (its box and its focus ring's 4 px inside it) and the window's scroll.
 IN_VIEW = """(id) => { const r = document.getElementById(id).getBoundingClientRect();
   return {inside: r.top - 4 >= 0 && r.bottom + 4 <= innerHeight, top: Math.round(r.top), bottom: Math.round(r.bottom), y: Math.round(scrollY)}; }"""
@@ -409,7 +421,10 @@ WORDS = """() => [document.title, document.body.innerText, ...[...document.query
 def new_page(browser, width=1440, height=900, scheme="light"):
     # ``scheme`` the page's look: "dark" the header's toggle on (its stored choice, DARK_CHOICE; 2026-11-06), the system's
     # own scheme light either way (the page no longer follows it).
+    # ROUTES (mutants.py's lib kind) served here too.
     context = browser.new_context(viewport={"width": width, "height": height}, color_scheme="light", accept_downloads=True)
+    for glob, content_type, body in ROUTES:
+        context.route(glob, served(content_type, body))
     if scheme == "dark":
         context.add_init_script(DARK_CHOICE)
     page = context.new_page()
@@ -538,6 +553,24 @@ def part_layout(browser):
             return {arrow: node.classList.contains('lib-arrow'), top: Math.round(r.top - 4), bottom: Math.round(r.bottom + 4), screen: innerHeight}; }""")
     check("layout 390 and 360: an arrow of the UMI shelf, Tabbed to, shows its focus ring inside the window",
           all(ring["arrow"] and ring["top"] >= 0 and ring["bottom"] <= ring["screen"] for ring in rings.values()), rings)
+    # Tabbed to from the grippers' last card, each of the UMI shelf's five cards whole inside its row's gutters (the
+    # review of 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so at 390 px the
+    # 1.5 mm and the 3 mm cards had 192 of their 273 px past the window).
+    tabbed = {}
+    for width, height in ((390, 844), (360, 740)):
+        page.set_viewport_size({"width": width, "height": height}); page.wait_for_timeout(120)
+        page.evaluate("() => { scrollTo(0, 0); document.querySelector('#shelf-umi-finray .lib-track').scrollLeft = 0; }"); page.wait_for_timeout(80)
+        page.focus("#gripper-makermods-metal")
+        tabbed[width] = []
+        for _ in range(5):
+            page.keyboard.press("Tab"); page.wait_for_timeout(100)
+            tabbed[width].append(page.evaluate(CARD_IN_ROW))
+    check("layout 390 and 360: each card of the UMI shelf, Tabbed to, whole inside its row's gutters (the row moved to it)",
+          all(len(seen) == 5 and all(card and card["left"] >= -1 and card["right"] >= -1 for card in seen) for seen in tabbed.values()), tabbed)
+    # And its focus ring inside the window with room under it, as the grippers' cards (the verification of 2026-11-06:
+    # the first card had stopped flush with the window's bottom, its ring cut; scroll-margin 16 px leaves 12 px).
+    check("layout 390 and 360: each card of the UMI shelf, Tabbed to, its focus ring inside the window above and below, 8 px or more",
+          all(len(seen) == 5 and all(card and card["top"] >= 8 and card["bottom"] >= 8 for card in seen) for seen in tabbed.values()), tabbed)
     # The review of 2026-11-05: from 1280 px every shelf heading is one line (the UMI finger's, balanced, took two of
     # half the row at 1440 px), and the title's line ends on the gutter at every width from 735 px (right-aligned beside
     # the title: left-aligned, its balanced lines left a third of the hero empty from 1024 to 1280 px) with
@@ -688,7 +721,7 @@ def part_routes(browser):
           and fine["tab"] == "WidowX 250, 1 mm · Library · FlexiTac-Gen", fine)
     facts = page.inner_text(".lib-facts")
     check("routes: the page's facts (26 rows × 27 columns · 664 taxels, 1 mm · fill 0.50, the field, the tails, reader none, the build)",
-          "26 rows × 27 columns · 664 taxels" in facts and "1 mm · fill 0.50" in facts and "surface-26x27-62928ed42a39" in facts
+          "26 rows × 27 columns · 664 taxels" in facts and "1 mm · fill 0.50" in facts and "surface-26x27-00b579408d5f" in facts
           and "none (one tail pin per line)" in facts, facts)
     widths = page.evaluate("() => [document.querySelector('.lib-open'), ...document.querySelectorAll('.lib-pill')].map(n => n.getBoundingClientRect().width)")
     check("routes: Open in Gen by Surface, the primary action, at least as wide as each download pill (1440 px)",
@@ -797,6 +830,87 @@ def part_routes(browser):
     bogus = page.evaluate(VIEW)
     check("routes: #bogus shows the grid with a note", bogus["grid"] and not bogus["detail"] and bogus["note"] == "No sensor in the library is named bogus.", bogus)
     check("routes: no console error", not errors_of(page), errors_of(page)[:5])
+    page.context.close()
+    routes_opened_directly(browser)
+
+
+# Every frame from the document's creation (a requestAnimationFrame callback runs before each paint): whether the grid's
+# title or the footer is rendered, whether a sensor's page is shown and whether <html> is marked data-lib-place.
+FRAMES = """(() => { const frames = []; Object.defineProperty(window, '__libFrames', {value: frames});
+  const rendered = node => Boolean(node) && node.getClientRects().length > 0;
+  const step = () => { const detail = document.getElementById('libDetail');
+    frames.push({hero: rendered(document.getElementById('libHero')), footer: rendered(document.querySelector('.lib-footer')),
+                 detail: Boolean(detail) && !detail.hidden, marked: document.documentElement.hasAttribute('data-lib-place')});
+    if (frames.length < 3000) requestAnimationFrame(step); };
+  requestAnimationFrame(step); })();"""
+# The page as it settled: the grid's title, the footer, the status (rendered), and the mark.
+SETTLED = """() => ({hero: document.getElementById('libHero').getClientRects().length > 0, footer: document.querySelector('.lib-footer').getClientRects().length > 0,
+  status: document.getElementById('libStatus').textContent, detail: !document.getElementById('libDetail').hidden,
+  marked: document.documentElement.hasAttribute('data-lib-place'), hash: location.hash})"""
+LATE_S = {"library.js": 0.8, "entries.json": 0.4}
+
+
+def late(seconds):
+    # A route handler answering ``seconds`` late (the browser paints meanwhile), then as it would have (the next route,
+    # ROUTES' or the server's).
+    def handler(route):
+        time.sleep(seconds)
+        route.fallback()
+    return handler
+
+
+def open_late(browser, fragment, width, height, entries=None):
+    """library.html``fragment`` opened anew, library.js and entries.json late (LATE_S; ``entries``: entries.json's status
+    instead): its frames (FRAMES) and the page as it settled (SETTLED)."""
+    page = new_page(browser, width, height)
+    page.add_init_script(FRAMES)
+    page.route("**/static/library.js", late(LATE_S["library.js"]))
+    if entries is None:
+        page.route("**/static/library/entries.json", late(LATE_S["entries.json"]))
+    else:
+        page.route("**/static/library/entries.json", lambda route: route.fulfill(status=entries, content_type="text/plain", body="not here"))
+    page.goto(SITE["base"] + "library.html" + fragment)
+    wait_until(page, READY, 30)
+    page.wait_for_timeout(200)
+    frames, settled = page.evaluate("() => window.__libFrames.slice()"), page.evaluate(SETTLED)
+    errors = errors_of(page) if entries is None else [entry for entry in errors_of(page) if "entries.json" not in entry[1] and "status of 500" not in entry[1]]
+    page.context.close()
+    return frames, settled, errors
+
+
+def routes_opened_directly(browser):
+    """The page opened at an address of its own (the reviews of 2026-11-06: a shared link or a reload had painted the
+    grid's title and tagline over the footer before the sensor's page; library.js's hiding of them, run late, had left
+    the footer hidden unchecked): with library.js 0.8 s and entries.json 0.4 s late (LATE_S), so the page paints before
+    either arrives, at 1440 x 900 and 390 x 844, a sensor's page shows no frame of the grid's title and no frame of the
+    footer before it, then its footer; #gripper-<part> and #shelf-umi-finray show the grid's title and the footer;
+    library.html alone paints the grid's title before library.js arrives, as before (no mark); entries.json failing (500)
+    on a sensor's address shows the title, the footer and the status; Gen by Surface is never marked."""
+    for width, height in ((1440, 900), (390, 844)):
+        frames, settled, errors = open_late(browser, "#widowx-250-2mm", width, height)
+        before = [frame for frame in frames if not frame["detail"]]
+        check(f"routes {width}: a sensor's page opened directly paints no frame of the grid's title, nor of the footer before it, then its footer "
+              f"({len(before)} frames before it, library.js {LATE_S['library.js']} s late)",
+              len(before) >= 10 and not any(frame["hero"] for frame in frames) and not any(frame["footer"] for frame in before)
+              and before[0]["marked"] and settled == {"hero": False, "footer": True, "status": "", "detail": True, "marked": False, "hash": "#widowx-250-2mm"}
+              and not errors, (len(frames), len(before), [frame for frame in frames if frame["hero"]][:3], settled, errors[:3]))
+        for fragment in ("#gripper-arx-x5", "#shelf-umi-finray"):
+            frames, settled, errors = open_late(browser, fragment, width, height)
+            check(f"routes {width}: {fragment} opened directly shows the grid's title and the footer once it is routed",
+                  frames and frames[0]["marked"] and settled == {"hero": True, "footer": True, "status": "", "detail": False, "marked": False, "hash": fragment}
+                  and not errors, (settled, errors[:3]))
+    frames, settled, errors = open_late(browser, "", 1440, 900)
+    early = [frame for frame in frames[:20] if frame["hero"] and frame["footer"]]
+    check("routes: library.html alone paints the grid's title and the footer before library.js arrives, as before (never marked)",
+          early and not any(frame["marked"] for frame in frames) and settled["hero"] and settled["footer"] and not errors, (frames[:3], settled, errors[:3]))
+    frames, settled, errors = open_late(browser, "#widowx-250-2mm", 390, 844, entries=500)
+    check("routes: a sensor's address with entries.json failing (500) shows the grid's title, the footer and the status",
+          settled["hero"] and settled["footer"] and settled["status"].startswith("The library could not be loaded (HTTP 500).") and not settled["marked"]
+          and not errors, (settled, errors[:3]))
+    page = new_page(browser)
+    page.goto(SITE["base"] + "#rect", wait_until="domcontentloaded")
+    check("routes: Gen by Surface opened at an address (#rect) is never marked data-lib-place",
+          page.evaluate("() => document.documentElement.hasAttribute('data-lib-place')") is False)
     page.context.close()
 
 

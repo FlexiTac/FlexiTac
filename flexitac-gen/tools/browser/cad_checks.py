@@ -72,6 +72,10 @@ Against a running app.py (FPC_PORT) with the example meshes in asset/ (skipped w
 - The Library (part_library, 2026-11-05): every sensor of web/library/entries.json opens at ./?part=<id> from its
   shipped fit with its build id, the file note naming it; ./?part=<part>, an unknown id, the mode switch, the user's
   own file and Remove model (?part and the options it set dropped, the user's own edits kept), a click and Undo.
+- A browser without Element.checkVisibility (part_older_browser, the review of 2026-11-06: iOS and iPadOS before 17.4):
+  Rectangular's Generate and Gen by Surface's default build shown as with it, at 1440 and 390 px.
+- The stacked card's foot (part_stack_feet, the verification of 2026-11-06): in both modes, at 1440 and 390 px, light and
+  dark, the last row's figures rounded as the card's foot (17 px inside its 18 px), the others square.
 Screenshots go to $FPC_BROWSER_OUT/shots (cad_*.png).
 """
 from __future__ import annotations
@@ -93,7 +97,7 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DONE, RECT_URL, SCRATCH, SHOTS, URL, check, figure_controls, pin1_shapes, pin1_strokes, set_look, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
+from rp import DARK_CHOICE, DONE, RECT_URL, SCRATCH, SHOTS, URL, check, figure_controls, pin1_shapes, pin1_strokes, set_look, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SOFT = ROOT / "asset" / "soft_gripper_finger.stl"
@@ -2504,6 +2508,98 @@ def part_figure_controls(browser):
         page.close()
 
 
+# A browser without the page's newest DOM API (the review of 2026-11-06: app.js's unguarded Element.checkVisibility, which
+# Safari has only since 17.4 and Firefox since 106, had failed every build there, in both modes): deleted before the
+# page runs.
+OLDER_BROWSER = "(() => { delete Element.prototype.checkVisibility; })();"
+# What a build shows: its status, both boards' 2D views (their view box and the band under the controls), the
+# registration's boards and both DRC tables' rows; and whether the page has checkVisibility.
+BUILT = """() => ({api: typeof Element.prototype.checkVisibility, status: document.getElementById('status').textContent.trim(),
+  boards: ['rowPreview', 'columnPreview'].map(id => { const svg = document.querySelector('#' + id + ' > svg');
+    return svg && svg.querySelector('.outline') ? [svg.getAttribute('viewBox'), svg.style.paddingTop] : null; }),
+  stacked: document.querySelectorAll('#stackedPreview .assembly-board').length,
+  drc: ['row', 'column'].map(key => document.querySelectorAll('#drc-' + key + ' tbody tr').length)})"""
+
+
+def part_older_browser(browser):
+    """A browser without Element.checkVisibility (OLDER_BROWSER: iOS and iPadOS before 17.4, Firefox before 106; the review
+    of 2026-11-06), at 1440 and 390 px: Rectangular's build after Generate (13 rows) and Gen by Surface's default build
+    each shown as in a browser with it: valid, both boards' 2D views as there (the same view box and the same band under
+    the controls: the finger's tall boards start under them), the registration's two boards and both DRC tables; no
+    console error."""
+    for width in (1440, 390):
+        for label, url in (("Rectangular", RECT_URL), ("Gen by Surface", URL)):
+            seen = {}
+            for older in (False, True):
+                page = new_page(browser, width=width, height=900, folded=True)
+                if older:
+                    page.add_init_script(OLDER_BROWSER)
+                page.goto(url)
+                wait_until(page, DONE, 60)
+                if url == URL:
+                    wait_until(page, DEFAULT_SETTLED, 120)
+                else:
+                    page.fill("#rows", "13"); page.click("#generate"); page.wait_for_timeout(60)
+                    wait_until(page, DONE, 60)
+                page.wait_for_timeout(400)
+                seen[older] = dict(page.evaluate(BUILT), build=state(page)["default_build"] if url == URL else None, errors=errors_of(page))
+                page.close()
+            new, old = seen[False], seen[True]
+            same = {key: value for key, value in old.items() if key != "api"} == {key: value for key, value in new.items() if key != "api"}
+            check(f"older browser {width}: {label}'s build without Element.checkVisibility shown as with it (valid, both boards' 2D views, "
+                  "the registration's boards, both DRC tables, no console error)",
+                  old["api"] == "undefined" and new["api"] == "function" and same and old["status"].startswith("Valid build")
+                  and all(old["boards"]) and old["stacked"] == 2 and all(old["drc"]) and not old["errors"]
+                  and old["build"] == ("done" if url == URL else None), (old, new))
+
+
+# The stacked card's figures: each shown one's corners (top left, top right, bottom right, bottom left), how far its
+# bottom is from the card's and the card's own bottom radius.
+STACK_FEET = """() => { const card = document.querySelector('.stacked-review'); const box = card.getBoundingClientRect();
+  return {card: getComputedStyle(card).borderBottomLeftRadius, theme: document.documentElement.dataset.theme || 'light',
+    figures: [...card.querySelectorAll('.stack-figure > .stacked-canvas')].filter(node => node.getClientRects().length).map(node => {
+      const s = getComputedStyle(node); const r = node.getBoundingClientRect();
+      return {id: node.id, corners: [s.borderTopLeftRadius, s.borderTopRightRadius, s.borderBottomRightRadius, s.borderBottomLeftRadius],
+              foot: Math.round(box.bottom - r.bottom)}; })}; }"""
+
+
+def part_stack_feet(browser):
+    """The stacked card's foot (the verification of 2026-11-06: the figures' light gradient, radius 0, reached the card's
+    rounded foot with square corners standing out, most in dark): in Rectangular and Gen by Surface, at 1440 and 390 px,
+    light and dark, the figures of its last row rounded as the card's foot (the card's 18 px less its 1 px edge), every
+    other corner square: Rectangular's registration alone both; at 1440 px Gen by Surface's two side by side, the
+    registration's bottom left and the sensor on the part's bottom right; at 390 px the sensor on the part under the
+    registration both, the registration none."""
+    seen = {}
+    for scheme in ("light", "dark"):
+        for width in (1440, 390):
+            for label, url in (("Rectangular", RECT_URL), ("Gen by Surface", URL)):
+                page = new_page(browser, width=width, height=900, folded=True)
+                if scheme == "dark":
+                    page.add_init_script(DARK_CHOICE)
+                page.goto(url)
+                wait_until(page, DONE, 60)
+                if url == URL:
+                    wait_until(page, DEFAULT_SETTLED, 120)
+                page.wait_for_timeout(300)
+                seen[(scheme, width, label)] = dict(page.evaluate(STACK_FEET), errors=errors_of(page))
+                if scheme == "dark":
+                    page.locator(".stacked-review").screenshot(path=f"{SHOTS}/cad_stack_feet_{'rect' if url == RECT_URL else 'cad'}_{width}_dark.png")
+                page.close()
+    for (scheme, width, label), got in seen.items():
+        foot = f"{float(got['card'].rstrip('px')) - 1:g}px"
+        if label == "Rectangular":
+            want = {"stackedPreview": ["0px", "0px", foot, foot]}
+        elif width == 1440:
+            want = {"stackedPreview": ["0px", "0px", "0px", foot], "sensorOnPart": ["0px", "0px", foot, "0px"]}
+        else:
+            want = {"stackedPreview": ["0px"] * 4, "sensorOnPart": ["0px", "0px", foot, foot]}
+        last = [figure for figure in got["figures"] if figure["foot"] <= 1]
+        check(f"stack feet {label} {width} {scheme}: the last row's figures rounded as the card's foot ({foot}), the other corners square",
+              got["card"] == "18px" and got["theme"] == scheme and {figure["id"]: figure["corners"] for figure in got["figures"]} == want
+              and {figure["id"] for figure in last} == {key for key, corners in want.items() if corners[2] != "0px" or corners[3] != "0px"}
+              and not got["errors"], got)
+
 def look_warnings(page):
     # The figure's own warnings (onpart.js warnOnce: "On the part: ...") and three.js's ("THREE.").
     return [entry[1] for entry in page.logs if entry[0] == "warning" and (entry[1].startswith("On the part:") or "THREE." in entry[1])]
@@ -3146,6 +3242,8 @@ def main():
                  part_rounded_corners, part_files)
         parts += (part_library,)  # the Library's ./?part=<id> (2026-11-05)
         parts += (part_figure_controls,)  # the figures' controls in their frames (2026-11-06)
+        parts += (part_older_browser,)  # a browser without Element.checkVisibility (the review of 2026-11-06)
+        parts += (part_stack_feet,)  # the stacked card's figures rounded at its foot (the verification of 2026-11-06)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
         for part in chosen:
             print(f"--- {part.__name__}", flush=True)

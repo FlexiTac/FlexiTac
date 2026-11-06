@@ -596,10 +596,13 @@ class ThemeFileTests(unittest.TestCase):
         # so the split keeps nothing that only kept its pin-1 rings off one (the review of 2026-11-05: the caption's right
         # margin, the plan view's 30 px at the pane's foot and its 400 px scene in the 480 px pane).  The plan view's scene
         # is the window's rules' alone, centred in its pane as in the whole card, scaled by --plan-fit (1 unless app.js
-        # clearPlanOfControls shrinks it off the frame's controls, 2026-11-06).
+        # clearPlanOfControls shrinks it off the frame's controls, 2026-11-06).  Since the verification of 2026-11-06 the
+        # split rounds its two figures' outer bottom corners at the card's foot too (test_surface_web).
         split = [rule for rule in self.styles_rules if any("stack-card" in condition for condition in rule.conditions)]
         self.assertEqual(sorted(selector for rule in split for selector in rule.selectors),
-                         ['.stack-figure', '.stack-figures', 'body[data-mode="cad"] .stack-figure.is-on-part'])
+                         ['.stack-figure', '.stack-figures', 'body[data-mode="cad"] .stack-figure.is-on-part',
+                          'body[data-mode="cad"] .stack-figure.is-on-part > .stacked-canvas',
+                          'body[data-mode="cad"] .stack-figure.is-registration > .stacked-canvas'])
         self.assertTrue(all(len(rule.conditions) == 1 for rule in split), split)
         for rules in (self.styles_rules, self.rules):
             self.assertEqual([rule for rule in rules if any("assembly-caption" in selector for selector in rule.selectors)], [])

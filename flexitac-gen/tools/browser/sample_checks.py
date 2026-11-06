@@ -32,7 +32,9 @@ project, in headless Chromium on SwiftShader, as a visitor sees the page (no fol
   and once its face is picked and Generate sensor pressed a whole gripper's sensor is in sight past the other finger in
   the 3D view (main.js sampleView) and, in both modes, in the stacked card's sensor on the part (drawn on the finger it
   lies on alone; the review of 2026-11-06); an unknown one the UMI finger with a warning, ?sample dropped.
-- part_keys: a click, Enter and Space on a tile load it as a drop does (its part alone); a tile's focus ring.
+- part_keys: a click, Enter and Space on a tile load it as a drop does (its part alone); a tile's focus ring; each tile
+  Tabbed to whole in the palette's scroller with its ring (the review of 2026-11-06: at 390 x 844 and 360 x 740 the row
+  sideways, at 1024 x 640 with Advanced Customization open the two columns down).
 - part_race: a sample dropped while another one loads (and again while the visitor's Generate sensor on the one shown
   is under way): the newer wins, shown alone, that build landing without a placement mismatch and not drawn on the
   newer part; the same sample twice is loaded once, and pressed twice 200 ms apart (one mesh fetched, one inspect);
@@ -47,8 +49,9 @@ project, in headless Chromium on SwiftShader, as a visitor sees the page (no fol
 - part_rect: in Rectangular mode the guide and so the palette are hidden; back in Gen by Surface it is there.
 - part_phones: at 390 x 844 and 360 x 740 (touch) the palette one sideways row under the steps, at most 80 px high,
   the hint saying tap, the page no wider than the window, every tile at least 24 x 24 CSS px, the first tile's focus
-  ring inside the row; a tap loads a sample (its part alone) and brings the 3D view into sight (at once under reduced
-  motion).
+  ring inside the row, the row's tiles one height with each name whole and 4 px or more clear of its tile's edges (the
+  verification of 2026-11-06); a tap loads a sample (its part alone) and brings the 3D view into sight (at once under
+  reduced motion).
 - part_firefox (with FPC_FIREFOX=1 and Playwright's Firefox installed): two tiles dragged onto the 3D view in Firefox,
   one onto the surface menu, each loaded alone, then its face picked and built (Chromium alone runs the other parts).
 - part_static (with FPC_STATIC_SITE, a site built by tools/build_static_site.py; served under /flexitac-gen/ on
@@ -466,9 +469,38 @@ def part_keys(browser):
           ring["id"] == SAMPLES[0]["id"] and ring["outline"] == "solid" and ring["width"] >= 2 and ring["visible"], ring)
     check("keys: no console errors", not errors_of(page), errors_of(page)[:4])
     page.close()
+    # Tabbed to, each of the eight tiles whole in the palette's scroller with its focus ring (3 px out) inside it (the
+    # review of 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so below 760 px the
+    # third tile had stayed 61 px past the row, its ring cut): the phone's row sideways, and a short laptop window's two
+    # columns down with Advanced Customization open.
+    rooms = {}
+    for width, height, advanced in ((390, 844, False), (360, 740, False), (1024, 640, True)):
+        page = new_page(browser, width, height)
+        open_page(page)
+        if advanced:
+            page.evaluate("() => { document.getElementById('cadCustomize').open = true; }"); page.wait_for_timeout(300)
+        page.focus('#cadGuide .flow-step[data-step="3"] button')
+        rooms[(width, height)] = []
+        for _ in SAMPLES:
+            page.keyboard.press("Tab"); page.wait_for_timeout(80)
+            rooms[(width, height)].append(page.evaluate(TILE_ROOM))
+        scrolled = page.evaluate("() => { const grid = document.querySelector('.sample-grid'); return [grid.scrollLeft, grid.scrollTop]; }")
+        rooms[(width, height)].append(scrolled)
+        page.close()
+    check("keys: each tile, Tabbed to, whole in the palette's scroller with its focus ring inside it (390 x 844 and 360 x 740 sideways, "
+          "1024 x 640 with Advanced Customization open downward)",
+          all([room["id"] for room in seen[:-1]] == [sample["id"] for sample in SAMPLES] and all(room["room"] >= 2.5 for room in seen[:-1])
+              and max(seen[-1]) > 0 for seen in rooms.values()), rooms)
 
 
-DROP = """(ids) => { const view = document.getElementById('cadView');
+# The tile focused in the palette's scroller: the least room between its box and the scroller's inside (px; its focus
+# ring needs 3).
+TILE_ROOM = """() => { const tile = document.activeElement; const grid = tile.closest('.sample-grid'); if (!grid || !tile.dataset.sample) return null;
+    const area = grid.getBoundingClientRect(); const box = tile.getBoundingClientRect(); const [x, y] = [area.left + grid.clientLeft, area.top + grid.clientTop];
+    return {id: tile.dataset.sample, room: Math.round(Math.min(box.left - x, box.top - y, x + grid.clientWidth - box.right, y + grid.clientHeight - box.bottom) * 10) / 10}; }"""
+
+
+DROP ="""(ids) => { const view = document.getElementById('cadView');
     for (const id of ids) { const data = new DataTransfer(); data.setData('application/x-flexitac-sample', id);
       view.dispatchEvent(new DragEvent('dragover', {dataTransfer: data, bubbles: true, cancelable: true}));
       view.dispatchEvent(new DragEvent('drop', {dataTransfer: data, bubbles: true, cancelable: true})); } }"""
@@ -724,6 +756,15 @@ def part_phones(browser):
                   layout["below"] and layout["rows"] == 1 and layout["scrolls"] and layout["width"] == width and layout["height"] <= 80
                   and layout["hint"] == "Drag onto the 3D view, or tap." and layout["ring_room"] >= 3
                   and all(tile["width"] >= 24 and tile["height"] >= 24 for tile in tiles), (layout, [(t["width"], t["height"]) for t in tiles]))
+            # The row's tiles one height, each name clear of its tile's edges and whole (the verification of 2026-11-06:
+            # a two-line name's tile 32 px, the others 30 px, its second line 3 px off the bottom edge).
+            names = page.evaluate("""() => [...document.querySelectorAll('#samplePalette [data-sample]')].map(tile => { const box = tile.getBoundingClientRect();
+                const name = tile.querySelector('.sample-name'); const line = name.getBoundingClientRect();
+                return {id: tile.dataset.sample, height: box.height, lines: Math.round(line.height / parseFloat(getComputedStyle(name).lineHeight)),
+                        top: line.top - box.top, bottom: box.bottom - line.bottom, whole: name.scrollHeight <= name.clientHeight}; })""")
+            check(f"phones {width} x {height}: the row's tiles one height, each name whole and 4 px or more clear of its tile's top and bottom edges",
+                  len({round(name["height"], 1) for name in names}) == 1 and any(name["lines"] == 2 for name in names)
+                  and all(name["whole"] and name["top"] >= 4 and name["bottom"] >= 4 for name in names), names)
             # A tap from the top of the page (the guide in sight, the view below it): the sample loads, the 3D view comes
             # into sight, at once under reduced motion.
             page.evaluate("() => window.scrollTo(0, 0)")

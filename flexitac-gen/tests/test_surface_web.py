@@ -315,6 +315,36 @@ class PageTests(unittest.TestCase):
         self.assertIn(".board-card > .canvas-wrap { border-radius:0 0 calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px); }",
                       (WEB / "theme.css").read_text(encoding="utf-8"))
 
+    def test_the_stacked_card_s_last_row_is_rounded_as_its_foot(self) -> None:
+        # The verification of 2026-11-06: the figures' light gradient (.stacked-canvas, radius 0) reached the stacked
+        # card's rounded foot with its square corners standing out, most in dark.  Its last row is rounded as the board
+        # cards' previews: Rectangular's registration alone both corners; in Gen by Surface the sensor on the part under it
+        # both, the registration above it none; side by side (styles.css's stack-card container from 720 px) the left's
+        # bottom left and the right's bottom right.  The card ends with its figures (no legend under them).
+        tree = _Tree()
+        tree.feed((WEB / "index.html").read_text(encoding="utf-8"))
+        card = _one(tree.root, lambda node: "stacked-review" in node["attrs"].get("class", "").split())
+        self.assertIn("board-card", card["attrs"]["class"].split())
+        figures = _elements(card)[-1]
+        self.assertEqual(figures["attrs"].get("class"), "stack-figures")
+        self.assertEqual([(child["attrs"].get("class"), [grand["attrs"].get("id") for grand in _elements(child) if "stacked-canvas" in grand["attrs"].get("class", "").split()])
+                          for child in _elements(figures)],
+                         [("stack-figure is-registration", ["stackedPreview"]), ("stack-figure is-on-part", ["sensorOnPart"])])
+        # The radius theme.css's (the card's less its 1 px edge, as .board-card > .canvas-wrap), which corners styles.css's
+        # by the layout (theme.css has no @container).
+        self.assertIn(".stacked-review { --stack-foot:calc(var(--r-lg) - 1px); }", (WEB / "theme.css").read_text(encoding="utf-8"))
+        styles = (WEB / "styles.css").read_text(encoding="utf-8")
+        foot = "var(--stack-foot,7px)"
+        self.assertIn('.stack-figure.is-registration > .stacked-canvas,body[data-mode="cad"] .stack-figure.is-on-part > .stacked-canvas '
+                      f"{{ border-radius:0 0 {foot} {foot}; }}", styles)
+        self.assertIn('body[data-mode="cad"] .stack-figure.is-registration > .stacked-canvas { border-radius:0; }', styles)
+        self.assertIn('body[data-mode="cad"] .stacked-review { container:stack-card / inline-size; }', styles)
+        beside = re.findall(r"@container stack-card \(min-width:720px\) \{\n(.*?)\n\}", styles, re.S)
+        self.assertEqual(len(beside), 1, "styles.css's rules for the two figures side by side")
+        self.assertEqual(beside[0].splitlines()[-2:], [
+            f'  body[data-mode="cad"] .stack-figure.is-registration > .stacked-canvas {{ border-radius:0 0 0 {foot}; }}',
+            f'  body[data-mode="cad"] .stack-figure.is-on-part > .stacked-canvas {{ border-radius:0 0 {foot} 0; }}'])
+
     def test_the_registration_has_no_caption(self) -> None:
         # The user's request of 2026-11-06 ("“Exploded 3D registration review…” 小字去掉"): the small caption at the stacked
         # view's bottom left ("Exploded 3D registration review · visual spacing only · thickness at least 2 px", in the
@@ -432,6 +462,22 @@ class FigureControlsTests(unittest.TestCase):
         narrow = narrow[:narrow.index("} }") + 3]
         self.assertIn("min-width:24px", narrow)
         self.assertFalse([value for value in re.findall(r"min-(?:width|height):(\d+)px", narrow) if int(value) < 24])
+
+    def test_the_clearance_of_the_controls_never_fails_a_build(self) -> None:
+        # The review of 2026-11-06: boardDrawing's unguarded Element.checkVisibility (Safari 17.4, Firefox 106) failed every
+        # build on iOS and iPadOS 17.3 and older, in both modes.  The page's scripts call it behind app.js's guard alone
+        # (rendered: its client rects without it), and fitScene's clearance of the controls falls back to the plain fit
+        # should it throw (tools/browser/cad_checks.py part_older_browser runs both modes without it).
+        guard = 'const rendered = node => (typeof node.checkVisibility === "function" ? node.checkVisibility() : node.getClientRects().length > 0);'
+        self.assertEqual(self.app.count(guard), 1)
+        self.assertIn('[...svg.querySelectorAll(".outline, .view-label")].filter(rendered).map(node => {', self.app)
+        for path in sorted(WEB.glob("*.js")) + sorted((WEB / "cad").glob("*.js")):
+            with self.subTest(script=path.name):
+                self.assertIsNone(re.search(r"checkVisibility\s*\(", path.read_text(encoding="utf-8").replace(guard, "")))
+        scene = re.search(r"function fitScene\(pane\) \{(.*?)\n  \}", self.app, re.S).group(1)
+        self.assertIn("    try {\n      const tools = controlsBox(pane.parentElement); const drawn = tools && boardDrawing(svg);\n", scene)
+        self.assertIn('    } catch (error) {\n      svg.style.paddingTop = "";\n      fit = fitWindow(svg, own);\n    }\n    if (!fit) return;\n'
+                      "    const r = COIN.diameter_mm / 2;\n", scene)
 
     def test_the_zoom_level_shows_the_level_alone(self) -> None:
         # app.js updateZoomReadout: "1.2×" in sight, the scale on screen in its tooltip and, for a screen reader, its text.

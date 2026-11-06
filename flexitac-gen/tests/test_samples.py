@@ -24,9 +24,9 @@ checks that need no browser.
   ./?sample idle), a model loaded with no face selected and the build below hidden until its own Generate (no build of
   the part before mapped onto it), a whole gripper's selection on its finger framed from its camera, the build settling
   its own state, a sample holding the model shown until its mesh is in hand, the sample on its way live, the one shown
-  framed again, the tiles wired; viewer.js's markers
-  sized from a whole gripper's finger; tools/sample_grippers.py private, tools/browser/sample_thumbs.py public;
-  Python 3.9.
+  framed again, the tiles wired; viewer.js's markers sized from a whole gripper's finger; a tile Tabbed to shown whole
+  in its scroller; each whole gripper's STL header the bodies' change notice, whole; tools/sample_grippers.py private,
+  tools/browser/sample_thumbs.py public; Python 3.9.
 
 The browser checks are tools/browser/sample_checks.py.
 """
@@ -120,7 +120,8 @@ def assemble(name: str, scene: dict, part: bytes, bodies: dict) -> bytes:
         out += [moved(record, scene["mate"]["matrix"]) for record in records(part)]
     for body in scene["bodies"]:
         out += [moved(record, body["matrix"]) for record in records(bodies[body["mesh"]])]
-    header = f"FlexiTac-Gen sample {name}: assembled from the Library scene of {scene['part']}".encode("ascii")[:80]
+    header = f"modified (assembled: {name}) by FlexiTac-Gen 2026, see NOTICE.md".encode("ascii")
+    assert len(header) <= 80, "an STL's header holds 80 bytes"
     return header.ljust(80, b" ") + struct.pack("<I", len(out)) + b"".join(out)
 
 
@@ -323,7 +324,10 @@ class WholeGripperTests(unittest.TestCase):
                 gripper = records((SAMPLES / sample["mesh"]["file"]).read_bytes())
                 self.assertEqual(gripper[:len(records(part))], records(part))
                 self.assertGreater(len(gripper), 2 * len(records(part)), "the other finger and the gripper's bodies follow")
-                self.assertTrue((SAMPLES / sample["mesh"]["file"]).read_bytes()[:80].startswith(f"FlexiTac-Gen sample {sample['id']}".encode()))
+                # The bodies' change notice, naming the sample, whole (the review of 2026-11-06: cut mid-word at 80 bytes, it
+                # had said neither "modified" nor "see NOTICE.md").
+                self.assertEqual((SAMPLES / sample["mesh"]["file"]).read_bytes()[:80],
+                                 f"modified (assembled: {sample['id']}) by FlexiTac-Gen 2026, see NOTICE.md".encode().ljust(80, b" "))
 
     def test_the_library_selection_is_the_finger_s_face_and_the_fit_its_sensor(self) -> None:
         from surface import api
@@ -467,6 +471,35 @@ class PaletteMarkupTests(unittest.TestCase):
                         self.assertFalse(any("prefers-color-scheme" in condition for condition in rule.conditions))
                         self.assertFalse({name for name, _, _ in rule.declarations} & {"transition", "transform", "animation", "opacity"})
 
+    def test_the_phone_row_s_tiles_are_one_height(self) -> None:
+        # The verification of 2026-11-06: under 760 px (the one sideways row) a tile with a two-line name was 32 px and
+        # the others 30 px, the second line 3 px off the tile's bottom edge.  Each tile fills its row's item (a flex
+        # item that stretches) and is 34 px at least: a two-line name (13 px lines), its 3 px of padding and its 1 px
+        # edges are 34 px, so every tile of the row is 34 px and the name 4 px clear of either edge (sample_checks
+        # part_phones).
+        styles, _ = parse_css((WEB / "styles.css").read_text(encoding="utf-8"))
+
+        def declared(selector, conditions=()):
+            out = {}
+            for rule in styles:
+                if selector in rule.selectors and tuple(rule.conditions) == tuple(conditions):
+                    out.update({name: value for name, value, _ in rule.declarations})
+            return out
+
+        def px(value):
+            return int(value.rstrip("px"))
+
+        phone = ("@media (max-width:759px)",)
+        compact = ("@media (min-width:981px) and (max-height:919px), (max-width:980px)",)
+        self.assertEqual(declared(".sample-grid > li", phone), {"display": "flex"})
+        tile = declared(".sample-grid .sample", phone)
+        self.assertEqual(tile, {"min-height": "34px", "padding-top": "3px", "padding-bottom": "3px"})
+        name = declared(".sample-grid .sample-name", compact)
+        self.assertEqual((name["-webkit-line-clamp"], declared(".sample-grid .sample", compact)["align-items"]), ("2", "center"))
+        edge = px(declared(".sample")["border"].split()[0])
+        self.assertEqual(2 * px(name["line-height"]) + px(tile["padding-top"]) + px(tile["padding-bottom"]) + 2 * edge, px(tile["min-height"]),
+                         "a two-line name's tile no taller than the others")
+
 
 class SampleScriptTests(unittest.TestCase):
     @classmethod
@@ -477,6 +510,17 @@ class SampleScriptTests(unittest.TestCase):
         match = re.search(r"\n(?:async )?function %s\(.*?\n}\n" % re.escape(name), self.main, re.S)
         self.assertIsNotNone(match, name)
         return match.group(0)
+
+    def test_a_tile_tabbed_to_is_shown_whole(self) -> None:
+        # The review of 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so a tile
+        # Tabbed to that the palette's scroller showed in part stayed cut, its ring too.  The scroller moves the least that
+        # shows it whole, for the keyboard's focus alone (a click's or a drag's never moves a tile from under the pointer)
+        # and the scroller alone (tools/browser/sample_checks.py part_keys).
+        self.assertIn('  document.querySelector("#samplePalette .sample-grid")?.addEventListener("focusin", revealTile);\n', self.function("wireSamples"))
+        reveal = self.function("revealTile")
+        self.assertIn('  if (!tile || !tile.matches(":focus-visible")) return;\n', reveal)
+        self.assertIn("  if (left || top) grid.scrollBy({left, top});\n", reveal)
+        self.assertNotIn("scrollIntoView", reveal, "the scroller only: the page stays put")
 
     def test_the_index_the_drag_type_and_the_address(self) -> None:
         self.assertIn('const SAMPLES_INDEX = "static/samples/samples.json";', self.main)

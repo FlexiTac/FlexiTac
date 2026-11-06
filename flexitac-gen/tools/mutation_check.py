@@ -234,6 +234,11 @@ from typing import NamedTuple, Sequence
 
 PROJECT = Path(__file__).resolve().parents[1]
 WORKFLOW = PROJECT.parent / ".github" / "workflows" / "fpc-agentic-customization.yml"
+# Seconds a mutant's suite run may take before it counts as a kill (--timeout).  One run of the whole suite took 670 to
+# 1900 s on the development host on 2026-11-06, by its load (the baseline 1393 s), and up to about 1700 s on a GitHub
+# runner, so the 900 s of before read every mutant KILLED by its timeout; 5400 s leaves room for a loaded host
+# (tools/README.md).
+SUITE_TIMEOUT = 5400.0
 CORE = "engine/core.py"
 LAYOUT = "engine/layout.py"
 DRC = "engine/drc.py"
@@ -2771,6 +2776,41 @@ THEME_TOGGLE = (
       killers=("test_web_theme.",)),
 )
 MUTANTS += THEME_TOGGLE
+# A browser without Element.checkVisibility (the review of 2026-11-06: iOS and iPadOS before 17.4, where every build had
+# failed in both modes): app.js's call unguarded again, and fitScene's clearance of the controls failing the build; each
+# killed alone by test_surface_web (FigureControlsTests) on a scratch copy; cad_checks part_older_browser sees both in
+# the browser.
+OLDER_BROWSER = (
+    m("M/web-check-visibility-unguarded", "2026-11-06 review", "app.js: boardDrawing calls Element.checkVisibility unguarded (every build fails where the browser lacks it)",
+      (WEB, '[...svg.querySelectorAll(".outline, .view-label")].filter(rendered).map(node => {',
+       '[...svg.querySelectorAll(".outline, .view-label")].filter(node => node.checkVisibility()).map(node => {'), killers=("test_surface_web.",)),
+    m("M/web-fit-scene-throws", "2026-11-06 review", "app.js: an error of fitScene's clearance of the controls fails the build (no plain fit to fall back on)",
+      (WEB, '    } catch (error) {\n      svg.style.paddingTop = "";\n      fit = fitWindow(svg, own);\n    }\n',
+       "    } catch (error) {\n      throw error;\n    }\n"), killers=("test_surface_web.",)),
+)
+MUTANTS += OLDER_BROWSER
+# The Library opened at an address of its own (the reviews of 2026-11-06): the grid's title painted before the sensor's
+# page (theme.js's mark gone), the footer hidden for good (route()'s opened() gone); each killed alone by test_library
+# (PageTests) on a scratch copy; library_checks part_routes sees both in the browser.
+LIBRARY_PLACE = (
+    m("S/library-place-unmarked", "2026-11-06 review", "theme.js: the Library opened at an address of its own unmarked (a frame of the grid's title over the footer before the sensor's page)",
+      (THEME_JS, """  if (location.hash.length > 1 && document.querySelector('meta[name="flexitac-page"][content="library"]')) root.dataset.libPlace = "";\n""", ""),
+      killers=("test_library.",)),
+    m("S/library-place-kept", "2026-11-06 review", "library.js: the first route no longer clears the mark (the footer, its trademark line and its licences, hidden on every page opened at its address)",
+      (LIBRARY_JS, "    if (!state.index) return;\n    opened();\n", "    if (!state.index) return;\n"), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_PLACE
+# A card or a sample's tile Tabbed to that its scroller shows in part (the review of 2026-11-06): left cut, its scroller's
+# focusin gone; each killed alone by test_library (PageTests) or test_samples (SampleScriptTests) on a scratch copy;
+# library_checks part_layout and sample_checks part_keys see them in the browser.
+TAB_REVEAL = (
+    m("S/library-row-reveal", "2026-11-06 review", "library.js: a card Tabbed to that its row shows in part left cut (the row not moved to it)",
+      (LIBRARY_JS, "      if (shift) track.scrollBy({left: shift});\n", ""), killers=("test_library.",)),
+    m("M/web-sample-reveal", "2026-11-06 review", "main.js: a sample's tile Tabbed to that the palette's scroller shows in part left cut (no focusin)",
+      (CAD_MAIN, '  document.querySelector("#samplePalette .sample-grid")?.addEventListener("focusin", revealTile);\n', ""),
+      killers=("test_samples.",)),
+)
+MUTANTS += TAB_REVEAL
 # A sample and the user's own file loaded with no face selected and nothing built, only the default UMI finger's (and a
 # Library sensor's ?part) built at once (the user's request of 2026-11-06, "测试用的sensor,不要托进去之后直接就生成好了,
 # 包括新拖进去的cad,不要直接显示哪个面被选择"): a sample's largest flat face selected and its sensor generated as it loads,
@@ -2795,6 +2835,23 @@ NO_AUTO = (
       killers=("test_samples.",)),
 )
 MUTANTS += NO_AUTO
+# The verification of 2026-11-06's small findings: the stacked card's last row square at its rounded foot, a shelf's card
+# Tabbed to without room round it in the window, the phone's row of samples of two heights, the runner's default timeout
+# below one run of the suite again; each killed alone on a scratch copy by the test named; cad_checks part_stack_feet,
+# library_checks part_layout and sample_checks part_phones see the first three in the browser.
+VERIFY_MINORS = (
+    m("M/web-stack-foot-square", "2026-11-06 verification", "styles.css: the stacked card's last row square at its rounded foot (the figures' gradient's corners standing out of it)",
+      (CSS, '.stack-figure.is-registration > .stacked-canvas,body[data-mode="cad"] .stack-figure.is-on-part > .stacked-canvas '
+       "{ border-radius:0 0 var(--stack-foot,7px) var(--stack-foot,7px); }\n", ""), killers=("test_surface_web.",)),
+    m("S/library-shelf-card-margin", "2026-11-06 verification", "library.css: a shelf's card Tabbed to without room round it in the window (at 390 px its focus ring cut at the window's bottom)",
+      ("web/library.css", ".lib-track > .lib-card { scroll-margin:16px 0; }\n", ""), killers=("test_library.",)),
+    m("M/web-sample-row-heights", "2026-11-06 verification", "styles.css: the phone's row of samples of two heights again (a two-line name's tile 32 px, the others 30 px)",
+      (CSS, "  .sample-grid > li { display:flex; }\n  .sample-grid .sample { min-height:34px; padding-top:3px; padding-bottom:3px; }\n", ""),
+      killers=("test_samples.",)),
+    m("T/doc-suite-timeout", "2026-11-06 verification", "mutation_check.py: the default --timeout 900 s again, below one run of the suite (every mutant KILLED by its timeout)",
+      ("tools/mutation_check.py", "\nSUITE_TIMEOUT = 5400.0\n", "\nSUITE_TIMEOUT = 900.0\n"), killers=("test_docs_consistency.",)),
+)
+MUTANTS += VERIFY_MINORS
 
 
 # --------------------------------------------------------------------------
@@ -2925,7 +2982,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true", help="only check that every edit still applies")
     parser.add_argument("--jobs", type=int, default=max(1, min(16, (os.cpu_count() or 2) // 2)), help="parallel suite runs")
     parser.add_argument("--python", default=sys.executable, help="interpreter for the suite (default: this one)")
-    parser.add_argument("--timeout", type=float, default=900.0, help="seconds per suite run")
+    parser.add_argument("--timeout", type=float, default=SUITE_TIMEOUT, help=f"seconds per suite run (default {SUITE_TIMEOUT:g})")
     parser.add_argument("--work", type=Path, default=None, help="scratch directory (default: the system temp directory)")
     parser.add_argument("--keep", action="store_true", help="keep the mutated copies")
     parser.add_argument("--json", type=Path, default=None, help="write the results as JSON")

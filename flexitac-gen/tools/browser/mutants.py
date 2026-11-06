@@ -12,10 +12,11 @@ for each part, the unmutated files through the same routes, which must pass ever
 INVALID), then each mutant; a run that crashes or never draws the figure is INVALID, not KILLED.
 
 The "lib" kind (the review of 2026-11-06: no mutant had reached the Library's 3D view) serves a mutated
-web/cad/library_view.js or web/cad/library_stage.js to a part of library_checks.py (part_view, part_view_race) in the
-same WebGL browser, after a control run of each part with the unmutated files through the same routes that must pass
-every check: a later show not winning, the lens shift the other way, the see-through finger's depth pass writing no
-depth, the see-through finger opaque.
+web/cad/library_view.js, web/cad/library_stage.js or (its second round) web/library.js to a part of library_checks.py
+(part_view, part_view_race, part_routes, part_layout) in the same WebGL browser, after a control run of each part with
+the unmutated files through the same routes that must pass every check: a later show not winning, the lens shift the
+other way, the see-through finger's depth pass writing no depth, the see-through finger opaque; the first route not
+clearing an address's mark (the footer hidden), a card Tabbed to left cut by its row.
 """
 from __future__ import annotations
 
@@ -43,6 +44,7 @@ VIEWER = open(f"{WEB}/cad/viewer.js", encoding="utf-8").read()
 STUDIO = open(f"{WEB}/cad/studio.js", encoding="utf-8").read()
 LIB_VIEW = open(f"{WEB}/cad/library_view.js", encoding="utf-8").read()
 LIB_STAGE = open(f"{WEB}/cad/library_stage.js", encoding="utf-8").read()
+LIBRARY_JS = open(f"{WEB}/library.js", encoding="utf-8").read()
 ORIENT_CASES = [("bottom", "top", "forward"), ("left", "bottom", "forward")]
 # The stacked view's pin-1 rings of app.js (P5-diagonal-bus.md sections 27.3-27.5), the mutants' text to replace: the
 # placement chosen, and the moves apart tried.
@@ -195,12 +197,18 @@ MUTANTS += [
      "const ghostDepth = new THREE.MeshBasicMaterial({colorWrite: false, depthWrite: false,", "part_view"),
     ("the see-through finger opaque: the rules' ghost_opacity not taken (library_stage.js)", "lib",
      "      ghostLook.opacity = rules.ghost_opacity;", "      ghostLook.opacity = 1;", "part_view"),
+    # The page itself (library.js; the reviews of 2026-11-06): the first route no longer clearing the mark theme.js set,
+    # and a card Tabbed to left cut by its row.
+    ("the Library's first route not clearing the mark of an address of its own: the footer hidden on every page opened so (library.js)", "lib",
+     "    if (!state.index) return;\n    opened();\n", "    if (!state.index) return;\n", "part_routes"),
+    ("a UMI card Tabbed to that its row shows in part left cut: the row not moved to it (library.js)", "lib",
+     "      if (shift) track.scrollBy({left: shift});\n", "", "part_layout"),
 ]
-LIB_FILES = {"**/static/cad/library_view.js": LIB_VIEW, "**/static/cad/library_stage.js": LIB_STAGE}
+LIB_FILES = {"**/static/cad/library_view.js": LIB_VIEW, "**/static/cad/library_stage.js": LIB_STAGE, "**/static/library.js": LIBRARY_JS}
 
 
 def lib_routes(old=None, new=None):
-    """The lib kind's routes: both files of LIB_FILES served, ``old`` replaced by ``new`` in the one that holds it."""
+    """The lib kind's routes: every file of LIB_FILES served, ``old`` replaced by ``new`` in the one that holds it."""
     if old is not None:
         assert sum(body.count(old) for body in LIB_FILES.values()) == 1, old
     return [(route, "text/javascript", body.replace(old, new) if old is not None and old in body else body) for route, body in LIB_FILES.items()]
