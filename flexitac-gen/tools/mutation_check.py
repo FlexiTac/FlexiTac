@@ -2775,7 +2775,9 @@ MUTANTS += THEME_TOGGLE
 # Library sensor's ?part) built at once (the user's request of 2026-11-06, "测试用的sensor,不要托进去之后直接就生成好了,
 # 包括新拖进去的cad,不要直接显示哪个面被选择"): a sample's largest flat face selected and its sensor generated as it loads,
 # and the user's own file's largest flat face selected as it loads; each killed alone by test_samples (SampleScriptTests)
-# on a scratch copy; sample_checks part_drag sees the first and cad_checks part_one_step the second in the browser.
+# on a scratch copy; sample_checks part_drag sees the first and cad_checks part_one_step the second in the browser.  Its
+# review: the build of the part before shown below a model loaded (its Gerber ZIPs ready), killed alone by test_samples
+# on a scratch copy, sample_checks' sample_ok seeing it in the browser.
 NO_AUTO = (
     m("M/web-sample-built-at-once", "2026-11-06 samples", "main.js: a sample dropped or pressed has a face selected and its sensor generated at once again",
       (CAD_MAIN, "    sampleAddress(id);\n    libraryNote();\n  } catch (error) {",
@@ -2786,6 +2788,10 @@ NO_AUTO = (
       (CAD_MAIN, ". Click the face the sensor goes on.`);\n  }\n",
        ". Click the face the sensor goes on.`);\n    const face = reply.candidates?.flat?.[0];\n"
        "    if (quickMode() && !cad.defaultFile && face && !cad.facetMismatch) await autoSelect(face.seed_facet, face.preset || \"flat\");\n  }\n"),
+      killers=("test_samples.",)),
+    m("M/web-results-of-another-part", "2026-11-06 samples", "main.js: the build of the part before shown below a model loaded, its Gerber ZIPs ready (a sample dropped after the default part's build)",
+      (CAD_MAIN, "  const shown = !cad.newPart && (cad.generated || cad.lastResult?.design?.template_id === SURFACE_TEMPLATE_ID);",
+       "  const shown = cad.generated || cad.lastResult?.design?.template_id === SURFACE_TEMPLATE_ID;"),
       killers=("test_samples.",)),
 )
 MUTANTS += NO_AUTO

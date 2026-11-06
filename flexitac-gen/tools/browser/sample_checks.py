@@ -98,6 +98,8 @@ BUILT = """() => { const s = JSON.parse(document.getElementById('cadState').text
 ASK = "Click the face the sensor goes on."
 NOTE = "() => document.getElementById('cadFileNote').textContent"
 STATUS = "() => document.getElementById('status').textContent"
+# The shared results below the 3D view (status, boards, checks, Gerber ZIPs) shown: main.js syncResults.
+RESULTS = "() => !document.body.classList.contains('cad-no-build')"
 TILES = """() => [...document.querySelectorAll('#samplePalette [data-sample]')].map(tile => { const box = tile.getBoundingClientRect();
     const img = tile.querySelector('img');
     return {id: tile.dataset.sample, name: tile.querySelector('.sample-name').textContent, left: Math.round(box.left), top: Math.round(box.top),
@@ -168,8 +170,8 @@ def shown_ok(page, sample_id, s):
 
 def sample_ok(page, sample_id):
     """A sample's part shown alone (the user's request of 2026-11-06: no face selected, nothing fitted or built, the sensor
-    shown before not drawn on it), the status and Generate sensor asking for the face, and the misses (empty when it is
-    so)."""
+    shown before not drawn on it, nor its results below: its review, they had stayed ready to download), the status and
+    Generate sensor asking for the face, and the misses (empty when it is so)."""
     s = state(page)
     got, want = shown_ok(page, sample_id, s)
     mesh = want["mesh"]
@@ -177,8 +179,8 @@ def sample_ok(page, sample_id):
     got.update({"selection": s["selection"], "ops": s["ops"], "proposals": s["proposals"], "overlay": s["overlay"], "map": s["verification"],
                 "on_part": s["on_part"]["state"], "building": s["default_build"] == "running" or s["step_running"],
                 "status": (s["status"]["kind"], s["status"]["shown"], message.startswith(f"{mesh}: ") and message.endswith(f" facets. {ASK}")),
-                "quick": (s["quick"]["kind"], s["quick"]["text"], s["quick"]["generate"]), "guide": s["guide"]})
-    want.update({"selection": None, "ops": 0, "proposals": 0, "overlay": None, "map": None, "on_part": "empty", "building": False,
+                "quick": (s["quick"]["kind"], s["quick"]["text"], s["quick"]["generate"]), "guide": s["guide"], "results": page.evaluate(RESULTS)})
+    want.update({"selection": None, "ops": 0, "proposals": 0, "overlay": None, "map": None, "on_part": "empty", "building": False, "results": False,
                  "status": ("ok", f"{mesh} loaded", True), "quick": ("idle", "Click the face the sensor goes on, then Generate sensor.", False),
                  "guide": ["done", "next", "todo"]})
     return {key: (got[key], want[key]) for key in want if got[key] != want[key]}
@@ -207,13 +209,14 @@ def generate_on(page, sample_id, timeout=300):
 
 def built_ok(page, sample_id):
     """A sample's sensor built by the visitor (generate_on): fitted by the server, generated and mapped with every check
-    passing, its DRC passing, the guide's step 3 next, and the misses (empty when it is so)."""
+    passing, its DRC passing and its results below shown, the guide's step 3 next, and the misses (empty when it is so)."""
     s = state(page)
     got, want = shown_ok(page, sample_id, s)
     build = s["generated_build_id"]
     got.update({"checks": (s["verification"] or {}).get("ok"), "drc": bool(build) and page.evaluate(STATUS).startswith(f"Valid build {build}"),
-                "fit": s["fit_source"], "status": s["status"]["kind"], "guide": s["guide"], "on_part": s["on_part"]["build_id"] == build})
-    want.update({"checks": True, "drc": True, "fit": "server", "status": "ok", "guide": ["done", "done", "next"], "on_part": True})
+                "fit": s["fit_source"], "status": s["status"]["kind"], "guide": s["guide"], "on_part": s["on_part"]["build_id"] == build,
+                "results": page.evaluate(RESULTS)})
+    want.update({"checks": True, "drc": True, "fit": "server", "status": "ok", "guide": ["done", "done", "next"], "on_part": True, "results": True})
     return {key: (got[key], want[key]) for key in want if got[key] != want[key]}
 
 
@@ -619,10 +622,11 @@ def part_errors(browser):
     page.wait_for_timeout(600)
     s, quick = state(page), page.evaluate(QUICK)
     check("errors: the user's own file during Generate sensor on a sample: not left busy (Generate sensor asking for the face), no tile "
-          "busy or current, no face selected on the file",
+          "busy or current, no face selected on the file, the sample's build (or the one before it) not shown below it",
           (s["mesh"] or {}).get("name") == "my-finger.stl" and not s["step_running"] and "Working" not in quick["title"]
           and quick["title"] == "Click the face the sensor goes on, then Generate sensor." and s["sample"] == {"pending": None, "shown": None}
-          and s["selection"] is None, (s["step_running"], quick, s["sample"], s["selection"]))
+          and s["selection"] is None and s["map_error"] is None and not page.evaluate(RESULTS),
+          (s["step_running"], quick, s["sample"], s["selection"], s["map_error"], page.evaluate(RESULTS)))
     # A sample whose mesh is refused while Generate sensor builds the one shown: that build lands, the warning stays after it.
     press_generate("widowx-250-gripper")
     page.route("**/samples/franka-hand-gripper.stl", lambda route: route.fulfill(status=404, body="not here"))

@@ -192,7 +192,8 @@ write, shoot the changed sensors again and write again.
     sample shown, pressed again, is only framed again; one that cannot be
     loaded leaves the part shown and its sensor as they were, with a
     warning.  Your own file, dropped or chosen, loads the same way, with
-    no face selected.
+    no face selected.  Until the new part's Generate sensor, the sensor
+    built before (its boards, checks and Gerber ZIPs) is not shown below it.
     The samples are
     static files in `web/samples/`: `samples.json` (each one's Library
     sensor, named in step 1's note), the thumbnails (drawn by `tools/browser/sample_thumbs.py` in

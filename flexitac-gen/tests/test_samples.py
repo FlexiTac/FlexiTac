@@ -20,9 +20,11 @@ checks that need no browser.
   proposal #1 build; with the scenes line's files present (web/library/scenes/<part>.json and its bodies) each STL is
   the assembly of that scene, byte for byte.
 - main.js: the samples' index and drag type, the drop on the 3D view's whole window taking a sample before a file,
-  ./?sample=<id> read and written, a whole gripper's fit asked of the server (its shipped fit the request alone), a
-  sample's build waiting for one under way, the build settling its own state, a sample holding the model shown until
-  its mesh is in hand, the sample on its way live, the one shown framed again, the tiles wired; viewer.js's markers
+  ./?sample=<id> read and written, a sample's part loaded alone (no fit fetched, no options, selection or build;
+  ./?sample idle), a model loaded with no face selected and the build below hidden until its own Generate (no build of
+  the part before mapped onto it), a whole gripper's selection on its finger framed from its camera, the build settling
+  its own state, a sample holding the model shown until its mesh is in hand, the sample on its way live, the one shown
+  framed again, the tiles wired; viewer.js's markers
   sized from a whole gripper's finger; tools/sample_grippers.py private, tools/browser/sample_thumbs.py public;
   Python 3.9.
 
@@ -535,6 +537,26 @@ class SampleScriptTests(unittest.TestCase):
         self.assertNotIn("autoSelect", self.function("loadFile"))
         self.assertEqual(self.main.count("autoSelect("), 3, "its definition, pickSurface's and a click's (onViewClick)")
         self.assertIn("const face = cad.inspect?.candidates?.flat?.[0];", self.function("buildDefaultSensor"), "the default part's face")
+
+    def test_a_model_loaded_hides_the_build_below_until_its_own_generate(self) -> None:
+        # The review of 2026-11-06: a sample dropped after the default part's build had that sensor's status, boards,
+        # checks and Gerber ZIPs under it; and a build landing after another part was loaded was mapped onto its proposal.
+        self.assertIn("generated: false, newPart: false,", self.main)
+        self.assertIn("const shown = !cad.newPart && (cad.generated || cad.lastResult?.design?.template_id === SURFACE_TEMPLATE_ID);",
+                      self.function("syncResults"))
+        load = self.function("loadFile")
+        assign = load.index("Object.assign(cad, {fileName: file.name")
+        self.assertIn("fitSource: null, newPart: true});\n  syncResults();", load[assign:], "the part before's build hidden as the model comes in")
+        self.assertLess(load.index("parsed = parseStl(bytes);"), assign, "an unreadable file leaves the part shown and its build")
+        self.assertIn("cad.generated = true; cad.newPart = false;", self.function("generate"))
+        self.assertIn("if (cad.newPart) { cad.newPart = false; syncResults(); }", self.function("mapBuild"), "a map onto this part shows its build")
+        result = self.function("onResult")
+        self.assertIn("if (!proposal || !cad.lastResult || cad.newPart) { renderState(); return; }", result)
+        self.assertLess(result.index("cad.newPart"), result.index("mapBuild("))
+        self.assertIn("if (!cad.newPart && chosenProposal() && cad.lastResult?.ok", self.function("setMode"))
+        remove = self.function("removeModel")
+        self.assertNotIn("newPart:", remove, "Remove model leaves the build below")
+        self.assertNotIn("syncResults", remove)
 
     def test_a_whole_gripper_s_selection_on_its_finger_is_seen_from_its_camera(self) -> None:
         # The visitor's selection on the Library finger of a whole gripper (its first facets) framed from the sample's

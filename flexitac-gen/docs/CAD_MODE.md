@@ -1083,7 +1083,11 @@ and Discord, as on flexitac.github.io:
 rectangular form, and `#cad` still names CAD mode.  CAD mode shows the
 CAD workspace in place of the rectangular form (Generate still writes the
 chosen design into it, out of sight); the results below (status, previews,
-design checks, downloads) appear once CAD mode has generated a build.  The
+design checks, downloads) appear once CAD mode has generated a build, and
+go again while a model loaded after it (a file, a sample) has had no
+Generate of its own (main.js `cad.newPart`; Remove model leaves them; a
+build of the part before that lands meanwhile is not mapped onto the new
+part's proposal).  The
 basic options are in sight; the file's unit and facts (File details), the
 grow settings (Selection settings), the other fit options (More options),
 the proposal's card (Proposal details) and the checks on the part (Check
@@ -1141,9 +1145,10 @@ fit's selection lies on its facets (main.js `figurePart`; the review of
 2026-11-06: drawn whole, the other finger and the hand's body stood
 between the figure's camera and the stack, Franka Hand's a wall of grey);
 the rest of the gripper stays in the 3D view.  A sample loaded after a
-build leaves that build below as the user's own file does: the sensor on
-the part is not drawn on the new part (its map is the old part's), and the
-Gerber downloads stay those of the build they name.  The address becomes
+build hides that build below as the user's own file does (the review of
+2026-11-06: its status, boards, checks and Gerber ZIPs had stayed under the
+new part, ready to download): the results come back with the new part's
+own Generate.  The address becomes
 `./?sample=<id>` (`?part` goes; a reload, or the page opened at it, shows
 the sample's part alone again; an unknown id the UMI finger with a
 warning); the user's own file and Remove model drop it, as they drop
