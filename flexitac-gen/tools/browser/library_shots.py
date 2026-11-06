@@ -177,9 +177,8 @@ GENERATOR_SHOT = """async (mode) => {
   return {url, buffer: [canvas.width, canvas.height], mode: op.mode, drawn_mode: op.drawn_mode, moved: op.moved, look: op.look,
           build_id: op.build_id, state: op.state};
 }"""
-# The stage's numbers (docs/LIBRARY_VIEW.md; their names frozen with the design of 2026-11-05).
-STAGE_NUMBERS = ("jaw_gap_mm", "step_mm", "drape_step_mm", "face_tilt_deg", "visible_min", "opaque_max", "assembled_opaque",
-                 "ghost_cover", "clearance_mm", "card_px", "band_css", "near_seen", "stacks_apart_px")
+# The stage's numbers (docs/LIBRARY_VIEW.md; their names frozen with the design of 2026-11-05): the writer's.
+STAGE_NUMBERS = library_write.STAGE_NUMBERS
 
 
 class ShotError(Exception):
@@ -308,63 +307,12 @@ def art_record(identifier: str, data: bytes, document: dict) -> dict:
 # -- 2. the pictures, from the Library's 3D view ---------------------------------------------------------------------
 
 def rule_breaches(numbers: dict, checks: dict, see_through, explode_stacks=("sensor",)) -> list:
-    """The rules of scenes/scenes.json's "checks" that a gripper's stage numbers break, one line each (none: []).
+    """The rules of scenes/scenes.json's "checks" that a gripper's stage numbers break, one line each (none: []):
+    library_write.stage_problems(), the one copy of the rules (docs/LIBRARY_VIEW.md; the review of 2026-11-06: a copy of
+    its own here had taken a jaw gap of 0 or below and an extra number, which the writer's --check and the site's gate
+    then refused), so the shots tool refuses exactly the sensors whose record the writer would refuse."""
 
-    The numbers (docs/LIBRARY_VIEW.md; the user's decision of 2026-11-06: one stack exploded, the sensor finger's, the
-    near finger see-through in both views, its stack assembled): visible_min, the least visible share of any exploding
-    layer's field in Exploded (rule layer_visible_min); opaque_max and assembled_opaque, the most of a layer's field the
-    bodies and the fingers not drawn see-through cover in Exploded (every layer drawn there), and of stack 1's top FPC
-    in Assembled (each below opaque_cover_max); clearance_mm's bodies and other_finger, each field's least distance to a
-    body and to the other finger (at least clearance_min_mm) and its stacks, the exploded stack's to the other finger's
-    stack in Exploded (at least stacks_apart_min_g of the jaws' gap, jaw_gap_mm, and stacks_apart_min_mm);
-    stacks_apart_px, the two stacks' silhouettes apart on screen in Exploded (at least stacks_apart_min_px); card_px,
-    stack 1's top FPC in the card (its shorter side at least card_min_px); ghost_cover, the most a see-through finger
-    veils (at least ghost_cover_min where the scene draws one see-through, null where none); near_seen, the least share
-    of the still stack's bottom FPC seen in Exploded and Assembled (at least near_seen_min; null exactly when
-    ``explode_stacks``, the rules' explode_stacks, has the mate's stack exploding too)."""
-
-    if not isinstance(numbers, dict):
-        return [f"the stage gave no numbers ({numbers!r})"]
-    missing = [name for name in STAGE_NUMBERS if name not in numbers]
-    if missing:
-        return [f"the stage's numbers lack {', '.join(missing)}"]
-    clearance = numbers["clearance_mm"] if isinstance(numbers["clearance_mm"], dict) else {}
-
-    def value(number):
-        return number if isinstance(number, (int, float)) and not isinstance(number, bool) else None
-
-    broken = []
-
-    def rule(name, number, holds, text):
-        threshold = checks.get(name)
-        if value(threshold) is None:
-            broken.append(f"{name}: scenes.json's rules have no such check")
-        elif value(number) is None or not holds(number, threshold):
-            broken.append(f"{name}: {text} {number!r} (rule {threshold})")
-
-    rule("layer_visible_min", numbers["visible_min"], lambda got, rule_: got >= rule_, "a layer's field visible only")
-    rule("opaque_cover_max", numbers["opaque_max"], lambda got, rule_: got < rule_, "a layer's field covered (Exploded)")
-    rule("opaque_cover_max", numbers["assembled_opaque"], lambda got, rule_: got < rule_, "stack 1's top FPC covered (Assembled)")
-    rule("clearance_min_mm", clearance.get("bodies"), lambda got, rule_: got >= rule_, "a field to a body, mm")
-    rule("clearance_min_mm", clearance.get("other_finger"), lambda got, rule_: got >= rule_, "a field to the other finger, mm")
-    gap = value(numbers["jaw_gap_mm"])
-    rule("stacks_apart_min_g", clearance.get("stacks"), lambda got, rule_: gap is not None and got >= rule_ * gap,
-         f"the exploded stack to the other finger's stack (the jaws' gap {gap} mm), mm")
-    rule("stacks_apart_min_mm", clearance.get("stacks"), lambda got, rule_: got >= rule_, "the exploded stack to the other finger's stack, mm")
-    rule("stacks_apart_min_px", numbers["stacks_apart_px"], lambda got, rule_: got >= rule_, "the stacks apart on screen, px")
-    card = numbers["card_px"]
-    rule("card_min_px", min(card) if isinstance(card, list) and card and all(value(side) is not None for side in card) else None,
-         lambda got, rule_: got >= rule_, "stack 1's top FPC's shorter side in the card, px")
-    if see_through:
-        rule("ghost_cover_min", numbers["ghost_cover"], lambda got, rule_: got >= rule_, "a see-through finger veils")
-    elif numbers["ghost_cover"] is not None:
-        broken.append(f"ghost_cover: {numbers['ghost_cover']!r} where the scene draws no finger see-through")
-    if "mate" in (explode_stacks or ()):
-        if numbers["near_seen"] is not None:
-            broken.append(f"near_seen: {numbers['near_seen']!r} with the mate's stack exploding")
-    else:
-        rule("near_seen_min", numbers["near_seen"], lambda got, rule_: got >= rule_, "the near stack's bottom FPC seen only")
-    return broken
+    return library_write.stage_problems(numbers, checks, see_through or (), explode_stacks)
 
 
 def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> dict:

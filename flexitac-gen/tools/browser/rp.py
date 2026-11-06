@@ -188,7 +188,8 @@ def stacked_pin1(page, margin=0.0):
     FPC's (``is-upper``) and the bottom FPC's (``is-lower``) in different colours, each at least 17 px across, apart by
     more than their radii and strokes (no overlap), neither taking in any of the other board's pin-1 triangle (its box),
     each round its own triangle (its centre within one ring radius of the triangle's: section 27.5, the plan view's
-    rings stepped a ring diameter off their triangles had left them marking nothing) and nearer its own triangle's
+    rings stepped a ring diameter off their triangles had left them marking nothing; where the two triangles crowd, one's
+    centre within a quarter of a ring's diameter of the other's box, beside it: within a ring diameter and the gap, the review of 2026-11-06) and nearer its own triangle's
     centre than the other's, so each marks its own pin-1 pad only, and both within the view (it clips; the view has no
     caption since 2026-11-06).  The exploded view tilts the boards about the screen's x axis, so its rings are ellipses
     along the screen's axes, alike: distances are measured with y scaled by their aspect.  ``margin`` (px): the gap the
@@ -214,10 +215,21 @@ def stacked_pin1(page, margin=0.0):
             near = (min(max(ring["x"], left), right) - ring["x"], (min(max(ring["y"], top), bottom) - ring["y"]) * aspect)
             if (near[0] ** 2 + near[1] ** 2) ** 0.5 < ring["d"] / 2 + margin:
                 problems.append(("takes in the other triangle", ring["layer"]))
-    for ring in (upper, lower):
+    for ring, other in ((upper, lower), (lower, upper)):
         if ring["triangle"]:
             left, top, right, bottom = ring["triangle"]
-            if ((left + right) / 2 - ring["x"]) ** 2 + (((top + bottom) / 2 - ring["y"]) * aspect) ** 2 >= (ring["d"] / 2) ** 2:
+            mine = ((left + right) / 2, (top + bottom) / 2)
+            # Crowded (the review of 2026-11-06: the plan view of a 2 x 2 field at 390 px, its two triangles 4 to 6 px apart,
+            # their boxes touching): its own triangle's centre within a quarter of a ring's diameter of the other's box, so
+            # no ring rounds it and stays clear of the other's; there the ring stands beside it (one step: its centre within
+            # a ring diameter and the 4 px gap, and a pixel, of the triangle's), still nearer it than the other's.
+            crowded = False
+            if other["triangle"]:
+                o_left, o_top, o_right, o_bottom = other["triangle"]
+                crowded = ((min(max(mine[0], o_left), o_right) - mine[0]) ** 2
+                           + ((min(max(mine[1], o_top), o_bottom) - mine[1]) * aspect) ** 2) ** 0.5 < ring["d"] / 4
+            reach = ring["d"] + 5 if crowded else ring["d"] / 2
+            if (mine[0] - ring["x"]) ** 2 + ((mine[1] - ring["y"]) * aspect) ** 2 >= reach ** 2:
                 problems.append(("off its own triangle", ring["layer"]))
     for ring, other in ((upper, lower), (lower, upper)):
         if ring["triangle"] and other["triangle"]:

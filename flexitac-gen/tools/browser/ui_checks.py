@@ -290,6 +290,16 @@ PIN1_HOME = """() => document.querySelectorAll('#stackedPreview .pin1-ring').for
 
 
 def part_stacked_pin1(browser):
+    _stacked_pin1(browser, 1440, 1000)
+
+
+def part_stacked_pin1_phone(browser):
+    """part_stacked_pin1 at 390 x 900 (the review of 2026-11-06: there the plan view's rings of 2 x 2 fields had sat off
+    their triangles, each nearer the other board's, a run at 1440 px alone never saw it)."""
+    _stacked_pin1(browser, 390, 900)
+
+
+def _stacked_pin1(browser, width, height):
     """The stacked view's pin-1 rings (P5-diagonal-bus.md section 27.3: the user's tails centred and ending together, so
     the two boards' pin-1 contacts may lie side by side at one height), in the exploded view (the default) and the plan
     view, on small fields (a 2 x 2's pin-1 contacts 0.5 mm apart), with both and one side, the form's former default
@@ -304,22 +314,23 @@ def part_stacked_pin1(browser):
     and the note on the tails went with the stacked card's notes, the user's request of 2026-11-06; the caption, which
     the plan view's rings of the nearly equal tails leaving at the bottom had parted off the line to avoid at 1440 px,
     went on 2026-11-06 too.)"""
-    page = new_page(browser, width=1440)
+    page = new_page(browser, width=width, height=height)
+    at = "" if width == 1440 else f" ({width} px)"
     boot(page)
     # The default build as the form opens (the user's decision of 2026-10-27, section 27.7: the rectangular mode's tails 12
     # / 12 mm): both tails 12 mm, and its pin-1 rings right in both views.
     form = page.evaluate("() => ['topTailLength', 'bottomTailLength'].map(id => document.getElementById(id).value)")
-    check("the default build as the form opens: both tails 12 mm", form == ["12", "12"], form)
+    check(f"the default build as the form opens{at}: both tails 12 mm", form == ["12", "12"], form)
     for view in ("exploded", "plan"):
         page.click(f'[data-assembly-mode="{view}"]'); page.wait_for_timeout(250)
         problems, rings = stacked_pin1(page)
-        check(f"the default build as the form opens, {view} view: the two boards' pin-1 rings differ in colour, do not overlap, neither "
+        check(f"the default build as the form opens{at}, {view} view: the two boards' pin-1 rings differ in colour, do not overlap, neither "
               "takes in the other board's triangle and each rounds its own", status(page).startswith("Valid build") and problems == [], (problems, rings))
         covered, counts = pin1_strokes(page)
-        check(f"the default build as the form opens, {view} view: both pin-1 rings drawn above both boards (each ring's stroke its own "
+        check(f"the default build as the form opens{at}, {view} view: both pin-1 rings drawn above both boards (each ring's stroke its own "
               "colour over the other board)", covered == [], (covered, counts))
         shaped, shapes = pin1_shapes(page)
-        check(f"the default build as the form opens, {view} view: each pin-1 ring drawn as its board's ring lies on screen (each semi-axis "
+        check(f"the default build as the form opens{at}, {view} view: each pin-1 ring drawn as its board's ring lies on screen (each semi-axis "
               "within 5 %, the centre within 1 px: section 27.9)", shaped == [], (shaped, shapes))
     page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(100)
     cases = [(rows, columns, sides, tails, "bottom") for rows, columns in ((2, 2), (3, 2), (2, 3), (3, 3)) for sides in ("both", "left")
@@ -328,7 +339,7 @@ def part_stacked_pin1(browser):
     cases += [(12, 32, sides, tails, "bottom") for sides in ("both", "left") for tails in (("12", "7.5"), ("12", "12"))]
     seen_over = {"exploded": 0, "plan": 0}  # views where the bottom FPC's ring crosses the top FPC (the stroke check bites)
     for rows, columns, sides, (top, bottom), exit_side in cases:
-        name = f"{rows} x {columns} {sides}, tails {top} / {bottom} mm" + ("" if exit_side == "bottom" else f", leaving {exit_side}")
+        name = f"{rows} x {columns} {sides}, tails {top} / {bottom} mm" + ("" if exit_side == "bottom" else f", leaving {exit_side}") + at
         page.fill("#rows", str(rows)); page.fill("#columns", str(columns)); page.select_option("#rowSides", sides)
         page.fill("#topTailLength", top); page.fill("#bottomTailLength", bottom); page.select_option("#connectorSide", exit_side)
         page.click("#regenerate" if page.is_visible("#regenerate") else "#generate"); settle(page)
@@ -373,11 +384,11 @@ def part_stacked_pin1(browser):
                 seen_over[view] += counts.get("lower", (0, 0))[0] > 0
                 page.keyboard.press("0"); page.wait_for_timeout(200)
             if (rows, columns, sides, exit_side) == (2, 2, "both", "bottom") and top in ("12",):
-                page.locator(".stacked-review").screenshot(path=f"{SHOTS}/stacked_pin1_2x2_both_{top}_{bottom}_{view}.png")
+                page.locator(".stacked-review").screenshot(path=f"{SHOTS}/stacked_pin1_2x2_both_{top}_{bottom}_{view}_{width}.png")
         page.click('[data-assembly-mode="exploded"]'); page.wait_for_timeout(100)
     page.select_option("#connectorSide", "bottom")
-    check("stacked pin 1: the stroke check saw the bottom FPC's ring cross the top FPC in both views", all(seen_over.values()), seen_over)
-    check("stacked pin 1 part: no console errors", not console_errors(page), console_errors(page))
+    check(f"stacked pin 1{at}: the stroke check saw the bottom FPC's ring cross the top FPC in both views", all(seen_over.values()), seen_over)
+    check(f"stacked pin 1 part{at}: no console errors", not console_errors(page), console_errors(page))
     page.close()
 
 
@@ -983,8 +994,9 @@ LIBRARY_HEADER = """() => { const m = document.querySelector('.masthead .mode-pi
 LIBRARY_MAST = {1440: 104, 1200: 104, 1131: 104, 1130: 104, 1120: 104, 1110: 104, 1101: 104, 1100: 158, 900: 158, 800: 178, 601: 178,
                 600: 178, 521: 178, 520: 173, 500: 173, 486: 173, 481: 173, 480: 173, 479: 219, 430: 219, 390: 239, 360: 239}
 # Below 360 px (an iPhone SE with Display Zoom: 320; the review of 2026-11-05): the header within the window's 20 px gutters
-# and the title clear of the community links, on both pages (styles.css's and theme.css's rules below 360 px).
-LIBRARY_NARROW = (359, 340, 320)
+# and the title clear of the community links, on both pages (styles.css's and theme.css's rules below 360 px); and from
+# 360 to 374 px (the review of 2026-11-06: the mode switch had left 5 to 15 px on its right there).
+LIBRARY_NARROW = (374, 370, 365, 360, 359, 340, 320)
 
 
 def narrow_header(page, page_overflow=False):
@@ -1020,7 +1032,7 @@ def part_library_header(browser):
     check("library header: on index.html the Library link 12 px after the mode switch, on its line from 480 to 1440 px and on its own "
           "below; the header 104 px at 1440 px and as before everywhere but at 479 px and below (+46 px)", misfits == [], misfits[:6])
     narrow = narrow_header(page)
-    check("library header: below 360 px (359, 340, 320) index.html's header within the window, the title clear of the community links",
+    check("library header: below 375 px (374 to 360, 359, 340, 320) index.html's header within the window, the title clear of the community links",
           narrow == [], narrow[:3])
     page.set_viewport_size({"width": 1440, "height": 1000}); page.wait_for_timeout(60)
     link = page.evaluate("() => { const a = document.querySelector('.masthead-library'); return [a.textContent, a.getAttribute('href'), a.target, a.rel, a.title, a.classList.contains('masthead-link')]; }")
@@ -1052,7 +1064,7 @@ def part_library_header(browser):
     check("library header: on library.html from 360 to 720 px the title clears the header's right (the look's toggle first), no horizontal "
           "overflow, up to 410 px the three circles as on the generator", misfits == [], misfits[:6])
     narrow = narrow_header(page, page_overflow=True)
-    check("library header: below 360 px (359, 340, 320) library.html's header within the window, the title clear of the links, the page "
+    check("library header: below 375 px (374 to 360, 359, 340, 320) library.html's header within the window, the title clear of the links, the page "
           "not scrolling sideways", narrow == [], narrow[:3])
     check("library header: no console errors", not console_errors(page), console_errors(page))
     page.close()
@@ -1632,7 +1644,7 @@ def part_figure_controls(browser):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        parts = (part_boot_and_limits, part_clean_interface, part_looks, part_row_traces, part_stacked_pin1, part_stacked_orbit, part_two_sided, part_coin, part_depth, part_view_light, part_nudges_and_advice, part_stale, part_zoom, part_drc_and_failures,
+        parts = (part_boot_and_limits, part_clean_interface, part_looks, part_row_traces, part_stacked_pin1, part_stacked_pin1_phone, part_stacked_orbit, part_two_sided, part_coin, part_depth, part_view_light, part_nudges_and_advice, part_stale, part_zoom, part_drc_and_failures,
                  part_aria, part_downloads_and_http, part_figure_controls)
         parts += (part_library_header,)  # the header's Library link (2026-11-05)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]

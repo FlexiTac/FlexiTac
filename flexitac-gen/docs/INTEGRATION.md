@@ -414,8 +414,10 @@ The look's fix round (2026-11-05, the minor findings of its review):
   had framed it with 836.  The boards and the Exploded view are unchanged
   pixel for pixel, and on the part only pixels beside the stack's edge
   change (on the wrap also 32 beside the knuckle's strip, 35 levels at
-  most).  `part_on_part_contact` checks the sock: two fifths or more of
-  the part's pixels along the stack's edge darkened (0.32 before, 0.49).
+  most).  `part_on_part_contact` checks the sock: 0.48 or more of the
+  part's pixels along the stack's edge darkened (0.32 before, 0.49; at
+  the default fill 0.5 of 2026-11-06 0.417 before, 0.545, so the two
+  fifths of then would let the light line through).
 
 ## The diagonal Row bus
 

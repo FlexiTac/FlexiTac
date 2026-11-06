@@ -11,8 +11,9 @@ Against a running app.py (FPC_PORT) with the example meshes in asset/ (skipped w
 - Crank tip_left: candidate #1 is the 2957.3 mm2 developable pad; base auto; the default fit (Containment: Field
   only; the field follows the selected area, no Field shape since P5-diagonal-bus.md section 26.16) proposes a masked field of 688 taxels (34 x 34, the tip-first field of P5-diagonal-bus.md
   section 26, the 696 next; 666 of 32 x 32 before shaped fields took the rectangles' caps, section 21, 683 before the
-  corner tolerance at every convex corner, section 24, 696 before section 26) on the 70 mm leg with the narrow tip (13.9 mm, not the cut corner's), Whole board the 549 of phase P4
-  (Field shape rectangle's 17 x 18 = 306 before section 26.16).
+  corner tolerance at every convex corner, section 24, 696 before section 26) on a leg with the narrow tip, not the cut corner's
+  (at the default fill 0.5 the 68 mm leg, side 7, a 6.2 mm tip, 35 x 34; at fill 0.7 the 70 mm leg, side 6, 13.9 mm),
+  Whole board the masked 563 of 30 x 33 (549 at fill 0.7; Field shape rectangle's 17 x 18 = 306 before section 26.16).
 - Masked crank (Containment: Whole board): the proposal is a masked field (its field polygon has more than 4 points,
   the table shows "N of R x C", the preview and the overlay have its N taxels); Generate sends the mask with the
   form and builds the proposal's build id; the summary badge reads "N of R x C taxels active"; the map has its
@@ -23,8 +24,8 @@ Against a running app.py (FPC_PORT) with the example meshes in asset/ (skipped w
 - No rectangle controls (P5-diagonal-bus.md section 26.16, the user's decision: what CAD generates depends only on the
   selected area): no Field shape, no Board rules, no Largest rectangle in the border editor; the fit request names
   none of shape, template or rectangle_preference_pct, and Containment and Row traces stay the user's.
-- Field only on the soft finger (side 0; the default containment): 708 taxels against the whole board's 470 (a masked
-  50 x 12; the 45 x 8 rectangle's 360 before masked fields took the rectangles' caps, P5-diagonal-bus.md section 21); the
+- Field only on the soft finger (side 0; the default containment): 708 taxels against the whole board's 480 (a masked
+  50 x 12, 470 at fill 0.7; the 45 x 8 rectangle's 360 before masked fields took the rectangles' caps, P5-diagonal-bus.md section 21); the
   proposal card shows the tip, the bands, each board's share on the surface and the overhang; the tip equals the Row
   outline's width at ROW_01's centre in the flat view; the boards are dotted off the surface; Generate sends
   routing.row_sides with the form and builds the proposal's build id; every map record passes (field_clearance),
@@ -46,7 +47,7 @@ Against a running app.py (FPC_PORT) with the example meshes in asset/ (skipped w
 - 1024 x 768: no horizontal page overflow, the proposals table fits without scrolling, the view stays in sight after
   Fit; WebGL disabled: "WebGL unavailable", the rest still works.
 - The corner tolerance (P5-diagonal-bus.md section 16): a 30 x 38 mm plate with 4 mm corners takes the full
-  14 x 18 (252) and maps with field_corner_overhang; with 5 mm corners the masked 248 stays first.
+  14 x 18 (252) and maps with field_corner_overhang; with 5 mm corners the masked 250 stays first (248 at fill 0.7).
 - The template is app.js state (no fetch shim): CAD Generate -> Rectangular -> Generate -> CAD reports the template
   mismatch (never "verified"); the form's own Generate after a fit sends the default template.
 - Form limits of the surface template: with /api/default?template= served (an app.py feature), Max columns goes to
@@ -320,7 +321,8 @@ def part_one_step(browser):
     view saying so and Generate sensor lit (the Gerber buttons off); Generate sensor fits it and generates its proposal
     #1, mapped onto the part; a click on the selected face does nothing; Undo brings the contact face back, again only
     chosen; with Advanced Customization open an option changed runs nothing, and closed again only Generate sensor applies it; a
-    model loaded gets its largest flat face selected, generated with Generate sensor."""
+    model loaded has no face selected (the user's request of 2026-11-06), a click on its largest flat face selects it and
+    Generate sensor builds it."""
     page = new_page(browser, folded=True)
     page.goto(URL)
     wait_until(page, DONE, 60)
@@ -348,7 +350,7 @@ def part_one_step(browser):
     check("one step: Generate sensor fits the face and generates its proposal #1, mapped onto the part, every check passing; the "
           "line says what the sensor is, Generate sensor off again",
           s["proposal"] and s["proposal"]["rank"] == 1 and s["generated_build_id"] == s["proposal"]["build_id"] != first["generated_build_id"]
-          and s["verification"]["ok"] and s["quick"]["kind"] == "ok" and s["quick"]["text"].startswith("86 taxels in a 17 × 29 field") and not s["quick"]["generate"],
+          and s["verification"]["ok"] and s["quick"]["kind"] == "ok" and s["quick"]["text"].startswith("90 taxels in a 19 × 31 field") and not s["quick"]["generate"],
           (s["generated_build_id"], s["quick"]))
     moved = s["generated_build_id"]
     builds = len(page.generate)
@@ -385,8 +387,15 @@ def part_one_step(browser):
         built = s["generated_build_id"]
         load(page, SOFT); at_rest(page)
         s = state(page)
-        check("one step: a model loaded gets its largest flat face selected (the soft finger's 3087.7 mm2), nothing generated",
-              s["mesh"]["name"] == SOFT.name and s["selection"] and round(s["selection"]["area_mm2"], 1) == 3087.7 and s["generated_build_id"] == built
+        check("one step: a model loaded has no face selected (the user's request of 2026-11-06), nothing generated, Generate sensor "
+              "off, it and the status asking for the face",
+              s["mesh"]["name"] == SOFT.name and s["selection"] is None and s["ops"] == 0 and s["generated_build_id"] == built and not s["quick"]["generate"]
+              and s["quick"]["text"] == "Click the face the sensor goes on, then Generate sensor."
+              and page.get_attribute("#cadStatus", "title").endswith(" facets. Click the face the sensor goes on."), (s["selection"], s["quick"]))
+        candidate(page, 1); at_rest(page)
+        s = state(page)
+        check("one step: a click on its largest flat face (the soft finger's 3087.7 mm2) selects that face alone, nothing generated",
+              s["selection"] and round(s["selection"]["area_mm2"], 1) == 3087.7 and s["ops"] == 1 and s["generated_build_id"] == built
               and s["quick"]["generate"], (s["selection"], s["quick"]))
         page.click("#cadQuickGenerate"); page.wait_for_timeout(300); at_rest(page)
         s = state(page)
@@ -899,18 +908,22 @@ def part_crank(browser):
     s = state(page)
     check("crank: fit gives proposals and previews #1 on the part", s["proposals"] >= 1 and s["preview_taxels"] == s["proposal"]["taxels"], s)
     check("crank: the default is Containment Field only (no Field shape); #1 is a masked field of 688 taxels, the tip-first field "
-          "(696 before section 26; 549 whole board)",
+          "(696 before section 26; 563 whole board, 549 at fill 0.7)",
           page.locator("#cadShape").count() == 0 and page.input_value("#cadContainment") == "field" and s["proposal"]["masked"]
           and s["proposal"]["taxels"] == 688 and s["proposal"]["containment"] == "field", s["proposal"])
-    check("crank: with the automatic exit the narrow tip wins (the 70 mm leg, side 6: a 13.9 mm tip, not the cut corner's)",
-          s["proposal"]["base_side"] == 6 and s["proposal"]["tip_mm"] < 20.0, (s["proposal"]["base_side"], s["proposal"]["tip_mm"]))
+    # At the default fill 0.5 (the user's of 2026-11-06) the 68 mm leg's field (side 7: 688 of 35 x 34, a 6.2 mm tip) holds within
+    # 1 % of the most and has the narrowest tip, so the narrow-tip rule chooses that leg; at fill 0.7 it had been the 70 mm leg
+    # (side 6: 688 of 34 x 34, a 13.9 mm tip), as test_field_fit's crank pins with the fill of before.
+    check("crank: with the automatic exit the narrow tip wins (a leg, the 68 mm one at fill 0.5, side 7: a 6.2 mm tip, not the cut "
+          "corner's; the 70 mm leg's 13.9 mm at fill 0.7)",
+          s["proposal"]["base_side"] == 7 and s["proposal"]["tip_mm"] < 10.0, (s["proposal"]["base_side"], s["proposal"]["tip_mm"]))
     page.screenshot(path=f"{SHOTS}/cad_crank_fit_1440.png")
     page.locator("#cadWorkspace").screenshot(path=f"{SHOTS}/cad_crank_workspace_1440.png")
     page.select_option("#cadContainment", "board")
     page.click("#cadFit"); settle(page)
     wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).preview_taxels !== null", 30)
     s = state(page)
-    check("crank: Containment Whole board proposes the masked field of 549 taxels of phase P4", s["proposal"]["masked"] and s["proposal"]["taxels"] == 549
+    check("crank: Containment Whole board proposes the masked field of 563 taxels of 30 x 33 (549 at fill 0.7)", s["proposal"]["masked"] and s["proposal"]["taxels"] == 563
           and s["proposal"]["containment"] == "board", s["proposal"])
     check("crank part: no console errors", not errors_of(page), errors_of(page))
     page.close()
@@ -1121,9 +1134,9 @@ def part_field_soft(browser):
     page.click("#cadFit"); settle(page)
     s = state(page)
     board = s["proposal"]["taxels"] if s["proposal"] else 0
-    check("field soft: Whole board fits the masked 50 x 12 (470) across side 0 (the 45 x 8 rectangle, 360, before section 21)",
+    check("field soft: Whole board fits the masked 50 x 12 (480; 470 at fill 0.7) across side 0 (the 45 x 8 rectangle, 360, before section 21)",
           s["proposal"] and s["proposal"]["containment"] == "board" and s["proposal"]["masked"]
-          and (s["proposal"]["rows"], s["proposal"]["columns"], board) == (50, 12, 470) and s["fit_options"].get("containment") == "board", s["proposal"])
+          and (s["proposal"]["rows"], s["proposal"]["columns"], board) == (50, 12, 480) and s["fit_options"].get("containment") == "board", s["proposal"])
     check("field soft: a whole-board proposal's card says so and shows no Row bus", "whole board" in page.inner_text("#cadProposalCard")
           and "straight Row channel" in page.inner_text("#cadProposalCard"), page.inner_text("#cadProposalCard"))
     page.select_option("#cadContainment", "field")
@@ -1136,9 +1149,10 @@ def part_field_soft(browser):
     s = state(page)
     proposal = s["proposal"]
     rows, taxels = proposal["rows"], proposal["taxels"]
-    check("field soft: Field only proposes at least 700 taxels (708, 59 x 12), 1.5 times the whole board's (1.9 times its rectangle before section 21)",
+    check("field soft: Field only proposes at least 700 taxels (708, 59 x 12), 1.45 times the whole board's 480 or more (1.5 times its "
+          "470 at fill 0.7, 1.9 times its rectangle before section 21)",
           proposal["containment"] == "field" and taxels >= 700
-          and taxels >= 1.5 * board and s["fit_options"]["containment"] == "field" and s["fit_options"]["row_sides"] == "both", (proposal, board))
+          and taxels >= 1.45 * board and s["fit_options"]["containment"] == "field" and s["fit_options"]["row_sides"] == "both", (proposal, board))
     check("field soft: the proposal is a diagonal Row bus on both sides", proposal["row_sides"] == "both" and proposal["tip_mm"] and proposal["on_surface"], proposal)
     card = page.inner_text("#cadProposalCard")
     check("field soft: the face is symmetric about its base edge's axis and so is the field, centred on it; the card says so (P5 section 22)",
@@ -1156,9 +1170,10 @@ def part_field_soft(browser):
           "both FPCs reach as far (one outline down to the tail roots, diagonal-bus/8)",
           0 < overhang["left"] < 10 and 0 < overhang["right"] < 10 and abs(column["left"] - overhang["left"]) < 0.01
           and abs(column["right"] - overhang["right"]) < 0.01 and 0 < column["exit"] and abs(column["exit"] - overhang["exit"]) < 0.01, proposal["overhang"])
-    check("field soft: the card gives its figures to its own precision, two decimals at most (the field's clearance 0.028157 mm, "
-          "0.278157 before section 26.18 put the 708 0.25 mm nearer its tip, printed so before P5-diagonal-bus.md section 27.5)",
-          "the taxel field on the surface (0.03 mm clear)" in card and re.findall(r"\d\.\d{3,}", card) == [], card)
+    check("field soft: the card gives its figures to its own precision, two decimals at most (the field's clearance 0.18 mm at fill "
+          "0.5, 0.028157 mm at fill 0.7, 0.278157 before section 26.18 put the 708 0.25 mm nearer its tip, printed so before "
+          "P5-diagonal-bus.md section 27.5)",
+          "the taxel field on the surface (0.18 mm clear)" in card and re.findall(r"\d\.\d{3,}", card) == [], card)
     shared = proposal["shared_outline_mm"]
     check("field soft: the card says both FPCs share one outline down to their tail roots, so they align by their edges",
           shared is not None and shared > 0.5
@@ -1964,7 +1979,7 @@ def rounded_outline(width, height, radius, segments=12):
 def part_rounded_corners(browser):
     """The user's corner tolerance (P5-diagonal-bus.md section 16): a 30 x 38 mm plate with 4 mm corners takes the full
     14 x 18 rectangle (252, its corners' margin within 0.5 mm off the face), mapped with field_corner_overhang; with 5 mm
-    corners the masked 248 stays first (Field shape Rectangle's full 238 is no CAD option since section 26.16)."""
+    corners the masked 250 stays first (248 at fill 0.7; Field shape Rectangle's full 238 is no CAD option since section 26.16)."""
     page = new_page(browser)
     open_cad(page)
     four = Path(SCRATCH) / "rounded_plate_r4.stl"
@@ -1990,8 +2005,8 @@ def part_rounded_corners(browser):
     page.click("#cadFit"); settle(page)
     wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).preview_taxels !== null", 60)
     s = state(page)
-    check("corners: with 5 mm corners the masked 248 stays first (coverage first)",
-          s["proposal"] and s["proposal"]["taxels"] == 248 and s["proposal"]["masked"], s["proposal"])
+    check("corners: with 5 mm corners the masked 250 of 18 x 14 stays first (coverage first; 248 at fill 0.7)",
+          s["proposal"] and s["proposal"]["taxels"] == 250 and s["proposal"]["masked"], s["proposal"])
     check("corners part: no console errors", not errors_of(page), errors_of(page))
     page.close()
 
@@ -2209,7 +2224,7 @@ def part_on_part(browser):
     check("on part: four layers (the part, the bottom FPC, the film, the top FPC; the Row FPC on top), each board's art "
           "a texture of its view box at 12 px/mm, the art's look rules ASCII and small",
           op["top_board"] == "rows" and op["bottom_board"] == "columns" and all(op["vertices"][k] > 100 for k in ("bottom", "film", "top"))
-          and op["texture_px"]["row"] == [423, 1732] and op["art_css"]["ascii"] and 200 < op["art_css"]["bytes"] < 4096,
+          and op["texture_px"]["row"] == [418, 1730] and op["art_css"]["ascii"] and 200 < op["art_css"]["bytes"] < 4096,
           {key: op.get(key) for key in ("top_board", "bottom_board", "vertices", "texture_px", "art_css")})
     routing = s["map_routing"]
     check("on part: each board's share on the surface as the map's (within 0.03)", routing and all(abs(op["on_surface"][k] - routing[k]) < 0.03 for k in ("row", "column")),
@@ -2218,9 +2233,16 @@ def part_on_part(browser):
           op["explode"] == "shift" and op["gap_mm"] > 13 and op["nest_mm"] == 0.25 and op["spread_deg"] < 10, op)
     ratio = lambda rgba: rgba[1] / max(1, rgba[0])
     faces = op["faces"] or {}
-    check("on part: from outside, the bottom FPC shows its copper side (ENIG gold at the first taxel) and the top FPC, turned "
-          "over, its polyimide (the copper seen through it: orange)", faces.get("bottom", [0, 0, 0, 0])[3] == 255 and faces.get("top", [0, 0, 0, 0])[3] == 255
-          and ratio(faces["bottom"]) > 0.75 and ratio(faces["top"]) < 0.65, faces)
+    # The first taxel is a corner one: at the default fill 0.5 its centre is 1.0 mm from the Row board's outline (1.2 mm at
+    # fill 0.7), so at the home's distance the top FPC's mipmapped alpha there takes in the transparent texels beyond the
+    # outline (146, not 255).  Its colour still says which side faces out; the boards' opaque faces at the taxels' centres
+    # (taxel_median, every taxel's median: the pads of the bottom FPC, the top FPC's polyimide over its copper) say the same.
+    taxels = ((op.get("pixels") or {}).get("taxel_median") or {})
+    check("on part: from outside, the bottom FPC shows its copper side (ENIG gold at the first taxel and at the taxels' centres) "
+          "and the top FPC, turned over, its polyimide (the copper seen through it: orange)",
+          faces.get("bottom", [0, 0, 0, 0])[3] == 255 and faces.get("top", [0, 0, 0, 0])[3] >= 96
+          and ratio(faces["bottom"]) > 0.75 and ratio(faces["top"]) < 0.65 and len(taxels.get("bottom") or []) >= 3
+          and len(taxels.get("top") or []) >= 3 and ratio(taxels["bottom"]) > 0.75 and ratio(taxels["top"]) < 0.65, (faces, taxels))
     check("on part: Photo: the art's ENIG at a taxel (green 120 or more; the bare copper's is 106): the look's rules and paints reach the texture",
           op["look"] == "photo" and op["look_rgb"][1] >= 120 and op["look_rgb"][3] == 255, op["look_rgb"])
     pixels = op.get("pixels") or {}
@@ -2714,12 +2736,14 @@ def part_on_part_contact(browser):
     page.wait_for_timeout(300)
     pixels = state(page)["on_part"].get("pixels") or {}
     turned = on_part_camera(page)
-    # Measured at 1440 x 900, so turned: 0.29 with the core outside the footprint only (the light line), 0.46 with it
-    # (0.32 and 0.49 at the Assembled home before the user's decision of 2026-11-05, 22 / -20 about the field's y).
-    check("on part contact: the WXAI sock assembled, turned to spin 45 and tilt 32 (kept from Exploded): two fifths or more of the "
+    # Measured at 1440 x 900, so turned, at the default fill 0.5 (the user's of 2026-11-06; the field's electrodes narrower,
+    # its footprint's edge farther in): 0.417 with the core outside the footprint only (the light line, catalogue's
+    # M/web-on-part-contact-inner), 0.545 with it.  At fill 0.7: 0.29 and 0.46 (0.32 and 0.49 at the Assembled home before
+    # the user's decision of 2026-11-05, 22 / -20 about the field's y), so the 0.4 of then let the light line through at 0.5.
+    check("on part contact: the WXAI sock assembled, turned to spin 45 and tilt 32 (kept from Exploded): 0.48 or more of the "
           "part's pixels along the stack's edge darkened by the contact shade (no light line between the edge band and the shade), "
           "the shade drawn, no seam", turned[0] is not None and abs(turned[0] - 32) <= 0.01 and abs(turned[1] - 45) <= 0.01 and turned[2]
-          and (pixels.get("contact_edge") or 0) >= 0.4 and (pixels.get("contact_px") or 0) > 0 and pixels.get("seam_px") == 0,
+          and (pixels.get("contact_edge") or 0) >= 0.48 and (pixels.get("contact_px") or 0) > 0 and pixels.get("seam_px") == 0,
           {"camera": turned, **{key: pixels.get(key) for key in ("contact_edge", "contact_px", "contact_max", "seam_px")}})
     page.click("button[data-on-part-mode=exploded]")
     page.wait_for_timeout(300)

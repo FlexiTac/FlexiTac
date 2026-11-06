@@ -18,7 +18,12 @@ and each sensor's art, `web/library/art/`).
   runs it too); `--list` prints the catalogue; `--only audit/ T/` selects by id
   prefix.  Each mutant's suite runs with `FPC_MUTANT=<id>`, so that test
   skips itself in the mutated copy; if it fails there anyway, the run counts
-  as a false alarm.  A full run takes about 17 minutes with `--jobs 16` on
+  as a false alarm.  The copies leave out the caches, `.git` and what a run
+  wrote under `outputs/`, never the committed `outputs/.gitkeep`, which
+  `test_static_site`'s public export asks for (the review of 2026-11-06:
+  without it the baseline failed and every kill read as a false alarm); a
+  kill whose failing tests all fail in the unmutated copy too is reported
+  `SURVIVED (baseline failures only)`.  A full run takes about 17 minutes with `--jobs 16` on
   a 48-core host; in CI it is a manual job.
 - `golden_values.py`: prints the default-build values pinned by
   `tests/test_golden_default.py`, for review after a deliberate change.
@@ -57,9 +62,11 @@ and each sensor's art, `web/library/art/`).
   are published with `web/` as `static/library/art/`, `scenes/` and
   `bodies/`; an art or a gripper's stage that `library_write.pictures`
   refuses, a scene `library_write.scenes` refuses (of the parts built) or a
-  `view` in `entries.json` that is not the manifest's stops the build, a
-  picture with no 3D view yet is published with a warning, and
-  `BUILD.json`'s library record counts the sensors viewed.
+  `view` in `entries.json` that is not the manifest's stops the build, so
+  does a picture with no 3D view (its record without its art, a gripper's
+  without its stage: `VIEW_REQUIRED`, since the shoot of 2026-11-06; before
+  it such a picture was published with a warning), and `BUILD.json`'s
+  library record counts the sensors viewed.
   See the README, "As a static website" and "The Library".
 - `export_public.py`: writes the public part of the project from a commit
   (`git archive`, so only committed files) into a clone of FlexiTac/FlexiTac

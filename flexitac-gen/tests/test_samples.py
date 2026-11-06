@@ -499,28 +499,56 @@ class SampleScriptTests(unittest.TestCase):
             self.assertIn(text, wire)
         self.assertIn("prefers-reduced-motion: reduce", wire, "its scroll into sight respects reduced motion")
 
-    def test_a_whole_gripper_is_fitted_by_the_server_and_a_build_under_way_lands_first(self) -> None:
-        # The Library's request without the file's name: never one the page sends (each names its file), so runFit (its
-        # shipped test as it was) asks the server; buildDefaultSensor builds from it.
-        shipped = self.function("shippedFit")
-        self.assertIn("if (!part.ownMesh) return shipped;\n  const {name, ...request} = shipped.request;\n  return {request, reply: null};", shipped)
-        self.assertIn("const shipped = cad.defaultFile && cad.defaultFit && canonical(header(extra)) === canonical(cad.defaultFit.request);", self.main)
-        self.assertIn("cad.defaultFit = shippedFit(part, shipped);", self.function("loadDefaultPart"))
-        self.assertIn("cad.defaultFit = shippedFit(part, shipped);", self.function("loadSample"))
-        self.assertIn("const found = await libraryPart(sample.library, {fallback: false});", self.function("sampleLookup"))
-        build = self.function("buildDefaultSensor")
-        self.assertLess(build.index("await whenBuilt();"), build.index("await runFit();"))
+    def test_a_sample_loads_its_part_alone(self) -> None:
+        # The user's request of 2026-11-06 ("测试用的sensor,不要托进去之后直接就生成好了 ... 只有最开始default的umi finger需要这样"):
+        # a sample's part is loaded as the default file and nothing more, no fit fetched, no face selected, no sensor built;
+        # the visitor clicks the face and presses Generate sensor, which the server fits (no shipped fit is the sample's).
         load = self.function("loadSample")
         for text in ("if (sampleLoading(id)) return;", "pending.load = cad.seq.load;", "leaveLibrary();", "{isDefault: true}", "sampleAddress(id);",
-                     "if (await buildDefaultSensor()) sampleView();", "const warning = `The sample ${name} was not loaded (${error.message}).`;",
+                     "cad.defaultFit = null;", "cad.entry = entry;", "libraryNote();", "const warning = `The sample ${name} was not loaded (${error.message}).`;",
                      'setStatus("warning", warning);'):
             self.assertIn(text, load)
+        for text in ("buildDefaultSensor", "applyLibraryOptions", "autoSelect", "runSelect", "runFit", "oneStep", "generate(", "commitBorder", "part.fit", "fitError"):
+            self.assertNotIn(text, load, "a sample builds nothing at once")
         self.assertLess(load.index("leaveLibrary();"), load.index("loadFile("))
+        self.assertLess(load.index("cad.defaultFit = null;"), load.index("loadFile("))
+        opened = self.function("loadDefaultPart")
+        self.assertIn('  if (entry?.sample) cad.defaultBuild = "idle";\n', opened, "./?sample=<id> as the page opens: no build pending")
+        self.assertIn("      if (!entry?.sample) await buildDefaultSensor();\n", opened, "the default part's and a Library sensor's built at once, a sample's not")
+        self.assertIn("part.fit ? fetch(part.fit)", opened, "no fit fetched for a sample")
+        lookup = self.function("sampleLookup")
+        self.assertIn("const found = await libraryPart(sample.library, {fallback: false});", lookup)
+        self.assertIn("{url: found.part.url, name: found.part.name}", lookup, "a Library finger's mesh, not its fit")
+        self.assertNotIn("fit:", lookup)
+        for gone in ("shippedFit", "ownMesh", "whenBuilt"):
+            self.assertNotIn(gone, self.main, "dead with the samples' builds")
+        self.assertIn("const shipped = cad.defaultFile && cad.defaultFit && canonical(header(extra)) === canonical(cad.defaultFit.request);", self.main)
         self.assertIn("sample: renderSamples(),", self.main, "the state dump says the sample shown and on its way")
 
+    def test_a_model_loaded_has_no_face_selected(self) -> None:
+        # The same request: the user's own file (or a sample) loads with no face selected, in quick mode too (it had its
+        # largest flat face selected, autoSelect); the status asks for the face.  The default part's sensor alone is built.
+        inspect = self.function("inspectMesh")
+        self.assertNotIn("autoSelect", inspect)
+        self.assertNotIn("candidates?.flat", inspect)
+        self.assertIn('setStatus("ok", `${cad.fileName}: ${plural(reply.mesh.facets, "facet")}. Click the face the sensor goes on.`);', inspect)
+        self.assertNotIn("autoSelect", self.function("loadFile"))
+        self.assertEqual(self.main.count("autoSelect("), 3, "its definition, pickSurface's and a click's (onViewClick)")
+        self.assertIn("const face = cad.inspect?.candidates?.flat?.[0];", self.function("buildDefaultSensor"), "the default part's face")
+
+    def test_a_whole_gripper_s_selection_on_its_finger_is_seen_from_its_camera(self) -> None:
+        # The visitor's selection on the Library finger of a whole gripper (its first facets) framed from the sample's
+        # camera wherever the selection is framed: along the face's normal the camera would stand in the other finger.
+        view = self.function("sampleView")
+        self.assertIn("facets.every(facet => facet < sample.partFacets)", view)
+        self.assertIn("cad.viewer.lookAt(centre, sample.camera, ", view)
+        self.assertIn("return true;", view)
+        self.assertIn("  if (sampleView()) return;\n", self.function("lookAtSelection"))
+        self.assertIn('if (cad.selection) lookAtSelection(); else cad.viewer.view("iso", viewClear());', self.function("frameSample"))
+
     def test_a_build_settles_its_own_state_and_a_sample_keeps_the_model_shown_until_its_mesh_is_in_hand(self) -> None:
-        # The review of 2026-11-06: a sample's build superseded by the user's own file had stayed "running" (Generate
-        # sensor disabled for good), and a sample that failed to load had stopped the shown one's build.
+        # The review of 2026-11-06: a build superseded by the user's own file had stayed "running" (Generate sensor
+        # disabled for good), and a sample that failed to load had stopped the shown one's build.
         build = self.function("buildDefaultSensor")
         self.assertIn("const run = (cad.buildRun = {});", build)
         self.assertIn("  } finally {\n    if (cad.buildRun === run) {\n      cad.buildRun = null;\n      if (!built) cad.defaultBuild = \"stopped\";", build)
@@ -528,7 +556,7 @@ class SampleScriptTests(unittest.TestCase):
         self.assertLess(build.index('cad.defaultBuild = "done";'), build.index("built = true;"))
         self.assertIn('if (!cad.buildRun) cad.defaultBuild = "stopped";', build, "a call no longer current says stopped, unless a later build runs")
         tail = self.function("loadDefaultPart")
-        self.assertIn('  if (cad.defaultBuild === "pending") cad.defaultBuild = "stopped";\n', tail, "its tail leaves a sample's build alone")
+        self.assertIn('  if (cad.defaultBuild === "pending") cad.defaultBuild = "stopped";\n', tail, "its tail leaves a build under way alone")
         self.assertNotIn('cad.defaultBuild === "running") cad.defaultBuild', tail)
         load = self.function("loadSample")
         # cad.seq.load moves before the fetch only for the default part still on its way (nothing shown yet); loadFile
@@ -540,15 +568,17 @@ class SampleScriptTests(unittest.TestCase):
         self.assertLess(fetched, load.index("if (!live()) return;"))
         self.assertLess(load.index("if (!live()) return;"), load.index('if (cad.mode !== "cad") {', fetched), "Rectangular chosen meanwhile: not loaded")
         self.assertLess(load.index('if (cad.mode !== "cad") {', fetched), load.index("leaveLibrary();"))
-        self.assertIn("if (cad.samplePending === pending) cad.samplePending = null;", load, "held until its build returns")
-        # The one shown, its sensor built or being built: framed again, not reloaded.
-        self.assertIn('if (sampleShown() === id && (cad.defaultBuild === "done" || cad.buildRun)) {', load)
+        self.assertIn("if (cad.samplePending === pending) cad.samplePending = null;", load, "held until its part is loaded")
+        # The one shown: framed again, not reloaded.
+        self.assertIn("  if (sampleShown() === id) {\n", load)
         self.assertIn("frameSample();", load)
         self.assertLess(load.index("if (sampleShown() === id"), load.index("await sampleLookup(id)"))
         # Not loaded: the veil goes, the drop zone back if no model is shown, the warning; said again once the shown build
         # lands (the review's mutant, the veil left on for good, had passed every test).
         self.assertIn("  } catch (error) {\n    if (!live()) return;\n    setLoading(null);\n    if (!cad.mesh && !cad.viewerError) $(\"cadDrop\").hidden = false;\n", load)
         self.assertIn('whenSettled().then(() => {', load)
+        self.assertIn("if (cad.buildRun || cad.stepRunning || cad.pendingBuild || cad.busy.size) {", load, "the visitor's Generate sensor too")
+        self.assertIn("!(cad.buildRun || cad.stepRunning || cad.pendingBuild || cad.busy.size)", self.function("whenSettled"))
         self.assertIn("pending.load === cad.seq.load", self.function("sampleLoading"))
         self.assertIn("const pending = sampleLoading() ? cad.samplePending.id : null;", self.function("renderSamples"))
 

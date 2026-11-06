@@ -550,7 +550,17 @@ class ScriptTests(unittest.TestCase):
         self.assertIn("async function show({stack, positions, probes}) {", onpart)
         self.assertNotRegex(_js_function(onpart, "show")[2], r"view\.mode\s*=")
         main = (CAD / "main.js").read_text(encoding="utf-8")
-        self.assertIn("view.show({stack, positions: cad.parsed.positions, probes})", main)
+        self.assertIn("view.show({stack, positions: part, probes})", main)
+        # The part it is drawn on (the review of 2026-11-06): the STL, or a whole gripper's sample's finger alone (its first
+        # facets) while the fit's selection lies on them, the part's box and the drape's vertices the same part's.
+        draw = _js_function(main, "drawOnPart")[2]
+        self.assertIn("const part = figurePart();", draw)
+        self.assertIn("vertices: {positions: part, scale: cad.inspect.mesh.scale_to_mm}", draw)
+        self.assertIn("partBox: partBox(part)", draw)
+        figure = _js_function(main, "figurePart")[2]
+        for text in ("cad.defaultFile && cad.entry?.sample?.gripper ? cad.entry.sample.partFacets || 0 : 0",
+                     "chart.every(facet => facet < facets)", "positions.subarray(0, 9 * facets)", "return positions;"):
+            self.assertIn(text, figure)
         materials = re.findall(r"coverage\(new THREE\.Mesh\w+Material\(\{[^}]*alphaTest: ALPHA_TEST", onpart)
         self.assertEqual(len(materials), onpart.count("alphaTest:"))
         self.assertGreaterEqual(len(materials), 2)

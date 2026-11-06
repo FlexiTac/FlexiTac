@@ -182,16 +182,20 @@ write, shoot the changed sensors again and write again.
     fingers (ARX X5, I2RT YAM, Unitree Dex1-1, MakerMods Metal Arm) and two
     whole grippers with their jaws open (Franka Hand, WidowX 250).  Drag one
     onto the 3D view, or click it (Enter, Space or a tap): the part loads
-    and its sensor is generated at once, the Library's own sensor of that
-    finger at 2 mm (a whole gripper's fitted by the engine on its own mesh),
-    and the address becomes `./?sample=<id>`, so a reload shows it again.
-    A tile or a file may be dropped anywhere on the 3D view's window, its
-    tools included.  The sample shown, pressed again, is only framed again;
-    one that cannot be loaded leaves the part shown and its sensor as they
-    were, with a warning.  Your own file, dropped or chosen, works as before.
+    with no face selected and no sensor built (the user's later request of
+    2026-11-06; only the default UMI finger's sensor is generated as the
+    page opens), so you click the face the sensor goes on and press
+    Generate sensor, as for your own file; on a whole gripper's finger the
+    face is then seen from past the other finger.  The address becomes
+    `./?sample=<id>`, so a reload shows it again.  A tile or a file may be
+    dropped anywhere on the 3D view's window, its tools included.  The
+    sample shown, pressed again, is only framed again; one that cannot be
+    loaded leaves the part shown and its sensor as they were, with a
+    warning.  Your own file, dropped or chosen, loads the same way, with
+    no face selected.
     The samples are
     static files in `web/samples/`: `samples.json` (each one's Library
-    sensor), the thumbnails (drawn by `tools/browser/sample_thumbs.py` in
+    sensor, named in step 1's note), the thumbnails (drawn by `tools/browser/sample_thumbs.py` in
     the 3D view's look) and the two whole grippers, each one binary STL
     assembled from the Library's scene of that gripper (the MuJoCo
     Menagerie's Franka Hand, Apache-2.0, and WidowX 250, BSD-3-Clause), its
@@ -338,7 +342,8 @@ write, shoot the changed sensors again and write again.
   away from the key whatever the turn; the plan view stays a flat plan.  In CAD mode the stacked view has a second figure beside it
   (the user's request of 2026-11-05; one under the other where the card is
   narrower than 720 px): the sensor on the part.  The loaded part is drawn
-  in a matte light grey, and outward from it, along the face's normal, come
+  (of a whole gripper's sample with the sensor on its Library finger, that
+  finger alone, so the other finger and the body do not hide it) in a matte light grey, and outward from it, along the face's normal, come
   the bottom FPC (copper out), the film (velostat, black, over the taxel
   field or its masked outline) and the top FPC (turned over: polyimide out).
   Each layer is draped on the part's surface where the map puts it, and
@@ -360,7 +365,8 @@ write, shoot the changed sensors again and write again.
   the browser from the map, with no request of its own.
 - **Interface**: one step to a sensor.  In CAD mode ("Gen by Surface") the
   default part's sensor is generated as the page opens; a model loaded
-  gets its largest flat face selected, a click selects another face, and
+  (your own file or a sample) has no face selected, a click selects the
+  face the sensor goes on, and
   **Generate sensor**, alone under the 3D view, fits it and generates its
   proposal #1 onto the part (its tooltip says what the sensor is, or what
   to do next; the Gerber ZIPs are the downloads').  Everything else is

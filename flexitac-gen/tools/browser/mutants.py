@@ -10,6 +10,12 @@ context's studio) to a part of cad_checks.py
 browser with WebGL (SwiftShader), web/cad/studio.js served with them: first,
 for each part, the unmutated files through the same routes, which must pass every check (else that part's results are
 INVALID), then each mutant; a run that crashes or never draws the figure is INVALID, not KILLED.
+
+The "lib" kind (the review of 2026-11-06: no mutant had reached the Library's 3D view) serves a mutated
+web/cad/library_view.js or web/cad/library_stage.js to a part of library_checks.py (part_view, part_view_race) in the
+same WebGL browser, after a control run of each part with the unmutated files through the same routes that must pass
+every check: a later show not winning, the lens shift the other way, the see-through finger's depth pass writing no
+depth, the see-through finger opaque.
 """
 from __future__ import annotations
 
@@ -23,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
 import cad_checks  # noqa: E402
+import library_checks  # noqa: E402
 import orient  # noqa: E402
 import rp  # noqa: E402
 import ui_checks  # noqa: E402
@@ -34,10 +41,14 @@ DRAPE = open(f"{WEB}/cad/drape.js", encoding="utf-8").read()
 ONPART = open(f"{WEB}/cad/onpart.js", encoding="utf-8").read()
 VIEWER = open(f"{WEB}/cad/viewer.js", encoding="utf-8").read()
 STUDIO = open(f"{WEB}/cad/studio.js", encoding="utf-8").read()
+LIB_VIEW = open(f"{WEB}/cad/library_view.js", encoding="utf-8").read()
+LIB_STAGE = open(f"{WEB}/cad/library_stage.js", encoding="utf-8").read()
 ORIENT_CASES = [("bottom", "top", "forward"), ("left", "bottom", "forward")]
 # The stacked view's pin-1 rings of app.js (P5-diagonal-bus.md sections 27.3-27.5), the mutants' text to replace: the
 # placement chosen, and the moves apart tried.
 CHOSEN = "    const [, , top, bottom] = chosen || placed.find(candidate => fits(candidate)) || placed.find(([upper, lower]) => apart(upper, lower)) || placed[0];"
+# The last steps of PIN1_STEPS (the top FPC's ring beside its triangle, the bottom FPC's along its own).
+BESIDE_STEPS = "[[0, 0], [1, 0]], [[0, 1], [1, 0]], [[0, -1], [1, 0]], [[0, 1], [-1, 0]], [[0, -1], [-1, 0]]];"
 SHARES = "      for (const [up, down] of [[0.5, 0.5], [1, 0], [0, 1]]) {"
 TURNS = "    const turns = [0, -15, 15, -30, 30, -45, 45, -60, 60, -75, 75, -90, 90];"
 
@@ -60,6 +71,9 @@ MUTANTS = [
      "      for (const [up, down] of [[1, 0]]) {", "part_stacked_pin1"),
     ("stacked pin-1 rings: moved apart along the line through them only (the 12 / 11.5 mm plan view's rings off their triangles with the tails leaving left)", "js",
      TURNS, "    const turns = [0];", "part_stacked_pin1"),
+    # The review of 2026-11-06: at 390 px the plan view of a 2 x 2 field crowds the two triangles 3 to 6 px apart.
+    ("stacked pin-1 rings: no step beside the top FPC's triangle (at 390 px with the tails leaving left the top ring then takes in the other triangle)", "js",
+     BESIDE_STEPS, "[[0, 0], [1, 0]]];", "part_stacked_pin1_phone"),
     ("stacked pin-1 rings in one colour", "css", ".pin1-ring.is-upper { stroke:#087e8b; }.pin1-ring.is-lower { stroke:#d7771f; }", "", "part_stacked_pin1"),
     # 27.8: both rings drawn above both boards (the bottom FPC's ring had lain under the top FPC's translucent face).
     ("stacked pin-1 rings drawn inside their boards, the bottom one under the top FPC's face (baf053c's)", "css",
@@ -170,6 +184,43 @@ MUTANTS = [
     ("the 3D view's studio not made again when a lost context comes back (M/web-view-restore-none)", "cad",
      "    look.environment = studioFor(renderer);\n    if (groups.mesh) groups.mesh.userData.look.envMap = look.environment?.texture || null;\n", "", "part_view_look"),
 ]
+# The lib kind (the Library's 3D view, web/cad/library_view.js and library_stage.js; the review of 2026-11-06).
+MUTANTS += [
+    ("the Library view's later show not winning: a sensor's files that land last drawn, whoever was asked last (library_view.js)", "lib",
+     "    if (serial !== current.serial) return false;\n    if (art.format", "    if (art.format", "part_view_race"),
+    ("the Library view's lens shift the other way: the drawing off the middle, not where its picture's is (library_view.js)", "lib",
+     "camera.setViewOffset(W, H, -dx, -dy, W, H)", "camera.setViewOffset(W, H, dx, dy, W, H)", "part_view"),
+    ("the see-through finger's depth pass writing no depth: its faces behind each other veiling twice (library_stage.js)", "lib",
+     "const ghostDepth = new THREE.MeshBasicMaterial({colorWrite: false, depthWrite: true,",
+     "const ghostDepth = new THREE.MeshBasicMaterial({colorWrite: false, depthWrite: false,", "part_view"),
+    ("the see-through finger opaque: the rules' ghost_opacity not taken (library_stage.js)", "lib",
+     "      ghostLook.opacity = rules.ghost_opacity;", "      ghostLook.opacity = 1;", "part_view"),
+]
+LIB_FILES = {"**/static/cad/library_view.js": LIB_VIEW, "**/static/cad/library_stage.js": LIB_STAGE}
+
+
+def lib_routes(old=None, new=None):
+    """The lib kind's routes: both files of LIB_FILES served, ``old`` replaced by ``new`` in the one that holds it."""
+    if old is not None:
+        assert sum(body.count(old) for body in LIB_FILES.values()) == 1, old
+    return [(route, "text/javascript", body.replace(old, new) if old is not None and old in body else body) for route, body in LIB_FILES.items()]
+
+
+def run_lib(browser, target, routes):
+    """library_checks' ``target`` with ``routes`` (lib_routes) served: (failing checks, whether the run is valid)."""
+    rp.RESULTS.update({"pass": 0, "fail": 0, "failures": []})
+    library_checks.ROUTES[:] = routes
+    crashed = False
+    with contextlib.redirect_stdout(io.StringIO()):
+        try:
+            getattr(library_checks, target)(browser)
+        except Exception as error:  # noqa: BLE001 - a crash says nothing about the mutant here
+            crashed = True
+            rp.check(f"{target} crashed: {type(error).__name__}", False)
+    library_checks.ROUTES[:] = []
+    return list(rp.RESULTS["failures"]), not crashed
+
+
 # The cad kind's files: each mutant's text is in exactly one of them.
 CAD_FILES = {"**/static/cad/drape.js": DRAPE, "**/static/cad/onpart.js": ONPART, "**/static/cad/viewer.js": VIEWER, "**/static/cad/studio.js": STUDIO}
 
@@ -216,8 +267,22 @@ def main():
                 verdict = "INVALID " if not valid else "KILLED  " if failures else "SURVIVED"
                 print(f"{verdict} {name}: {len(failures)} failing checks; e.g. {failures[:2]}", flush=True)
             webgl.close()
+        lib = [m for m in selected if m[1] == "lib"]
+        if lib:
+            webgl = p.chromium.launch(args=library_checks.WEBGL_ARGS)
+            controls = {}
+            for target in dict.fromkeys(m[4] for m in lib):
+                failures, valid = run_lib(webgl, target, lib_routes())
+                controls[target] = valid and not failures
+                print(f"{'CONTROL ' if controls[target] else 'INVALID '} {target}: the Library view's files unmutated through the routes: "
+                      f"{len(failures)} failing checks; e.g. {failures[:2]}", flush=True)
+            for name, kind, old, new, target in lib:
+                failures, valid = run_lib(webgl, target, lib_routes(old, new)) if controls[target] else ([], False)
+                verdict = "INVALID " if not valid else "KILLED  " if failures else "SURVIVED"
+                print(f"{verdict} {name}: {len(failures)} failing checks; e.g. {failures[:2]}", flush=True)
+            webgl.close()
         for name, kind, old, new, target in selected:
-            if kind == "cad":
+            if kind in ("cad", "lib"):
                 continue
             source = APP if kind == "js" else CSS
             assert source.count(old) == 1, (name, source.count(old))

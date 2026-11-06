@@ -1047,10 +1047,12 @@ One step to a sensor (the user's requests of 2026-11-02; main.js
 `quickMode`, `autoSelect`, `oneStep`, `renderQuick`): the default part's
 sensor is generated as the page opens (below).  After that the user's
 changes only choose, and **Generate sensor** under the view makes the
-sensor: with "Advanced Customization" folded a model loaded gets its largest
-flat face (the server's first flat candidate) selected and a click on the
-part selects the face under it alone (the face already selected: nothing
-to do); Generate sensor fits the inputs as they are when the fit is
+sensor: a model loaded, the user's own file or a sample, has no face
+selected (the user's request of 2026-11-06; until then the user's own
+file had its largest flat face, the server's first flat candidate,
+selected in quick mode), and with "Advanced Customization" folded a click
+on the part selects the face under it alone (the face already selected:
+nothing to do); Generate sensor fits the inputs as they are when the fit is
 missing or stale (Undo, a base edge or border from the view's tools, the
 options changed in Advanced Customization all make it stale) and generates the chosen
 proposal (#1 of a new fit), mapped onto the part, after the proposal's
@@ -1116,28 +1118,47 @@ over the tools drawn on the view too, the surface menu, the camera row and
 the status; the view lit as for a file until the drag leaves the window,
 the dashed frame drawn over the part too) or pressed
 (a click, Enter, Space, a tap; the view brought into sight when less than
-half of it is) loads its part as the default part is and builds its sensor
-at once (main.js `loadSample`, `buildDefaultSensor`): a Library finger from
-its shipped fit, so the sensor is the Library's own; a whole gripper (one
-STL, its finger's facets first) from the same Library sensor's request
-(its selection, base, border and options) fitted by the engine, its sensor
-then seen past the other finger from the sample's `camera`, and its 3D
-markers (the exit's and the border's tubes, the boards' end markers) sized
-as on that finger alone (`viewer.js` `setMarkScale`: they go with the
-model's size, and a whole hand's had covered the sensor's corners).  The address
-becomes `./?sample=<id>` (`?part` goes; a reload shows the sample again, an
-unknown id the UMI finger with a warning); the user's own file and Remove
-model drop it, with the options the sample set, as they drop `?part`.  The
-newest press wins: another sample, a file or Remove model on the way stops
-it, but the part shown keeps its sensor and its build until the sample's
-mesh is in hand, so a sample that cannot be loaded (its files refused,
-Rectangular chosen meanwhile) leaves the page as it was, with a warning
-(said again once the shown build lands).  A sample dropped while the last
-one's build is under way waits for that build to land.  The sample on its
-way is not asked again until its build returns; the one shown, pressed
-again, is framed again, not reloaded (the visitor's changes stay).
-`buildDefaultSensor` settles its own state, done or stopped however it ends,
-so a build superseded never leaves Generate sensor busy.  The tile of the
+half of it is) loads its part as the default part is and nothing more
+(main.js `loadSample`; the user's later request of 2026-11-06, "测试用的
+sensor,不要托进去之后直接就生成好了,包括新拖进去的cad,不要直接显示哪个面被选择;
+只有最开始default的umi finger需要这样"): no face selected, no border, no fit,
+nothing generated, the options as they are (the Library sensor's are not
+applied); the 3D view frames the whole mesh as for any file, the status
+says it loaded ("<file>: N facets. Click the face the sensor goes on." on
+hover), the guide's step 2 is next and step 1's note names the sample (a
+finger "Sample: <name>", a whole gripper "Sample: <name>, whole gripper":
+no pitch, since no sensor of the Library's is built for it).  The visitor clicks the face and presses Generate sensor,
+fitted by the server as for their own file (no shipped fit is a sample's).
+A whole gripper is one STL, its Library finger's facets first: a selection
+on that finger is framed from the sample's `camera` (main.js `sampleView`,
+in place of `lookAtSelection`'s own: along the face's normal the camera
+would stand in the other finger, which faces it across the open jaws), and
+its 3D markers (the exit's and the border's tubes, the boards' end markers)
+are sized as on that finger alone (`viewer.js` `setMarkScale`: they go with
+the model's size, and a whole hand's had covered the sensor's corners).
+The stacked card's sensor on the part draws that finger alone while the
+fit's selection lies on its facets (main.js `figurePart`; the review of
+2026-11-06: drawn whole, the other finger and the hand's body stood
+between the figure's camera and the stack, Franka Hand's a wall of grey);
+the rest of the gripper stays in the 3D view.  A sample loaded after a
+build leaves that build below as the user's own file does: the sensor on
+the part is not drawn on the new part (its map is the old part's), and the
+Gerber downloads stay those of the build they name.  The address becomes
+`./?sample=<id>` (`?part` goes; a reload, or the page opened at it, shows
+the sample's part alone again; an unknown id the UMI finger with a
+warning); the user's own file and Remove model drop it, as they drop
+`?part` with the options a Library sensor set.  The newest press wins:
+another sample, a file or Remove model on the way stops it, but the part
+shown keeps its sensor and its build until the sample's mesh is in hand,
+so a sample that cannot be loaded (its files refused, Rectangular chosen
+meanwhile) leaves the page as it was, with a warning (said again once a
+build under way, the default part's or the visitor's Generate sensor,
+lands).  The sample on its way is not asked again until its part is
+loaded; the one shown, pressed again, is framed again (the visitor's
+selection, else the whole part), not reloaded (the visitor's changes
+stay).  `buildDefaultSensor`, the default part's and a Library sensor's
+build, settles its own state, done or stopped however it ends, so a build
+superseded never leaves Generate sensor busy.  The tile of the
 sample shown is edged (`aria-current`), the one on its way busy.  In Rectangular mode the guide,
 and so the palette, is hidden.  In the view's top right the
 camera (Fit, Selection, the six axes); the camera frames the part, the
@@ -1200,8 +1221,7 @@ the drag ends.  The steps:
    selection kept.  A preset or custom angles (Selection settings; a
    click grows with Surface, 30° and no blend under 4 mm radius, by default
    since 2026-11-02, so it takes a curved face too; the default part's
-   face and a loaded model's largest flat face keep the flat preset they
-   were found with).  The
+   face keeps the flat preset it was found with).  The
    browser has no Disk tool since 2026-10-30 (the API's `disk` operation
    stays).
 3. **Base edge.**  Click a side or a rounded edge of the selection's

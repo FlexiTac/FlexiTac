@@ -2771,6 +2771,24 @@ THEME_TOGGLE = (
       killers=("test_web_theme.",)),
 )
 MUTANTS += THEME_TOGGLE
+# A sample and the user's own file loaded with no face selected and nothing built, only the default UMI finger's (and a
+# Library sensor's ?part) built at once (the user's request of 2026-11-06, "测试用的sensor,不要托进去之后直接就生成好了,
+# 包括新拖进去的cad,不要直接显示哪个面被选择"): a sample's largest flat face selected and its sensor generated as it loads,
+# and the user's own file's largest flat face selected as it loads; each killed alone by test_samples (SampleScriptTests)
+# on a scratch copy; sample_checks part_drag sees the first and cad_checks part_one_step the second in the browser.
+NO_AUTO = (
+    m("M/web-sample-built-at-once", "2026-11-06 samples", "main.js: a sample dropped or pressed has a face selected and its sensor generated at once again",
+      (CAD_MAIN, "    sampleAddress(id);\n    libraryNote();\n  } catch (error) {",
+       "    sampleAddress(id);\n    libraryNote();\n    const face = cad.inspect.candidates?.flat?.[0];\n"
+       "    if (face) { await autoSelect(face.seed_facet, face.preset || \"flat\"); await oneStep(); }\n  } catch (error) {"),
+      killers=("test_samples.",)),
+    m("M/web-file-largest-face", "2026-11-06 samples", "main.js: the user's own file has its largest flat face selected as it loads again (quick mode)",
+      (CAD_MAIN, ". Click the face the sensor goes on.`);\n  }\n",
+       ". Click the face the sensor goes on.`);\n    const face = reply.candidates?.flat?.[0];\n"
+       "    if (quickMode() && !cad.defaultFile && face && !cad.facetMismatch) await autoSelect(face.seed_facet, face.preset || \"flat\");\n  }\n"),
+      killers=("test_samples.",)),
+)
+MUTANTS += NO_AUTO
 
 
 # --------------------------------------------------------------------------
@@ -2779,7 +2797,18 @@ MUTANTS += THEME_TOGGLE
 
 _CATALOGUE_TEST = "HandoffTests.test_every_catalogue_edit_still_applies"
 _FAILURE = re.compile(r"^(FAIL|ERROR): (\S+) \(([^)\s]*)\)", re.M)
-_IGNORED = shutil.ignore_patterns("__pycache__", "*.pyc", ".git", "outputs")
+_CACHES = shutil.ignore_patterns("__pycache__", "*.pyc", ".git")
+
+
+def _ignored(directory: str, names: list) -> set:
+    """What the scratch copy leaves out: caches, .git and the outputs a run wrote, but outputs/.gitkeep, which is
+    committed and which test_static_site's public export asks for (the review of 2026-11-06: without it the baseline
+    failed in every run and each kill read as a false alarm)."""
+
+    left_out = set(_CACHES(directory, names))
+    if Path(directory) == PROJECT / "outputs":
+        left_out |= {name for name in names if name != ".gitkeep"}
+    return left_out
 
 
 def _problems(mutant: Mutant) -> list[str]:
@@ -2803,7 +2832,7 @@ def _problems(mutant: Mutant) -> list[str]:
 
 def _prepare(directory: Path, mutant: Mutant | None) -> Path:
     copy = directory / "project"
-    shutil.copytree(PROJECT, copy, ignore=_IGNORED)
+    shutil.copytree(PROJECT, copy, ignore=_ignored)
     # The CI workflow sits beside the project, at the repository root; a document test reads it.
     if WORKFLOW.is_file():
         (directory / WORKFLOW.parent.relative_to(PROJECT.parent)).mkdir(parents=True)
@@ -2866,6 +2895,17 @@ def _evaluate(mutant: Mutant | None, work: Path, python: str, timeout: float, ke
     }
 
 
+def _against_baseline(result: dict, base: dict) -> dict:
+    """A kill whose failing tests all fail in the unmutated copy too says nothing about its mutant (a mutant without
+    killers has no stray filter): it is reported SURVIVED (baseline failures only), never KILLED."""
+
+    if base["status"] == "PASSED" or not result["status"].startswith("KILLED") or result["returncode"] is None:
+        return result
+    if result["failed"] and all(name in base["failed"] for name in result["failed"]):
+        return dict(result, status="SURVIVED (baseline failures only)")
+    return result
+
+
 def _select(mutants: Sequence[Mutant], prefixes: Sequence[str]) -> list[Mutant]:
     if not prefixes:
         return list(mutants)
@@ -2919,7 +2959,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"baseline: {base['status']} ({base['summary']}, {base['seconds']} s)", flush=True)
         results = []
         for future in futures:
-            result = future.result()
+            result = _against_baseline(future.result(), base)
             results.append(result)
             failing = ", ".join(result["failed"][:2]) + (f" (+{len(result['failed']) - 2})" if len(result["failed"]) > 2 else "")
             print(f"{result['status']:28s} {result['id']:28s} {result['seconds']:6.1f} s  {failing or result['summary']}", flush=True)
@@ -2928,7 +2968,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     killed = [result for result in results if result["status"].startswith("KILLED") and result["status"] != "KILLED (false alarm)"]
     expected_survivors = [result for result in results if result["status"] == "SURVIVED (expected)"]
-    unexpected = [result for result in results if result["status"] in ("SURVIVED", "KILLED (false alarm)")]
+    unexpected = [result for result in results if result["status"] in ("SURVIVED", "KILLED (false alarm)", "SURVIVED (baseline failures only)")]
     scored = len(results) - len(expected_survivors)
     print()
     print(f"baseline {base['status']}; {len(killed)}/{len(results)} killed; "

@@ -251,9 +251,10 @@ and the tests' too):
   importer's inputs (`asset/`, `outputs/`, `gripper_recipes`, the word
   recipe, a part's id with underscores, an absolute path) in a scene,
   `scenes.json` or a body's row.
-- `run()`: `--check` refuses the pictures' and the scenes' problems, warns
-  of the pictures with no 3D view and says how many sensors have one;
-  writing reports them and writes each sensor's `view`.
+- `run()`: `--check` refuses the pictures' and the scenes' problems
+  (since the shoot of 2026-11-06, `VIEW_REQUIRED`, a picture with no 3D
+  view among them; while it is false, a warning) and says how many sensors
+  have one; writing reports them and writes each sensor's `view`.
 
 `tools/build_static_site.py` stops on the same problems (the scenes of the
 parts it builds and the index's), on a `view` in `entries.json` other than

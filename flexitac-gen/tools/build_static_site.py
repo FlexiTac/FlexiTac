@@ -42,9 +42,10 @@ first: a picture of another fit (the wrong sensor pictured), a broken file or an
 its shot's fails the build too; a picture of older figure sources is published with a warning (re-shoot it with
 tools/browser/library_shots.py: this build runs no browser).  So are each sensor's 3D view (the user's request of
 2026-11-05, docs/LIBRARY_VIEW.md): an art or a gripper's stage that is not the sensor's own, a "view" in entries.json
-that is not the one the manifest gives, or a gripper's scene that library_write.scenes refuses fails the build; a
-picture with no 3D view yet (before the shoot that writes every sensor's art) is published with a warning, its page
-showing the picture only.
+that is not the one the manifest gives, or a gripper's scene that library_write.scenes refuses fails the build; so
+does a picture with no 3D view (its record without its art, a gripper's without its stage: library_write.VIEW_REQUIRED,
+set by the shoot of 2026-11-06 that wrote every sensor's art; while it is false such a picture is published with a
+warning, its page showing the picture only).
 """
 from __future__ import annotations
 

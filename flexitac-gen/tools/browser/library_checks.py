@@ -51,14 +51,18 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   box; nothing renders at rest (no frame asked for, no WebGL draw over 500 ms: COUNTERS); a group named by the picture's
   alt, in the tab order, described by its hint, its canvas aria-hidden with touch-action pan-y; at each home, its host at
   the pictures' pane (640 x 400 CSS px, 1280 x 800), the drawing where its picture's is (margins within 1 px; the view's
-  own lens shift) and, written as the shots tool writes a picture, its picture (colours within 1 level on average, 99 %
-  within 16), where the picture was shot from the view (its record has art, or its part has no scene); a drag, ArrowLeft
+  own lens shift) and, written as the shots tool writes a picture (its webp(), not centred again), its picture (colours
+  within 1.5 levels on average, 99 % within 16), where the picture was shot from the view (its record has art, or its part has no scene); a drag, ArrowLeft
   and ArrowUp turn it, 0 and a double click bring it home; the Exploded | Assembled switch drives it both ways; Tab
-  reaches it with its focus ring; at 390 px a vertical swipe scrolls the page and a sideways one turns the view; no
+  reaches it with its focus ring; at 390 px a vertical swipe scrolls the page and leaves the view at home, a sideways one turns the view; no
   request for the API, py/, Pyodide, backend.js or app.js, no console error; the UMI finger drawn after the gripper on
   the same page (one view, the stage's scene taken down) as on a page of its own; without WebGL, without
   DecompressionStream, its art a 404 or with Save-Data (no three.js then) the picture stays, no uncaught error; in the
   dark scheme the view drawn in the picture's light box.
+- part_view_race (the review of 2026-11-06): the view asked for again and again while its files load, on a 400 kbit/s,
+  150 ms network (five pitch and part changes with four mode toggles during each load; Back and Forward between the grid
+  and two grippers' pages; Unitree Dex1's sensor left for Franka Hand's, which is drawn first): each time the sensor
+  asked last drawn at its home exactly as a fresh page draws it, every pixel, its state that sensor's, no error.
 - part_placeholders (no picture: every "image" null): every slot the drawing of its field (its rows and columns), no
   image, no view control and no request for a picture, as before the pictures.
 - part_family (the tapered tips, 2026-11-05): the family card ends the UMI shelf ('Tapered tips', its two lines), no
@@ -108,6 +112,7 @@ import base64
 import functools
 import io
 import json
+import math
 import os
 import re
 import sys
@@ -1467,11 +1472,22 @@ SHOTS_MANIFEST = (json.loads((LIBRARY / library_write.SHOTS_MANIFEST).read_text(
                   if (LIBRARY / library_write.SHOTS_MANIFEST).is_file() else {})
 
 
+# Routes of the view's pages: (glob, content type, body), each served in place of the server's file (tools/browser/
+# mutants.py's lib kind: library_view.js or library_stage.js mutated).
+ROUTES = []
+
+
+def served(content_type, body):
+    return lambda route, request=None: route.fulfill(status=200, content_type=content_type, body=body)
+
+
 def view_page(browser, width=1440, height=900, scheme="light", scripts=(), mobile=False):
     """A page as new_page's, its frames and draws counted (COUNTERS), ``scripts`` run first; ``mobile``: a phone's
     (touch, DPR 3), else DPR 2."""
     context = browser.new_context(viewport={"width": width, "height": height}, color_scheme="light", device_scale_factor=3 if mobile else 2,
                                   is_mobile=mobile, has_touch=mobile)
+    for glob, content_type, body in ROUTES:
+        context.route(glob, served(content_type, body))
     for script in (COUNTERS,) + ((DARK_CHOICE,) if scheme == "dark" else ()) + tuple(scripts):
         context.add_init_script(script)
     page = context.new_page()
@@ -1555,7 +1571,7 @@ def likeness(live, picture):
     # Each pixel's largest channel difference, over the pixels both draw opaque: how many are within 16 levels.
     largest = ImageChops.lighter(ImageChops.lighter(*difference.split()[:2]), difference.split()[2])
     histogram = largest.histogram(mask=both)
-    return {"margins": [margins(one), margins(two)], "mean": round(sum(mean) / 3, 3) if count else None, "share": round(count / max(1, total), 4),
+    return {"margins": [margins(one), margins(two)], "mean": round(math.fsum(mean) / 3, 3) if count else None, "share": round(count / max(1, total), 4),
             "close": round(sum(histogram[:17]) / max(1, count), 4)}
 
 
@@ -1623,13 +1639,18 @@ def part_view(browser):
                   and aria["touch"] == "pan-y", (aria, named))
             # The live drawing at its homes against the picture (the pictures' pane: 1280 x 800), when the picture is its.
             # The visitor's view moves its drawing to the middle by a lens shift, the pictures by whole pixels (library_shots
-            # centred()): the drawing is written as the shots tool writes a picture (its encode()) and compared with it, so
-            # the picture's lossy WebP is on both sides (the canvases differ only where the shift rounds an edge otherwise).
+            # centred()): the drawing, already in the middle, is written as the shots tool writes a picture (its webp(), so
+            # the picture's lossy WebP is on both sides) and compared with it, never centred a second time (the review of
+            # 2026-11-06: encode()'s centred() had moved UMI 2 mm's Assembled drawing down 1 px for two pixels of alpha 18
+            # in a row above it, mean 3.656 against 0.975 unmoved).  An odd lens shift antialiases the edges at other places
+            # than the shots tool's whole-pixel paste: over the 42 sensors' 84 homes, unmoved, the mean up to 1.27 levels,
+            # 99.7 % or more of the pixels within 16.
             if comparable(key):
                 reads = home_reads(page)
                 compared = {mode: None for mode in library_shots.MODES}
                 if sorted(reads) == sorted(library_shots.MODES):
-                    files, _ = library_shots.encode(reads)
+                    from PIL import Image
+                    files = {mode: library_shots.webp(Image.open(io.BytesIO(reads[mode]["png"]))) for mode in library_shots.MODES}
                     for mode in library_shots.MODES:
                         picture = page.request.get(SITE["base"] + "static/library/" + IMAGES[key][mode]["src"]).body()
                         compared[mode] = dict(likeness(files[mode], picture), margins=likeness(reads[mode]["png"], picture)["margins"],
@@ -1637,9 +1658,9 @@ def part_view(browser):
                                               home=(reads[mode]["state"].get("drawn_mode"), reads[mode]["state"].get("moved")))
                 check(f"view {name}: at each home the view's drawing stands where its picture's does (margins within 1 px, at the pictures' 1280 x 800, "
                       "moved to the middle by its own lens shift) and is its picture (written as the shots tool writes one: the colours of the pixels "
-                      "both draw opaque within 1 level on average, 99 % of them within 16, over 99 % of the picture's)",
+                      "both draw opaque within 1.5 levels on average, 99 % of them within 16, over 99 % of the picture's)",
                       all(item and item["margins"] and all(abs(a - b) <= 1 for a, b in zip(*item["margins"])) and item["mean"] is not None
-                          and item["mean"] < 1 and item["close"] >= 0.99 and item["share"] >= 0.99 and item["home"] == (mode, False)
+                          and item["mean"] < 1.5 and item["close"] >= 0.99 and item["share"] >= 0.99 and item["home"] == (mode, False)
                           for mode, item in compared.items()), compared)
             else:
                 print(f"    view {name}: its picture is not its 3D view's (shot before the view): drawing and picture not compared", flush=True)
@@ -1683,20 +1704,30 @@ def part_view(browser):
             check(f"view {name}: Tab reaches the view, its focus ring shown (:focus-visible, an outline)",
                   ring["focused"] and ring["visible"] and ring["style"] not in ("none", "") and ring["width"] >= 1, ring)
             if mobile:
-                page.evaluate("() => scrollTo(0, 0)"); page.wait_for_timeout(100)
+                # The review of 2026-11-06: the few pointermoves before the browser took a vertical swipe for the page's
+                # scroll had turned the view (a gripper edge-on after one swipe); from home, two vertical swipes (one in
+                # steps of 4 px, under the figure's slop) leave it at home, a sideways one turns it.
+                page.focus("#libDetail .lib-live"); page.keyboard.press("0"); page.wait_for_timeout(120)
+                page.evaluate("() => { document.activeElement?.blur(); scrollTo(0, 0); }"); page.wait_for_timeout(100)
+                before = state()["moved"]
                 box = page.evaluate(CANVAS_BOX)
                 top = page.evaluate("() => scrollY")
                 swipe(page, (box[0] + box[2] / 2, box[1] + box[3] / 2 + 20), (0, -12))
                 page.wait_for_timeout(400)
                 scrolled = page.evaluate("() => scrollY") - top
+                page.evaluate("() => scrollTo(0, 0)"); page.wait_for_timeout(150)
+                box = page.evaluate(CANVAS_BOX)
+                swipe(page, (box[0] + box[2] / 2 + 2, box[1] + box[3] / 2 + 20), (1, -4), count=12)
+                page.wait_for_timeout(400)
                 stayed = state()["moved"]
                 page.evaluate("() => scrollTo(0, 0)"); page.wait_for_timeout(150)
                 box = page.evaluate(CANVAS_BOX)
                 swipe(page, (box[0] + box[2] / 2 - 60, box[1] + box[3] / 2), (15, 0))
                 page.wait_for_timeout(300)
                 page.screenshot(path=f"{SHOTS}/library_view_{key}_{size}_swiped.png")
-                check(f"view {name}: a vertical swipe on the view scrolls the page, a sideways one turns the view",
-                      scrolled >= 40 and state()["moved"] is True, {"scrolled": scrolled, "turned by the vertical swipe": stayed, "turned": state()["moved"]})
+                check(f"view {name}: a vertical swipe on the view scrolls the page and leaves the view at home, a sideways one turns the view",
+                      scrolled >= 40 and before is False and stayed is False and state()["moved"] is True,
+                      {"scrolled": scrolled, "home before": not before, "turned by the vertical swipes": stayed, "turned": state()["moved"]})
             engine = [url for url in page.requests if re.search(r"/api/|/py/|pyodide|backend\.js|(^|/)app\.js", url)]
             check(f"view {name}: no request for the server's API, py/, Pyodide, backend.js or app.js; no console error",
                   not engine and not errors_of(page), (engine[:3], errors_of(page)[:3]))
@@ -1755,6 +1786,103 @@ def part_view(browser):
         page.context.close()
 
 
+# The race (the review of 2026-11-06): a sensor's page whose view is asked for again and again while its files load (a slow
+# network: 400 kbit/s, 150 ms), each time another sensor's or the other mode, ends with the last one asked drawn exactly as a
+# fresh page draws it (library_view.js: a later show wins; the stage's scene of a gripper taken down for the next).  In the
+# last, a sensor whose files are slow to come (Unitree Dex1's part and bodies, 1.4 MB) is left for one already drawn
+# (Franka Hand's, whose bodies the view keeps), which is drawn first: the files of the one left land after it.
+RACE_PITCHES = ("trossen-widowx-ai-1.5mm", VIEW_UMI, "trossen-widowx-ai-3mm", "arx-x5-2mm", VIEW_GRIPPER)
+RACE_GRID = (("click", "#gripper-trossen-widowx-ai"), ("back", None), ("forward", None), ("back", None), ("click", "#gripper-arx-x5"),
+             ("back", None), ("forward", None), ("back", None), ("click", "#gripper-trossen-widowx-ai"))
+RACE_SLOW, RACE_FAST = "unitree-dex1-2mm", "franka-hand-2mm"
+
+
+def throttled(page, on):
+    session = page.context.new_cdp_session(page)
+    session.send("Network.enable")
+    session.send("Network.emulateNetworkConditions", {"offline": False, "latency": 150 if on else 0, "downloadThroughput": 400 * 1024 / 8 if on else -1,
+                                                      "uploadThroughput": 400 * 1024 / 8 if on else -1})
+    return session
+
+
+def race_read(page, key):
+    """The view of ``key`` at its Exploded home as a PNG (its host at the pictures' pane), with its state, or (None, state)."""
+    settled = view_settled(page, key, 240) or {}
+    if settled.get("state") != "drawn":
+        return None, settled
+    page.click("#libDetail .lib-view label:has(input[value='exploded'])")
+    page.wait_for_timeout(300)
+    page.focus("#libDetail .lib-live"); page.keyboard.press("0"); page.wait_for_timeout(200)
+    reads = home_reads(page)
+    return (reads.get("exploded") or {}).get("png"), page.evaluate(LIB_STATE)
+
+
+def part_view_race(browser):
+    """The Library's 3D view asked for again and again while its files load (the review of 2026-11-06): on a slow network,
+    five pitch and part changes with four mode toggles during each load, Back and Forward between the grid and two
+    grippers' pages, and a slow sensor left for one drawn at once; each time the sensor asked last is drawn as a fresh
+    page draws it (every pixel), its state that sensor's, no error."""
+    if not any(arts(browser).values()):
+        check("view race: the 3D view's art is there for the sensors entries.json gives a view", not VIEWED, "a built site without the shoot's art/")
+        return
+    from PIL import Image, ImageChops
+
+    references = {}
+    for key in (VIEW_GRIPPER, RACE_FAST):
+        page = view_page(browser)
+        library_case(page, "pictures", view=True)
+        open_view(page, key)
+        references[key], _ = race_read(page, key)
+        page.context.close()
+    for scenario, last in (("pitches", VIEW_GRIPPER), ("grid", VIEW_GRIPPER), ("slow first", RACE_FAST)):
+        page = view_page(browser)
+        library_case(page, "pictures", view=True)
+        if scenario == "slow first":
+            open_view(page, RACE_FAST)
+        session = throttled(page, True)
+        if scenario == "pitches":
+            page.goto(SITE["base"] + "library.html?probe#trossen-widowx-ai-1mm")
+            page.wait_for_selector("#libDetail .lib-seg input[name=libPitch]", state="attached", timeout=60000)
+            for target in RACE_PITCHES:
+                page.wait_for_timeout(350)
+                page.evaluate("(target) => { location.hash = target; }", target)
+                page.wait_for_timeout(120)
+                for mode in ("assembled", "exploded", "assembled", "exploded"):
+                    radio = page.query_selector(f"#libDetail .lib-view label:has(input[value='{mode}'])")
+                    if radio:
+                        radio.click()
+                    page.wait_for_timeout(30)
+        elif scenario == "grid":
+            page.goto(SITE["base"] + "library.html?probe")
+            page.wait_for_selector("#gripper-trossen-widowx-ai", timeout=60000)
+            for action, target in RACE_GRID:
+                if action == "click":
+                    page.click(target)
+                elif action == "back":
+                    page.go_back()
+                else:
+                    page.go_forward()
+                page.wait_for_timeout(200)
+        else:
+            page.evaluate("(target) => { location.hash = target; }", RACE_SLOW)
+            page.wait_for_timeout(300)
+            page.evaluate("(target) => { location.hash = target; }", RACE_FAST)
+            view_settled(page, RACE_FAST, 120)
+        session.send("Network.emulateNetworkConditions", {"offline": False, "latency": 0, "downloadThroughput": -1, "uploadThroughput": -1})
+        if scenario == "slow first":
+            page.wait_for_timeout(3000)  # the slow sensor's files land
+        test, settled = race_read(page, last)
+        same = None
+        if references[last] and test:
+            one, two = (Image.open(io.BytesIO(data)).convert("RGBA") for data in (references[last], test))
+            same = one.size == two.size and ImageChops.difference(one, two).getbbox() is None
+        check(f"view race ({scenario}): the sensor asked last ({last}) drawn at its home exactly as a fresh page draws it (every pixel), "
+              "its state that sensor's, no console error",
+              same is True and settled.get("id") == last and settled.get("drawn_mode") == "exploded" and not settled.get("moved")
+              and not errors_of(page), ({key: settled.get(key) for key in ("state", "id", "drawn_mode", "moved", "gripper")}, same, errors_of(page)[:3]))
+        page.context.close()
+
+
 class QuietFiles(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
@@ -1781,7 +1909,7 @@ def main(argv=None):
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(args=WEBGL_ARGS)
-            parts = (part_layout, part_grid, part_routes, part_first_screen, part_pictures, part_view, part_placeholders, part_family,
+            parts = (part_layout, part_grid, part_routes, part_first_screen, part_pictures, part_view, part_view_race, part_placeholders, part_family,
                      part_downloads, part_isolation, part_errors)
             for part in parts:
                 if args.parts and part.__name__ not in args.parts:

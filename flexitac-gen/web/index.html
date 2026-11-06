@@ -72,9 +72,11 @@
           <li class="flow-step" data-step="3"><button type="button" data-go="downloadsTitle"><span class="flow-no" aria-hidden="true">3</span><span class="flow-text"><strong>Send to manufacture</strong><span>Download the two Gerber ZIPs and order them.</span></span></button></li>
         </ol>
         <!-- Samples to try (the user's request of 2026-11-06): eight parts in two columns under the steps (one row that
-             scrolls sideways on a narrow page), each dragged onto the 3D view or pressed to load it and generate its
-             sensor at once (main.js loadSample; static/samples/samples.json holds each one's mesh and Library sensor, in
-             this order; the thumbnails are tools/browser/sample_thumbs.py's).  Hidden with the guide in Rectangular. -->
+             scrolls sideways on a narrow page), each dragged onto the 3D view or pressed to load it, no face selected
+             and no sensor built (the user's later request of 2026-11-06: the visitor clicks the face and presses
+             Generate sensor, as for their own file; main.js loadSample; static/samples/samples.json holds each one's mesh
+             and Library sensor, in this order; the thumbnails are tools/browser/sample_thumbs.py's).  Hidden with the
+             guide in Rectangular. -->
         <section class="sample-palette" id="samplePalette" aria-labelledby="samplePaletteTitle">
           <h3 class="sample-palette-title" id="samplePaletteTitle">Try a sample</h3>
           <p class="sample-palette-hint" id="samplePaletteHint">Drag onto the 3D view, or <span class="sample-hint-click">click</span><span class="sample-hint-tap">tap</span>.</p>
@@ -203,7 +205,7 @@
           <header>
             <div>
               <h2 id="cadTitle"><span class="cad-step-no">1</span>Load your gripper</h2>
-              <p class="hint cad-title-hint">Load your gripper finger (STL), click the face the sensor goes on (its largest flat face is picked for you), then Generate sensor.</p>
+              <p class="hint cad-title-hint">Load your gripper finger (STL), click the face the sensor goes on, then Generate sensor.</p>
             </div>
           </header>
           <div class="cad-main">
@@ -305,8 +307,8 @@
               <p class="cad-help" id="cadHelp" hidden>Drag: rotate · right-drag or arrow keys: pan · wheel: zoom · click a surface to select it, click it again to deselect it.</p>
               <!-- One step (the user's requests of 2026-11-02): Generate sensor alone under the view (main.js oneStep: fit
                    when needed, then the chosen proposal generated and mapped; its title says what the sensor is or what to
-                   do next, renderQuick).  The default part's sensor is generated at once; a model loaded or a face clicked
-                   only chooses (main.js autoSelect).  The Gerber ZIPs are the downloads'. -->
+                   do next, renderQuick).  The default part's sensor is generated at once; a model loaded (a file, a sample)
+                   has no face selected, a face clicked only chooses (main.js autoSelect).  The Gerber ZIPs are the downloads'. -->
               <div class="cad-quick" id="cadQuick">
                 <button type="button" class="primary cad-quick-generate" id="cadQuickGenerate" disabled>Generate sensor</button>
               </div>

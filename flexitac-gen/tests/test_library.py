@@ -953,16 +953,22 @@ class SceneTests(LibraryTestCase):
             self.assertIn(text, stage)
         self.assertEqual(SHOTS_TOOL.STAGE_NUMBERS, library_write.STAGE_NUMBERS)
         checks = rules["checks"]
-        self.assertEqual(SHOTS_TOOL.rule_breaches(NUMBERS, checks, ["mate"], ["sensor"]), [])
-        self.assertEqual(SHOTS_TOOL.rule_breaches(dict(NUMBERS, near_seen=0.4), checks, ["mate"], ["sensor"]),
-                         ["near_seen_min: the near stack's bottom FPC seen only 0.4 (rule 0.5)"])
-        self.assertEqual(SHOTS_TOOL.rule_breaches(dict(NUMBERS, stacks_apart_px=19), checks, ["mate"], ["sensor"]),
-                         ["stacks_apart_min_px: the stacks apart on screen, px 19 (rule 20)"])
-        self.assertEqual(SHOTS_TOOL.rule_breaches(dict(NUMBERS, jaw_gap_mm=10, clearance_mm={"bodies": 12, "other_finger": 12, "stacks": 2.9}),
-                                                  checks, ["mate"], ["sensor"]),
-                         ["stacks_apart_min_mm: the exploded stack to the other finger's stack, mm 2.9 (rule 3)"])
-        self.assertEqual(SHOTS_TOOL.rule_breaches(NUMBERS, checks, ["mate"], ["sensor", "mate"]), ["near_seen: 1.0 with the mate's stack exploding"])
-        self.assertEqual(SHOTS_TOOL.rule_breaches(dict(NUMBERS, near_seen=None), checks, ["mate"], ["sensor", "mate"]), [])
+        # One copy of the rules (the review of 2026-11-06: the shots tool's own copy had taken a jaw gap of 0 or below and
+        # an extra number, which the writer then refused): the shots tool refuses what the writer refuses, in its words.
+        cases = [(NUMBERS, ["sensor"], []),
+                 (dict(NUMBERS, near_seen=0.4), ["sensor"], ["near_seen 0.4 breaks the rule near_seen_min: not >= 0.5"]),
+                 (dict(NUMBERS, stacks_apart_px=19), ["sensor"], ["stacks_apart_px 19 breaks the rule stacks_apart_min_px: not >= 20"]),
+                 (dict(NUMBERS, jaw_gap_mm=10, clearance_mm={"bodies": 12, "other_finger": 12, "stacks": 2.9}), ["sensor"],
+                  ["clearance_mm.stacks 2.9 breaks the rule stacks_apart_min_mm: not >= 3"]),
+                 (NUMBERS, ["sensor", "mate"], ["near_seen is 1.0, with the mate's stack exploding"]),
+                 (dict(NUMBERS, near_seen=None), ["sensor", "mate"], []),
+                 (dict(NUMBERS, jaw_gap_mm=0), ["sensor"], ["jaw_gap_mm (0) is not a positive number"]),
+                 (dict(NUMBERS, jaw_gap_mm=-5.0), ["sensor"], ["jaw_gap_mm (-5.0) is not a positive number"]),
+                 (dict(NUMBERS, extra=1), ["sensor"], [f"its stage's numbers are not {', '.join(library_write.STAGE_NUMBERS)}"])]
+        for numbers, explode, problems in cases:
+            with self.subTest(numbers=numbers, explode=explode):
+                self.assertEqual(SHOTS_TOOL.rule_breaches(numbers, checks, ["mate"], explode), problems)
+                self.assertEqual(library_write.stage_problems(numbers, checks, ["mate"], explode), problems)
 
     def test_the_bodies_and_the_art_stay_within_their_budgets(self) -> None:
         for folder, budget in (("bodies", BODIES_BUDGET_BYTES), ("art", ART_BUDGET_BYTES)):
