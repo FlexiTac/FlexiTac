@@ -102,8 +102,10 @@ DEFAULT_BUS = {"fans": [85.0, 85.0], "tip_width_mm": 64.900857, "widest_mm": 67.
 # outline corner on the side without the bus bridged): the build ids, and the one-sided boards' outlines there (each
 # 0.234 mm2 larger; the copper, the tails and the roots the same) (before: 9922e93e...).  Re-pinned by the profile
 # revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes): the build ids change with
-# the profiles' digests, the boards not (before: 4d4bf0e4...).
-DIGEST = "4ea89555c67dcca53c186e17740728293b31c30fefaa41403b05f2a8463aa293"
+# the profiles' digests, the boards not (before: 4d4bf0e4...).  Re-pinned by the profile revision 2026-11-06 (the order:
+# JLC's 2-layer 0.2 mm FPC, the bottom copper empty): the build ids change with the profiles' digests, the boards not
+# (before: 4ea89555...).
+DIGEST = "6b1f66e0a4b50f841c84a2fcf42f914782f8f43517f747664ec7c1047d552ba4"
 # The manifest's identity: the build id and its hashes, and the surface template's version.
 IDENTITY = {"build_id", "build_sha256", "design_sha256", "template"}
 

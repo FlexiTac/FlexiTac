@@ -48,6 +48,13 @@ oversize one) changed their designs, build ids and manifests, the 6 built ones
 their layout digests and the oversize one its validation report (E_BOARD_SIZE quotes the outline's
 size); every verdict and error code held.  The 82 others kept their records
 byte for byte.
+
+It was rewritten by the profile revision 2026-11-06 (the order: JLC's 2-layer
+0.2 mm FPC, the bottom copper empty; the FlexiTac fabrication guide cited and
+JLC's 2-layer thicknesses, the file hash re-pinned): all 92 entries changed
+their build ids and manifests (of a manifest its build id, build digest,
+profile revision and profile digest alone); every design, verdict, error code,
+board (layout digest) and validation report held.
 """
 
 from __future__ import annotations
@@ -70,7 +77,7 @@ except ImportError:  # run as a package
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "surface_identity_baseline.json"
 SURFACE_PROFILE = Path(__file__).resolve().parents[1] / "profiles" / "jlc_fpc_surface_v1.json"
 # sha256 of the surface profile file's bytes (its canonical-JSON digest is in every surface build id).
-SURFACE_PROFILE_FILE_SHA256 = "4a0af054390bce16653e0e8650eaf0e28628b34c8f0241c4b79466c28e693442"
+SURFACE_PROFILE_FILE_SHA256 = "cbce05988eeca8a8dc9af1ef20e68ea03270a93671d2105af11d6ea7e42e8a33"
 SURFACE = "surface_matrix_v1"
 SEED = 20261020
 RANDOM_COUNT = 80
@@ -136,8 +143,9 @@ def write_fixture() -> None:
     entries = [{"request": request, "expected": record(generate_design(request))} for request in requests()]
     document = {
         "format": "tactile-fpc-surface-guard/v1",
-        "written_from": "engine of the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: the default electrodes 1.4 -> 1.0 "
-                        "mm, in the requests that leave them to the default), 2026-11-06; before it, the profile revision 2026-10-29 "
+        "written_from": "engine of the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty, "
+                        "in every build id), 2026-11-06; before it, the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: "
+                        "the default electrodes 1.4 -> 1.0 mm, in the requests that leave them to the default), 2026-11-06; before it, the profile revision 2026-10-29 "
                         "(the gold-finger thickness order option and the coverlay-window "
                         "notes, in every build id), 2026-10-29; before it, P5-diagonal-bus.md section 23's (the surface profile's tails "
                         "to 200 mm), 2026-10-25, and before that the "

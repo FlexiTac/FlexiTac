@@ -64,26 +64,30 @@ TRIANGLE = [[10 - row, 10] for row in range(10)]
 # profile's tails to 200 mm): the build ids, the manifests and the bundle's profile.json change, every other member holds.
 # Re-pinned by the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes): the
 # build ids, the manifests, ORDER_NOTES.txt and the bundle's profile.json change, every other member holds.
+# Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty): the build
+# ids, the manifests, ORDER_NOTES.txt (the order block and the FlexiTac fabrication guide cited) and the bundle's
+# profile.json change; the designs, boards, layouts and validation, the Gerber layers and netlists but their identity
+# headers, jlcpcb.json, taxels.csv, pinout.csv and the previews hold.
 DIGESTS = {
     "triangle": (
-        "202fa5bb8faedd3fd86397aaebbe186e9acd3bc99fcf63c25eeb28b9e16e4d72",
-        "9ef6d4f5c3ea78b59963d02bf5680a74e2adbfbb01f4611b6737ba1401c2cda3",
-        "86c9ca547e5685cd0236c133fde4d45417920f2db7526e58f4a4e3f89d5468f8",
+        "34af536f8dfbae74a1f57dc53d91541f529687533d7010e0c3f58f6e254ad8e1",
+        "603f200dad28f484a50684cd622e0e629a1008f5259aae98ac574914517a0be0",
+        "557b56c7566a367ce1a9ff1400bc63291e531847522a60f3d397a46bbb9fb1b3",
     ),
     "per-electrode windows": (
-        "519f0d3ab763a26564e62c1d66d75a209235de08aee24d698a96fd02dd04041d",
-        "eb4590df8926b621e9e3720f4d31fa1e9c22586b76ccc7a89bba76a107e448bb",
-        "c7bc636cabc0e6026835f8892a5e63c76730449f1ee8b4897d83288f617ad0a7",
+        "1e181ae4a3b7430cffc82896321309131f489ab9b0c70e34e9d9a36402430c4b",
+        "5659e037b4e0d78dc36ff0af79e082fa63416608ca6be06be08a96cee368e287",
+        "b67247b79e8fb6cd3893a6adfc889acfc48e6a883012efbc91a03d26b748bc82",
     ),
     "turned, columns on top": (
-        "c49066c9194b46e2a8ff675e97d759cd99a52f30ed07625643a1d3dfd26b50b1",
-        "fdf7a544d2135a37fb0834cdd661bfd866df15ef5e697ff3f0d4df3abe595769",
-        "ef012924244b1ac4b38c625010ecb0311d0c062d6819c7f8984fe4630b2dee92",
+        "b5e9eb8dc4d7a4442fbb5659925a6487217c4bb3142634946793f35678b20188",
+        "4658009b9a04b086178911df4c50e4bfd91df2f4d53b0e6343e4ae76547962a3",
+        "18c6143040ac18a09cd1f1bb9b46830ec304d8f7ce107dcb7050d1ec81c2a9be",
     ),
     "opposite tails": (
-        "42ce83e154f30223b544e86aa042fb5a5556b920dbad7cebbc40a9f37fadc77e",
-        "cc39f3b859ac10286169a65107fca46c9fa54aec342943d014d18823537218c5",
-        "5e5cf2483e4ce76806092e4d4877dab788289b2a2a4ea3ca8bd365686c3d9c6c",
+        "77e22017fecbbb1a31478e8e74c126d372770f8af490a78e318eb05768ffef1f",
+        "6e3bea128a28ae336aeb74078090b0b7d93c6e52f408df6b63a0a43c23828936",
+        "c7a97b5ee1b5745d191a856509c95580ec3c98fae77307db768c8a081194cad6",
     ),
 }
 
@@ -259,7 +263,8 @@ class MaskedExportTests(unittest.TestCase):
                     self.assertLess(flat.index("Profile:"), flat.index(line))
                     self.assertLess(flat.index(line), flat.index("Board "))
                     self.assertIn("the other positions have no crossing and read 0.", flat)
-                    self.assertTrue(all(len(row) <= 78 for row in text.splitlines()))
+                    # A cited URL (the FlexiTac fabrication guide's, profile revision 2026-11-06) cannot wrap: it stands whole on its own line.
+                    self.assertTrue(all(len(row) <= 78 or row.strip().startswith("https://") for row in text.splitlines()))
 
     def test_the_netlist_tests_each_masked_electrode_at_its_far_end(self) -> None:
         for name, exports in self.exports.items():

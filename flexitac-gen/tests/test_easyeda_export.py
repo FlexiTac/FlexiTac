@@ -82,12 +82,15 @@ SOFT_BASE = {"point_xyz": [0.0, -12.9, -3.0]}
 # coverlay-window notes): their build ids change with the profiles' digests, their boards not (before: a12b04c8...,
 # 6d7035e5..., a1e63ad3..., 31569177...).  The default re-pinned by the user's decision of 2026-11-06 (the default fill
 # 0.7 -> 0.5: its electrodes 1.0 mm, a coverlay window per electrode; before: 15c169e4...); the other three keep theirs,
-# built with the electrodes of before (_builds()).
+# built with the electrodes of before (_builds()).  Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer
+# 0.2 mm FPC, the bottom copper empty): their build ids and the uuids seeded from them change with the profiles' digests,
+# README_EASYEDA.txt's order options with the order, their boards and read-back geometry not (before: ccb42d6f...,
+# d2557913..., 76152d5f..., 5a00b531...).
 DIGESTS = {
-    "default": "ccb42d6fffb7fe8acc62335bbbfed95cc540b39fd5c0307c881cbab363cc11f0",
-    "soft finger": "d25579132032ab5fde9f76bde77bac91c7fe7cd26d0edbc472510a85d92bde08",
-    "masked triangle": "76152d5f71b4b219fde4721f54e3140dca0d1ed459c924d0c7903d451c978151",
-    "straight channel with a cutout": "5a00b531a7a7417598392bc88dd191c917c2f691097ba54b370809f8221674c2",
+    "default": "f66648e94501f7b1e260ddf962a83dab965eadd5e98d81d65f68771d788d4e2a",
+    "soft finger": "a6c2d86685360273928883dc39c3f7b45ed7ef3761f4ae27a424e68790dd67bd",
+    "masked triangle": "f5a2548c09250eddb3e42f88b2c8bc8efa0897158ef2f7cf4ecd035fd15f1d0c",
+    "straight channel with a cutout": "982e3c5886f1c6463b35ba016e71aa349731e219c910f6de9f0847d81c2c86b5",
 }
 
 

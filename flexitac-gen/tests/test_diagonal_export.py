@@ -346,31 +346,35 @@ class DiagonalExportTests(unittest.TestCase):
 # field's outline corner bridged; the copper the same) (Python 3.9.6 and 3.12 alike).  Every case re-pinned by the
 # profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes): the build ids, the
 # manifests, ORDER_NOTES.txt and the bundles' profile.json change; the Gerbers and every other member hold, the build id aside.
+# Every case re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty):
+# the build ids, the manifests, ORDER_NOTES.txt (the order block and the FlexiTac fabrication guide cited) and the
+# bundles' profile.json change; the boards, the Gerbers, netlists and validation, the build id aside, and every other
+# member hold (before: e3a015f3..., cae0ddac..., 79cc0f5c..., 2cb1554e..., c8222458... for the top ZIPs).
 DIGESTS = {
     "both": (
-        "e3a015f3e1d01b07c5d07162f0931e17c7d292ac2442ffbfb0fc783ce369eef5",
-        "bc906e7a2c20f819c72e071d54f4a241325ad6c96d7a25ef2a57e99e531c8a86",
-        "767165ef55c0b557f0c605b31eaa7e58da84f25b13f4a668c17615715e0f9049",
+        "87171f8212b2d2642770c7f9b8839543835867a8b9279d2d0ccee254743769e0",
+        "81e551ebf029f1917c2000be3008349041edcebd4c91c56946260e3600a3d388",
+        "4e466d2be8b10000b6eb0bf4e158afe7ec6949b8c5be96cae485262627eb58b2",
     ),
     "both, descending, columns on top": (
-        "cae0ddac671e3bdb3792f4fcba8646411773430581af734b90acfac2fc59129d",
-        "c832c77cc3a60b9a16853b9cfd00b19ec754a6558b390ab404134358c7ca0ee0",
-        "0e0e0c0027ba891516d6a5598af8879c7d14745403928b55f691fc187e6edf8d",
+        "3bf5ab37385636f751702c11fd0f41130b9377379d94a6e43264185e88c039cf",
+        "2ff6aeb2f755fb7221041f0885114819b86f9c945f86ee63acaaa6f1b87bf17f",
+        "9b4794f996e2a7496af1d927f00bc5c513ccc6db8ffe77181aef548ee17cb00b",
     ),
     "left, mirrored": (
-        "79cc0f5c04902804bfdf982bf80cdf8bffba9b4ad065cf4b0497404176e226f9",
-        "e9af79641dcd757f8910a790fada0e0eb43e54e55133eefcce2ee80398602085",
-        "bf9e614df434facf7d6db8ca033390d5dd020bb82d18e2f190dc989373cb15e9",
+        "4d751c59976e21453b5eaecef3199505991fa140def637d70dfeb700fc3f3e7d",
+        "ca54bbd8868e82cae4ace8ba0afa9b0ab587b777ba546f89e84e14984d532870",
+        "cea09932fb16f6c55b18844969250e7edb45ae86dd5e18f8ac98bfd505b6dc45",
     ),
     "right": (
-        "2cb1554ebf69d6d4defa00975bec02f45571eb9355ba95431e5497da1b9a3eb1",
-        "a04105caf0988d3540321a7ce2ba0222f0a0e10bd7bc3eb2b5fcfbbecb3f8849",
-        "b4d643d2f388f70f722928e910476debd7d81aced6ec6dc92d15159b6462209e",
+        "868a9496fd7caa1f9a1ef32faa3bd9fe6c403ffce167fd3fefa4c5d5bac97ebe",
+        "4d0b7b159a213d45dc8a11dcf6244ba984bec758aa77690e91516b5f7fb0827d",
+        "300345ea791351ee15efc5a45f8161880db300735452491e4ca240be0585ee06",
     ),
     "diamond, both": (
-        "c8222458fa8893dcbdae738a7feecd5a2efde4e43a94a797a97218dd1570f56b",
-        "54f8c677ba6b488c210ce1c33463db1456f9c9daff32c6bb13761834057de336",
-        "78555dafe045a9d4d127a98831fc864301608d2c9845e27cc3d2dfc77ad31599",
+        "096fd6856c989cbbe5519730d03f2889e9a953c684ca4bfc2e28ee4fa88f7111",
+        "4cf58f4a22e851caa5fee54a883050f21bf2071f7e8137b5b7be73985f2e9a13",
+        "88250d4dfe395e2a517cf460a7b9df4a44bc682d27af603d4d260bc10821c4d7",
     ),
 }
 
@@ -402,24 +406,27 @@ class DiagonalArchiveTests(unittest.TestCase):
 # profile.json change, every other member holds; the generic case (the standard profile) keeps its archives.  Every
 # case re-pinned by the profile revision 2026-10-29 of both profiles (the gold-finger thickness order option and the
 # coverlay-window notes): the build ids, the manifests, ORDER_NOTES.txt and profile.json change, every other member holds
-# (the build id aside).
+# (the build id aside).  Every case re-pinned by the profile revision 2026-11-06 of both profiles (the order: JLC's
+# 2-layer 0.2 mm FPC, the bottom copper empty): the build ids, the manifests, ORDER_NOTES.txt and profile.json change,
+# every other member holds (the build id aside; before: tactile-fpc-10x10-06ff5b60ff59, tactile-fpc-8x9-60ee5335903c,
+# tactile-fpc-8x9-acbc69addeac, tactile-fpc-3x5-0f245ad84036).
 CHANNEL = {
     "surface 10 x 10": (
         {"template_id": SURFACE, "matrix": {"rows": 10, "columns": 10}},
-        ("tactile-fpc-10x10-06ff5b60ff59", "dfac28c38fd39e78dfc02360dc3f0ce856c3aeeb9c80d669a38b99a42f5b8b8a",
-         "44e8fe2d8969a6b3634da59d6be8492d979e787aaacab39fe63ef0f94b053b1c", "ee034b93bced87872c88e076d86b8f43f6ee7f395c4f9019892bba53764ef87a"),
+        ("tactile-fpc-10x10-2606dd95dd75", "f66d70ce6e445647d25d293f7dd9314a9b95bd235d930354c53e5876168b7da9",
+         "7c52521399a51ff0858e9cf53faa5e025290c420096ea2436e4b8f4aa61dcf45", "b980eb99917404a92b8af02ece92d67651eb81237a0a8857f874118a0451cff4"),
     ),
     "surface turned, columns on top": (
         {"template_id": SURFACE, "matrix": {"rows": 8, "columns": 9}, "tail": {"row_side": "right", "column_side": "right"},
          "role_mapping": {"top": "columns", "bottom": "rows"}, "channel_order": {"rows": "descending", "columns": "ascending"},
          "connector": {"row_pins": 12}},
-        ("tactile-fpc-8x9-60ee5335903c", "d54036288e170fb3722c2de9cfb2e51d2048a9bf438210fd908721df06b3b684",
-         "44543a2665f2a789272288005845aee4485e20e4ce6762be76729aa84407c683", "b5877c290763ee0e0e3b84b28d6773eb03072ffdcacf51d2e85ac35d0ac7147b"),
+        ("tactile-fpc-8x9-f97b2164f700", "5996238a8faed9a58399908ad48ae4ebddd163c1724f493ba7a61d50ae282dcf",
+         "1063c6a2354239f2fca69c248a85673085fd21a3d5f94c2f54f3cd4938d5532b", "12f5d1b3131d952282639e60310cabd653d34676cfd83ef5335127127e5c85e2"),
     ),
     "surface opposite tails": (
         {"template_id": SURFACE, "matrix": {"rows": 8, "columns": 9}, "tail": {"row_side": "bottom", "column_side": "top"}},
-        ("tactile-fpc-8x9-acbc69addeac", "b0f96d8dad130c2c65ad3f7c6b480b2fd3ff84dc4201a4ce4a75f54ac180f11b",
-         "d5c169f1cb5ddc903af78d1364a688dacadb3f2e88695373cf0f1eb86cab6589", "348de1e85eea6c4a27ce240446409d53cb8b4f43c65e7ae9fb7a279a953f236a"),
+        ("tactile-fpc-8x9-7777f8a5147a", "93cde3ed489e650f87f63c099c2d19f4b3049ea87f248954a4fbb6cb1ca70ed2",
+         "19cf857755cc5e9fce623aa548f94993647887bc66390ecc40af275be13d371b", "816d0b0153e28c56c251e2e295b7c6c173b0414b6a2a0d4092c1e69895ed9a9a"),
     ),
     # The generic template builds the diagonal Row bus by default since P5-diagonal-bus.md section 18: its straight
     # channel names routing.row_sides "channel", a new build id (it was tactile-fpc-3x5-1adb4c7f8a53), so the archives
@@ -428,8 +435,8 @@ CHANNEL = {
         {"matrix": {"rows": 3, "columns": 5}, "tail": {"row_side": "left", "column_side": "left"},
          "channel_order": {"rows": "ascending", "columns": "descending"},
          "routing": {"trace_width_mm": 0.1016, "trace_space_mm": 0.1016, "row_sides": "channel"}},
-        ("tactile-fpc-3x5-0f245ad84036", "7f9ccc9fd04b6fb49e5d077c2658ee7ccaf3b9b68db941002575dd40cfd4b74a",
-         "130419afc594a6b85be4afc0e24be94a925f9d76e8cebc132a3f46da4c01513e", "2ea9751454e7229f11dec9f475651a533e0843a1120934469be1d136a748a91d"),
+        ("tactile-fpc-3x5-4041f0e0d274", "1a22d8fd0c52c9203df45e3670cf37f5026089b3fef1b91b49a3f90f30b01714",
+         "a8318294e657caee66ed1b18fd52dbef0c75f74c7f741d99bf7f0fbe93037879", "e9fe6514734673afeb0b320f299d1926592f1d6333aca6a35d67fbfc0ee471b3"),
     ),
 }
 

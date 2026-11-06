@@ -79,10 +79,12 @@ _OPPOSITE = {"bottom": "top", "top": "bottom", "left": "right", "right": "left"}
 # profiles' new revision and digest (before: a79e66ad...), the surface schema's x-profile the surface profile's (before:
 # ebb2976c...); the limits unchanged.  And with the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5): every
 # schema's and limits' default electrode widths 1.0 mm (1.4 before: e495f1c6..., 8154a3c0..., 938f3f6f... and
-# 13345dbc...).
-GENERIC_SCHEMA_SHA256 = "45c0b8e38e70c89652d8d47c64a9ea0f14557711169b893d326a689fbbe1a041"
+# 13345dbc...).  Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper
+# empty): the generic schema's x-profile and x-row-bus-profile name both profiles' new revision and digest (before:
+# 45c0b8e3...), the surface schema's x-profile the surface profile's (before: 61d8f76a...); the limits unchanged.
+GENERIC_SCHEMA_SHA256 = "4babcb58d7eae99996c55c024253367452f231802969e1e972b4c4e77bdaeca3"
 GENERIC_LIMITS_SHA256 = "8eb88e9e6031676226c4db419c7a6fe1b62b9b0c4dc4df7678ec73fea42233f8"
-SURFACE_SCHEMA_SHA256 = "61d8f76ac73a743f2b349a133d2cec3eb7a935b7384d52c24b2c307668b71c10"
+SURFACE_SCHEMA_SHA256 = "d69de578275c11f088f6640adb2d791372e519be4ca80d615cc6cb0ed46c61c9"
 SURFACE_LIMITS_SHA256 = "e143c63fbddc5ce488df0780f9f52755899a66a21d62fb472ffce1fbc55b0f5e"
 
 

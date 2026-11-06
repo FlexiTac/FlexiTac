@@ -650,7 +650,7 @@ characters.  A name without ASCII letters or digits (for example an all-Chinese
 name) gets `tactile-fpc-` plus 8 hex digits of the SHA-256 of the trimmed
 name.  Any change of the design, of profile content or of either version
 gives a new build id; equivalent requests (`2` vs `2.0`, flat vs nested)
-share one.  The default build is `tactile-fpc-12x32-34a71a29e4d0` (the
+share one.  The default build is `tactile-fpc-12x32-48b9d43409a6` (the
 diagonal Row bus with `both`, `diagonal-bus/11`, both tails 12 mm since
 P5-diagonal-bus.md section 27.7, the profile revision 2026-10-29, the 1.0 mm
 electrodes of the default fill 0.5 since 2026-11-06), for the browser's default form and for

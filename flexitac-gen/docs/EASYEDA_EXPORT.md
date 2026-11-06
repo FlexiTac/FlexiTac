@@ -88,7 +88,8 @@ names the layer `Gerber_BottomStiffenerLayer_pib_0.225.GBSL`.
 **Stack.**  The originals' nine `LAYER_PHYS` records with the profile's
 thicknesses (mil): coverlay and adhesive on layer 5, the copper on layer 1,
 the polyimide core as the dielectric, the profile's 1 µm placeholder bottom
-copper and no bottom coverlay (0.111 mm in all, the 0.11 mm FPC of the order).
+copper and no bottom coverlay (0.111 mm in all, the boards' own 0.11 mm stack-up; they are ordered as a
+2-layer 0.2 mm FPC).
 
 **Design rules.**  The originals' rule set (JLCPCB Capability, Two Layers
 Board) with this board's own rules from its DRC (`verification.checks`,

@@ -368,13 +368,14 @@ class SurfaceIdentityTests(unittest.TestCase):
     # Re-pinned by the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes):
     # a new profile digest and revision (before: 89ad79654dd6, 0cf8782b...).  Re-pinned by the user's decision of
     # 2026-11-06 (the default fill 0.7 -> 0.5): the default electrodes 1.4 -> 1.0 mm, a new design (before: 527bfeafd16e,
-    # d580000c...).
+    # d580000c...).  Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper
+    # empty): a new profile digest and revision (before: 0fa31c3236be, 308eb329...); the design and the boards as before.
     DEFAULT_IDENTITY = {
-        "build_id": "tactile-fpc-12x32-0fa31c3236be",
+        "build_id": "tactile-fpc-12x32-e484a57c9a40",
         "design_sha256": "87581f25ad863355e1fae87419798e53537e9a403ef900f0122e0a46ac1ff38a",
-        "profile_sha256": "308eb3296df3107301f3789d1013421f7ee5dc92e4e4133417bb88a8eee1aa95",
+        "profile_sha256": "fb37953c0b7ad8f820ac71fcf4f5e07df946d3ec2943ecd3e1f43be30a2f2448",
         "template": "surface-matrix/1",
-        "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-10-29"},
+        "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-11-06"},
     }
 
     def test_the_same_matrix_in_both_templates_has_two_identities(self) -> None:

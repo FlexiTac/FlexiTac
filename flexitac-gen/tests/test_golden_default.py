@@ -34,19 +34,23 @@ from exporters import artifact_filenames, build_exports
 
 # Re-pinned for the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes):
 # the identity, the profile revision and the archives; the layout and every measurement held.
-BUILD_ID = "tactile-fpc-12x32-34a71a29e4d0"
+# Rewritten by the user's request of 2026-11-06 ("ordering node,改成2 layer, 0.2mm"): the profile revision 2026-11-06 orders
+# each board as JLC's 2-layer 0.2 mm FPC, the bottom copper empty (order.fpc_layers 2, order.fpc_thickness_mm 0.2, the
+# FlexiTac fabrication guide cited): the identity, the profile revision and the archives (ORDER_NOTES.txt); the
+# layout and every measurement held.
+BUILD_ID = "tactile-fpc-12x32-48b9d43409a6"
 IDENTITY = {
     "build_id": BUILD_ID,
-    "build_sha256": "34a71a29e4d0ff4923f432bcfaa4a8cb7c997edf4b171ca9c3762843188c614e",
+    "build_sha256": "48b9d43409a6147adafaf81fee8ba6ef2c7eae85cc726f79c06e32a5c013693f",
     "design_sha256": "1e0001a8705c5453ecb598d34939d9f3123511a34f0b71597c6fc4bed6655a72",
-    "profile_sha256": "308eb3296df3107301f3789d1013421f7ee5dc92e4e4133417bb88a8eee1aa95",
+    "profile_sha256": "fb37953c0b7ad8f820ac71fcf4f5e07df946d3ec2943ecd3e1f43be30a2f2448",
     "generator": "deterministic-sensor-core/0.4.0",
     "exporter": "direct-gerber-pure-stdlib/0.3.0",
     "row_bus": "diagonal-bus/11",
     "layout_format": "tactile-fpc-layout/v3",
     "format": "tactile-fpc-manifest/v2",
     "slug": "tactile-fpc-12x32",
-    "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-10-29"},
+    "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-11-06"},
     "output_status": "geometry_only",
     "geometry_valid": True,
     "production_ready": False,
@@ -54,9 +58,9 @@ IDENTITY = {
 # sha256 of the canonical JSON of {"format", "units", "boards"} (= derived-layout.json without its newline).
 LAYOUT_SHA256 = "6e20c9f42212fba7dc318aa97a5d0b2ed6e41f9160bfc098b29b36d780978460"
 ARTIFACTS = {
-    "top_fpc_gerber_zip": (f"{BUILD_ID}-top-rows-direct-gerber.zip", 30097, "f3edfa708c37455feb74361a9652bf5fe61b9ed13c67d9c86770e1b91288c4bd"),
-    "bottom_fpc_gerber_zip": (f"{BUILD_ID}-bottom-columns-direct-gerber.zip", 42203, "45ac29dd2b1551477f0a8243a8bfb8bb349a8b9c79c5cb7e19b2d3954cbe905f"),
-    "project_review_bundle_zip": (f"{BUILD_ID}-project-review.zip", 235822, "420ecf33f8b65d8ecf664e73f2d36a5e58918bf1d9e6a7be58b75bba10dd5e5d"),
+    "top_fpc_gerber_zip": (f"{BUILD_ID}-top-rows-direct-gerber.zip", 30610, "774773c1e7526efc05fd6d70e3b5e74a45878f148c4252736c32d40a81834b36"),
+    "bottom_fpc_gerber_zip": (f"{BUILD_ID}-bottom-columns-direct-gerber.zip", 42716, "6871de5732d55c201a77988d6395940c6fac5775ab27e3827a4a85b9520cb4a7"),
+    "project_review_bundle_zip": (f"{BUILD_ID}-project-review.zip", 237849, "8c32011b5def58c54fb2a5bb03d86ad2a3ba048bb7b96fc3c18a1789fa708936"),
 }
 # Since 2026-10-24 (P5-diagonal-bus.md section 18) the default design is the diagonal Row bus with both sides: the Row
 # traces leave both ends of their rows (ROW_01, 03, ... on the stack's right), fan into a Row tail centred under the

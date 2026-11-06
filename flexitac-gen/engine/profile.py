@@ -83,6 +83,8 @@ STIFFENER_THICKNESS_OPTIONS = {"polyimide": "pi_stiffener_thickness_options_mm"}
 STIFFENER_MATERIAL_NAMES = {"polyimide": "PI"}
 # The generator writes one copper layer (stackup.construction single_copper_flexible).
 COPPER_LAYERS = 1
+# JLC's finished FPC thicknesses per ordered layer count (fabrication), for the boards' one copper layer.
+_FPC_THICKNESS_OPTIONS = {COPPER_LAYERS: "single_layer_fpc_thickness_options_mm", COPPER_LAYERS + 1: "two_layer_fpc_thickness_options_mm"}
 # The layers of the ordered FPC (stackup), and those left under the contacts,
 # where the coverlay is open, before the stiffener is added.
 _FPC_LAYERS = ("core_polyimide_thickness_mm", "copper_thickness_mm", "coverlay_thickness_mm", "coverlay_adhesive_thickness_mm")
@@ -93,6 +95,7 @@ _COPPER_MINIMUMS = ("single_sided_min_trace_width_mm", "single_sided_min_trace_s
 # Profile texts the order notes cite (ORDER_NOTES.txt "Sources").
 _ORDER_SOURCES = (
     ("jlcpcb_flex_capabilities", "url"), ("jlcpcb_flex_capabilities", "fetched"), ("jlcpcb_flex_capabilities", "trace_rules_rechecked"),
+    ("flexitac_fabrication_guide", "url"), ("flexitac_fabrication_guide", "fetched"),
     ("jlcpcb_gold_finger_stiffeners", "url"), ("jlcpcb_gold_finger_stiffeners", "fetched"),
     ("jlcpcb_fpc_design_clearance", "url"), ("jlcpcb_fpc_design_clearance", "fetched"),
     ("reader_connectors", "rows"), ("reader_connectors", "columns"), ("reference_design",),
@@ -295,13 +298,33 @@ def profile_issues(profile: Any) -> list[dict[str, str]]:
     # Order options (ORDER_NOTES.txt): JLC must offer each one, and together
     # they must hold the reader connectors' tail tolerances.
     order = profile["order"]
-    if order["fpc_layers"] != COPPER_LAYERS:
-        issue("E_PROFILE_INCONSISTENT", "order.fpc_layers", f"the generator writes {COPPER_LAYERS} copper layer, so the order needs {COPPER_LAYERS}.")
-    fpc_options = fab.get("single_layer_fpc_thickness_options_mm")
-    if not _thicknesses(fpc_options):
-        issue("E_PROFILE_MISSING", "fabrication.single_layer_fpc_thickness_options_mm", "must be a list of thicknesses.")
+    # The generator writes COPPER_LAYERS copper layer: the boards are ordered as JLC's 1-layer FPC, or as its 2-layer FPC
+    # with the bottom copper empty (the FlexiTac fabrication guide's 0.2 mm, the order since 2026-11-06).
+    options_key = _FPC_THICKNESS_OPTIONS.get(order["fpc_layers"])
+    fpc_options = fab.get(options_key) if options_key else None
+    if options_key is None:
+        issue(
+            "E_PROFILE_INCONSISTENT", "order.fpc_layers",
+            f"the generator writes {COPPER_LAYERS} copper layer, so the order needs {COPPER_LAYERS} or {COPPER_LAYERS + 1} (the bottom copper empty).",
+        )
+    elif not _thicknesses(fpc_options):
+        issue("E_PROFILE_MISSING", f"fabrication.{options_key}", "must be a list of thicknesses.")
     elif not _listed(order["fpc_thickness_mm"], fpc_options):
-        issue("E_PROFILE_FAB_LIMIT", "order.fpc_thickness_mm", f"{order['fpc_thickness_mm']} mm is not a JLC 1-layer FPC thickness {fpc_options}.")
+        issue("E_PROFILE_FAB_LIMIT", "order.fpc_thickness_mm", f"{order['fpc_thickness_mm']} mm is not a JLC {order['fpc_layers']}-layer FPC thickness {fpc_options}.")
+    elif order["fpc_layers"] != COPPER_LAYERS:
+        # A 2-layer order is JLC's own build of the boards' one copper layer: the stack-up stays the boards' own build, a
+        # 1-layer FPC of JLC's tables, so its layers add up to one of JLC's 1-layer thicknesses.
+        single = fab.get("single_layer_fpc_thickness_options_mm")
+        layers = round(math.fsum(float(stack[key]) for key in _FPC_LAYERS), 6)
+        if not _thicknesses(single):
+            issue("E_PROFILE_MISSING", "fabrication.single_layer_fpc_thickness_options_mm", "must be a list of thicknesses.")
+        elif min(abs(layers - float(option)) for option in single) >= _half_step(single):
+            issue(
+                "E_PROFILE_INCONSISTENT",
+                "stackup",
+                f"the core, copper and coverlay layers add up to {layers:g} mm, none of JLC's 1-layer FPC thicknesses {single} "
+                "(the boards' own build).",
+            )
     else:
         # The stack-up describes the ordered build: its layers add up to the
         # ordered thickness, closer than half the step between JLC's options.
@@ -495,6 +518,9 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
     rows_part, columns_part = (readers[role].split(" (", 1)[0] for role in ("rows", "columns"))
     material = STIFFENER_MATERIAL_NAMES.get(stack["stiffener_material"], stack["stiffener_material"])
     stiffener, fpc = float(stack["stiffener_thickness_mm"]), float(order["fpc_thickness_mm"])
+    two_layer = order["fpc_layers"] > COPPER_LAYERS
+    # The boards' own layers: the ordered FPC on a 1-layer order, JLC's 2-layer build of them otherwise.
+    own = round(core_layers(stack), 6) if two_layer else fpc
     core, copper = (float(stack[key]) for key in _CONTACT_LAYERS)
     coverlay, adhesive = float(stack["coverlay_thickness_mm"]), float(stack["coverlay_adhesive_thickness_mm"])
     copper_options, weights = fab["single_sided_copper_thicknesses_mm"], fab["single_sided_copper_weights_oz"]
@@ -504,7 +530,7 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
         float(fab[key])
         for key in ("recommended_pi_stiffener_mm", "recommended_pi_stiffener_fpc_thickness_mm", "recommended_pi_stiffener_connector_thickness_mm")
     )
-    follows = all(abs(a - b) <= 1e-9 for a, b in zip(recommended, (stiffener, fpc, zone)))
+    follows = all(abs(a - b) <= 1e-9 for a, b in zip(recommended, (stiffener, own, zone)))
     tolerance, default_tolerance = float(order["outline_tolerance_mm"]), float(fab["outline_tolerance_mm"])
     special = tolerance < default_tolerance - 1e-12
     width, width_tolerance = float(conn["pad_width_mm"]), float(conn["contact_width_tolerance_mm"])
@@ -534,15 +560,20 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
     return [
         entry(
             "fpc_thickness", "order_option", "Layers and FPC thickness",
-            f"{order['fpc_layers']} layer, {_g(fpc)} mm FPC thickness (finished, without the stiffener)",
-            f"JLC's 1-layer finished thicknesses are {_list(fab['single_layer_fpc_thickness_options_mm'])} mm"
-            + (f"; the {material} stiffener below is JLC's choice for {_g(fpc)} mm." if follows else "."),
-            (jlc,), {"fpc_layers": order["fpc_layers"], "fpc_thickness_mm": fpc},
+            f"{order['fpc_layers']} layer, {_g(fpc)} mm FPC thickness (finished, without the stiffener)"
+            + (", the bottom copper layer empty" if two_layer else ""),
+            (f"The FlexiTac fabrication guide orders {_g(fpc)} mm, one of JLC's 2-layer finished thicknesses "
+             f"({_list(fab['two_layer_fpc_thickness_options_mm'])} mm); the boards have one copper layer, so the bottom one stays empty"
+             + "." if two_layer else f"JLC's 1-layer finished thicknesses are {_list(fab['single_layer_fpc_thickness_options_mm'])} mm"
+             + (f"; the {material} stiffener below is JLC's choice for {_g(fpc)} mm." if follows else ".")),
+            (jlc, "flexitac_fabrication_guide") if two_layer else (jlc,), {"fpc_layers": order["fpc_layers"], "fpc_thickness_mm": fpc},
         ),
         entry(
             "copper_weight", "order_option", "Copper weight", f"{_g(weight)} oz ({_g(copper)} mm)",
             f"With {_g(copper)} mm copper, the {_g(core)} mm PI core and the {_g(coverlay)} mm PI + {_g(adhesive)} mm adhesive "
-            f"coverlay make the {_g(fpc)} mm FPC ordered above; JLC's single-sided copper is {_list(weights)} oz "
+            + (f"coverlay, the boards' own layers come to {_g(own)} mm; JLC builds them as the "
+               f"{_g(fpc)} mm {order['fpc_layers']}-layer FPC ordered above" if two_layer else f"coverlay make the {_g(fpc)} mm FPC ordered above")
+            + f"; JLC's single-sided copper is {_list(weights)} oz "
             f"({_list(copper_options)} mm).",
             (jlc,),
             {
@@ -665,6 +696,12 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
             {"coverlay_opening_general_max_length_mm": window_limit, "reference_field_window_length_mm": reference_window},
         ),
     ]
+
+
+def core_layers(stack: Mapping[str, Any]) -> float:
+    """The boards' own FPC layers (core, copper, coverlay and its adhesive) in mm, the stiffener not counted."""
+
+    return math.fsum(float(stack[key]) for key in _FPC_LAYERS)
 
 
 def _g(value: Any) -> str:

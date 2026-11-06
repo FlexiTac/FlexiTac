@@ -3661,7 +3661,9 @@ REGRESSION_CENTRED_COST = {"edge:035": 0.26, "reader:029": 1.39, "rv:063": 0.85,
 # below the field's outline corner bridged; the copper, the tails and the roots the same); Python 3.9.6 and 3.12 alike
 # (before: dfd99419...).  Re-pinned by the profile revision 2026-10-29 (the gold-finger thickness order option and the
 # coverlay-window notes): the build ids change with the profiles' digests, the boards not (before: 7e03aa07...).
-DIGEST = "82d8a2c9614035521f769532cf08c4bd028eec0f81982bb6ee691f616d655241"
+# Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty): the build
+# ids change with the profiles' digests, the boards not (before: 82d8a2c9...).
+DIGEST = "6c34e7e9562aaeb3c4cb228d3675aa105d03b45e2b09ca61f01df7d2cd79d809"
 # StraightSideTests: the sides whose upper stretch takes the line and those that keep their polyline (the named corpus,
 # the regressions and the user's cases).  diagonal-bus/10 (the Row tail centred): 19, 34 -> 21, 36: reader:011's and
 # reader:015's west sides take the line (their stretch down to the widest point within 1.0 mm of one now), and the inner

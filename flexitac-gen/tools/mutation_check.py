@@ -821,7 +821,7 @@ TESTS_AND_DOCS = (
       (WEB, "      schema_version: state.design?.schema_version, template_id: state.design?.template_id,\n",
        "      template_id: state.design?.template_id,\n")),
     m("T/doc-build-id", "M12", "README names a stale default build id",
-      ("README.md", "tactile-fpc-12x32-34a71a29e4d0", "tactile-fpc-12x32-ac8bac358de6")),
+      ("README.md", "tactile-fpc-12x32-48b9d43409a6", "tactile-fpc-12x32-ac8bac358de6")),
     m("T/doc-code", "M12", "an issue code missing from the documented catalogue",
       ("docs/LAYOUT_SCHEMA.md", "| `E_NECK_WIDTH` | drc |", "| `E_NECK_WIDTH_GONE` | drc |")),
     m("T/doc-check", "M12", "a DRC record missing from the documented list",

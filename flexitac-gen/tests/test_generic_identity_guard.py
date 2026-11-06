@@ -140,7 +140,7 @@ CHANNEL_FIXTURE = FIXTURE.with_name("generic_builds_straight_channel.json")
 CHANNEL_EXPORTS = FIXTURE.with_name("generic_channel_exports.json")
 GENERIC_PROFILE = Path(__file__).resolve().parents[1] / "profiles" / "jlc_fpc_standard_v1.json"
 # sha256 of the generic profile file's bytes (its canonical-JSON digest is in every build id).
-GENERIC_PROFILE_FILE_SHA256 = "45805f86f365832038a97f59289f0fdbf242d35b77771ccdd9099a7a26ff10d7"
+GENERIC_PROFILE_FILE_SHA256 = "b035465f40dd0d78a244f4050c06c6632a242e256c53062066d1f8644427d5a3"
 SEED = 20261020
 RANDOM_COUNT = 188
 
@@ -262,7 +262,8 @@ def write_fixture() -> None:
     entries = [{"request": request, "expected": record(generate_design(request))} for request in requests()]
     document = {
         "format": "tactile-fpc-generic-guard/v1",
-        "written_from": "engine of the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: the default electrodes 1.4 -> 1.0 "
+        "written_from": "engine of the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty, "
+                        "in every build id), 2026-11-06; before it, the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: the default electrodes 1.4 -> 1.0 "
                         "mm, in the requests that leave them to the default), 2026-11-06; before it, the profile revision 2026-10-29 "
                         "(the gold-finger thickness order option and the coverlay-window "
                         "notes, in every build id), 2026-10-29; before it, P5-diagonal-bus.md section 27.8's (diagonal-bus/11: one side's "

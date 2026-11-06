@@ -215,8 +215,8 @@ build's archives do not change (the table below).
 `tests/test_mask_export.py` pins the archives of four masked builds (a
 polygon window, per-electrode windows, tails on the right with the columns
 on top, opposite tails), the same on Python 3.9 and 3.12; the right
-triangle of 55 of 10 x 10 taxels gives a 28495-byte top ZIP, a
-29436-byte bottom ZIP and a 171123-byte bundle.
+triangle of 55 of 10 x 10 taxels gives a 29008-byte top ZIP, a
+29949-byte bottom ZIP and a 173150-byte bundle.
 
 ## Diagonal Row bus
 
@@ -281,9 +281,9 @@ Python 3.9 to 3.13 and hash seeds.  The default build gives:
 
 | Archive | Bytes | SHA-256 |
 | --- | --- | --- |
-| `tactile-fpc-12x32-34a71a29e4d0-top-rows-direct-gerber.zip` | 30097 | `f3edfa708c37455feb74361a9652bf5fe61b9ed13c67d9c86770e1b91288c4bd` |
-| `tactile-fpc-12x32-34a71a29e4d0-bottom-columns-direct-gerber.zip` | 42203 | `45ac29dd2b1551477f0a8243a8bfb8bb349a8b9c79c5cb7e19b2d3954cbe905f` |
-| `tactile-fpc-12x32-34a71a29e4d0-project-review.zip` | 235822 | `420ecf33f8b65d8ecf664e73f2d36a5e58918bf1d9e6a7be58b75bba10dd5e5d` |
+| `tactile-fpc-12x32-48b9d43409a6-top-rows-direct-gerber.zip` | 30610 | `774773c1e7526efc05fd6d70e3b5e74a45878f148c4252736c32d40a81834b36` |
+| `tactile-fpc-12x32-48b9d43409a6-bottom-columns-direct-gerber.zip` | 42716 | `6871de5732d55c201a77988d6395940c6fac5775ab27e3827a4a85b9520cb4a7` |
+| `tactile-fpc-12x32-48b9d43409a6-project-review.zip` | 237849 | `8c32011b5def58c54fb2a5bb03d86ad2a3ba048bb7b96fc3c18a1789fa708936` |
 
 (`tests/test_golden_default.py` pins these values; the bundle shown is the
 one of `default_design()` and of the browser's export of the default build,
@@ -334,7 +334,7 @@ at or above it)."  The wording, and which sources each entry
 cites, are in that function.  The profile check rejects an FPC thickness,
 copper, surface finish or outline tolerance JLCPCB does not offer
 (`E_PROFILE_FAB_LIMIT`), and a stack-up whose layers do not add up to the
-ordered thickness or an order the reader connectors cannot take
+ordered thickness of a 1-layer order, a layer count other than 1 or 2 or an order the reader connectors cannot take
 (`E_PROFILE_INCONSISTENT`).  It checks the connectors two ways: the outline
 tolerance must hold the THD0515 tail width (+/-0.07 mm), and the contact zone
 (core, copper and stiffener under the open coverlay) must be within
@@ -342,14 +342,14 @@ tolerance must hold the THD0515 tail width (+/-0.07 mm), and the contact zone
 `review_note`), `topic`, `requirement`, `special_request`, `reason`, `sources`
 and `values`.
 
-In short: order each board as a 1-layer, 0.11 mm FPC with 1 oz copper and a
+In short: order each board as a 2-layer, 0.2 mm FPC with 1 oz copper and a
 0.225 mm PI stiffener at the contacts, a +/-0.05 mm outline tolerance (a
 special request) and ENIG, and check that the 0.3 mm gold fingers come out
 within +/-0.05 mm (JLC's trace tolerance is +/-20%).
 
 | Entry | Kind | Requirement (default profile) |
 | --- | --- | --- |
-| `fpc_thickness` | order option | 1 layer, 0.11 mm FPC thickness (finished, without the stiffener) |
+| `fpc_thickness` | order option | 2 layer, 0.2 mm FPC thickness (finished, without the stiffener), the bottom copper layer empty |
 | `copper_weight` | order option | 1 oz (0.035 mm) |
 | `pi_stiffener` | order option | PI 0.225 mm on the bottom side at the contacts (the 6 mm zone from the tip) |
 | `gold_finger_thickness` | order option | Yes, Gold Fingers Thickness 0.3 mm (the stiffened contact zone in total, from the contact surface to the outer surface of the stiffener) |
@@ -362,8 +362,11 @@ within +/-0.05 mm (JLC's trace tolerance is +/-20%).
 | `contact_window` | review note | the gang coverlay window leaves 0.05 mm beyond the outer contacts |
 | `coverlay_windows` | review note | check them on the upload: JLC advises one opening no longer than 20 mm, and the merged electrode-field window and the gang contact window are one opening each (each board's lines in ORDER_NOTES.txt give its windows and those longer) |
 
-The reasons, as `ORDER_NOTES.txt` gives them: JLC's 1-layer finished
-thicknesses are 0.07, 0.11 and 0.12 mm; the 0.11 mm FPC is a 0.025 mm PI
+The reasons, as `ORDER_NOTES.txt` gives them: the FlexiTac fabrication guide
+orders 0.2 mm, one of JLC's 2-layer finished thicknesses (0.11, 0.12 and
+0.2 mm), and the boards have one copper layer, so the bottom one stays empty
+(JLC's 1-layer finished thicknesses are 0.07, 0.11 and 0.12 mm, the order
+before 2026-11-06); the boards' own 0.11 mm layers are a 0.025 mm PI
 core, 0.035 mm copper and a 0.025 mm PI + 0.025 mm adhesive coverlay, and
 JLC's single-sided copper is 0.5 or 1 oz (0.018 or 0.035 mm); both reader
 connectors take a 0.3 +/- 0.03 mm thick FPC at the contacts, and JLC

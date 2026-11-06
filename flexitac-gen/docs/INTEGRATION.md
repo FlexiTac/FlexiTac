@@ -627,10 +627,13 @@ open mechanical decision.
 
 ### Ordering for the reader connectors
 
-Order each board as a 1-layer, 0.11 mm FPC with 1 oz copper and a 0.225 mm
+Order each board as a 2-layer, 0.2 mm FPC with 1 oz copper and a 0.225 mm
 PI stiffener at the contacts, a +/-0.05 mm outline tolerance (a special
 request) and ENIG, and check that the 0.3 mm gold fingers come out within
-+/-0.05 mm (JLC's trace tolerance is +/-20%).  On the order form set Gold
++/-0.05 mm (JLC's trace tolerance is +/-20%).  The boards have one copper
+layer, so the 2-layer order's bottom copper stays empty, as the
+[FlexiTac fabrication guide](https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db)
+orders them (0.2 mm since 2026-11-06; a 1-layer 0.11 mm FPC before).  On the order form set Gold
 Fingers to Yes and Gold Fingers Thickness to 0.3 mm, the stiffened contact
 zone in total: JLC gives that total the highest priority when it chooses the
 stiffener under the gold fingers (its PI calculator may take another PI
@@ -642,14 +645,15 @@ reasons and sources): the tolerance holds the THD0515-32CL-SN tail width
 contact zone above, inside the 0.30 +/- 0.03 mm the connectors take; the
 finger width is the TXGA drawing's 0.30 +/- 0.05 mm.
 
-The profile's stack-up (`stackup`) is the ordered build: a 0.025 mm PI core,
+The profile's stack-up (`stackup`) is the boards' own build (ordered as a
+2-layer 0.2 mm FPC since 2026-11-06, JLC's build of it): a 0.025 mm PI core,
 0.035 mm (1 oz) copper and a 0.025 mm PI + 0.025 mm adhesive coverlay make
 the 0.11 mm FPC.  That is JLC's 25 um-dielectric 1-layer FPC with the
 coverlay JLC puts on 1 oz copper (its 0.07 mm 1-layer FPC is the 0.5 oz
 build, its 0.12 mm one the 50 um dielectric), derived from JLC's
 finished-thickness and coverlay tables; confirm the copper weight on the
-order form.  The profile check rejects a stack-up that does not add up to
-the ordered thickness, a copper weight JLC does not offer and a contact zone
+order form.  The profile check rejects a 1-layer order whose stack-up does not add up to
+the ordered thickness, an ordered thickness JLC does not offer for the layer count, a copper weight JLC does not offer and a contact zone
 outside the connectors' 0.30 +/- 0.03 mm.
 
 The design rules are checked against JLC's minimum for the ordered 1 oz

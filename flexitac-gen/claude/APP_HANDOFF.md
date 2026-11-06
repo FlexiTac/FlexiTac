@@ -212,7 +212,7 @@ browser (web/) --HTTP--> app.py --+
   `build_exports(result, cache=)`, determinism, the order requirements and
   the JLC review items are in
   [PHASE2_DIRECT_GERBER.md](../docs/PHASE2_DIRECT_GERBER.md).
-- **Ordering**: order each board as a 1-layer, 0.11 mm FPC with 1 oz copper
+- **Ordering**: order each board as a 2-layer, 0.2 mm FPC with 1 oz copper
   and a 0.225 mm PI stiffener at the contacts, a +/-0.05 mm outline
   tolerance (a special request) and ENIG, and check that the 0.3 mm gold
   fingers come out within +/-0.05 mm (JLC's trace tolerance is +/-20%).
@@ -267,6 +267,7 @@ Its `sources` block quotes the JLCPCB flexible-PCB capabilities page (fetched
 | `fabrication.maximum_outline_short_side_mm` | 234.0 | JLC regular size |
 | `fabrication.maximum_outline_long_side_mm` | 490.0 | JLC regular size |
 | `fabrication.single_layer_fpc_thickness_options_mm` | 0.07, 0.11, 0.12 | JLC 1-layer finished thicknesses |
+| `fabrication.two_layer_fpc_thickness_options_mm` | 0.11, 0.12, 0.2 | JLC 2-layer finished thicknesses |
 | `fabrication.single_sided_copper_thicknesses_mm` | 0.018, 0.035 | JLC single-sided copper |
 | `fabrication.single_sided_copper_weights_oz` | 0.5, 1 | the same copper in oz |
 | `fabrication.single_sided_min_trace_width_mm` | 0.0889, 0.1016 | JLC minimum trace width per copper: 3.5 mil (18 um), 4 mil (35 um); the ordered 1 oz gives 0.1016 |
@@ -345,8 +346,8 @@ Its `sources` block quotes the JLCPCB flexible-PCB capabilities page (fetched
 | `limits.high_fill_factor_warning` | 0.8 | |
 | `limits.large_matrix_warning_taxels` | 1024 | |
 | `limits.maximum_project_name_length` | 80 | |
-| `order.fpc_layers` | 1 | |
-| `order.fpc_thickness_mm` | 0.11 | JLC 1-layer option |
+| `order.fpc_layers` | 2 | the bottom copper empty (the FlexiTac fabrication guide's order) |
+| `order.fpc_thickness_mm` | 0.2 | JLC 2-layer option |
 | `order.outline_tolerance_mm` | 0.05 | a special request |
 | `order.surface_finish` | ENIG | |
 | `order.reference_contact_window_margin_mm` | 0.051 | the JLC-accepted reference's contact openings |
@@ -365,7 +366,7 @@ roots and the Column V at 80 degrees since section 20, `diagonal-bus/9`
 since section 24, the same boards, `diagonal-bus/10` since section 27, the
 Row tail 0.048 mm east, on the field's centre line, `diagonal-bus/11` since
 section 27.8, the same boards) gives build
-`tactile-fpc-12x32-34a71a29e4d0` with no error or warning (with
+`tactile-fpc-12x32-48b9d43409a6` with no error or warning (with
 `routing.row_sides` `channel`, the straight Row channel, and the 1.4 mm
 electrodes of before, the boards of before, byte for byte, its bottom tail
 7 mm).  Values per

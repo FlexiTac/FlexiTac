@@ -78,7 +78,9 @@ class FitTests(unittest.TestCase):
         self.assertEqual((metrics["rows"], metrics["columns"], metrics["pitch_x_mm"]), (44, 8, 2.0))
         self.assertEqual((metrics["taxels"], metrics["positions"], metrics["sampled"], metrics["mask_class"]), (44 * 8, 44 * 8, 1.0, None))
         # Re-pinned by the profile revision 2026-10-29 (the profile's digest in the build id; d0ff86bfafec before).
-        self.assertEqual(best["build_id"], "surface-44x8-31192a48fa1b")
+        # Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty): the
+        # profile's digest in the build id, the fit, its design, boards and layout as before (31192a48fa1b before).
+        self.assertEqual(best["build_id"], "surface-44x8-5d18c0e96e82")
         self.assertEqual(best["design"]["template_id"], "surface_matrix_v1")
         self.assertGreaterEqual(metrics["min_clearance_mm"], 0.0)
         # Proposals are ranked best first and every one is a generated, DRC-clean design.

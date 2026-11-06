@@ -266,4 +266,4 @@ field), both tails 12 mm since section 27.7, `diagonal-bus/11` since section
 27.8 (one side's convex flank), the profile revision 2026-10-29 (the
 gold-finger thickness order option and the coverlay-window notes), the
 1.0 mm electrodes of the default fill 0.5 since 2026-11-06, build
-`tactile-fpc-12x32-34a71a29e4d0`).*
+`tactile-fpc-12x32-48b9d43409a6`).*
