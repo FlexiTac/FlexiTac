@@ -250,7 +250,8 @@ class DirectGerberExportTests(unittest.TestCase):
     def test_jlc_stiffener_metadata_comes_from_the_stiffener_objects(self) -> None:
         # The exporter derives layer, material, thickness and Gerber name from
         # each stiffener object (audit M7); the default is bottom PI at the
-        # profile's thickness (0.225 mm since 2026-10-14).
+        # profile's thickness (0.1 mm since the user's decision of 2026-11-06,
+        # 0.225 mm from 2026-10-14).
         thickness = self.result["profile"]["stackup"]["stiffener_thickness_mm"]
         by_side = {board["physical_side"]: board for board in self.result["boards"].values()}
         for side, package_key in (("top", "top_fpc_gerber_zip"), ("bottom", "bottom_fpc_gerber_zip")):

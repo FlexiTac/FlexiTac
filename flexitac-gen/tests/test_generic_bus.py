@@ -104,8 +104,11 @@ DEFAULT_BUS = {"fans": [85.0, 85.0], "tip_width_mm": 64.900857, "widest_mm": 67.
 # revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes): the build ids change with
 # the profiles' digests, the boards not (before: 4d4bf0e4...).  Re-pinned by the profile revision 2026-11-06 (the order:
 # JLC's 2-layer 0.2 mm FPC, the bottom copper empty): the build ids change with the profiles' digests, the boards not
-# (before: 4ea89555...).
-DIGEST = "6b1f66e0a4b50f841c84a2fcf42f914782f8f43517f747664ec7c1047d552ba4"
+# (before: 4ea89555...).  Re-pinned by the profile revision 2026-11-06b (the user's later decision of 2026-11-06: the PI
+# stiffener 0.225 -> 0.1 mm): the build ids change with the profiles' digests and every board carries the stiffener's
+# new thickness (fpc.stackup, layers.bottom_stiffener); with the build ids masked and the 0.225 mm put back the 18
+# builds hash as cd19f02's (6ffe89fe...) (before: 6b1f66e0...).
+DIGEST = "fbbb9461e778e8f891d04482fdfcb8b9b51e8a6fa6bb8672f9abaa5080d12e03"
 # The manifest's identity: the build id and its hashes, and the surface template's version.
 IDENTITY = {"build_id", "build_sha256", "design_sha256", "template"}
 

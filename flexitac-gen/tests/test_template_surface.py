@@ -370,12 +370,15 @@ class SurfaceIdentityTests(unittest.TestCase):
     # 2026-11-06 (the default fill 0.7 -> 0.5): the default electrodes 1.4 -> 1.0 mm, a new design (before: 527bfeafd16e,
     # d580000c...).  Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper
     # empty): a new profile digest and revision (before: 0fa31c3236be, 308eb329...); the design and the boards as before.
+    # Re-pinned by the profile revision 2026-11-06b (the user's later decision of 2026-11-06: the PI stiffener 0.225 ->
+    # 0.1 mm, the 2-layer 0.2 mm FPC + 0.1 mm the 0.3 mm gold fingers by JLC's rule): a new profile digest and revision
+    # (before: e484a57c9a40, fb37953c...); the design as before, the boards with the stiffener's new thickness.
     DEFAULT_IDENTITY = {
-        "build_id": "tactile-fpc-12x32-e484a57c9a40",
+        "build_id": "tactile-fpc-12x32-486988205e7c",
         "design_sha256": "87581f25ad863355e1fae87419798e53537e9a403ef900f0122e0a46ac1ff38a",
-        "profile_sha256": "fb37953c0b7ad8f820ac71fcf4f5e07df946d3ec2943ecd3e1f43be30a2f2448",
+        "profile_sha256": "299b1ab7c76ab719153e638908798f493f70adaa1abf771e3dda878077ca8de9",
         "template": "surface-matrix/1",
-        "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-11-06"},
+        "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-11-06b"},
     }
 
     def test_the_same_matrix_in_both_templates_has_two_identities(self) -> None:

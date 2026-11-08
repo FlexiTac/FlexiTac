@@ -350,31 +350,36 @@ class DiagonalExportTests(unittest.TestCase):
 # the build ids, the manifests, ORDER_NOTES.txt (the order block and the FlexiTac fabrication guide cited) and the
 # bundles' profile.json change; the boards, the Gerbers, netlists and validation, the build id aside, and every other
 # member hold (before: e3a015f3..., cae0ddac..., 79cc0f5c..., 2cb1554e..., c8222458... for the top ZIPs).
+# Every case re-pinned by the profile revision 2026-11-06b (the user's later decision of 2026-11-06: the PI stiffener
+# 0.225 -> 0.1 mm): the build ids, the manifests, ORDER_NOTES.txt, the bundles' profile.json and derived-layout.json (the
+# boards' stiffener thickness), the stiffener layers (named pib_0.1, their headers naming 0.1 mm) and jlcpcb.json change;
+# the boards' geometry, the copper, coverlay and outline layers, netlists and validation, the build id aside, and every
+# other member hold (before: 87171f82..., 3bf5ab37..., 4d751c59..., 868a9496..., 096fd685... for the top ZIPs).
 DIGESTS = {
     "both": (
-        "87171f8212b2d2642770c7f9b8839543835867a8b9279d2d0ccee254743769e0",
-        "81e551ebf029f1917c2000be3008349041edcebd4c91c56946260e3600a3d388",
-        "4e466d2be8b10000b6eb0bf4e158afe7ec6949b8c5be96cae485262627eb58b2",
+        "9f2966477e5cfa905e6d6cc41b719b4e712093f1ee1bf45d59bfd2d5be936510",
+        "0e5a6a3c0960ae0789a9d6f3c5395b7ca44d577f97b42ac4099c65c8925aaf89",
+        "3ada98ab5b824529baa52f5ff85d2ee9ddb7c684226ad6f524618ec2ffa59567",
     ),
     "both, descending, columns on top": (
-        "3bf5ab37385636f751702c11fd0f41130b9377379d94a6e43264185e88c039cf",
-        "2ff6aeb2f755fb7221041f0885114819b86f9c945f86ee63acaaa6f1b87bf17f",
-        "9b4794f996e2a7496af1d927f00bc5c513ccc6db8ffe77181aef548ee17cb00b",
+        "895956a89d760f83cc7e35f2dcd01b7ef1446b02208552bc919362ea88637b79",
+        "58c5ec695f07962061c1f8edb4b4560581d7da6b7ff3b0d1c228c4f610c3a207",
+        "9df420aa71d2b9bd8ccf9778062a37c012dcda082a3b403e1541203b3e238554",
     ),
     "left, mirrored": (
-        "4d751c59976e21453b5eaecef3199505991fa140def637d70dfeb700fc3f3e7d",
-        "ca54bbd8868e82cae4ace8ba0afa9b0ab587b777ba546f89e84e14984d532870",
-        "cea09932fb16f6c55b18844969250e7edb45ae86dd5e18f8ac98bfd505b6dc45",
+        "23335363374346e478a807e2fdf2c25bacc90d43faf1dfe8b616d3d2aeb4a27c",
+        "2fef306d5fa01778c2c1a6d652bb01d7dbc7c4828dd4214c2f833daf625e6ee0",
+        "e6dae680c58edc7da5955a4f4c2cc7f89047e3f9bc31a68a41db3e83bd554258",
     ),
     "right": (
-        "868a9496fd7caa1f9a1ef32faa3bd9fe6c403ffce167fd3fefa4c5d5bac97ebe",
-        "4d0b7b159a213d45dc8a11dcf6244ba984bec758aa77690e91516b5f7fb0827d",
-        "300345ea791351ee15efc5a45f8161880db300735452491e4ca240be0585ee06",
+        "ea0f414b633473b52f84056e022eea0d848c1f6a177db44560468c540b83bb27",
+        "e9a6795ec2fe8beb5c83f9b794fdfcab0561670cc659638d8e61d421f96fafbb",
+        "a2b7c0254938d9705ec6ce450bb520c0725a4e0a31464a4880421bb72cad065f",
     ),
     "diamond, both": (
-        "096fd6856c989cbbe5519730d03f2889e9a953c684ca4bfc2e28ee4fa88f7111",
-        "4cf58f4a22e851caa5fee54a883050f21bf2071f7e8137b5b7be73985f2e9a13",
-        "88250d4dfe395e2a517cf460a7b9df4a44bc682d27af603d4d260bc10821c4d7",
+        "c26a8b13c0f440da1b73a8e168c19fc5790c962d11c60031708b979b09bb61fb",
+        "08c5d8094f6023c4e908f845ba88957a901997d7513a2548d951856a29c1502c",
+        "f73a0224301cd57b183bd03def202224336f33f385ab8269b63ab8783b4cefa7",
     ),
 }
 
@@ -409,24 +414,27 @@ class DiagonalArchiveTests(unittest.TestCase):
 # (the build id aside).  Every case re-pinned by the profile revision 2026-11-06 of both profiles (the order: JLC's
 # 2-layer 0.2 mm FPC, the bottom copper empty): the build ids, the manifests, ORDER_NOTES.txt and profile.json change,
 # every other member holds (the build id aside; before: tactile-fpc-10x10-06ff5b60ff59, tactile-fpc-8x9-60ee5335903c,
-# tactile-fpc-8x9-acbc69addeac, tactile-fpc-3x5-0f245ad84036).
+# tactile-fpc-8x9-acbc69addeac, tactile-fpc-3x5-0f245ad84036).  Every case re-pinned by the profile revision 2026-11-06b
+# (the PI stiffener 0.225 -> 0.1 mm): the build ids, the manifests, ORDER_NOTES.txt, profile.json, derived-layout.json,
+# the stiffener layers (pib_0.1) and jlcpcb.json change, every other member holds (the build id aside; before: 2606dd95dd75,
+# f97b2164f700, 7777f8a5147a, 4041f0e0d274).
 CHANNEL = {
     "surface 10 x 10": (
         {"template_id": SURFACE, "matrix": {"rows": 10, "columns": 10}},
-        ("tactile-fpc-10x10-2606dd95dd75", "f66d70ce6e445647d25d293f7dd9314a9b95bd235d930354c53e5876168b7da9",
-         "7c52521399a51ff0858e9cf53faa5e025290c420096ea2436e4b8f4aa61dcf45", "b980eb99917404a92b8af02ece92d67651eb81237a0a8857f874118a0451cff4"),
+        ("tactile-fpc-10x10-78722e97b0b0", "797732e2e48990d5f034005a4f8452d8a6d96d80bc64a91d918ef996119965ba",
+         "84090ac9992e196dc61af17a896fab587a9ac25dc7f79a44e3b8840fae050160", "d81fc94f44ef7af01abc8e9e1649ae90eaeb248e26ab42b7c025d2d1affccb2a"),
     ),
     "surface turned, columns on top": (
         {"template_id": SURFACE, "matrix": {"rows": 8, "columns": 9}, "tail": {"row_side": "right", "column_side": "right"},
          "role_mapping": {"top": "columns", "bottom": "rows"}, "channel_order": {"rows": "descending", "columns": "ascending"},
          "connector": {"row_pins": 12}},
-        ("tactile-fpc-8x9-f97b2164f700", "5996238a8faed9a58399908ad48ae4ebddd163c1724f493ba7a61d50ae282dcf",
-         "1063c6a2354239f2fca69c248a85673085fd21a3d5f94c2f54f3cd4938d5532b", "12f5d1b3131d952282639e60310cabd653d34676cfd83ef5335127127e5c85e2"),
+        ("tactile-fpc-8x9-c9a018e4eb97", "f77be72b69b9f05b16b50d6c5fd7ef2e50670c952933d0203a80b0145a5839ee",
+         "5bce92dc8334607bbc7ddce48d0ed4da0e13e42cf18a12c5c88f030dbaecce0f", "221c38541c91a7c568e7609f72912c2ffdc1a3259e02690060a53ff80bb1c5c9"),
     ),
     "surface opposite tails": (
         {"template_id": SURFACE, "matrix": {"rows": 8, "columns": 9}, "tail": {"row_side": "bottom", "column_side": "top"}},
-        ("tactile-fpc-8x9-7777f8a5147a", "93cde3ed489e650f87f63c099c2d19f4b3049ea87f248954a4fbb6cb1ca70ed2",
-         "19cf857755cc5e9fce623aa548f94993647887bc66390ecc40af275be13d371b", "816d0b0153e28c56c251e2e295b7c6c173b0414b6a2a0d4092c1e69895ed9a9a"),
+        ("tactile-fpc-8x9-5122d339bbc5", "20df7d84b7ab209044c3d8f731d287157cee7f24314e72f41efa42a7f681e2af",
+         "5e93e4b49edf7fa10ccbc557ac3e2039077492ad6c55c8d9ccc7c238308f4ec7", "7e718678518b782c631e6c15fadde3aa82033cd66b6dde6b567056afc2b97e62"),
     ),
     # The generic template builds the diagonal Row bus by default since P5-diagonal-bus.md section 18: its straight
     # channel names routing.row_sides "channel", a new build id (it was tactile-fpc-3x5-1adb4c7f8a53), so the archives
@@ -435,8 +443,8 @@ CHANNEL = {
         {"matrix": {"rows": 3, "columns": 5}, "tail": {"row_side": "left", "column_side": "left"},
          "channel_order": {"rows": "ascending", "columns": "descending"},
          "routing": {"trace_width_mm": 0.1016, "trace_space_mm": 0.1016, "row_sides": "channel"}},
-        ("tactile-fpc-3x5-4041f0e0d274", "1a22d8fd0c52c9203df45e3670cf37f5026089b3fef1b91b49a3f90f30b01714",
-         "a8318294e657caee66ed1b18fd52dbef0c75f74c7f741d99bf7f0fbe93037879", "e9fe6514734673afeb0b320f299d1926592f1d6333aca6a35d67fbfc0ee471b3"),
+        ("tactile-fpc-3x5-9b68512626fb", "b1d6ab426d946cc8ee9f165d14a50e936af268ef26801e0ec143c555f994aba6",
+         "337bcc327dc5a23779852bcc31b83e161239be3def1d908364b61d53c5f55cab", "8d35a5d137d27f74f7a9e4a8ec1f903808beb6a5f9f265fd4778a2bd0dea084d"),
     ),
 }
 

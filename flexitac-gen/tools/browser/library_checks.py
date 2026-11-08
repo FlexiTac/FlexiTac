@@ -721,7 +721,7 @@ def part_routes(browser):
           and fine["tab"] == "WidowX 250, 1 mm · Library · FlexiTac-Gen", fine)
     facts = page.inner_text(".lib-facts")
     check("routes: the page's facts (26 rows × 27 columns · 664 taxels, 1 mm · fill 0.50, the field, the tails, reader none, the build)",
-          "26 rows × 27 columns · 664 taxels" in facts and "1 mm · fill 0.50" in facts and "surface-26x27-00b579408d5f" in facts
+          "26 rows × 27 columns · 664 taxels" in facts and "1 mm · fill 0.50" in facts and "surface-26x27-7112a7cc7ced" in facts
           and "none (one tail pin per line)" in facts, facts)
     widths = page.evaluate("() => [document.querySelector('.lib-open'), ...document.querySelectorAll('.lib-pill')].map(n => n.getBoundingClientRect().width)")
     check("routes: Open in Gen by Surface, the primary action, at least as wide as each download pill (1440 px)",

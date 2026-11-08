@@ -68,26 +68,31 @@ TRIANGLE = [[10 - row, 10] for row in range(10)]
 # ids, the manifests, ORDER_NOTES.txt (the order block and the FlexiTac fabrication guide cited) and the bundle's
 # profile.json change; the designs, boards, layouts and validation, the Gerber layers and netlists but their identity
 # headers, jlcpcb.json, taxels.csv, pinout.csv and the previews hold.
+# Re-pinned by the profile revision 2026-11-06b (the user's later decision of 2026-11-06: the PI stiffener 0.225 ->
+# 0.1 mm): the build ids, the manifests, ORDER_NOTES.txt, the bundle's profile.json and derived-layout.json (the boards'
+# stiffener thickness), and the stiffener layer (named pib_0.1, its header naming 0.1 mm) and jlcpcb.json change; the
+# designs, the boards' geometry and validation, the copper, coverlay and outline layers and netlists but their identity
+# headers, taxels.csv, pinout.csv and the previews hold.
 DIGESTS = {
     "triangle": (
-        "34af536f8dfbae74a1f57dc53d91541f529687533d7010e0c3f58f6e254ad8e1",
-        "603f200dad28f484a50684cd622e0e629a1008f5259aae98ac574914517a0be0",
-        "557b56c7566a367ce1a9ff1400bc63291e531847522a60f3d397a46bbb9fb1b3",
+        "efc375aba144c8386d86a116f9011c0c75adfaab1081715a083979a7f383534a",
+        "d5d343d7f215da6612559561c0d8228710af7fa130e300fe5d35db8fd6cf66e6",
+        "b6a648ad1a46f50bfcd7f5643edd65cae7dee4b82d5065e44f27b78b5c31311a",
     ),
     "per-electrode windows": (
-        "1e181ae4a3b7430cffc82896321309131f489ab9b0c70e34e9d9a36402430c4b",
-        "5659e037b4e0d78dc36ff0af79e082fa63416608ca6be06be08a96cee368e287",
-        "b67247b79e8fb6cd3893a6adfc889acfc48e6a883012efbc91a03d26b748bc82",
+        "30b405d052372a9426e89204ee161250f670791f3a996f22713311691ee2b8d4",
+        "81e9e40c9fceac0e2910231b5e434a15b2efa0dad951ace492f527e8e6b89aa7",
+        "dd30860d20ad2cbf366bf108c4b5abac589799d9c959907deb645c5686b6dbcf",
     ),
     "turned, columns on top": (
-        "b5e9eb8dc4d7a4442fbb5659925a6487217c4bb3142634946793f35678b20188",
-        "4658009b9a04b086178911df4c50e4bfd91df2f4d53b0e6343e4ae76547962a3",
-        "18c6143040ac18a09cd1f1bb9b46830ec304d8f7ce107dcb7050d1ec81c2a9be",
+        "300c0f6821ae77fef1134844255d41388543b4806b23e70a352d8210519a39c5",
+        "1bbb9b3f46eb7bc3094da12412ef325eccb306ab1c50989c7fa5ff9e9e9a53b0",
+        "11ee171a58152ad0ca6f493c1d8e69a601cd7c815a9995810d321ee3fbdf51aa",
     ),
     "opposite tails": (
-        "77e22017fecbbb1a31478e8e74c126d372770f8af490a78e318eb05768ffef1f",
-        "6e3bea128a28ae336aeb74078090b0b7d93c6e52f408df6b63a0a43c23828936",
-        "c7a97b5ee1b5745d191a856509c95580ec3c98fae77307db768c8a081194cad6",
+        "af1cad1c6e3c3de1bee1ae1e59947c486ce7feb09f21c2e262a45a5b8858af81",
+        "bca2acccf81c55c5f6123408b6574500d4939aee49dfbfb1977bae1bcb5ae6ac",
+        "0953f78e8e7ab044178164fa9c844f879ced5078bcb16a36f6e1832d365e8783",
     ),
 }
 

@@ -126,7 +126,7 @@ copper side where that faces the camera, else its polyimide, with the copper
 seen through it and the PI stiffener outermost (no coverlay window, no ENIG);
 so from above the turned-over top board shows its polyimide side.  Each board
 is as thick as its result's stack-up (`fpc.stackup`: 0.11 mm of core PI,
-copper, coverlay adhesive and coverlay, and the 0.225 mm PI stiffener below),
+copper, coverlay adhesive and coverlay, and the 0.1 mm PI stiffener below),
 behind its copper side, which stays in place; at the views' scale 0.11 mm is
 under a pixel, so the FPC is drawn at least 2 px thick and the stiffener in
 proportion (the oblique views' caption says so; the stacked view has no
@@ -565,14 +565,17 @@ stiffener flush with the tip and both sides.
 - The contacts start 0.30 mm from the tip (the JLC copper-to-edge rule; the
   gold-finger rule is 0.2 mm), so 4.00 mm of exposed contact spans 0.30-4.30
   mm from the tip.
-- The contact zone is about 0.025 (core PI) + 0.035 (copper) + 0.225 (PI
-  stiffener) = 0.285 mm thick, since the coverlay is open over the contacts,
-  within the connectors' 0.30 +/- 0.03 mm (approved 2026-10-14: JLC
-  recommends this PI thickness for a 0.3 mm connector on its 0.11 mm FPC).
-  JLC holds the gold-finger area to +/- 0.03 mm, so measure the delivered
-  tails.  The 0.2 mm JLC PI option, the default before, would give about
-  0.26 mm, which the profile check rejects.  The stiffener is a profile
-  value (`stackup.stiffener_thickness_mm`), not a form input.
+- The contact zone is about 0.2 (FPC) + 0.1 (PI stiffener) = 0.3 mm thick,
+  the connectors' 0.30 +/- 0.03 mm, by JLC's rule: the thickness with a
+  stiffener is the FPC thickness plus the stiffener thickness (the user's
+  decision of 2026-11-06 for the 2-layer 0.2 mm order).  JLC holds the
+  gold-finger area to +/- 0.03 mm and says the finished thickness is less
+  where an area has no copper or coverlay, as at the contacts, so measure
+  the delivered tails.  The 0.225 mm stiffener of before (JLC's choice for a
+  0.3 mm connector on a 0.11 mm FPC, the 1-layer order until 2026-11-06)
+  would give 0.425 mm by that rule, which the profile check rejects.  The
+  stiffener is a profile value (`stackup.stiffener_thickness_mm`), not a
+  form input.
 
 ### Masked fields and the other readers (CAD mode)
 
@@ -627,21 +630,24 @@ open mechanical decision.
 
 ### Ordering for the reader connectors
 
-Order each board as a 2-layer, 0.2 mm FPC with 1 oz copper and a 0.225 mm
+Order each board as a 2-layer, 0.2 mm FPC with 1 oz copper and a 0.1 mm
 PI stiffener at the contacts, a +/-0.05 mm outline tolerance (a special
 request) and ENIG, and check that the 0.3 mm gold fingers come out within
 +/-0.05 mm (JLC's trace tolerance is +/-20%).  The boards have one copper
 layer, so the 2-layer order's bottom copper stays empty, as the
 [FlexiTac fabrication guide](https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db)
-orders them (0.2 mm since 2026-11-06; a 1-layer 0.11 mm FPC before).  On the order form set Gold
+orders them (0.2 mm since 2026-11-06; a 1-layer 0.11 mm FPC before).  By
+JLC's rule the thickness with a stiffener is the FPC's plus the stiffener's,
+so the 0.2 mm FPC takes the 0.1 mm stiffener (0.225 mm until the user's
+decision of 2026-11-06).  On the order form set Gold
 Fingers to Yes and Gold Fingers Thickness to 0.3 mm, the stiffened contact
 zone in total: JLC gives that total the highest priority when it chooses the
 stiffener under the gold fingers (its PI calculator may take another PI
-there than the 0.225 mm stiffener option).  These are the profile's
+there than the 0.1 mm stiffener option).  These are the profile's
 order requirements (`ORDER_NOTES.txt` in each ZIP lists them with their
 reasons and sources): the tolerance holds the THD0515-32CL-SN tail width
 0.5 x (N + 1) +/- 0.07 mm, which JLC's default laser-outline tolerance of
-+/-0.1 mm does not guarantee; the core, the copper and the stiffener give the
++/-0.1 mm does not guarantee; the ordered FPC and the stiffener give the
 contact zone above, inside the 0.30 +/- 0.03 mm the connectors take; the
 finger width is the TXGA drawing's 0.30 +/- 0.05 mm.
 
@@ -654,7 +660,9 @@ build, its 0.12 mm one the 50 um dielectric), derived from JLC's
 finished-thickness and coverlay tables; confirm the copper weight on the
 order form.  The profile check rejects a 1-layer order whose stack-up does not add up to
 the ordered thickness, an ordered thickness JLC does not offer for the layer count, a copper weight JLC does not offer and a contact zone
-outside the connectors' 0.30 +/- 0.03 mm.
+outside the connectors' 0.30 +/- 0.03 mm (on a 2-layer order the ordered FPC
+plus the stiffener, JLC's rule; on a 1-layer order core, copper and
+stiffener).
 
 The design rules are checked against JLC's minimum for the ordered 1 oz
 copper, 4/4 mil (0.1016 mm; 3.5/3.5 mil applies to 18 um copper only): the
@@ -752,8 +760,8 @@ again.
    of every position.
 6. Before ordering: set the order options of `ORDER_NOTES.txt` (above;
    Gold Fingers Thickness 0.3 mm among them),
-   check the contact-zone thickness against the connector (0.285 mm with the
-   0.225 mm PI stiffener), and review in the JLCPCB upload the outline, the
+   check the contact-zone thickness against the connector (0.3 mm with the
+   0.1 mm PI stiffener), and review in the JLCPCB upload the outline, the
    coverlay windows (the contact window leaves only 0.05 mm of coverlay
    expansion beside the outer contacts, because it may not enter the R0.30
    tip corners, and the windows longer than JLC's general 20 mm for one

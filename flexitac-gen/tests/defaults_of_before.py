@@ -16,10 +16,19 @@ fixtures' faces were measured at fill 0.7), so they build with the electrodes of
 test that builds as it does calls ``start(cleanup=False)`` first); ``electrodes`` and
 ``fill`` are the two patches as context managers, for one test.  A request that names its electrodes (or a fit that
 names its fill) builds as it does without them.
+
+The PI stiffener of before the user's later decision of 2026-11-06 ("订单厚度对不上... 建议把补强改成 0.1 mm... 要不要现在改？"
+-> "好的"): 0.225 mm until then, 0.1 mm since (the profile revision 2026-11-06b: the 2-layer 0.2 mm FPC + 0.1 mm, the
+0.3 mm gold fingers by JLC's rule).  Every board carries the profile's thickness twice, in ``fpc.stackup`` and in each
+``layers.bottom_stiffener`` item; its outline, side and material are the same.  The digests of layouts pinned before
+then (the straight channel's records of before, ``CHANNEL_LAYOUT_SHA256``) are taken of the boards with the 0.225 mm
+put back (``stiffener``), after checking that they carry the profile's thickness.  The profile itself cannot be
+patched back: on the 2-layer order the check refuses 0.225 mm (0.2 + 0.225 = 0.425 mm).
 """
 
 from __future__ import annotations
 
+import copy
 import unittest
 from typing import Any
 from unittest import mock
@@ -30,6 +39,8 @@ from surface import fit
 # The rectangular default's electrodes at its 2 mm pitch and Gen by Surface's default fill, until 2026-11-06.
 ELECTRODE_MM = 1.4
 FILL = 0.7
+# The PI stiffener's thickness until the user's later decision of 2026-11-06.
+STIFFENER_MM = 0.225
 
 
 def electrodes() -> Any:
@@ -60,3 +71,20 @@ def start(cleanup: bool = True) -> None:
         patch.start()
         if cleanup:
             unittest.addModuleCleanup(patch.stop)
+
+
+def stiffener(boards: Any, thickness: float) -> Any:
+    """``boards`` (a result's boards by key) with the stiffener's thickness of before (STIFFENER_MM) put back where it
+    is the profile's ``thickness``, in ``fpc.stackup`` and in every ``layers.bottom_stiffener`` item: a copy, for the
+    digest of a layout pinned before 2026-11-06.  A board that carries another thickness raises ``ValueError``."""
+
+    boards = copy.deepcopy(boards)
+    for key, board in boards.items():
+        stackup = board["fpc"]["stackup"]
+        items = board["layers"]["bottom_stiffener"]
+        if stackup["stiffener_thickness_mm"] != thickness or any(item["thickness_mm"] != thickness for item in items):
+            raise ValueError(f"board {key} does not carry the profile's {thickness} mm stiffener")
+        stackup["stiffener_thickness_mm"] = STIFFENER_MM
+        for item in items:
+            item["thickness_mm"] = STIFFENER_MM
+    return boards

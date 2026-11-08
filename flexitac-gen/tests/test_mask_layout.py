@@ -691,7 +691,11 @@ class MaskDeterminismTests(unittest.TestCase):
         corpus = dict(_corpus())
         for name, digest in DIGESTS.items():
             with self.subTest(case=name):
-                self.assertEqual(_layout_digest(generate_design(corpus[name])), digest)
+                result = generate_design(corpus[name])
+                # The 0.225 mm PI stiffener of before put back (0.1 mm since the user's later decision of 2026-11-06): the
+                # one value of these boards that changed, so the digests still pin the masked geometry of 2026-10-21.
+                boards = defaults_of_before.stiffener(result["boards"], result["profile"]["stackup"]["stiffener_thickness_mm"])
+                self.assertEqual(_layout_digest(dict(result, boards=boards)), digest)
 
     def test_the_masked_code_sums_no_floats(self) -> None:
         # Python 3.12's sum() of floats rounds differently from 3.9's; the masked code accumulates with loops or fsum.

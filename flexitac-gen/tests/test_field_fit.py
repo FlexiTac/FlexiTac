@@ -1008,21 +1008,25 @@ def _coverage_alone(name: str, options: dict = FIELD, base=None) -> dict:
 # 2-layer 0.2 mm FPC, the bottom copper empty): only the build ids change (the profiles' digests: each proposal's
 # build_id, build_sha256 and its placement's build_id, its design and the rest as before); with the build ids masked
 # the nine digests equal bba441f's (1cbbf6d3..., 09dab2e9..., 67778c85...; fd5535f9..., 3013c8b5..., 9e7ff7bd...;
-# 7a82f11a..., 3c23a056..., 3546804a... before).
+# 7a82f11a..., 3c23a056..., 3546804a... before).  Re-pinned (all three sets) by the profile revision 2026-11-06b (the
+# user's later decision of 2026-11-06: the PI stiffener 0.225 -> 0.1 mm): only the build ids change (the profiles'
+# digests: each proposal's build_id and its placement's build_id; the fits' boards carry the stiffener's thickness but
+# the fingerprint takes the proposals, not the boards); with the build ids masked the nine digests equal cd19f02's
+# (8bf8653e..., 9460b908..., 2e9109c3...; 2147aa0c..., 4d27d7d8..., 3733fd87...; 98bab48b..., 0c5e619b..., 76d1e427...).
 FINGERPRINTS = {
-    "disk": "f79f96ff4c95d548e57ac61cdea6556727050ceeb4e3ec1ee8bc2bb8bb144dba",
-    "equilateral": "99c5a6a1acec8888159999f81b3f5d23dcd5b0207b0200836e59a58e5a52302c",
-    "isosceles": "0361b3e84dbcbf5f6f42900e0759628494bbd73182fa0ac577d2f39ddcde2571",
+    "disk": "e3898e913f67aff7de28f2f7b7b6997246324c821e3e466a0556f1b8eae6e8ed",
+    "equilateral": "95ccf8e39b521c406f852f4bcce6963a42605039a5dede9b1c1347360e79719d",
+    "isosceles": "1d2c5c8f7226b9cb561d7d5862dcc05464fdfbb4f03a64a318f8a5412fe152b3",
 }
 FINGERPRINTS_BEFORE = {
-    "disk": "f22d9f80ea5918337d74153f82da851b6e11ceacb9c18ef961ddb0316bddfaf1",
-    "equilateral": "ffc79aeb6568226e666e7eb1347a7795957f760957b5a9dc038ee4c5c5f85c1f",
-    "isosceles": "0765fd587dd4864c04de434c276df2b8933e92035e8a493d17bb47a023929620",
+    "disk": "c696b7a446618f92f8095e2a5647c600dd87effb155dec61c9bb4951c84db2e2",
+    "equilateral": "3f548acdcdf7a18198f0831ffebd5e007bb0d9216855b079e71a14534341b557",
+    "isosceles": "4fb064e19f658b43b44a3bfee1e7ddc665be59796e2ae71912d03ff85161267f",
 }
 FINGERPRINTS_TIES = {
-    "disk": "27c66e69cfedb6821d7f80411a904f00a6f1b75ca406ff99745e826745c03beb",
-    "equilateral": "5e9bc1d388df7c6e0c2e8729ec2b23bcaead324ad9011eda746bdc22df203c10",
-    "isosceles": "bbd402e83bd8859941e6cddd8e6b37fb145b66ad3cc086e59dc856f754222758",
+    "disk": "619fc89d655a0636ef073521677b8639e47d636b741cfcc66c6b868a3db398e9",
+    "equilateral": "9d868d605b238b5c231660377b8937e2773c76abc5ac7ae9026a86d955086828",
+    "isosceles": "0f0a4dd5d97bd62ab20ec82b2d90af3de066a21044c9bc274e4c485e2e429b37",
 }
 
 

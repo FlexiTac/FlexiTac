@@ -125,11 +125,13 @@ def part_boot_and_limits(browser):
     check("the manufacturing note lists /api/default profile.order_requirements (order options, review notes, reasons)",
           shown["options"] == expected["order_option"] and shown["notes"] == expected["review_note"], shown)
     note = page.inner_text("#manufacturingNote")
-    check("the note shows the approved order: 0.11 mm FPC, 1 oz copper, PI 0.225 mm, +/-0.05 mm outline tolerance, ENIG",
-          all(part in note for part in ("0.11 mm FPC thickness", "Copper weight: 1 oz (0.035 mm)", "PI 0.225 mm",
+    # The order of 2026-11-06: JLC's 2-layer 0.2 mm FPC, the bottom copper empty, with a 0.1 mm PI stiffener (0.2 + 0.1 mm,
+    # the 0.3 mm gold fingers by JLC's rule; the user's decision of 2026-11-06, 0.225 mm before).
+    check("the note shows the approved order: 2 layer, 0.2 mm FPC, 1 oz copper, PI 0.1 mm, +/-0.05 mm outline tolerance, ENIG",
+          all(part in note for part in ("2 layer, 0.2 mm FPC thickness", "Copper weight: 1 oz (0.035 mm)", "Stiffener: PI 0.1 mm",
                                         "Outline tolerance: +/-0.05 mm", "Surface finish: ENIG")), note[-600:])
-    check("the review notes include the contact-zone thickness (about 0.285 mm, measure on delivery)",
-          "Contact-zone thickness: the tail is about 0.285 mm thick at the contacts" in note, note[-600:])
+    check("the review notes include the contact-zone thickness (about 0.3 mm: the 0.2 mm FPC + the 0.1 mm stiffener)",
+          "Contact-zone thickness: the tail is about 0.3 mm thick at the contacts" in note, note[-600:])
     fine = page.evaluate("() => [...document.querySelectorAll('input.fine-step')].map(e => e.id + ':' + getComputedStyle(e).appearance)")
     check("mm inputs (step 1e-6) have no native spinner", sorted(f.split(":")[0] for f in fine) == sorted(
         ["pitchX", "pitchY", "rowWidth", "columnWidth", "topTailLength", "bottomTailLength", "traceWidth", "traceSpace"])
@@ -1361,14 +1363,15 @@ DEPTH_STATE = r"""(selector) => [...document.querySelectorAll(selector)].map(boa
 
 
 def depth_problems(state):
-    """What is wrong with a board's thickness (DEPTH_STATE): the stack-up 0.11 + 0.225 mm, three FPC wall rings and five
-    stiffener rings at the middles of their layers, the stiffener's outer face at 0.335 mm, the other side at 0.11 mm,
+    """What is wrong with a board's thickness (DEPTH_STATE): the stack-up 0.11 + 0.1 mm (the PI stiffener 0.225 mm until the
+    user's decision of 2026-11-06), three FPC wall rings and five
+    stiffener rings at the middles of their layers, the stiffener's outer face at 0.21 mm, the other side at 0.11 mm,
     each at its depth times the scale (within 0.02 px), the copper side at 0, never a pointer target."""
     fpc, stiffener, scale = state["fpc"], state["stiffener"], state["scale"]
     expected = [("fpc", fpc * (k + 0.5) / 3) for k in range(3)] + [("stiffener", fpc + stiffener * (k + 0.5) / 5) for k in range(5)]
     expected.append(("stiffener-face", fpc + stiffener))
     problems = []
-    if (fpc, stiffener) != (0.11, 0.225):
+    if (fpc, stiffener) != (0.11, 0.1):
         problems.append(("stack-up", fpc, stiffener))
     if [kind for kind, *_ in state["layers"]] != [kind for kind, _ in expected]:
         problems.append(("layers", [kind for kind, *_ in state["layers"]]))
@@ -1382,7 +1385,7 @@ def depth_problems(state):
 
 def part_depth(browser):
     """The boards' thickness in the 3D views (the user's request of 2026-10-30): the stack-up of each board's result
-    (board.fpc.stackup: 0.11 mm of PI, copper, coverlay adhesive and coverlay, the PI stiffener 0.225 mm below it) behind
+    (board.fpc.stackup: 0.11 mm of PI, copper, coverlay adhesive and coverlay, the PI stiffener 0.1 mm below it) behind
     the copper side, which stays in its place; to scale where that is 2 px or more on screen, else the FPC drawn 2 px
     thick and the stiffener in proportion; the walls rings along the edges, so the turned-over top FPC stays see-through
     over the taxel field; none in the plan view; the oblique views' caption says so (the stacked view has none since
@@ -1391,7 +1394,7 @@ def part_depth(browser):
     boot(page)
     page.click("#rowTab3d"); page.click("#columnTab3d"); page.wait_for_timeout(300)
     oblique = page.evaluate(DEPTH_STATE, ".three-d-pane .oblique-board")
-    check("depth: both oblique views draw the board 0.11 mm thick with its 0.225 mm stiffener behind the copper side (walls, the "
+    check("depth: both oblique views draw the board 0.11 mm thick with its 0.1 mm stiffener behind the copper side (walls, the "
           "stiffener's outer face and the other side each at its depth, the copper side in place)",
           len(oblique) == 2 and all(depth_problems(state) == [] for state in oblique), [(state, depth_problems(state)) for state in oblique])
     check("depth: at the oblique views' scale (under 18.2 px a mm) the FPC is drawn 2 px thick, the stiffener in proportion",

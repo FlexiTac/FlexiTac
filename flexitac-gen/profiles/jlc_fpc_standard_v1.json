@@ -1,6 +1,6 @@
 {
   "id": "jlc-fpc-standard-v1",
-  "revision": "2026-11-06",
+  "revision": "2026-11-06b",
   "units": "mm",
   "description": "Locked manufacturing defaults for the deterministic tactile-FPC generator. These are process rules, not ordinary UI controls. Every rule value used by the engine lives in this file; design rules must not be looser than the fabrication capabilities below (the trace minimums apply per single-sided copper thickness, for stackup.copper_thickness_mm). The order section holds the JLCPCB order options every exported board needs (ORDER_NOTES.txt).",
   "sources": {
@@ -98,7 +98,7 @@
     "bottom_copper_placeholder_thickness_mm": 0.001,
     "stiffener_side": "bottom",
     "stiffener_material": "polyimide",
-    "stiffener_thickness_mm": 0.225
+    "stiffener_thickness_mm": 0.1
   },
   "routing": {
     "finger_trace_width_mm": 0.254,

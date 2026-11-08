@@ -36,7 +36,7 @@ class SensorCoreTests(unittest.TestCase):
     def test_stiffener_is_a_bounded_bottom_pi_tail_feature_of_the_profile_thickness(self) -> None:
         result = generate_design()
         stackup = result["profile"]["stackup"]
-        # The profile's PI thickness (0.225 mm since 2026-10-14), a JLC option.
+        # The profile's PI thickness (0.1 mm since the user's decision of 2026-11-06, 0.225 mm from 2026-10-14), a JLC option.
         self.assertIn(stackup["stiffener_thickness_mm"], result["profile"]["fabrication"]["pi_stiffener_thickness_options_mm"])
         for board in result["boards"].values():
             stiffeners = board["layers"]["bottom_stiffener"]

@@ -178,12 +178,11 @@ class StiffenerTests(unittest.TestCase):
         profile = copy.deepcopy(load_profile())
         stackup = profile["stackup"]
         stackup["stiffener_thickness_mm"] = thickness
-        # Stage G: the profile also checks the contact zone (core + copper +
-        # stiffener) against the connector; describe a connector that takes
-        # this one, so every JLC option still reaches the exporter.
-        profile["connector"]["contact_zone_thickness_mm"] = round(
-            stackup["core_polyimide_thickness_mm"] + stackup["copper_thickness_mm"] + thickness, 6
-        )
+        # Stage G: the profile also checks the contact zone against the
+        # connector (on the 2-layer order, since the user's decision of
+        # 2026-11-06, JLC's rule: the ordered FPC + the stiffener); describe a
+        # connector that takes this one, so every JLC option still reaches the exporter.
+        profile["connector"]["contact_zone_thickness_mm"] = round(profile["order"]["fpc_thickness_mm"] + thickness, 6)
         # The generic profile builds the straight Row channel (the diagonal Row bus takes the surface profile, whose
         # stack-up and fabrication sections are the same; P5-diagonal-bus.md section 20).
         with mock.patch("engine.core.load_profile", return_value=profile):
@@ -267,17 +266,19 @@ class StiffenerTests(unittest.TestCase):
     def test_several_stiffeners_get_one_layer_per_thickness(self) -> None:
         # The extra stiffeners come from the generator (a patched board
         # builder), since the exporter regenerates the boards it writes (D17):
-        # one thinner, one as thick as the connector-zone stiffener.
+        # one of another thickness (0.15 mm; the connector zone's is the
+        # thinnest option, 0.1 mm, since the user's decision of 2026-11-06),
+        # one as thick as the connector-zone stiffener.
         build_column_board = engine_core.build_column_board
         profile_thickness = load_profile()["stackup"]["stiffener_thickness_mm"]
-        self.assertNotEqual(profile_thickness, 0.1)
+        self.assertNotEqual(profile_thickness, 0.15)
 
         def with_fanout_stiffeners(design, profile):
             board = build_column_board(design, profile)
             active = board["grid_registration"]["active_region"]
             cx, cy = active["x"] + active["width"] / 2, active["y"] + active["height"] / 2
             connector = board["layers"]["bottom_stiffener"][0]
-            for offset, thickness in ((-6.0, 0.1), (6.0, connector["thickness_mm"])):
+            for offset, thickness in ((-6.0, 0.15), (6.0, connector["thickness_mm"])):
                 square = [[cx + offset - 1, cy - 1], [cx + offset + 1, cy - 1], [cx + offset + 1, cy + 1], [cx + offset - 1, cy + 1]]
                 board["layers"]["bottom_stiffener"].append(dict(connector, zone="fanout", thickness_mm=thickness, points=square))
             return board
@@ -294,28 +295,28 @@ class StiffenerTests(unittest.TestCase):
         self.assertTrue(board["verification"]["all_checks_passed"])
         self.assertEqual(len(board["layers"]["bottom_stiffener"]), 3)
         members = _members(exports[f"{board['physical_side']}_fpc_gerber_zip"])
-        thin, thick = "Gerber_BottomStiffenerLayer_pib_0.1.GBSL", f"Gerber_BottomStiffenerLayer_pib_{profile_thickness:g}.GBSL"
-        self.assertEqual(sorted(name for name in members if name.endswith(".GBSL")), [thin, thick])
+        other, thick = "Gerber_BottomStiffenerLayer_pib_0.15.GBSL", f"Gerber_BottomStiffenerLayer_pib_{profile_thickness:g}.GBSL"
+        self.assertEqual(sorted(name for name in members if name.endswith(".GBSL")), sorted([other, thick]))
         stiffeners = board["layers"]["bottom_stiffener"]
-        _, thin_regions = gc.decode_gerber(members[thin].decode("ascii"))
+        _, other_regions = gc.decode_gerber(members[other].decode("ascii"))
         _, thick_regions = gc.decode_gerber(members[thick].decode("ascii"))
-        self.assertEqual(len(thin_regions), 1)
-        self.assertTrue(gc.same_ring(thin_regions[0], stiffeners[1]["points"], 2e-6))
+        self.assertEqual(len(other_regions), 1)
+        self.assertTrue(gc.same_ring(other_regions[0], stiffeners[1]["points"], 2e-6))
         self.assertEqual(len(thick_regions), 2)
         self.assertTrue(gc.same_ring(thick_regions[0], stiffeners[0]["points"], 2e-6))
         self.assertTrue(gc.same_ring(thick_regions[1], stiffeners[2]["points"], 2e-6))
         entries = json.loads(members["jlcpcb.json"])["fpcStiffeners"]
         self.assertEqual(
             [(entry["id"], entry["gerber"], entry["thickness"]) for entry in entries],
-            [("direct_pi_01", thick, f"{profile_thickness:g}"), ("direct_pi_02", thin, "0.1"), ("direct_pi_03", thick, f"{profile_thickness:g}")],
+            [("direct_pi_01", thick, f"{profile_thickness:g}"), ("direct_pi_02", other, "0.15"), ("direct_pi_03", thick, f"{profile_thickness:g}")],
         )
         manifest = json.loads(members["manifest.json"])
-        self.assertEqual([(item["gerber"], item["count"]) for item in manifest["stiffeners"]], [(thick, 2), (thin, 1)])
+        self.assertEqual([(item["gerber"], item["count"]) for item in manifest["stiffeners"]], [(thick, 2), (other, 1)])
         review = json.loads(_members(exports["project_review_bundle_zip"])["manifest.json"])
-        self.assertTrue(any(thin in line for line in review["review_requirements"]))
+        self.assertTrue(any(other in line for line in review["review_requirements"]))
         # The board's order notes name each of its stiffener layers with its thickness.
         notes = " ".join(members["ORDER_NOTES.txt"].decode("utf-8").split())
-        for layer, thickness in ((thick, f"{profile_thickness:g}"), (thin, "0.1")):
+        for layer, thickness in ((thick, f"{profile_thickness:g}"), (other, "0.15")):
             self.assertIn(f"Stiffener layer: {layer} (polyimide {thickness} mm, bottom side)", notes)
 
 

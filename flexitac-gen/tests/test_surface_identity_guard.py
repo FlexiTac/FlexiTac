@@ -55,6 +55,16 @@ JLC's 2-layer thicknesses, the file hash re-pinned): all 92 entries changed
 their build ids and manifests (of a manifest its build id, build digest,
 profile revision and profile digest alone); every design, verdict, error code,
 board (layout digest) and validation report held.
+
+It was rewritten by the profile revision 2026-11-06b (the user's later decision
+of 2026-11-06, "建议把补强改成 0.1 mm" -> "好的": the PI stiffener 0.225 -> 0.1
+mm, the 2-layer 0.2 mm FPC + 0.1 mm the 0.3 mm gold fingers by JLC's rule; the
+file hash re-pinned): all 92 entries changed their build ids and manifests,
+and the 81 built ones their layout digests (each board carries the stiffener's
+thickness, in ``fpc.stackup`` and its ``layers.bottom_stiffener``; with the
+0.225 mm put back, tests/defaults_of_before.py ``stiffener``, every layout is
+the one of before); every design, verdict, error code and validation report
+held.
 """
 
 from __future__ import annotations
@@ -77,7 +87,7 @@ except ImportError:  # run as a package
 FIXTURE = Path(__file__).resolve().parent / "fixtures" / "surface_identity_baseline.json"
 SURFACE_PROFILE = Path(__file__).resolve().parents[1] / "profiles" / "jlc_fpc_surface_v1.json"
 # sha256 of the surface profile file's bytes (its canonical-JSON digest is in every surface build id).
-SURFACE_PROFILE_FILE_SHA256 = "cbce05988eeca8a8dc9af1ef20e68ea03270a93671d2105af11d6ea7e42e8a33"
+SURFACE_PROFILE_FILE_SHA256 = "1ad3af57fdf5d243ffed6232ad47a0fdf898ad0f1957c9ffeebb4450694107af"
 SURFACE = "surface_matrix_v1"
 SEED = 20261020
 RANDOM_COUNT = 80
@@ -143,7 +153,9 @@ def write_fixture() -> None:
     entries = [{"request": request, "expected": record(generate_design(request))} for request in requests()]
     document = {
         "format": "tactile-fpc-surface-guard/v1",
-        "written_from": "engine of the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty, "
+        "written_from": "engine of the profile revision 2026-11-06b (the PI stiffener 0.225 -> 0.1 mm, the 2-layer 0.2 mm FPC + 0.1 mm the "
+                        "0.3 mm gold fingers by JLC's rule: in every build id and every built board's layout), 2026-11-06; before it, "
+                        "the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty, "
                         "in every build id), 2026-11-06; before it, the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: "
                         "the default electrodes 1.4 -> 1.0 mm, in the requests that leave them to the default), 2026-11-06; before it, the profile revision 2026-10-29 "
                         "(the gold-finger thickness order option and the coverlay-window "

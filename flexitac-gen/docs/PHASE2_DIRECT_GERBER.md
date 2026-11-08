@@ -99,8 +99,8 @@ After writing:
 | `Gerber_TopLayer.GTL` | `Copper,L1,Top`, positive: route pieces as round strokes with one aperture per width (by default `C0.127` for the fan-out pieces and `C0.254` for the tail pieces), electrodes and contacts as G36/G37 regions |
 | `Gerber_TopSolderMaskLayer.GTS` | `Soldermask,Top`, declared **negative**: its regions are the coverlay openings (clearances), as EasyEDA and KiCad write them; a masked board's polygon field window is one region over its ring |
 | `Gerber_BoardOutlineLayer.GKO` | `Profile,NP`: the closed outline and every routed slot, drawn with a 0.1 mm line |
-| `Gerber_BottomStiffenerLayer_pib_<t>.GBSL` | `Other,BottomStiffener`: one layer per side, material and thickness, EasyEDA-style name (default `pib_0.225`) |
-| `jlcpcb.json` | `fpcStiffeners`: per stiffener `id` (`direct_pi_01`...), `gerber`, `layer` (`bottom`), `material` (`pi`), `thickness` (`"0.225"`) and `path`, one closed contour in mils in the Gerber frame, nested as `[[[x0, y0, "L", x1, y1, ..., x0, y0]]]` (the first point repeated at the end) |
+| `Gerber_BottomStiffenerLayer_pib_<t>.GBSL` | `Other,BottomStiffener`: one layer per side, material and thickness, EasyEDA-style name (default `pib_0.1`) |
+| `jlcpcb.json` | `fpcStiffeners`: per stiffener `id` (`direct_pi_01`...), `gerber`, `layer` (`bottom`), `material` (`pi`), `thickness` (`"0.1"`) and `path`, one closed contour in mils in the Gerber frame, nested as `[[[x0, y0, "L", x1, y1, ..., x0, y0]]]` (the first point repeated at the end) |
 | `netlist.ipc` | IPC-D-356A netlist (below) |
 | `ORDER_NOTES.txt` | how to order this board from JLCPCB (below): the board (with its trace widths and what JLC's width tolerance makes of them), its archive and stiffener layers, its coverlay windows (those longer than JLC's general 20 mm for one opening named), the order options and review notes with their reasons, the upload checks and the sources; UTF-8 text with LF line ends, like the ordering note EasyEDA puts in its exports |
 | `manifest.json` | `tactile-fpc-board-manifest/v1`: identity fields, `board_id`, `physical_side`, `role`, status flags, member digests, stiffener groups, netlist summary, geometry counts, `order_notes` and `order_requirements` |
@@ -215,8 +215,8 @@ build's archives do not change (the table below).
 `tests/test_mask_export.py` pins the archives of four masked builds (a
 polygon window, per-electrode windows, tails on the right with the columns
 on top, opposite tails), the same on Python 3.9 and 3.12; the right
-triangle of 55 of 10 x 10 taxels gives a 29008-byte top ZIP, a
-29949-byte bottom ZIP and a 173150-byte bundle.
+triangle of 55 of 10 x 10 taxels gives a 29871-byte top ZIP, a
+30812-byte bottom ZIP and a 175825-byte bundle.
 
 ## Diagonal Row bus
 
@@ -281,9 +281,9 @@ Python 3.9 to 3.13 and hash seeds.  The default build gives:
 
 | Archive | Bytes | SHA-256 |
 | --- | --- | --- |
-| `tactile-fpc-12x32-48b9d43409a6-top-rows-direct-gerber.zip` | 30610 | `774773c1e7526efc05fd6d70e3b5e74a45878f148c4252736c32d40a81834b36` |
-| `tactile-fpc-12x32-48b9d43409a6-bottom-columns-direct-gerber.zip` | 42716 | `6871de5732d55c201a77988d6395940c6fac5775ab27e3827a4a85b9520cb4a7` |
-| `tactile-fpc-12x32-48b9d43409a6-project-review.zip` | 237849 | `8c32011b5def58c54fb2a5bb03d86ad2a3ba048bb7b96fc3c18a1789fa708936` |
+| `tactile-fpc-12x32-ba2e9b58bd8e-top-rows-direct-gerber.zip` | 31473 | `1cbce64d030b6186ad226202f15b8067e6501849c86cb1aed3a64d5d0f8dc529` |
+| `tactile-fpc-12x32-ba2e9b58bd8e-bottom-columns-direct-gerber.zip` | 43579 | `4a37eb34c0c30e40fbfb9ab5ba27fd8aa879997b0a5a60cdd52b922b30425366` |
+| `tactile-fpc-12x32-ba2e9b58bd8e-project-review.zip` | 240524 | `aec1b4c44f3fcf52bef6434b3569c4a6362c567812d6afe4e47369f2940a573a` |
 
 (`tests/test_golden_default.py` pins these values; the bundle shown is the
 one of `default_design()` and of the browser's export of the default build,
@@ -295,7 +295,9 @@ section 27, the Row tail 0.048 mm east, on the field's centre line; both
 tails 12 mm since section 27.7, the Column board 4.5 mm longer;
 `diagonal-bus/11` since section 27.8, the same boards; the 1.0 mm electrodes
 of the default fill 0.5 since the user's decision of 2026-11-06, both boards
-0.4 mm narrower and shorter and a coverlay window per electrode.)
+0.4 mm narrower and shorter and a coverlay window per electrode; the profile
+revision 2026-11-06b, the 0.1 mm PI stiffener of the 2-layer 0.2 mm order,
+the same boards.)
 
 ## Stiffeners
 
@@ -306,11 +308,13 @@ else before generation (`E_PROFILE_INCONSISTENT` for another side,
 `E_PROFILE_FAB_LIMIT` for a material without an orderable thickness list or a
 thickness that is not a JLC PI option 0.1, 0.15, 0.2, 0.225 or 0.25 mm).  The
 connector-zone thickness must also suit the reader connectors (below): on the
-ordered 0.11 mm build that leaves the 0.225 and 0.25 mm options.  The
+ordered 2-layer 0.2 mm FPC, by JLC's rule (FPC thickness + stiffener
+thickness), that leaves the 0.1 mm option (on a 1-layer 0.11 mm order, the
+0.225 and 0.25 mm options).  The
 layer name and `jlcpcb.json` follow the thickness, e.g.
-`Gerber_BottomStiffenerLayer_pib_0.225.GBSL` for the default 0.225 mm (since
-2026-10-14; it was 0.2 mm); stiffeners of different thicknesses go to
-separate layers.
+`Gerber_BottomStiffenerLayer_pib_0.1.GBSL` for the default 0.1 mm (since the
+user's decision of 2026-11-06; 0.225 mm from 2026-10-14, 0.2 mm before);
+stiffeners of different thicknesses go to separate layers.
 
 ## Order requirements
 
@@ -337,13 +341,14 @@ copper, surface finish or outline tolerance JLCPCB does not offer
 ordered thickness of a 1-layer order, a layer count other than 1 or 2 or an order the reader connectors cannot take
 (`E_PROFILE_INCONSISTENT`).  It checks the connectors two ways: the outline
 tolerance must hold the THD0515 tail width (+/-0.07 mm), and the contact zone
-(core, copper and stiffener under the open coverlay) must be within
-0.30 +/- 0.03 mm.  Each entry has `id`, `kind` (`order_option` or
+(on a 2-layer order the ordered FPC plus the stiffener, JLC's rule; on a
+1-layer order core, copper and stiffener under the open coverlay) must be
+within 0.30 +/- 0.03 mm.  Each entry has `id`, `kind` (`order_option` or
 `review_note`), `topic`, `requirement`, `special_request`, `reason`, `sources`
 and `values`.
 
 In short: order each board as a 2-layer, 0.2 mm FPC with 1 oz copper and a
-0.225 mm PI stiffener at the contacts, a +/-0.05 mm outline tolerance (a
+0.1 mm PI stiffener at the contacts, a +/-0.05 mm outline tolerance (a
 special request) and ENIG, and check that the 0.3 mm gold fingers come out
 within +/-0.05 mm (JLC's trace tolerance is +/-20%).
 
@@ -351,16 +356,16 @@ within +/-0.05 mm (JLC's trace tolerance is +/-20%).
 | --- | --- | --- |
 | `fpc_thickness` | order option | 2 layer, 0.2 mm FPC thickness (finished, without the stiffener), the bottom copper layer empty |
 | `copper_weight` | order option | 1 oz (0.035 mm) |
-| `pi_stiffener` | order option | PI 0.225 mm on the bottom side at the contacts (the 6 mm zone from the tip) |
+| `pi_stiffener` | order option | PI 0.1 mm on the bottom side at the contacts (the 6 mm zone from the tip) |
 | `gold_finger_thickness` | order option | Yes, Gold Fingers Thickness 0.3 mm (the stiffened contact zone in total, from the contact surface to the outer surface of the stiffener) |
 | `outline_tolerance` | order option | +/-0.05 mm (special request; JLC's default is +/-0.1 mm) |
 | `surface_finish` | order option | ENIG |
 | `finger_width` | review note | ask JLC to hold the 0.3 mm contacts within +/-0.05 mm, or measure them on delivery |
 | `trace_widths` | review note | the fan-out traces are 0.127 mm wide by default (routing.trace_width_mm, at least 0.1016 mm) and widen to 0.254 mm in the tail, which the stiffener edge flexes |
-| `contact_zone` | review note | the tail is about 0.285 mm thick at the contacts; measure it on delivery |
+| `contact_zone` | review note | the tail is about 0.3 mm thick at the contacts, within 0.3 +/-0.03 mm at JLC's tolerance |
 | `contact_start` | review note | the contacts start 0.3 mm from the tip |
 | `contact_window` | review note | the gang coverlay window leaves 0.05 mm beyond the outer contacts |
-| `coverlay_windows` | review note | check them on the upload: JLC advises one opening no longer than 20 mm, and the merged electrode-field window and the gang contact window are one opening each (each board's lines in ORDER_NOTES.txt give its windows and those longer) |
+| `coverlay_windows` | review note | check them on the upload: JLC advises one opening no longer than 20 mm; each board has a window per electrode, or one merged electrode-field window when a coverlay bridge between two would be under 0.5 mm, and one gang window over its contacts (each board's lines in ORDER_NOTES.txt give its windows and those longer) |
 
 The reasons, as `ORDER_NOTES.txt` gives them: the FlexiTac fabrication guide
 orders 0.2 mm, one of JLC's 2-layer finished thicknesses (0.11, 0.12 and
@@ -369,10 +374,16 @@ orders 0.2 mm, one of JLC's 2-layer finished thicknesses (0.11, 0.12 and
 before 2026-11-06); the boards' own 0.11 mm layers are a 0.025 mm PI
 core, 0.035 mm copper and a 0.025 mm PI + 0.025 mm adhesive coverlay, and
 JLC's single-sided copper is 0.5 or 1 oz (0.018 or 0.035 mm); both reader
-connectors take a 0.3 +/- 0.03 mm thick FPC at the contacts, and JLC
-recommends a 0.225 mm PI stiffener for a 0.3 mm connector on a 0.11 mm FPC;
-with the coverlay open, core, copper and stiffener make about 0.285 mm, and
-JLC holds the gold-finger area to +/-0.03 mm; THD0515-32CL-SN needs the
+connectors take a 0.3 +/- 0.03 mm thick FPC at the contacts, and by JLC's
+rule the thickness with a stiffener is the FPC thickness plus the stiffener
+thickness, so the 0.2 mm FPC + 0.1 mm make 0.3 mm (the user's decision of
+2026-11-06; JLC's recommended 0.225 mm PI stiffener for a 0.3 mm connector
+is for a 0.11 mm FPC, where core, copper and stiffener under the open
+coverlay made about 0.285 mm on the 1-layer order before); JLC holds the
+gold-finger area to +/-0.03 mm and says the finished thickness is less where
+an area has no copper or coverlay, as at the contacts (the coverlay open,
+the bottom copper empty), so the note asks to measure it on delivery if it
+matters; THD0515-32CL-SN needs the
 tail width 0.5 x (N + 1) mm within +/-0.07 mm, and JLC's default
 laser-outline tolerance is +/-0.1 mm (+/-0.05 mm on request); JLC's
 trace-width tolerance of +/-20% allows 0.24-0.36 mm for the 0.3 mm contacts,
@@ -388,17 +399,21 @@ ordering guide and its FPC design rules, both fetched that day): JLC gives
 the total gold-finger thickness ordered (0.3 mm, from the contact surface to
 the outer surface of the stiffener) the highest priority when it chooses the
 stiffener under the gold fingers, so its PI calculator may take another PI
-thickness there than the 0.225 mm of the stiffener option (its guide's
-example takes 0.2 mm for 0.3 mm); the contact-zone estimate of 0.285 mm does
-not count the stiffener's adhesive.  JLC advises one coverlay opening no
+thickness there than the 0.1 mm of the stiffener option (its guide's
+example takes 0.2 mm for 0.3 mm).  JLC advises one coverlay opening no
 longer than 20 mm (a longer one can stretch and deform when the coverlay is
-laminated); the merged electrode-field window is one opening (64 x 23.6 mm
-on the default board) and the JLC-accepted reference design's field windows
-were up to 63.373 mm long (23.368 x 63.373 mm), so the notes ask for a
-check on the upload instead of refusing the build.  Each board's lines name
-its windows, for example "Coverlay windows: electrode field 64 x 23.6 mm,
-contacts 5.9 x 4.4 mm; longer than JLC's general 20 mm for one opening: the
-electrode field window (64 mm)."
+laminated); each board has a window per electrode, or one merged
+electrode-field window where a coverlay bridge between two would be under
+0.5 mm, and one gang window over its contacts.  The default boards' 1.0 mm
+electrodes (the fill 0.5 of 2026-11-06) have a window each, the Row board's
+12 up to 63.6 x 1.2 mm, the Column board's 32 up to 1.2 x 23.6 mm (the
+1.4 mm electrodes before merged into one field window of 64 x 23.6 mm), and
+the JLC-accepted reference design's field windows were up to 63.373 mm long
+(23.368 x 63.373 mm), so the notes ask for a check on the upload instead of
+refusing the build.  Each board's lines name its windows, for example
+"Coverlay windows: 12 electrode windows up to 63.6 x 1.2 mm, contacts 5.9 x
+4.4 mm; longer than JLC's general 20 mm for one opening: 12 electrode
+windows (up to 63.6 mm)."
 
 ## Manufacturing status
 
@@ -409,17 +424,17 @@ options above and check:
 - every coverlay opening, in particular the contact window, which stops at
   the straight part of the tip edge and so leaves only 0.05 mm of coverlay
   expansion beside the outer contacts (JLC's expansion is 0.1 mm);
-- that each PI stiffener layer is detected at its thickness (0.225 mm by
+- that each PI stiffener layer is detected at its thickness (0.1 mm by
   default).
 
 Not verified with JLCPCB (no upload was made): whether JLC ignores or uses
 the extra members `manifest.json`, `netlist.ipc` (and the netlist for its
 electrical test) and `ORDER_NOTES.txt`, how it treats comment-form X2
-attributes, the stiffener detection for the default 0.225 mm PI layer (the
+attributes, the stiffener detection for the default 0.1 mm PI layer (the
 JLC-accepted reference packages used 0.1 and 0.2 mm), whether the +/-0.05
 mm outline tolerance and the gold-finger width are held as requested, and
-that the 0.11 mm 1-layer FPC comes with 1 oz copper (derived from JLC's
-thickness and coverlay tables) at the estimated contact-zone thickness.  Not
+that the 2-layer 0.2 mm FPC comes with 1 oz copper and the bottom copper
+empty at the 0.3 mm contact-zone thickness of JLC's rule.  Not
 implemented: X2 object attributes (`TO.N`, `TO.P`) on the contacts (nets and
 pins are in `netlist.ipc`), top-side and non-PI stiffeners.
 

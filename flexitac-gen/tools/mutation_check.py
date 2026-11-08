@@ -826,7 +826,7 @@ TESTS_AND_DOCS = (
       (WEB, "      schema_version: state.design?.schema_version, template_id: state.design?.template_id,\n",
        "      template_id: state.design?.template_id,\n")),
     m("T/doc-build-id", "M12", "README names a stale default build id",
-      ("README.md", "tactile-fpc-12x32-48b9d43409a6", "tactile-fpc-12x32-ac8bac358de6")),
+      ("README.md", "tactile-fpc-12x32-ba2e9b58bd8e", "tactile-fpc-12x32-ac8bac358de6")),
     m("T/doc-code", "M12", "an issue code missing from the documented catalogue",
       ("docs/LAYOUT_SCHEMA.md", "| `E_NECK_WIDTH` | drc |", "| `E_NECK_WIDTH_GONE` | drc |")),
     m("T/doc-check", "M12", "a DRC record missing from the documented list",
@@ -845,8 +845,8 @@ TESTS_AND_DOCS = (
       ("docs/INTEGRATION.md", "| face up: `COL_01` on the left, pin 1 leftmost |", "| face up: `COL_01` on the right, pin 1 leftmost |")),
     m("T/doc-flex", "D23/M12", "INTEGRATION: wrong straight flexible length beyond the stiffener",
       ("docs/INTEGRATION.md", "6.0 mm of straight", "1.5 mm of straight")),
-    m("T/doc-thickness", "L7/M12", "INTEGRATION: wrong contact-zone thickness",
-      ("docs/INTEGRATION.md", "= 0.285 mm thick", "= 0.30 mm thick")),
+    m("T/doc-thickness", "L7/M12", "INTEGRATION: wrong contact-zone thickness (the 1-layer stack-up's of before 2026-11-06)",
+      ("docs/INTEGRATION.md", "= 0.3 mm thick", "= 0.285 mm thick")),
     m("T/doc-alias", "H6/M12", "API.md: an alias the engine does not accept",
       ("docs/API.md", "| `rows`, `row_num` |", "| `rows`, `row_count` |")),
     m("T/doc-enum", "M12", "API.md: a tail side value the engine does not accept",
@@ -885,9 +885,10 @@ TESTS_AND_DOCS = (
 )
 
 # --------------------------------------------------------------------------
-# Stage G: the 0.225 mm PI default, the profile's order requirements
-# (ORDER_NOTES.txt, manifests, /api/default, the browser note) and the gold
-# fingers measured on the emitted Gerbers.
+# Stage G: the PI stiffener (0.225 mm from stage G, 0.1 mm for the 2-layer
+# 0.2 mm order since the user's decision of 2026-11-06), the profile's order
+# requirements (ORDER_NOTES.txt, manifests, /api/default, the browser note)
+# and the gold fingers measured on the emitted Gerbers.
 # --------------------------------------------------------------------------
 
 _REVIEW_LINES = (
@@ -898,9 +899,9 @@ _REVIEW_LINES = (
 )
 
 GOLD_FINGERS = (
-    m("G/stiffener-0.2", "G1", "default PI stiffener back to 0.2 mm (a consistent profile: the connector takes the thinner zone)",
-      (PROFILE, '"stiffener_thickness_mm": 0.225', '"stiffener_thickness_mm": 0.2'),
-      (PROFILE, '"contact_zone_thickness_mm": 0.3,', '"contact_zone_thickness_mm": 0.28,')),
+    m("G/stiffener-0.2", "G1", "default PI stiffener 0.2 mm (a consistent profile: the connector takes the 0.4 mm zone the 2-layer 0.2 mm order gives)",
+      (PROFILE, '"stiffener_thickness_mm": 0.1\n', '"stiffener_thickness_mm": 0.2\n'),
+      (PROFILE, '"contact_zone_thickness_mm": 0.3,', '"contact_zone_thickness_mm": 0.4,')),
     m("G/order-tolerance", "G2", "the default +/-0.1 mm outline tolerance ordered (wider than the THD0515 tail tolerance)",
       (PROFILE, '"outline_tolerance_mm": 0.05,', '"outline_tolerance_mm": 0.1,')),
     m("G/tolerance-check", "G2", "profile check accepts an outline tolerance wider than the connector's",
@@ -914,6 +915,10 @@ GOLD_FINGERS = (
     m("G/zone-check", "G1/G2", "profile check accepts a contact zone the reader connectors cannot take",
       (PROFILE_PY, '    if abs(contact_zone - conn["contact_zone_thickness_mm"]) > conn["contact_zone_thickness_tolerance_mm"] + 1e-9:\n',
        "    if False:\n")),
+    # The user's decision of 2026-11-06 ("建议把补强改成 0.1 mm" -> "好的"): a 2-layer order's gold fingers by JLC's rule.
+    m("G/zone-two-layer-rule", "order 2026-11-06", "profile check takes a 2-layer order's contact zone as core + copper + stiffener, not JLC's FPC + stiffener",
+      (PROFILE_PY, '        contact_zone = round(math.fsum((float(order["fpc_thickness_mm"]), float(stack["stiffener_thickness_mm"]))), 6)\n',
+       '        contact_zone = round(sum(float(stack[key]) for key in _CONTACT_LAYERS) + float(stack["stiffener_thickness_mm"]), 6)\n')),
     m("G/copper-entry", "G2", "the copper weight listed as a review note, not as an order option",
       (PROFILE_PY, '"copper_weight", "order_option", "Copper weight"', '"copper_weight", "review_note", "Copper weight"')),
     m("G/finish-check", "G2", "profile check accepts a surface finish JLC does not offer",
@@ -957,7 +962,7 @@ GOLD_FINGERS = (
     m("G/doc-order", "G2/M12", "README quotes the default outline tolerance as the order",
       ("README.md", "PI stiffener at the contacts, a +/-0.05 mm", "PI stiffener at the contacts, a +/-0.1 mm")),
     m("G/doc-zone", "G1/M12", "README quotes the contact zone of the old stack-up",
-      ("README.md", "0.285 mm thick with the 0.225 mm stiffener", "0.293 mm thick with the 0.225 mm stiffener")),
+      ("README.md", "0.3 mm thick with the 0.1 mm stiffener", "0.285 mm thick with the 0.1 mm stiffener")),
     m("G/doc-order-table", "G2/M12", "PHASE2: an order requirement missing from the table",
       ("docs/PHASE2_DIRECT_GERBER.md", "| `surface_finish` | order option | ENIG |\n", "")),
     # Profile revision 2026-10-29: the gold-finger thickness ordered in total (JLC's gold-finger stiffener ordering

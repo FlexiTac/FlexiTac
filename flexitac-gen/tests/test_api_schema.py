@@ -270,7 +270,7 @@ class UiProfileTests(unittest.TestCase):
         # No rule value is literal text in app.py.
         source = (ROOT / "app.py").read_text(encoding="utf-8")
         self.assertIn(f"{profile['stackup']['stiffener_thickness_mm']:.3f} mm", rules["PI stiffener"])
-        for literal in ("≤16", "17–32", "0.200 mm", "0.225 mm", "0.035 mm", "0.018 mm", "Single top copper", "Polyimide\"", "0.1016", "0.127", "0.254 mm", "4/4 mil"):
+        for literal in ("≤16", "17–32", "0.100 mm", "0.200 mm", "0.225 mm", "0.035 mm", "0.018 mm", "Single top copper", "Polyimide\"", "0.1016", "0.127", "0.254 mm", "4/4 mil"):
             self.assertNotIn(literal, source)
 
 

@@ -1050,7 +1050,7 @@ field `tail.column_side`) next to the DRC error that names the real defect.
 
 ## Profile rules used by the layout and the DRC
 
-Values of `profiles/jlc_fpc_standard_v1.json` (revision 2026-10-15);
+Values of `profiles/jlc_fpc_standard_v1.json` (revision 2026-11-06b);
 [APP_HANDOFF](../claude/APP_HANDOFF.md#locked-profile) lists the whole profile.
 
 | Profile key | Value | Used for |
@@ -1090,11 +1090,11 @@ Values of `profiles/jlc_fpc_standard_v1.json` (revision 2026-10-15);
 | `drc.numeric_epsilon_mm` | 1e-06 | the only comparison tolerance |
 | `limits.maximum_outline_short_side_mm` | 234.0 | fabrication maximum, short side |
 | `limits.maximum_outline_long_side_mm` | 490.0 | fabrication maximum, long side |
-| `stackup.stiffener_thickness_mm` | 0.225 | PI stiffener (JLC options 0.1, 0.15, 0.2, 0.225, 0.25) |
+| `stackup.stiffener_thickness_mm` | 0.1 | PI stiffener (JLC options 0.1, 0.15, 0.2, 0.225, 0.25; 0.225 until 2026-11-06) |
 
 ## Surface template profile (`jlc-fpc-surface-v1`)
 
-`profiles/jlc_fpc_surface_v1.json` (revision 2026-10-20), the locked
+`profiles/jlc_fpc_surface_v1.json` (revision 2026-11-06b), the locked
 profile of the surface template (`surface_matrix_v1`, see
 [API.md](API.md#surface-template-surface_matrix_v1)).  It is the generic
 profile with `template_id: "surface_matrix_v1"` and these rules; every

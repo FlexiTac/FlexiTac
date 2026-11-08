@@ -222,7 +222,7 @@ class EmittedGoldFingerTests(unittest.TestCase):
                     if point[1] < y1 - EPS:
                         self.assertTrue(any(math.dist(point, vertex) <= EPS for vertex in tail["outline"]), point)
                 self.assertTrue(gc.polygon_inside(stiffener, tail["outline"], tolerance=EPS))
-                # The layer name and jlcpcb.json carry the profile's PI thickness (0.225 mm by default).
+                # The layer name and jlcpcb.json carry the profile's PI thickness (0.1 mm by default since 2026-11-06).
                 self.assertEqual(tail["layer"], f"Gerber_BottomStiffenerLayer_pib_{thickness:g}.GBSL")
                 (entry,) = tail["metadata"]["fpcStiffeners"]
                 self.assertEqual((entry["gerber"], entry["material"], entry["thickness"]), (tail["layer"], "pi", f"{thickness:g}"))

@@ -260,7 +260,7 @@ write, shoot the changed sensors again and write again.
   `routing.row_sides` defaults to `both`, or to `channel` where the tails
   leave on opposite sides or the field is a single row or column, the
   bottom tail then 7.0 mm; on the surface template to `channel`, its bottom
-  tail 7.5 mm), build `tactile-fpc-12x32-48b9d43409a6`.
+  tail 7.5 mm), build `tactile-fpc-12x32-ba2e9b58bd8e`.
 - **Geometry** (layout `tactile-fpc-layout/v3`): the traces leave the sensor
   thin, converge into a bundle at the trace width + spacing (0.254 mm by
   default) and expand again to the 0.5 mm contact pitch, with bus-style
@@ -328,7 +328,7 @@ write, shoot the changed sensors again and write again.
   home), and draw each
   single-sided board's two sides: its copper side, or its polyimide with the
   copper seen through it and the stiffener outermost, each board as thick
-  as its stack-up (0.11 mm, the PI stiffener 0.225 mm more; drawn at least
+  as its stack-up (0.11 mm, the PI stiffener 0.1 mm more; drawn at least
   2 px thick, the stiffener in proportion); the plan view shows
   the registration.  Every view has a coin for scale beside the board, clear
   of it (in a board's 2D view at the window's bottom right, the board
@@ -419,13 +419,16 @@ write, shoot the changed sensors again and write again.
   build say how to order the boards; `engine.profile.order_requirements`
   words each entry from those values and cites the profile's JLCPCB and
   connector sources.  Order each board as a 2-layer, 0.2 mm FPC with 1 oz
-  copper and a 0.225 mm PI stiffener at the contacts, a +/-0.05 mm outline
+  copper and a 0.1 mm PI stiffener at the contacts, a +/-0.05 mm outline
   tolerance (a special request) and ENIG, and check that the 0.3 mm gold
   fingers come out within +/-0.05 mm (JLC's trace tolerance is +/-20%).
   The boards have one copper layer: the 2-layer order's bottom copper
   stays empty, as the
   [FlexiTac fabrication guide](https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db)
   orders them (0.2 mm, since 2026-11-06; 0.11 mm 1-layer before).
+  By JLC's rule the thickness with a stiffener is the FPC's plus the
+  stiffener's, so the 0.2 mm FPC takes the 0.1 mm stiffener (0.225 mm until
+  the user's decision of 2026-11-06, JLC's choice for a 0.11 mm FPC).
   The order form's Gold Fingers Thickness is 0.3 mm, the stiffened contact
   zone in total, which JLC gives the highest priority when it chooses the
   stiffener under the gold fingers (profile revision 2026-10-29); each
@@ -467,10 +470,12 @@ narrower than 0.1016 mm (accepted down to 0.1 mm before) are now rejected.
   detected PI stiffener before ordering.
 - The default Row tail has 12 contacts; the FlexiTac reader's row connector
   has 16, so set `connector.row_pins` to 16 for it.  The contact zone is about
-  0.285 mm thick with the 0.225 mm stiffener (an estimate from the boards' own
-  0.11 mm stack-up; ordered as a 2-layer 0.2 mm FPC, JLC takes the stiffener
-  under the gold fingers to the 0.3 mm gold-finger thickness), within the connectors' 0.30 +/- 0.03 mm; JLC
-  holds the gold-finger area to +/-0.03 mm, so measure it on delivery.  One
+  0.3 mm thick with the 0.1 mm stiffener (JLC's rule, the 0.2 mm FPC plus the
+  stiffener; JLC takes the stiffener under the gold fingers to the 0.3 mm
+  gold-finger thickness), the connectors' 0.30 +/- 0.03 mm; JLC holds the
+  gold-finger area to +/-0.03 mm and says the finished thickness is less
+  where an area has no copper or coverlay, as at the contacts, so measure it
+  on delivery.  One
   of the two tails must be turned over to reach bottom-contact connectors on
   one reader face.  See [docs/INTEGRATION.md](docs/INTEGRATION.md).
 - One template (`generic_matrix_v1`), one locked profile; no alignment

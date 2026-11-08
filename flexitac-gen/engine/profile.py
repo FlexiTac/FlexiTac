@@ -344,14 +344,22 @@ def profile_issues(profile: Any) -> list[dict[str, str]]:
         )
     elif not _listed(stack["copper_thickness_mm"], copper_options):
         issue("E_PROFILE_FAB_LIMIT", "stackup.copper_thickness_mm", f"{stack['copper_thickness_mm']} mm is not a JLC single-sided copper {copper_options}.")
-    # The contacts sit in the open coverlay window: core, copper and the stiffener
-    # must give the thickness both reader connectors take.
-    contact_zone = round(sum(float(stack[key]) for key in _CONTACT_LAYERS) + float(stack["stiffener_thickness_mm"]), 6)
+    # The contacts sit in the open coverlay window: the stiffener must give the
+    # thickness both reader connectors take.  On a 1-layer order core, copper and
+    # the stiffener make it.  On a 2-layer order it is JLC's rule, the ordered FPC
+    # plus the stiffener (the user's decision of 2026-11-06, "建议把补强改成 0.1 mm"
+    # -> "好的": 0.2 + 0.1 = 0.3 mm; the 0.225 mm stiffener of before gives 0.425).
+    if order["fpc_layers"] > COPPER_LAYERS:
+        contact_zone = round(math.fsum((float(order["fpc_thickness_mm"]), float(stack["stiffener_thickness_mm"]))), 6)
+        made = "order.fpc_thickness_mm + stiffener, JLC's rule: thickness with stiffener = FPC thickness + stiffener thickness"
+    else:
+        contact_zone = round(sum(float(stack[key]) for key in _CONTACT_LAYERS) + float(stack["stiffener_thickness_mm"]), 6)
+        made = "core + copper + stiffener under the open coverlay"
     if abs(contact_zone - conn["contact_zone_thickness_mm"]) > conn["contact_zone_thickness_tolerance_mm"] + 1e-9:
         issue(
             "E_PROFILE_INCONSISTENT",
             "stackup.stiffener_thickness_mm",
-            f"gives a {contact_zone:g} mm contact zone (core + copper + stiffener under the open coverlay), outside the "
+            f"gives a {contact_zone:g} mm contact zone ({made}), outside the "
             f"{conn['contact_zone_thickness_mm']:g} +/-{conn['contact_zone_thickness_tolerance_mm']:g} mm the reader connectors take.",
         )
     tolerance = float(order["outline_tolerance_mm"])
@@ -540,13 +548,16 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
     # The gang window stops where the rounded tip corners begin (engine.layout).
     margin = round(min(expansion, float(conn["contact_center_to_side_edge_mm"]) - width / 2 - radius), 6)
     start = float(conn["contact_tip_clearance_mm"])
-    # Under the open coverlay the contacts keep the core and the copper, plus the stiffener.
-    contact_zone = round(core + copper + stiffener, 6)
+    # Under the open coverlay the contacts keep the core and the copper, plus the stiffener; on a 2-layer order the
+    # thickness is JLC's rule, the ordered FPC plus the stiffener (profile_issues).
+    contact_zone = round(math.fsum((fpc, stiffener)), 6) if two_layer else round(core + copper + stiffener, 6)
     finger_tolerance = float(fab["gold_finger_thickness_tolerance_mm"])
     zone_held = zone - zone_tolerance - 1e-9 <= contact_zone - finger_tolerance and contact_zone + finger_tolerance <= zone + zone_tolerance + 1e-9
     jlc, gold, clearance = "jlcpcb_flex_capabilities", "jlcpcb_gold_finger_stiffeners", "jlcpcb_fpc_design_clearance"
     # JLC's general length limit of one coverlay opening, and the longest field window of the JLC-accepted reference design.
     window_limit, reference_window = float(cover["coverlay_opening_general_max_length_mm"]), float(order["reference_field_window_length_mm"])
+    # The coverlay bridge below which the electrode windows merge into one (engine.layout).
+    bridge = float(cover["coverlay_min_bridge_mm"])
     bundle = float(default_design["routing"]["trace_width_mm"])
     finger = float(profile["routing"]["finger_trace_width_mm"])
     minimum_width, minimum_space = fabrication_minimum(profile)
@@ -585,9 +596,13 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
             "pi_stiffener", "order_option", "Stiffener",
             f"{material} {_g(stiffener)} mm on the {stack['stiffener_side']} side at the contacts "
             f"(the {_g(tail['stiffener_length_mm'])} mm zone from the tip)",
-            f"Both reader connectors take a {_g(zone)} +/-{_g(zone_tolerance)} mm thick FPC at the contacts; JLC recommends a "
-            f"{_g(recommended[0])} mm {material} stiffener for a {_g(recommended[2])} mm thick connector on a {_g(recommended[1])} mm FPC"
-            + ("." if follows else f" (this profile: {_g(stiffener)} mm on {_g(fpc)} mm, for {_g(zone)} mm).")
+            f"Both reader connectors take a {_g(zone)} +/-{_g(zone_tolerance)} mm thick FPC at the contacts"
+            + (f", and by JLC's rule the thickness with a stiffener is the FPC thickness plus the stiffener thickness: the "
+               f"{_g(fpc)} mm FPC ordered above + {_g(stiffener)} mm = {_g(contact_zone)} mm. JLC's recommended "
+               f"{_g(recommended[0])} mm {material} stiffener for a {_g(recommended[2])} mm thick connector is for a "
+               f"{_g(recommended[1])} mm FPC." if two_layer else
+               f"; JLC recommends a {_g(recommended[0])} mm {material} stiffener for a {_g(recommended[2])} mm thick connector on a "
+               f"{_g(recommended[1])} mm FPC" + ("." if follows else f" (this profile: {_g(stiffener)} mm on {_g(fpc)} mm, for {_g(zone)} mm)."))
             + " The gold-finger thickness below takes priority when JLC chooses the stiffener under the gold fingers.",
             (jlc, "reader_connectors.rows", "reader_connectors.columns", gold),
             {
@@ -652,10 +667,15 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
             "contact_zone", "review_note", "Contact-zone thickness",
             f"the tail is about {_g(contact_zone)} mm thick at the contacts"
             + (f", within {_g(zone)} +/-{_g(zone_tolerance)} mm at JLC's tolerance" if zone_held else "; measure it on delivery"),
-            f"{_g(core)} mm PI core + {_g(copper)} mm copper + the {_g(stiffener)} mm {material} stiffener where the coverlay is open, "
-            f"the stiffener's adhesive not counted; both reader connectors take {_g(zone)} +/-{_g(zone_tolerance)} mm, JLC holds the "
+            (f"{_g(fpc)} mm FPC + the {_g(stiffener)} mm {material} stiffener by JLC's rule (thickness with stiffener = FPC "
+             "thickness + stiffener thickness)" if two_layer else
+             f"{_g(core)} mm PI core + {_g(copper)} mm copper + the {_g(stiffener)} mm {material} stiffener where the coverlay is open, "
+             "the stiffener's adhesive not counted")
+            + f"; both reader connectors take {_g(zone)} +/-{_g(zone_tolerance)} mm, JLC holds the "
             f"gold-finger area to +/-{_g(finger_tolerance)} mm and chooses the stiffener under the gold fingers to the gold-finger "
-            "thickness ordered.",
+            "thickness ordered."
+            + (" JLC says the finished thickness is less where an area has no copper or coverlay, as at the contacts (the coverlay "
+               "open, the bottom copper empty), so measure it on delivery if it matters." if two_layer else ""),
             (jlc, "reader_connectors.rows", "reader_connectors.columns", gold),
             {
                 "contact_zone_thickness_mm": contact_zone, "connector_thickness_mm": zone,
@@ -686,14 +706,20 @@ def order_requirements(profile: Mapping[str, Any], default_design: Mapping[str, 
         ),
         entry(
             "coverlay_windows", "review_note", "Coverlay windows",
-            f"check them on the upload: JLC advises one opening no longer than {_g(window_limit)} mm, and the "
-            "merged electrode-field window and the gang contact window are one opening each (each board's lines in "
-            "ORDER_NOTES.txt give its windows and those longer)",
+            # engine.layout: a window per electrode, merged into one field window when a bridge between two would be
+            # narrower than the rule (the default's 1.0 mm electrodes since the fill 0.5 of 2026-11-06 have their own).
+            f"check them on the upload: JLC advises one opening no longer than {_g(window_limit)} mm; each board has a window "
+            f"per electrode, or one merged electrode-field window when a coverlay bridge between two would be under "
+            f"{_g(bridge)} mm, and one gang window over its contacts (each board's lines in ORDER_NOTES.txt give its "
+            "windows and those longer)",
             "JLC's FPC design rules: a longer opening can stretch and deform when the coverlay is laminated, making bonding "
             "difficult or misaligning it. The JLC-accepted reference design's electrode-field windows were up to "
             f"{_g(reference_window)} mm long.",
             (clearance, "reference_design"),
-            {"coverlay_opening_general_max_length_mm": window_limit, "reference_field_window_length_mm": reference_window},
+            {
+                "coverlay_opening_general_max_length_mm": window_limit, "coverlay_min_bridge_mm": bridge,
+                "reference_field_window_length_mm": reference_window,
+            },
         ),
     ]
 

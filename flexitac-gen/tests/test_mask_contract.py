@@ -82,9 +82,12 @@ _OPPOSITE = {"bottom": "top", "top": "bottom", "left": "right", "right": "left"}
 # 13345dbc...).  Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper
 # empty): the generic schema's x-profile and x-row-bus-profile name both profiles' new revision and digest (before:
 # 45c0b8e3...), the surface schema's x-profile the surface profile's (before: 61d8f76a...); the limits unchanged.
-GENERIC_SCHEMA_SHA256 = "4babcb58d7eae99996c55c024253367452f231802969e1e972b4c4e77bdaeca3"
+# Re-pinned by the profile revision 2026-11-06b (the user's later decision of 2026-11-06: the PI stiffener 0.225 ->
+# 0.1 mm): the same three names of the profiles' revision and digest (before: 4babcb58... and d69de578...); the limits
+# unchanged.
+GENERIC_SCHEMA_SHA256 = "6e45123b7b0f1f68c7298545d19768d389da51a473e3f626076dbe4708a7f24a"
 GENERIC_LIMITS_SHA256 = "8eb88e9e6031676226c4db419c7a6fe1b62b9b0c4dc4df7678ec73fea42233f8"
-SURFACE_SCHEMA_SHA256 = "d69de578275c11f088f6640adb2d791372e519be4ca80d615cc6cb0ed46c61c9"
+SURFACE_SCHEMA_SHA256 = "d74df56b506499c2cb57da74a154ab92cfa8c1f2e36d92f72714b0d33b851f4e"
 SURFACE_LIMITS_SHA256 = "e143c63fbddc5ce488df0780f9f52755899a66a21d62fb472ffce1fbc55b0f5e"
 
 

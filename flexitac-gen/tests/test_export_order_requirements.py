@@ -30,17 +30,22 @@ from exporters import direct_gerber
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTES = "ORDER_NOTES.txt"
-# 0.025 mm core + 0.035 mm copper + 0.225 mm stiffener under the open coverlay.
-DEFAULT_ZONE_MM = 0.285
+# The 0.2 mm FPC + the 0.1 mm stiffener, JLC's thickness with a stiffener (the user's decision of 2026-11-06, "建议把补强改成
+# 0.1 mm" -> "好的"; the 1-layer 0.11 mm order's 0.025 mm core + 0.035 mm copper + 0.225 mm stiffener, 0.285 mm, before).
+DEFAULT_ZONE_MM = 0.3
 # The approved defaults (2026-10-14), restated: 1-layer 0.11 mm FPC (JLC's 1 oz
 # copper build), 0.225 mm PI at the contacts, +/-0.05 mm outline on request,
 # ENIG, and the review notes (the trace note since the necked routing of 2026-10-15).
 # Profile revision 2026-10-29: the gold-finger thickness of the contact zone ordered in total (JLC's
 # gold-finger stiffener ordering guide), and the coverlay windows against JLC's general 20 mm for one opening.
+# Profile revision 2026-11-06b (the user's decision of 2026-11-06, "订单厚度对不上... 建议把补强改成 0.1 mm... 要不要现在改？" ->
+# "好的"): on the 2-layer 0.2 mm order the PI stiffener 0.225 -> 0.1 mm, so 0.2 + 0.1 mm make the 0.3 mm gold fingers by
+# JLC's rule (thickness with stiffener = FPC thickness + stiffener thickness), and the contact zone about 0.3 mm; the
+# coverlay-window note names the per-electrode windows of the default since the fill 0.5 of 2026-11-06.
 DEFAULT_REQUIREMENTS = {
     "fpc_thickness": "2 layer, 0.2 mm FPC thickness (finished, without the stiffener), the bottom copper layer empty",
     "copper_weight": "1 oz (0.035 mm)",
-    "pi_stiffener": "PI 0.225 mm on the bottom side at the contacts (the 6 mm zone from the tip)",
+    "pi_stiffener": "PI 0.1 mm on the bottom side at the contacts (the 6 mm zone from the tip)",
     "gold_finger_thickness": (
         "Yes, Gold Fingers Thickness 0.3 mm (the stiffened contact zone in total, from the contact surface to the outer "
         "surface of the stiffener)"
@@ -52,13 +57,13 @@ DEFAULT_REQUIREMENTS = {
         "the fan-out traces are 0.127 mm wide by default (routing.trace_width_mm, at least 0.1016 mm) "
         "and widen to 0.254 mm in the tail, which the stiffener edge flexes"
     ),
-    "contact_zone": "the tail is about 0.285 mm thick at the contacts; measure it on delivery",
+    "contact_zone": "the tail is about 0.3 mm thick at the contacts, within 0.3 +/-0.03 mm at JLC's tolerance",
     "contact_start": "the contacts start 0.3 mm from the tip",
     "contact_window": "the gang coverlay window leaves 0.05 mm beyond the outer contacts",
     "coverlay_windows": (
-        "check them on the upload: JLC advises one opening no longer than 20 mm, and the merged electrode-field window "
-        "and the gang contact window are one opening each (each board's lines in ORDER_NOTES.txt give its windows and "
-        "those longer)"
+        "check them on the upload: JLC advises one opening no longer than 20 mm; each board has a window per electrode, or "
+        "one merged electrode-field window when a coverlay bridge between two would be under 0.5 mm, and one gang window "
+        "over its contacts (each board's lines in ORDER_NOTES.txt give its windows and those longer)"
     ),
 }
 # The default 12 x 32 board's coverlay windows (each board's line of ORDER_NOTES.txt): a window per electrode (the 1.0 mm
@@ -109,7 +114,8 @@ class OrderBlockValidationTests(unittest.TestCase):
         order, fabrication = self.profile["order"], self.profile["fabrication"]
         self.assertEqual(profile_module.profile_issues(self.profile), [])
         self.assertEqual((order["fpc_layers"], order["fpc_thickness_mm"], order["outline_tolerance_mm"], order["surface_finish"]), (2, 0.2, 0.05, "ENIG"))
-        self.assertEqual(self.profile["stackup"]["stiffener_thickness_mm"], 0.225)
+        # 0.1 mm PI since the user's decision of 2026-11-06 (0.225 mm before): the 0.2 mm FPC + 0.1 mm, JLC's rule.
+        self.assertEqual(self.profile["stackup"]["stiffener_thickness_mm"], 0.1)
         # The boards' own 0.11 mm build (ordered as JLC's 2-layer 0.2 mm FPC, the bottom copper empty): 25 um PI core, 35 um (1 oz) copper, 25 um PI + 25 um adhesive coverlay.
         stackup = self.profile["stackup"]
         self.assertEqual(
@@ -118,12 +124,14 @@ class OrderBlockValidationTests(unittest.TestCase):
             (0.025, 0.035, 0.025, 0.025),
         )
         self.assertEqual((fabrication["single_sided_copper_thicknesses_mm"], fabrication["single_sided_copper_weights_oz"]), ([0.018, 0.035], [0.5, 1]))
-        # JLC's recommendation for a 0.3 mm connector on a 0.11 mm FPC, which the profile follows.
+        # JLC's recommendation for a 0.3 mm connector on a 0.11 mm FPC, quoted as JLC gives it: the 2-layer 0.2 mm order
+        # takes 0.1 mm instead (0.2 + 0.1 = 0.3 mm by JLC's rule, quoted below).
         self.assertEqual(
             (fabrication["recommended_pi_stiffener_mm"], fabrication["recommended_pi_stiffener_fpc_thickness_mm"],
              fabrication["recommended_pi_stiffener_connector_thickness_mm"]),
-            (self.profile["stackup"]["stiffener_thickness_mm"], 0.11, self.profile["connector"]["contact_zone_thickness_mm"]),
+            (0.225, 0.11, self.profile["connector"]["contact_zone_thickness_mm"]),
         )
+        self.assertEqual(round(order["fpc_thickness_mm"] + self.profile["stackup"]["stiffener_thickness_mm"], 6), self.profile["connector"]["contact_zone_thickness_mm"])
         # The sources the order requirements cite: the JLC page and both connector drawings.
         # JLC's gold-finger stiffener ordering guide and its FPC design rules (fetched 2026-10-29), the JLC-accepted
         # reference design's field windows measured from its Gerbers.
@@ -139,7 +147,9 @@ class OrderBlockValidationTests(unittest.TestCase):
         quoted = " ".join(self.profile["sources"]["jlcpcb_flex_capabilities"]["quoted"])
         for fact in ("+/-0.05 mm upon request", "1-layer 0.07 / 0.11 mm", "Surface finish: ENIG", "Trace width tolerance +/-20%",
                      "0.3 mm thick on a 0.11 mm FPC, a 0.225 mm stiffener", "inner PI thickness 25 um", "35 um (1 oz)",
-                     "PI 25 um + adhesive 25 um on 1 oz copper", "35 um (1 oz) copper 4/4 mil", "gold finger area +/-0.03 mm"):
+                     "PI 25 um + adhesive 25 um on 1 oz copper", "35 um (1 oz) copper 4/4 mil", "gold finger area +/-0.03 mm",
+                     "Thickness with stiffener = FPC thickness + stiffener thickness", "where an area has no copper or coverlay, the finished thickness is reduced",
+                     "PI stiffener thickness options 0.1, 0.15"):
             self.assertIn(fact, quoted)
         readers = self.profile["sources"]["reader_connectors"]
         self.assertIn("contacts 0.30 +/-0.05 mm", readers["rows"])
@@ -172,11 +182,12 @@ class OrderBlockValidationTests(unittest.TestCase):
             (("stackup", "coverlay_adhesive_thickness_mm", 0.0), "profile.stackup.coverlay_adhesive_thickness_mm", "E_PROFILE_MISSING"),
             (("fabrication", "single_sided_copper_weights_oz", [1]), "profile.fabrication.single_sided_copper_weights_oz", "E_PROFILE_MISSING"),
             (("fabrication", "gold_finger_thickness_tolerance_mm", None), "profile.fabrication.gold_finger_thickness_tolerance_mm", "E_PROFILE_MISSING"),
-            # ... and give the contact zone the connectors take: 0.2 mm PI is a JLC option, but
-            # 0.025 + 0.035 + 0.2 = 0.26 mm is thinner than 0.30 - 0.03 mm.
+            # ... and give the contact zone the connectors take: on the 2-layer 0.2 mm order JLC's rule, the FPC + the
+            # stiffener.  0.2 and 0.225 mm PI are JLC options, but 0.2 + 0.2 = 0.4 mm and 0.2 + 0.225 = 0.425 mm (the stiffener
+            # before the user's decision of 2026-11-06) are thicker than 0.30 + 0.03 mm, and 0.3 mm is 0.04 mm off 0.34 mm.
             (("stackup", "stiffener_thickness_mm", 0.2), "profile.stackup.stiffener_thickness_mm", "E_PROFILE_INCONSISTENT"),
-            (("stackup", "stiffener_thickness_mm", 0.1), "profile.stackup.stiffener_thickness_mm", "E_PROFILE_INCONSISTENT"),
-            (("connector", "contact_zone_thickness_mm", 0.33), "profile.stackup.stiffener_thickness_mm", "E_PROFILE_INCONSISTENT"),
+            (("stackup", "stiffener_thickness_mm", 0.225), "profile.stackup.stiffener_thickness_mm", "E_PROFILE_INCONSISTENT"),
+            (("connector", "contact_zone_thickness_mm", 0.34), "profile.stackup.stiffener_thickness_mm", "E_PROFILE_INCONSISTENT"),
         )
         for (section, key, value), field, code in cases:
             profile = copy.deepcopy(self.profile)
@@ -191,6 +202,53 @@ class OrderBlockValidationTests(unittest.TestCase):
                 self.assertIn(field, {issue["field"] for issue in result["validation"]["errors"]})
                 with self.assertRaises(ExportError):
                     build_exports(result)
+
+    def test_the_gold_finger_thickness_of_a_2_layer_order_is_jlc_s_rule(self) -> None:
+        # The user's decision of 2026-11-06 ("建议把补强改成 0.1 mm" -> "好的"): on a 2-layer order the finished thickness at the
+        # gold fingers is JLC's "Thickness with stiffener = FPC thickness + stiffener thickness", 0.2 + 0.1 = 0.3 mm.
+        self.assertEqual(profile_module.profile_issues(self.profile), [])
+        before = copy.deepcopy(self.profile)
+        before["stackup"]["stiffener_thickness_mm"] = 0.225
+        self.assertEqual(
+            [(issue["code"], issue["field"], issue["message"]) for issue in profile_module.profile_issues(before)],
+            [("E_PROFILE_INCONSISTENT", "profile.stackup.stiffener_thickness_mm",
+              "gives a 0.425 mm contact zone (order.fpc_thickness_mm + stiffener, JLC's rule: thickness with stiffener = FPC "
+              "thickness + stiffener thickness), outside the 0.3 +/-0.03 mm the reader connectors take.")],
+        )
+        # A 1-layer order keeps the stack-up's own estimate, core + copper + stiffener under the open coverlay: JLC's 0.11 mm
+        # FPC with 0.225 mm (JLC's recommendation; 0.335 mm by the 2-layer rule) gives 0.285 mm and holds, 0.1 mm gives 0.16 mm.
+        single = copy.deepcopy(before)
+        single["order"].update(fpc_layers=1, fpc_thickness_mm=0.11)
+        self.assertEqual(profile_module.profile_issues(single), [])
+        thin = copy.deepcopy(single)
+        thin["stackup"]["stiffener_thickness_mm"] = 0.1
+        self.assertEqual(
+            [(issue["code"], issue["field"], issue["message"]) for issue in profile_module.profile_issues(thin)],
+            [("E_PROFILE_INCONSISTENT", "profile.stackup.stiffener_thickness_mm",
+              "gives a 0.16 mm contact zone (core + copper + stiffener under the open coverlay), outside the 0.3 +/-0.03 mm the "
+              "reader connectors take.")],
+        )
+        # ... and its notes as before the 2-layer order: JLC's recommendation followed, the zone estimated from the layers.
+        records = {record["id"]: record for record in order_requirements(single, default_design())}
+        self.assertEqual(
+            records["fpc_thickness"]["reason"],
+            "JLC's 1-layer finished thicknesses are 0.07, 0.11 and 0.12 mm; the PI stiffener below is JLC's choice for 0.11 mm.",
+        )
+        self.assertEqual(records["pi_stiffener"]["requirement"], "PI 0.225 mm on the bottom side at the contacts (the 6 mm zone from the tip)")
+        self.assertEqual(
+            records["pi_stiffener"]["reason"],
+            "Both reader connectors take a 0.3 +/-0.03 mm thick FPC at the contacts; JLC recommends a 0.225 mm PI stiffener for a "
+            "0.3 mm thick connector on a 0.11 mm FPC. The gold-finger thickness below takes priority when JLC chooses the stiffener "
+            "under the gold fingers.",
+        )
+        self.assertEqual(records["contact_zone"]["requirement"], "the tail is about 0.285 mm thick at the contacts; measure it on delivery")
+        self.assertEqual(
+            records["contact_zone"]["reason"],
+            "0.025 mm PI core + 0.035 mm copper + the 0.225 mm PI stiffener where the coverlay is open, the stiffener's adhesive not "
+            "counted; both reader connectors take 0.3 +/-0.03 mm, JLC holds the gold-finger area to +/-0.03 mm and chooses the "
+            "stiffener under the gold fingers to the gold-finger thickness ordered.",
+        )
+        self.assertEqual(records["contact_zone"]["values"]["contact_zone_thickness_mm"], 0.285)
 
     def test_missing_order_section_or_cited_sources_are_reported(self) -> None:
         missing = copy.deepcopy(self.profile)
@@ -229,12 +287,16 @@ class OrderRequirementTests(unittest.TestCase):
         )
         self.assertEqual([record["id"] for record in self.records if record["special_request"]], ["outline_tolerance"])
         reasons = {record["id"]: record["reason"] for record in self.records}
-        self.assertIn("JLC recommends a 0.225 mm PI stiffener for a 0.3 mm thick connector on a 0.11 mm FPC.", reasons["pi_stiffener"])
+        # The 2-layer order's stiffener by JLC's rule; JLC's recommendation stays a quote, for the 0.11 mm FPC it names.
+        self.assertIn("by JLC's rule the thickness with a stiffener is the FPC thickness plus the stiffener thickness: the 0.2 mm FPC "
+                      "ordered above + 0.1 mm = 0.3 mm.", reasons["pi_stiffener"])
+        self.assertIn("JLC's recommended 0.225 mm PI stiffener for a 0.3 mm thick connector is for a 0.11 mm FPC.", reasons["pi_stiffener"])
+        self.assertNotIn("this profile:", reasons["pi_stiffener"])
         self.assertIn("0.3 +/-0.03 mm thick FPC at the contacts", reasons["pi_stiffener"])
         self.assertIn("The gold-finger thickness below takes priority when JLC chooses the stiffener under the gold fingers.", reasons["pi_stiffener"])
         self.assertIn("JLC gives the total gold-finger thickness the highest priority when it chooses the stiffener under the gold fingers",
                       reasons["gold_finger_thickness"])
-        self.assertIn("may take another PI thickness there than the 0.225 mm above; it holds the gold-finger area to +/-0.03 mm.",
+        self.assertIn("may take another PI thickness there than the 0.1 mm above; it holds the gold-finger area to +/-0.03 mm.",
                       reasons["gold_finger_thickness"])
         self.assertIn("a longer opening can stretch and deform when the coverlay is laminated", reasons["coverlay_windows"])
         self.assertIn("reference design's electrode-field windows were up to 63.373 mm long.", reasons["coverlay_windows"])
@@ -255,10 +317,19 @@ class OrderRequirementTests(unittest.TestCase):
         self.assertIn("no rule on necking or on the trace width near bends or stiffener edges", reasons["trace_widths"])
         self.assertIn("the 0.025 mm PI core and the 0.025 mm PI + 0.025 mm adhesive coverlay, the boards' own layers come to 0.11 mm; JLC builds them as the 0.2 mm 2-layer FPC", reasons["copper_weight"])
         self.assertIn("JLC's single-sided copper is 0.5 and 1 oz (0.018 and 0.035 mm)", reasons["copper_weight"])
-        self.assertIn("0.025 mm PI core + 0.035 mm copper + the 0.225 mm PI stiffener where the coverlay is open, the stiffener's "
-                      "adhesive not counted", reasons["contact_zone"])
+        self.assertTrue(reasons["contact_zone"].startswith(
+            "0.2 mm FPC + the 0.1 mm PI stiffener by JLC's rule (thickness with stiffener = FPC thickness + stiffener thickness); "
+        ), reasons["contact_zone"])
         self.assertIn("take 0.3 +/-0.03 mm, JLC holds the gold-finger area to +/-0.03 mm and chooses the stiffener under the gold "
                       "fingers to the gold-finger thickness ordered.", reasons["contact_zone"])
+        # JLC's own words: thinner where an area has no copper or coverlay, as at the contacts.
+        self.assertTrue(reasons["contact_zone"].endswith(
+            "JLC says the finished thickness is less where an area has no copper or coverlay, as at the contacts (the coverlay "
+            "open, the bottom copper empty), so measure it on delivery if it matters."
+        ), reasons["contact_zone"])
+        self.assertEqual(records["contact_zone"]["values"]["contact_zone_thickness_mm"], DEFAULT_ZONE_MM)
+        self.assertEqual(records["pi_stiffener"]["values"]["thickness_mm"], 0.1)
+        self.assertEqual(records["coverlay_windows"]["values"]["coverlay_min_bridge_mm"], self.profile["coverlay"]["coverlay_min_bridge_mm"])
         self.assertIn("closer than 0.2 mm to the board edge", reasons["contact_start"])
         self.assertIn("copper-to-edge minimum is 0.3 mm", reasons["contact_start"])
         self.assertIn("R0.3 mm tip corners", reasons["contact_window"])
@@ -319,10 +390,13 @@ class OrderRequirementTests(unittest.TestCase):
             connector["contact_width_tolerance_mm"], connector["contact_zone_thickness_mm"], connector["contact_zone_thickness_tolerance_mm"],
             self.profile["coverlay"]["coverlay_opening_general_max_length_mm"], order["reference_field_window_length_mm"],
         }
+        # The exporter's outline line width is a drawing convention, not an order figure; it is the 0.1 mm of the stiffener
+        # since the user's decision of 2026-11-06.
+        drawing = {"direct_gerber.py": {direct_gerber._OUTLINE_APERTURE_MM}}
         for path in (ROOT / "engine" / "profile.py", ROOT / "exporters" / "direct_gerber.py", ROOT / "app.py"):
             numbers, texts = _code_constants(path)
             with self.subTest(module=path.name):
-                self.assertFalse(numbers & figures, sorted(numbers & figures))
+                self.assertFalse((numbers - drawing.get(path.name, set())) & figures, sorted(numbers & figures))
                 for name in ("ENIG", "THD0515", "FFC05001", "+/-0.", "0.11", "0.225", "0.035", "0.285", "20 mm", "63.373"):
                     self.assertFalse([text for text in texts if name in text], name)
 
@@ -348,7 +422,7 @@ class SurfacedEverywhereTests(unittest.TestCase):
             name = self.names[f"{board['physical_side']}_fpc_gerber_zip"]
             self.assertIn(f"Board {board['id']}:", flat)
             self.assertIn(f"Archive: {name}", flat)
-            self.assertIn("Stiffener layer: Gerber_BottomStiffenerLayer_pib_0.225.GBSL (polyimide 0.225 mm, bottom side)", flat)
+            self.assertIn("Stiffener layer: Gerber_BottomStiffenerLayer_pib_0.1.GBSL (polyimide 0.1 mm, bottom side)", flat)
             self.assertIn(_flat(direct_gerber._coverlay_window_note(board, self.result["profile"])), flat)
             if board["role"] in DEFAULT_WINDOW_LINES:
                 self.assertIn(_flat(DEFAULT_WINDOW_LINES[board["role"]]), flat)
@@ -360,9 +434,9 @@ class SurfacedEverywhereTests(unittest.TestCase):
                 "Trace tolerance: at JLC's -20% the 0.127 mm fan-out traces may come out 0.1016 mm wide, "
                 "not below JLC's 0.1016 mm minimum for 1 oz copper.", flat,
             )
-        for phrase in ("2 layer, 0.2 mm FPC thickness", "Copper weight: 1 oz (0.035 mm).", "PI 0.225 mm",
+        for phrase in ("2 layer, 0.2 mm FPC thickness", "Copper weight: 1 oz (0.035 mm).", "Stiffener: PI 0.1 mm",
                        "Outline tolerance: +/-0.05 mm (special request", "Surface finish: ENIG.",
-                       "Contact-zone thickness: the tail is about 0.285 mm thick at the contacts",
+                       "Contact-zone thickness: the tail is about 0.3 mm thick at the contacts",
                        "https://jlcpcb.com/capabilities/flex-pcb-capabilities (fetched 2026-10-12); trace rules rechecked 2026-10-15:",
                        "Gold fingers: Yes, Gold Fingers Thickness 0.3 mm",
                        "jlcpcb_gold_finger_stiffeners: https://jlcpcb.com/help/article/fpc-gold-finger-stiffeners-ordering-guide (fetched 2026-10-29)",
@@ -400,8 +474,8 @@ class SurfacedEverywhereTests(unittest.TestCase):
                 if record["kind"] == "order_option" else f"Check '{record['topic']}' on both boards: {record['requirement']} ({NOTES})."
             )
             self.assertIn(expected, requirements)
-        # The stiffener review item stays and names the 0.225 mm layer.
-        self.assertIn("Verify each PI stiffener in Gerber_BottomStiffenerLayer_pib_0.225.GBSL is detected at 0.225 mm after JLCPCB upload.", requirements)
+        # The stiffener review item stays and names the 0.1 mm layer.
+        self.assertIn("Verify each PI stiffener in Gerber_BottomStiffenerLayer_pib_0.1.GBSL is detected at 0.1 mm after JLCPCB upload.", requirements)
         self.assertIn("ORDER_NOTES.txt", manifest["export_verification"])
 
     def test_each_board_states_what_the_tolerance_makes_of_its_own_traces(self) -> None:
@@ -557,7 +631,7 @@ class OrderNotesSelfCheckTests(unittest.TestCase):
             ("0.2 mm FPC thickness", "0.12 mm FPC thickness"),
             ("not below JLC's", "below JLC's"),
             ("Surface finish: ENIG.", "Surface finish: HASL."),
-            ("Gerber_BottomStiffenerLayer_pib_0.225.GBSL", "Gerber_BottomStiffenerLayer_pib_0.2.GBSL"),
+            ("Gerber_BottomStiffenerLayer_pib_0.1.GBSL", "Gerber_BottomStiffenerLayer_pib_0.15.GBSL"),
             ("reader_connectors.columns:", "reader_connectors:"),
             ("Gold Fingers Thickness 0.3 mm", "Gold Fingers Thickness 0.35 mm"),
             ("Coverlay windows: electrode field", "Coverlay windows: field"),

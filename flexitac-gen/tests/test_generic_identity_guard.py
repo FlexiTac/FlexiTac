@@ -115,6 +115,23 @@ verdicts, error codes and validation reports held.  The 194 others kept their
 records byte for byte.  ``ChannelIdentityTests`` builds the records of before
 with the default electrodes of before (tests/defaults_of_before.py: 1.4 mm), so
 the straight channel stays byte for byte the generic geometry of before.
+
+It was rewritten by the user's later decision of 2026-11-06 ("订单厚度对不上...
+建议把补强改成 0.1 mm... 要不要现在改？" -> "好的": the profile revision
+2026-11-06b, the PI stiffener 0.225 -> 0.1 mm, so the 2-layer 0.2 mm FPC + 0.1 mm
+make the 0.3 mm gold fingers by JLC's rule).  Both profiles' canonical digests
+are part of every build id, so the requests changed their build ids and
+manifests, and every built board carries the stiffener's thickness (in
+``fpc.stackup`` and in each ``layers.bottom_stiffener`` item), so the built
+ones changed their layout digests; their verdicts, error codes and validation
+reports held, and with the 0.225 mm put back every layout is the one of
+before.  ``ChannelIdentityTests`` takes the layout digests of the records of
+before with the 0.225 mm put back (tests/defaults_of_before.py
+``stiffener``), and ``tests/fixtures/generic_channel_exports.json`` was
+rewritten in the members that carry the stiffener's thickness or quote the
+profile alone (the stiffener layer, renamed ``pib_0.1``, ``jlcpcb.json``,
+``ORDER_NOTES.txt``, ``derived-layout.json`` and ``profile.json``); every other
+member kept its bytes.
 """
 
 from __future__ import annotations
@@ -140,7 +157,7 @@ CHANNEL_FIXTURE = FIXTURE.with_name("generic_builds_straight_channel.json")
 CHANNEL_EXPORTS = FIXTURE.with_name("generic_channel_exports.json")
 GENERIC_PROFILE = Path(__file__).resolve().parents[1] / "profiles" / "jlc_fpc_standard_v1.json"
 # sha256 of the generic profile file's bytes (its canonical-JSON digest is in every build id).
-GENERIC_PROFILE_FILE_SHA256 = "b035465f40dd0d78a244f4050c06c6632a242e256c53062066d1f8644427d5a3"
+GENERIC_PROFILE_FILE_SHA256 = "67df18547cd0540868064bf7d90c750d843c5f1723eb97f4ef87e0c71c725d17"
 SEED = 20261020
 RANDOM_COUNT = 188
 
@@ -262,7 +279,9 @@ def write_fixture() -> None:
     entries = [{"request": request, "expected": record(generate_design(request))} for request in requests()]
     document = {
         "format": "tactile-fpc-generic-guard/v1",
-        "written_from": "engine of the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty, "
+        "written_from": "engine of the profile revision 2026-11-06b (the PI stiffener 0.225 -> 0.1 mm, the 2-layer 0.2 mm FPC + 0.1 mm the 0.3 mm "
+                        "gold fingers by JLC's rule: in every build id and every built board's layout), 2026-11-06; before it, the profile revision "
+                        "2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty, "
                         "in every build id), 2026-11-06; before it, the user's decision of 2026-11-06 (the default fill 0.7 -> 0.5: the default electrodes 1.4 -> 1.0 "
                         "mm, in the requests that leave them to the default), 2026-11-06; before it, the profile revision 2026-10-29 "
                         "(the gold-finger thickness order option and the coverlay-window "
@@ -377,7 +396,13 @@ class ChannelIdentityTests(unittest.TestCase):
         self.assertEqual(fixture["entries"][0]["request"], first)
         for index, entry in enumerate(fixture["entries"]):
             with self.subTest(index=index, build_id=entry["expected"]["build_id"]), defaults_of_before.electrodes():
-                found = record(generate_design(_channel(entry["request"])))
+                result = generate_design(_channel(entry["request"]))
+                found = record(result)
+                if result["ok"]:
+                    # The layout with the 0.225 mm PI stiffener of before put back (0.1 mm since the user's later decision
+                    # of 2026-11-06), the one value of the boards that changed.
+                    found["layout_sha256"] = record(dict(result, boards=defaults_of_before.stiffener(
+                        result["boards"], result["profile"]["stackup"]["stiffener_thickness_mm"])))["layout_sha256"]
                 for key in ("ok", "error_codes", "layout_sha256", "validation_sha256"):
                     self.assertEqual(found[key], entry["expected"][key], key)
                 if found["ok"]:
@@ -397,7 +422,9 @@ class ChannelIdentityTests(unittest.TestCase):
                 result = generate_design(_channel(entry["request"]))
                 expected = entry["expected"]
                 self.assertEqual(result["ok"], expected["ok"])
-                layout = {"format": result["derived_layout"]["format"], "units": "mm", "boards": result["boards"]}
+                # The 0.225 mm PI stiffener of before put back (the user's later decision of 2026-11-06).
+                boards = defaults_of_before.stiffener(result["boards"], result["profile"]["stackup"]["stiffener_thickness_mm"])
+                layout = {"format": result["derived_layout"]["format"], "units": "mm", "boards": boards}
                 self.assertEqual(_sha256(layout), expected["layout_sha256"])
                 self.assertEqual(_sha256(result["validation"]), expected["validation_sha256"])
                 exports = build_exports(result)

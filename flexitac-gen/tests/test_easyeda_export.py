@@ -85,12 +85,15 @@ SOFT_BASE = {"point_xyz": [0.0, -12.9, -3.0]}
 # built with the electrodes of before (_builds()).  Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer
 # 0.2 mm FPC, the bottom copper empty): their build ids and the uuids seeded from them change with the profiles' digests,
 # README_EASYEDA.txt's order options with the order, their boards and read-back geometry not (before: ccb42d6f...,
-# d2557913..., 76152d5f..., 5a00b531...).
+# d2557913..., 76152d5f..., 5a00b531...).  Re-pinned by the profile revision 2026-11-06b (the user's later decision of
+# 2026-11-06: the PI stiffener 0.225 -> 0.1 mm): their build ids and the uuids seeded from them, each FPC_FILL's thickness,
+# README_EASYEDA.txt's stiffener and order options and the manifests change; their boards' geometry and the rest of the
+# projects not (before: f66648e9..., a6c2d866..., f5a2548c..., 982e3c58...).
 DIGESTS = {
-    "default": "f66648e94501f7b1e260ddf962a83dab965eadd5e98d81d65f68771d788d4e2a",
-    "soft finger": "a6c2d86685360273928883dc39c3f7b45ed7ef3761f4ae27a424e68790dd67bd",
-    "masked triangle": "f5a2548c09250eddb3e42f88b2c8bc8efa0897158ef2f7cf4ecd035fd15f1d0c",
-    "straight channel with a cutout": "982e3c5886f1c6463b35ba016e71aa349731e219c910f6de9f0847d81c2c86b5",
+    "default": "33bbac31526fce0bb5ada6e610764b58d7c38cb685c840ded2d354a889d00cea",
+    "soft finger": "a036a74c4adceca8f48822f44cb7f51fbaef3f506dc0d80f3a37430988af2238",
+    "masked triangle": "0e1eeaff3ce9c1f764d5db3ca9871727238d07548a7b94eafd2bfe6a81f4fa2a",
+    "straight channel with a cutout": "ca3b4abae0ff582d0b2cecfd6ed2da7ef424bc4776e2731797e5d173cc9ea595",
 }
 
 
@@ -347,7 +350,8 @@ class PcbTests(unittest.TestCase):
                     self.assertEqual(body["thickness"], float(stack["stiffener_thickness_mm"]))
                     self.assertIn(body["thickness"], easyeda_pro.EASYEDA_PI_THICKNESSES_MM)
                     self.assertIn(body["thickness"], profile["fabrication"]["pi_stiffener_thickness_options_mm"])
-        # 0.225 mm (the profile's) is one of EasyEDA Pro's PI thicknesses, as on JLC's list.
+        # 0.1 mm (the profile's since the user's decision of 2026-11-06, 0.225 mm before) is one of EasyEDA Pro's PI
+        # thicknesses, as on JLC's list.
         self.assertEqual(easyeda_pro.EASYEDA_PI_THICKNESSES_MM, (0.1, 0.15, 0.2, 0.225, 0.25))
 
     def test_every_line_is_its_own_net_with_its_pads_and_tracks(self) -> None:
@@ -468,7 +472,8 @@ class GeometryTests(unittest.TestCase):
                         self.assertLess(entry["xor_mm2"], 1e-3, layer)
                         self.assertGreater(entry["ours"]["area_mm2"], 0, layer)
                         self.assertEqual(entry["easyeda"]["bbox_mm"], entry["ours"]["bbox_mm"], layer)
-                    self.assertEqual(report["jlcpcb_stiffeners"]["ours"], [("bottom", "pi", "0.225")] * len(build["boards"][side]["layers"]["bottom_stiffener"]))
+                    thickness = f"{build['result']['profile']['stackup']['stiffener_thickness_mm']:g}"
+                    self.assertEqual(report["jlcpcb_stiffeners"]["ours"], [("bottom", "pi", thickness)] * len(build["boards"][side]["layers"]["bottom_stiffener"]))
 
     def test_a_routed_cutout_is_a_hole_of_the_outline(self) -> None:
         build = _builds()["straight channel with a cutout"]
@@ -584,15 +589,17 @@ def _easyeda_style_zip(geometry: dict) -> bytes:
     stiffener = header([])
     for item in geometry["stiffeners"]:
         stiffener.extend(region(item["ring"]))
+    # EasyEDA names the layer by the stiffeners' thickness (one here, the profile's).
+    (thickness,) = {f"{item['thickness_mm']:g}" for item in geometry["stiffeners"]}
     files = {
         "Gerber_TopLayer.GTL": copper, "Gerber_TopSolderMaskLayer.GTS": mask, "Gerber_BoardOutlineLayer.GKO": outline,
-        "Gerber_BottomStiffenerLayer_pib_0.225.GBSL": stiffener,
+        f"Gerber_BottomStiffenerLayer_pib_{thickness}.GBSL": stiffener,
     }
     stream = io.BytesIO()
     with zipfile.ZipFile(stream, "w") as archive:
         for member, lines in files.items():
             archive.writestr(member, "\n".join([*lines, "M02*"]) + "\n")
-        archive.writestr("jlcpcb.json", json.dumps({"fpcStiffeners": [{"layer": "bottom", "material": "pi", "thickness": "0.225"} for _ in geometry["stiffeners"]]}))
+        archive.writestr("jlcpcb.json", json.dumps({"fpcStiffeners": [{"layer": "bottom", "material": "pi", "thickness": thickness} for _ in geometry["stiffeners"]]}))
     return stream.getvalue()
 
 
@@ -652,7 +659,8 @@ class RefusalTests(unittest.TestCase):
             self.assertIn("is not the profile's polyimide 0.25 mm", str(caught.exception))
 
     def test_a_thickness_easyeda_does_not_offer_is_refused(self) -> None:
-        with mock.patch.object(easyeda_pro, "EASYEDA_PI_THICKNESSES_MM", (0.1, 0.15, 0.2, 0.25)):
+        # EasyEDA Pro without the profile's 0.1 mm (since the user's decision of 2026-11-06; 0.225 mm was left out before).
+        with mock.patch.object(easyeda_pro, "EASYEDA_PI_THICKNESSES_MM", (0.15, 0.2, 0.225, 0.25)):
             with self.assertRaises(ExportError) as caught:
                 build_easyeda_exports(_builds()["default"]["result"])
         self.assertIn("would reset the thickness to 0.2 mm", str(caught.exception))
@@ -665,7 +673,7 @@ class RefusalTests(unittest.TestCase):
         edits = {
             "a net dropped": lambda text: text.replace('"padNet":"ROW_05"', '"padNet":""', 1),
             "a track moved": lambda text: re.sub(r'("netName":"ROW_12","layerId":1,"width":\d+,"path":\[)([\d.]+)', lambda m: m.group(1) + str(float(m.group(2)) + 1), text, count=1),
-            "the stiffener thinner": lambda text: text.replace('"thickness":0.225', '"thickness":0.2'),
+            "the stiffener thicker": lambda text: text.replace('"material":"Polyimide","thickness":0.1,', '"material":"Polyimide","thickness":0.2,'),
             "the stiffener on the top": lambda text: text.replace('"layerId":59,"material"', '"layerId":58,"material"'),
             "FPC mode off": lambda text: text.replace('"layerName":"Bottom Stiffener Layer","use":true', '"layerName":"Bottom Stiffener Layer","use":false'),
             "a coverlay opening dropped": lambda text: re.sub(r'\|\n\{"type":"FILL"[^\n]*', "", text, count=1),

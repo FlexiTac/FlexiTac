@@ -21,6 +21,7 @@ import importlib.util
 import inspect
 import io
 import json
+import math
 import os
 import re
 import unittest
@@ -593,15 +594,19 @@ class IntegrationDocumentTests(unittest.TestCase):
         self.assertEqual((first_nc, last_nc, last), (first, last, pins))
         start, length = connector["contact_tip_clearance_mm"], connector["contact_length_mm"]
         self.assertEqual(_quoted(self, text, r"so ([\d.]+) mm of exposed contact spans ([\d.]+)-([\d.]+) mm from the tip"), (length, start, round(start + length, 2)))
-        layers = (stackup["core_polyimide_thickness_mm"], stackup["copper_thickness_mm"], stackup["stiffener_thickness_mm"])
-        self.assertEqual(
-            _quoted(self, text, r"about ([\d.]+) \(core PI\) \+ ([\d.]+) \(copper\) \+ ([\d.]+) \(PI stiffener\) = ([\d.]+) mm thick"),
-            (*layers, round(sum(layers), 3)),
-        )
-        option, total = _quoted(self, text, r"The ([\d.]+) mm JLC PI option, the default before, would give about ([\d.]+) mm")
+        # The 2-layer order's contact zone, JLC's rule: the ordered FPC + the stiffener (the user's decision of 2026-11-06).
+        order = self.profile["order"]
+        self.assertGreater(order["fpc_layers"], 1)
+        layers = (order["fpc_thickness_mm"], stackup["stiffener_thickness_mm"])
+        zone = round(math.fsum(layers), 3)
+        self.assertEqual(_quoted(self, text, r"about ([\d.]+) \(FPC\) \+ ([\d.]+) \(PI stiffener\) = ([\d.]+) mm thick"), (*layers, zone))
+        self.assertEqual(zone, {record["id"]: record for record in order_requirements(self.profile, default_design())}["contact_zone"]["values"]["contact_zone_thickness_mm"])
+        option, total = _quoted(self, text, r"The ([\d.]+) mm stiffener of before \(JLC's choice for a [\d.]+ mm connector on a [\d.]+ mm FPC, "
+                                            r"the 1-layer order until [\d-]+\) would give ([\d.]+) mm by that rule")
         self.assertIn(option, self.profile["fabrication"]["pi_stiffener_thickness_options_mm"])
-        self.assertEqual(total, round(layers[0] + layers[1] + option, 3))
-        self.assertEqual(_quoted(self, text, r"contact-zone thickness against the connector \(([\d.]+) mm with the ([\d.]+) mm PI stiffener\)"), (round(sum(layers), 3), layers[2]))
+        self.assertEqual(total, round(layers[0] + option, 3))
+        self.assertGreater(abs(total - connector["contact_zone_thickness_mm"]), connector["contact_zone_thickness_tolerance_mm"])
+        self.assertEqual(_quoted(self, text, r"contact-zone thickness against the connector \(([\d.]+) mm with the ([\d.]+) mm PI stiffener\)"), (zone, layers[1]))
         bottom, straight, stiffener, row_straight, twisted = _quoted(
             self, text,
             r"The default ([\d.]+) mm bottom tail leaves ([\d.]+) mm of straight, flexible Column tail beyond its (\d+) mm stiffener "
@@ -927,7 +932,8 @@ class ReadmeAndPlanTests(unittest.TestCase):
         result = generate_design(design)
         rows = result["boards"]["row"]["tail"]["connector_pins"]
         stackup = profile["stackup"]
-        thickness = round(stackup["core_polyimide_thickness_mm"] + stackup["copper_thickness_mm"] + stackup["stiffener_thickness_mm"], 3)
+        # The 2-layer order's contact zone, JLC's rule: the ordered FPC + the stiffener (the user's decision of 2026-11-06).
+        thickness = round(math.fsum((profile["order"]["fpc_thickness_mm"], stackup["stiffener_thickness_mm"])), 3)
         reader = int(re.search(r"-(\d+)", profile["sources"]["reader_connectors"]["rows"]).group(1))
         self.assertEqual(
             _quoted(self, readme, r"The default Row tail has (\d+) contacts; the FlexiTac reader's row connector has (\d+), so set connector\.row_pins to (\d+)"),

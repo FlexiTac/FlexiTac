@@ -1,6 +1,6 @@
 {
   "id": "jlc-fpc-surface-v1",
-  "revision": "2026-11-06",
+  "revision": "2026-11-06b",
   "template_id": "surface_matrix_v1",
   "units": "mm",
   "description": "Locked manufacturing profile of the surface_matrix_v1 template (CAD mode: a sensor laid on a selected CAD surface). It is jlc-fpc-standard-v1 with the tight geometry rules for the smallest margins (research of 2026-10-20, rules 'V4'): a 0.5 mm field margin (the 0.2 mm electrode overhang plus JLC's 0.3 mm copper to edge), a tight Row channel and expansion (routing.row_channel), a bus angle chosen per transition among whole-degree caps of 60-85 degrees (fanout.bus_angle), one Column fan-out lane converging straight into the contact columns for up to 64 columns (fanout.column_convergence), and 7.5 mm minimum tails (the tail check at an 85 degree cap needs 7.344 mm). These are process rules, not ordinary UI controls. Every rule value used by the engine lives in this file; design rules must not be looser than the fabrication capabilities below (the trace minimums apply per single-sided copper thickness, for stackup.copper_thickness_mm). The order section holds the JLCPCB order options every exported board needs (ORDER_NOTES.txt).",
@@ -100,7 +100,7 @@
     "bottom_copper_placeholder_thickness_mm": 0.001,
     "stiffener_side": "bottom",
     "stiffener_material": "polyimide",
-    "stiffener_thickness_mm": 0.225
+    "stiffener_thickness_mm": 0.1
   },
   "routing": {
     "finger_trace_width_mm": 0.254,

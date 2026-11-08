@@ -78,12 +78,13 @@ the user's 32-pin original.
 
 **Stiffeners** take the profile's one value: `stackup.stiffener_material`
 (`polyimide`, written `Polyimide`) and `stackup.stiffener_thickness_mm`
-(0.225 mm), which every stiffener of the layout must carry.  EasyEDA Pro
+(0.1 mm since the user's decision of 2026-11-06, 0.225 mm before), which
+every stiffener of the layout must carry.  EasyEDA Pro
 offers PI stiffeners of 0.1, 0.15, 0.2, 0.225 and 0.25 mm (JLC's list) and
 resets any other thickness to 0.2 mm on load, so the exporter refuses a
 thickness outside that list; an unknown material name would become
 Polyimide on load, so the name is checked too.  EasyEDA's own export then
-names the layer `Gerber_BottomStiffenerLayer_pib_0.225.GBSL`.
+names the layer `Gerber_BottomStiffenerLayer_pib_0.1.GBSL`.
 
 **Stack.**  The originals' nine `LAYER_PHYS` records with the profile's
 thicknesses (mil): coverlay and adhesive on layer 5, the copper on layer 1,

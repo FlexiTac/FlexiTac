@@ -48,6 +48,11 @@ are today's ids (31, every other recorded value as written).  Re-pinned by the
 profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom
 copper empty): the 31 values again, each the same design (its design digest
 with the profile of 2026-10-29 gives the id pinned before) and every other
+recorded value as written.  Re-pinned by the profile revision 2026-11-06b (the
+user's later decision of 2026-11-06: the PI stiffener 0.225 -> 0.1 mm, the
+2-layer 0.2 mm FPC + 0.1 mm the 0.3 mm gold fingers by JLC's rule): the 31
+values again, each the same rectangle (its recorded metrics, outlines and
+field frame matched one to one among today's proposals) and every other
 recorded value as written.
 
 Since P5-diagonal-bus.md section 26.16 (the user's decision of 2026-10-26:
@@ -118,39 +123,40 @@ GENERIC_BUILD_IDS = {
 # module docstring), and again with the profile revision 2026-10-29 (the gold-finger thickness order option and the
 # coverlay-window notes: the profile's digest moves every surface build id; every other recorded value holds).
 # Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty): the
-# values only, the profile's digest in every id; the designs, metrics, outlines and field frames as recorded.
+# values only, the profile's digest in every id; the designs, metrics, outlines and field frames as recorded.  Re-pinned by
+# the profile revision 2026-11-06b (the PI stiffener 0.225 -> 0.1 mm): the values only, as before.
 SURFACE_BUILD_IDS = {
-    "surface-44x8-6bd1c5396ff8": "surface-44x8-5d18c0e96e82",
-    "surface-50x7-e8798c3ba815": "surface-50x7-7588957b0810",
-    "surface-43x8-4ec47321d5cc": "surface-43x8-38abd4e8f755",
-    "surface-49x7-b7de8f7e4235": "surface-49x7-d4ef559b2931",
-    "surface-48x7-64cac5f65a98": "surface-48x7-55d418daef19",
-    "surface-44x8-81635c0115dd": "surface-44x8-675d6a21f01f",
-    "surface-17x18-b4476fbe2f96": "surface-17x18-d3e7c8ae94f0",
-    "surface-18x17-cfd7562f2065": "surface-18x17-5534270379e2",
-    "surface-16x19-152f7f052c52": "surface-16x19-8efd94b79214",
-    "surface-19x16-0349ca18b2aa": "surface-19x16-1d71a962b65b",
-    "surface-15x20-436d77e60df2": "surface-15x20-ff66070ac7fe",
-    "surface-13x14-570e71061a69": "surface-13x14-6482673023e0",
-    "surface-14x13-e0d74734ef82": "surface-14x13-3daf04b2637d",
-    "surface-10x18-f9ad3d58ec9a": "surface-10x18-e6b2a9b02720",
-    "surface-9x20-6c0783f9c25c": "surface-9x20-d3fca404015f",
-    "surface-12x15-e9cb9e4c34e6": "surface-12x15-d137eec870c1",
-    "surface-12x13-4a12e44faaeb": "surface-12x13-f2ac26a4feca",
-    "surface-13x12-77f1a15c6d5a": "surface-13x12-c6b9b337dd67",
-    "surface-11x14-241f52b2a67c": "surface-11x14-2ef82815084a",
-    "surface-14x11-8d175fe185b4": "surface-14x11-e17a04ca978f",
-    "surface-10x15-46d59e2505b1": "surface-10x15-b7759c409a04",
-    "surface-19x12-fd3c866aee25": "surface-19x12-1cb8fd2c6ab4",
-    "surface-18x12-839dd57f01ea": "surface-18x12-97a50924eb81",
-    "surface-19x11-881a9d3e9657": "surface-19x11-b4620365e659",
-    "surface-17x12-5348eb9d783d": "surface-17x12-e7cc42d4be10",
-    "surface-20x10-ae575be77eca": "surface-20x10-f27d8e45601b",
-    "surface-18x35-75c3febd94f7": "surface-18x35-7e8caa6873f4",
-    "surface-21x30-b45e7622dba7": "surface-21x30-6626cafea1b5",
-    "surface-17x37-93c1cf7a5e96": "surface-17x37-6e853126e677",
-    "surface-19x33-42de258b7737": "surface-19x33-93bf4c5dfc50",
-    "surface-16x39-9a5a68b41c9c": "surface-16x39-7e20a9822b66",
+    "surface-44x8-6bd1c5396ff8": "surface-44x8-7eaaa3f9a606",
+    "surface-50x7-e8798c3ba815": "surface-50x7-ef6189261f72",
+    "surface-43x8-4ec47321d5cc": "surface-43x8-e7f3d2803431",
+    "surface-49x7-b7de8f7e4235": "surface-49x7-2f4e04d1aeed",
+    "surface-48x7-64cac5f65a98": "surface-48x7-9608e97b9c9e",
+    "surface-44x8-81635c0115dd": "surface-44x8-59301512d011",
+    "surface-17x18-b4476fbe2f96": "surface-17x18-458472fec435",
+    "surface-18x17-cfd7562f2065": "surface-18x17-41336940065c",
+    "surface-16x19-152f7f052c52": "surface-16x19-65d0ae71e89d",
+    "surface-19x16-0349ca18b2aa": "surface-19x16-2555783f0a1f",
+    "surface-15x20-436d77e60df2": "surface-15x20-6efa3d9fefaa",
+    "surface-13x14-570e71061a69": "surface-13x14-a2647370f43a",
+    "surface-14x13-e0d74734ef82": "surface-14x13-8652be604b17",
+    "surface-10x18-f9ad3d58ec9a": "surface-10x18-ac2d8bd0c068",
+    "surface-9x20-6c0783f9c25c": "surface-9x20-771a2ce1d20c",
+    "surface-12x15-e9cb9e4c34e6": "surface-12x15-80393c8a9909",
+    "surface-12x13-4a12e44faaeb": "surface-12x13-a4179eed3311",
+    "surface-13x12-77f1a15c6d5a": "surface-13x12-8c2503ffab6b",
+    "surface-11x14-241f52b2a67c": "surface-11x14-240848749129",
+    "surface-14x11-8d175fe185b4": "surface-14x11-b3dd39e73b5c",
+    "surface-10x15-46d59e2505b1": "surface-10x15-1308ac610107",
+    "surface-19x12-fd3c866aee25": "surface-19x12-6637c56f073a",
+    "surface-18x12-839dd57f01ea": "surface-18x12-4b1634075b32",
+    "surface-19x11-881a9d3e9657": "surface-19x11-ff0299d7b764",
+    "surface-17x12-5348eb9d783d": "surface-17x12-ccef8fd5c7b2",
+    "surface-20x10-ae575be77eca": "surface-20x10-7fb0155f5c5e",
+    "surface-18x35-75c3febd94f7": "surface-18x35-544c132b317a",
+    "surface-21x30-b45e7622dba7": "surface-21x30-b47cf821b324",
+    "surface-17x37-93c1cf7a5e96": "surface-17x37-49b8e93f7d51",
+    "surface-19x33-42de258b7737": "surface-19x33-d708b1397e96",
+    "surface-16x39-9a5a68b41c9c": "surface-16x39-11f0b0a6c0e1",
 }
 # The placement's field frame: where the taxel field sits on the chart.
 PLACEMENT_KEYS = ("base_side", "base_kind", "exit_edges", "base_angle_deg", "field_origin_base", "field_origin_uv", "field_x_uv", "field_y_uv", "bottom_board")

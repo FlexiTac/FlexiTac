@@ -18,7 +18,9 @@
   row electrodes and column electrodes.
 - Standardized single-copper FPC profile, top copper routing, Polyimide
   coverlay openings, bottom 0.200 mm PI tail stiffener and locked fabrication
-  limits.  *2026-10-14: the PI stiffener is 0.225 mm since stage G.*
+  limits.  *2026-10-14: the PI stiffener is 0.225 mm since stage G;
+  2026-11-06: 0.1 mm, for the 2-layer 0.2 mm order (JLC's rule: FPC
+  thickness + stiffener thickness = the 0.3 mm gold fingers).*
 - DRC-style input and manufacturing-rule validation.  *2026-10-14: the
   post-generation DRC then checked routes only; electrodes, contacts,
   coverlay, stiffener, outline shape, connectivity and the registration of
@@ -265,5 +267,7 @@ section 24, `diagonal-bus/10` since section 27 (the Row tail centred on the
 field), both tails 12 mm since section 27.7, `diagonal-bus/11` since section
 27.8 (one side's convex flank), the profile revision 2026-10-29 (the
 gold-finger thickness order option and the coverlay-window notes), the
-1.0 mm electrodes of the default fill 0.5 since 2026-11-06, build
-`tactile-fpc-12x32-48b9d43409a6`).*
+1.0 mm electrodes of the default fill 0.5 since 2026-11-06, the profile
+revision 2026-11-06b (the 2-layer 0.2 mm order with its 0.1 mm PI
+stiffener), build
+`tactile-fpc-12x32-ba2e9b58bd8e`).*

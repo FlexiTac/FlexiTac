@@ -3662,8 +3662,11 @@ REGRESSION_CENTRED_COST = {"edge:035": 0.26, "reader:029": 1.39, "rv:063": 0.85,
 # (before: dfd99419...).  Re-pinned by the profile revision 2026-10-29 (the gold-finger thickness order option and the
 # coverlay-window notes): the build ids change with the profiles' digests, the boards not (before: 7e03aa07...).
 # Re-pinned by the profile revision 2026-11-06 (the order: JLC's 2-layer 0.2 mm FPC, the bottom copper empty): the build
-# ids change with the profiles' digests, the boards not (before: 82d8a2c9...).
-DIGEST = "6c34e7e9562aaeb3c4cb228d3675aa105d03b45e2b09ca61f01df7d2cd79d809"
+# ids change with the profiles' digests, the boards not (before: 82d8a2c9...).  Re-pinned by the profile revision
+# 2026-11-06b (the user's later decision of 2026-11-06: the PI stiffener 0.225 -> 0.1 mm): the build ids change with the
+# profiles' digests and every board carries the stiffener's new thickness (fpc.stackup, layers.bottom_stiffener); with
+# the build ids masked and the 0.225 mm put back the 7 builds hash as cd19f02's (822e2dc1...) (before: 6c34e7e9...).
+DIGEST = "6f0cda4d8e94f1bc18d3b83b13e244bb45f39ee98cddcccde1a4d9457e068fdf"
 # StraightSideTests: the sides whose upper stretch takes the line and those that keep their polyline (the named corpus,
 # the regressions and the user's cases).  diagonal-bus/10 (the Row tail centred): 19, 34 -> 21, 36: reader:011's and
 # reader:015's west sides take the line (their stretch down to the widest point within 1.0 mm of one now), and the inner

@@ -32,35 +32,46 @@ import zipfile
 from engine import check_design, default_design, generate_design
 from exporters import artifact_filenames, build_exports
 
+try:
+    import defaults_of_before
+except ImportError:  # run as a package
+    from tests import defaults_of_before
+
 # Re-pinned for the profile revision 2026-10-29 (the gold-finger thickness order option and the coverlay-window notes):
 # the identity, the profile revision and the archives; the layout and every measurement held.
 # Rewritten by the user's request of 2026-11-06 ("ordering node,改成2 layer, 0.2mm"): the profile revision 2026-11-06 orders
 # each board as JLC's 2-layer 0.2 mm FPC, the bottom copper empty (order.fpc_layers 2, order.fpc_thickness_mm 0.2, the
 # FlexiTac fabrication guide cited): the identity, the profile revision and the archives (ORDER_NOTES.txt); the
 # layout and every measurement held.
-BUILD_ID = "tactile-fpc-12x32-48b9d43409a6"
+# Rewritten by the user's later decision of 2026-11-06 ("订单厚度对不上... 建议把补强改成 0.1 mm... 要不要现在改？" -> "好的"):
+# the profile revision 2026-11-06b, the PI stiffener 0.225 -> 0.1 mm (the 2-layer 0.2 mm FPC + 0.1 mm, the 0.3 mm gold
+# fingers by JLC's rule, which the profile check now applies to a 2-layer order): the identity, the profile revision,
+# the layout digest (each board carries the stiffener's thickness, in fpc.stackup and its bottom_stiffener) and the
+# archives (the stiffener layer pib_0.1, jlcpcb.json and ORDER_NOTES.txt); the boards' geometry and every measurement
+# held, and with the 0.225 mm put back the straight channel's layout is the one of before byte for byte.
+BUILD_ID = "tactile-fpc-12x32-ba2e9b58bd8e"
 IDENTITY = {
     "build_id": BUILD_ID,
-    "build_sha256": "48b9d43409a6147adafaf81fee8ba6ef2c7eae85cc726f79c06e32a5c013693f",
+    "build_sha256": "ba2e9b58bd8e48a8935a92d4287b0b89b6cb682818f75daacbe5c620e26d2186",
     "design_sha256": "1e0001a8705c5453ecb598d34939d9f3123511a34f0b71597c6fc4bed6655a72",
-    "profile_sha256": "fb37953c0b7ad8f820ac71fcf4f5e07df946d3ec2943ecd3e1f43be30a2f2448",
+    "profile_sha256": "299b1ab7c76ab719153e638908798f493f70adaa1abf771e3dda878077ca8de9",
     "generator": "deterministic-sensor-core/0.4.0",
     "exporter": "direct-gerber-pure-stdlib/0.3.0",
     "row_bus": "diagonal-bus/11",
     "layout_format": "tactile-fpc-layout/v3",
     "format": "tactile-fpc-manifest/v2",
     "slug": "tactile-fpc-12x32",
-    "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-11-06"},
+    "profile": {"id": "jlc-fpc-surface-v1", "revision": "2026-11-06b"},
     "output_status": "geometry_only",
     "geometry_valid": True,
     "production_ready": False,
 }
 # sha256 of the canonical JSON of {"format", "units", "boards"} (= derived-layout.json without its newline).
-LAYOUT_SHA256 = "6e20c9f42212fba7dc318aa97a5d0b2ed6e41f9160bfc098b29b36d780978460"
+LAYOUT_SHA256 = "914562a3250e71a4d207e7aba9bc0c1bca070fb5a693801d014b2bd61926257e"
 ARTIFACTS = {
-    "top_fpc_gerber_zip": (f"{BUILD_ID}-top-rows-direct-gerber.zip", 30610, "774773c1e7526efc05fd6d70e3b5e74a45878f148c4252736c32d40a81834b36"),
-    "bottom_fpc_gerber_zip": (f"{BUILD_ID}-bottom-columns-direct-gerber.zip", 42716, "6871de5732d55c201a77988d6395940c6fac5775ab27e3827a4a85b9520cb4a7"),
-    "project_review_bundle_zip": (f"{BUILD_ID}-project-review.zip", 237849, "8c32011b5def58c54fb2a5bb03d86ad2a3ba048bb7b96fc3c18a1789fa708936"),
+    "top_fpc_gerber_zip": (f"{BUILD_ID}-top-rows-direct-gerber.zip", 31473, "1cbce64d030b6186ad226202f15b8067e6501849c86cb1aed3a64d5d0f8dc529"),
+    "bottom_fpc_gerber_zip": (f"{BUILD_ID}-bottom-columns-direct-gerber.zip", 43579, "4a37eb34c0c30e40fbfb9ab5ba27fd8aa879997b0a5a60cdd52b922b30425366"),
+    "project_review_bundle_zip": (f"{BUILD_ID}-project-review.zip", 240524, "aec1b4c44f3fcf52bef6434b3569c4a6362c567812d6afe4e47369f2940a573a"),
 }
 # Since 2026-10-24 (P5-diagonal-bus.md section 18) the default design is the diagonal Row bus with both sides: the Row
 # traces leave both ends of their rows (ROW_01, 03, ... on the stack's right), fan into a Row tail centred under the
@@ -129,7 +140,8 @@ BOARDS = {
 # The straight Row channel (routing.row_sides "channel") of the default design keeps the golden geometry of before
 # section 18 byte for byte: its layout digest and boards are the ones pinned here until then (build
 # tactile-fpc-12x32-f978429d47e3, whose id changed with the design's routing.row_sides; its archives' members but the
-# identity carriers are pinned in tests/fixtures/generic_channel_exports.json).
+# identity carriers are pinned in tests/fixtures/generic_channel_exports.json).  Since the user's later decision of
+# 2026-11-06 its digest is of the boards with the 0.225 mm PI stiffener of before put back (tests/defaults_of_before.py).
 CHANNEL_LAYOUT_SHA256 = "b445ed4509f0261fc9042c93ce9d6ce1ffe81e9c345ac3fefd56395682a2993c"
 # Since 2026-10-15 every net is a 0.254 mm tail piece and a 0.127 mm fan-out
 # piece; the bundle runs at 0.254 mm pitch (0.127 mm gaps) on both boards, so
@@ -230,7 +242,10 @@ class GoldenDefaultBuildTests(unittest.TestCase):
         design["matrix"].update(taxel_width_mm=1.4, taxel_height_mm=1.4)
         result = generate_design(design)
         self.assertTrue(result["ok"], result["validation"]["errors"])
-        layout = {"format": IDENTITY["layout_format"], "units": "mm", "boards": result["boards"]}
+        # ... and the 0.225 mm PI stiffener of before put back (the user's later decision of 2026-11-06: 0.1 mm since),
+        # the one value of its layout that changed.
+        boards = defaults_of_before.stiffener(result["boards"], result["profile"]["stackup"]["stiffener_thickness_mm"])
+        layout = {"format": IDENTITY["layout_format"], "units": "mm", "boards": boards}
         self.assertEqual(_sha256(_canonical(layout).encode("utf-8")), CHANNEL_LAYOUT_SHA256)
         self._check_boards(result, CHANNEL_BOARDS)
         self.assertNotIn("row_bus", result["manifest"])
@@ -258,8 +273,9 @@ class GoldenDefaultBuildTests(unittest.TestCase):
                 (stiffener,) = board["layers"]["bottom_stiffener"]
                 xs, ys = [point[0] for point in stiffener["points"]], [point[1] for point in stiffener["points"]]
                 self.assertEqual((min(xs), min(ys), max(xs), max(ys)), expected["stiffener_bbox"])
-                # 0.225 mm PI since 2026-10-14 (JLC's choice for a 0.3 mm connector on a 0.11 mm FPC).
-                self.assertEqual((stiffener["side"], stiffener["material"], stiffener["thickness_mm"]), ("bottom", "polyimide", 0.225))
+                # 0.1 mm PI since the user's decision of 2026-11-06 (the 2-layer 0.2 mm FPC + 0.1 mm, the 0.3 mm gold
+                # fingers by JLC's rule; 0.225 mm from 2026-10-14, JLC's choice for a 0.3 mm connector on a 0.11 mm FPC).
+                self.assertEqual((stiffener["side"], stiffener["material"], stiffener["thickness_mm"]), ("bottom", "polyimide", 0.1))
                 self.assertEqual(stiffener["thickness_mm"], result["profile"]["stackup"]["stiffener_thickness_mm"])
                 openings = [(o["kind"], o["x"], o["y"], o["width_mm"], o["height_mm"]) for o in board["layers"]["top_coverlay_openings"]]
                 self.assertEqual(openings, expected["openings"])

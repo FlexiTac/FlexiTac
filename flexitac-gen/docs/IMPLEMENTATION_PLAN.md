@@ -81,7 +81,7 @@ stack-up.
 ## Locked manufacturing profile
 
 The `jlc-fpc-standard-v1` profile (`profiles/jlc_fpc_standard_v1.json`,
-revision 2026-10-15) owns the following settings; the JLCPCB flexible-PCB
+revision 2026-11-06b) owns the following settings; the JLCPCB flexible-PCB
 capabilities it follows are quoted in its `sources` block:
 
 - 0.254 mm gold-finger traces, a 0.1016-0.254 mm fan-out trace width,
@@ -91,10 +91,12 @@ capabilities it follows are quoted in its `sources` block:
   0.1016 mm, also the narrowest electrode);
 - a 0.5 mm-pitch ZIF connector tail: width (pins + 1) x 0.5 mm, 0.30 x 4.0 mm
   contacts from 0.30 mm behind the tip, R0.30 tip corners;
-- single top copper (1 oz, the copper of the ordered 0.11 mm build),
+- single top copper (1 oz, the copper of the boards' own 0.11 mm build,
+  ordered as JLC's 2-layer 0.2 mm FPC with the bottom copper empty since
+  2026-11-06),
   polyimide coverlay openings (0.1 mm expansion, merged where a bridge would
   be under 0.5 mm) and 0.3 mm copper-to-edge;
-- a bottom polyimide stiffener at 0.225 mm over a 6.0 mm connector zone;
+- a bottom polyimide stiffener at 0.1 mm over a 6.0 mm connector zone (0.225 mm until 2026-11-06);
 - fan-out, slot, fillet, board-size and input limits.
 
 The form reports these values read-only (the rule text is generated from the
