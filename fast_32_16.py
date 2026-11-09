@@ -3,6 +3,7 @@ import serial
 import threading
 import cv2
 import time
+import sys
 from scipy.ndimage import gaussian_filter  # (still unused unless you enable)
 
 # =========================
@@ -26,7 +27,10 @@ ROWS, COLS = 16, 32
 FRAME_BYTES = ROWS * COLS  # 512
 INIT_FRAMES = 30
 
-PORT = "/dev/ttyUSB0"
+# Allow overriding the port on the command line so this runs on Windows/macOS too:
+#   python fast_32_16.py COM3        (Windows)
+#   python fast_32_16.py             (defaults to /dev/ttyUSB0 on Linux)
+PORT = sys.argv[1] if len(sys.argv) > 1 else "/dev/ttyUSB0"
 BAUD = 2_000_000
 
 
@@ -126,15 +130,19 @@ def readThread(serDev):
     # 2) Streaming loop: update contact_data_norm per frame
     # -------------------------
     while True:
-        chunk = serDev.read(8192)
-        if not chunk:
-            continue
-        ring.extend(chunk)
+        # Drain everything the OS has buffered, then keep only the NEWEST complete frame.
+        # Processing every queued frame lets on-screen latency snowball whenever the host
+        # falls behind the ~100 Hz stream (the serial queue is FIFO, so you keep reading
+        # old frames). Jumping to the latest frame bounds the delay regardless of host speed.
+        n = serDev.in_waiting
+        chunk = serDev.read(n if n > 0 else 1)
+        if chunk:
+            ring.extend(chunk)
 
         if len(ring) > 50000:
             ring = ring[-50000:]
 
-        # parse as many complete frames as available
+        frame_bytes = None
         while True:
             idx = ring.find(MAGIC)
             if idx < 0:
@@ -149,26 +157,26 @@ def readThread(serDev):
 
             # need marker + frame
             if len(ring) < 2 + FRAME_BYTES:
-                # not enough yet
                 break
 
-            # consume marker
+            # consume marker + frame; overwrite so only the newest frame survives
             del ring[:2]
-
-            # take frame bytes
             frame_bytes = ring[:FRAME_BYTES]
             del ring[:FRAME_BYTES]
 
-            backup = np.frombuffer(frame_bytes, dtype=np.uint8).reshape((ROWS, COLS)).astype(np.float32)
+        if frame_bytes is None:
+            continue
 
-            # old-style processing
-            contact_data = backup - median - THRESHOLD
-            contact_data = np.clip(contact_data, 0, 100)
+        backup = np.frombuffer(frame_bytes, dtype=np.uint8).reshape((ROWS, COLS)).astype(np.float32)
 
-            if np.max(contact_data) < THRESHOLD:
-                contact_data_norm = contact_data / NOISE_SCALE
-            else:
-                contact_data_norm = contact_data / (np.max(contact_data) + 1e-6)
+        # old-style processing (unchanged)
+        contact_data = backup - median - THRESHOLD
+        contact_data = np.clip(contact_data, 0, 100)
+
+        if np.max(contact_data) < THRESHOLD:
+            contact_data_norm = contact_data / NOISE_SCALE
+        else:
+            contact_data_norm = contact_data / (np.max(contact_data) + 1e-6)
 
 
 # =========================
