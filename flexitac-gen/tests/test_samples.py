@@ -13,7 +13,9 @@ checks that need no browser.
   the UMI tips' thumbnails drawn looking at their contact face (the Library selection's normal), where they differ.
 - The files: every file of web/samples/ a third-party file of NOTICE.md's table (re-hashed) or one of this project's
   own (NOTICE.md, samples.json, the thumbnails); each licence text the Library's copy; the thumbnails WebP of their
-  recorded size; the folder within its budget (BUDGET_BYTES), each thumbnail within THUMB_BYTES; no deny-list name.
+  recorded size; the folder within its budget (BUDGET_BYTES), each thumbnail within THUMB_BYTES; no deny-list name;
+  no sample made from the Library's showcase or naming its vendor's folder (web/vendor/ufactory-g1/, the one vendor
+  model shown, by the project owner's decision of 2026-11-12: a sample is a model to fit a sensor to, that one is not).
 - The whole grippers: each STL starts with its Library part's facets, record for record, so the Library sensor's
   selection names the same facets; that selection grows over exactly the Library fit's facets (the finger's contact
   face) and the engine's fit of the page's request (the Library's, named as the gripper's file) gives the Library's
@@ -64,6 +66,10 @@ THUMB_BYTES = 8_000
 THUMB_SIZE = (240, 110)
 OWN = {"NOTICE.md", "samples.json"}
 DENIED_NAME = re.compile(r"robotiq|xarm|ufactory", re.IGNORECASE)
+# The Library's showcase (2026-11-12; tools/library_write.py SHOWCASE_*): its scene and the vendor's folder, which no
+# sample may be assembled from or name.
+SHOWCASE_SCENE = "library/scenes/flexitac-g1.json"
+SHOWCASE_FOLDER = "vendor/ufactory-g1"
 
 
 def webp_size(data: bytes):
@@ -200,6 +206,39 @@ class SamplesDataTests(unittest.TestCase):
                 self.assertEqual(self.entries["variants"][sample["library"]]["pitch_mm"], 2, "each sample's sensor is its part's 2 mm one")
                 if "mesh" not in sample:
                     self.assertEqual(sample["id"], part, "a finger sample is named as its Library part")
+
+    def test_no_sample_is_made_from_the_showcase(self) -> None:
+        # The showcase's gripper is UFACTORY's 3D model, shown in the Library's first section only: no sample offers it
+        # as a model to fit, is assembled from its scene or its meshes, or names its folder (in any file of web/samples/).
+        for path in sorted(SAMPLES.rglob("*")):
+            if path.is_file() and path.suffix in (".json", ".md"):
+                with self.subTest(file=path.relative_to(SAMPLES).as_posix()):
+                    text = path.read_text(encoding="utf-8").lower()
+                    self.assertNotIn("ufactory-g1", text)
+                    self.assertNotIn("flexitac-g1", text)
+        if not (WEB / SHOWCASE_FOLDER).is_dir():
+            self.skipTest("the showcase is not in this tree")
+        vendor = {hashlib.sha256(path.read_bytes()).hexdigest() for path in (WEB / SHOWCASE_FOLDER).glob("*.stl")}
+        self.assertEqual(len(vendor), 12)
+        # Nor is any file of web/samples/ a copy of one of its meshes under another name (the review of 2026-11-12;
+        # library_write.showcase() refuses the same anywhere under web/).
+        for path in sorted(SAMPLES.rglob("*")):
+            if path.is_file():
+                with self.subTest(copy=path.relative_to(SAMPLES).as_posix()):
+                    self.assertNotIn(hashlib.sha256(path.read_bytes()).hexdigest(), vendor)
+        scene = json.loads((WEB / SHOWCASE_SCENE).read_text(encoding="utf-8"))
+        for sample in self.samples:
+            with self.subTest(sample=sample["id"]):
+                self.assertNotEqual(self.entries["variants"][sample["library"]]["part"], "flexitac-g1")
+                if "mesh" not in sample:
+                    continue
+                self.assertNotEqual(sample["assembled"]["scene"], SHOWCASE_SCENE)
+                self.assertNotIn(sample["mesh"]["sha256"], vendor)
+                # Its scene is a gripper part's, whose bodies are all the Library's own folder's (none beside it).
+                assembled = json.loads((WEB / sample["assembled"]["scene"]).read_text(encoding="utf-8"))
+                self.assertFalse([body["mesh"] for body in assembled["bodies"] if not body["mesh"].startswith("bodies/")])
+        self.assertTrue([body["mesh"] for body in scene["bodies"] if body["mesh"].startswith(f"../{SHOWCASE_FOLDER}/")],
+                        "the showcase's own scene is the one that draws the folder")
 
     def test_whole_gripper_records_match_their_files(self) -> None:
         grippers = [sample for sample in self.samples if "mesh" in sample]
@@ -359,8 +398,21 @@ class WholeGripperTests(unittest.TestCase):
                     data = (LIBRARY / body["mesh"]).read_bytes()
                     self.assertEqual(hashlib.sha256(data).hexdigest(), body["sha256"], body["mesh"])
                     bodies[body["mesh"]] = data
-                self.assertEqual(assemble(sample["id"], scene, part, bodies), (SAMPLES / sample["mesh"]["file"]).read_bytes(),
-                                 "re-assemble with tools/sample_grippers.py")
+                # The sample is the scene's assembly as it was written: the part and its mate first, record for record (a
+                # seed facet names the same facet), then the bodies.  Since the looks of 2026-11-12 a scene may share a
+                # body out by material (tools/library_split.py: the same facets in other files, in another order) and
+                # hold plain shapes the project drew: the sample keeps its bytes, so its bodies' facets are compared as
+                # a set with the scene's, the drawn shapes left out.
+                if str(ROOT / "tools") not in sys.path:
+                    sys.path.insert(0, str(ROOT / "tools"))
+                import library_write
+
+                maker = dict(scene, bodies=[body for body in scene["bodies"] if not library_write.own_body(body["mesh"], bodies[body["mesh"]])])
+                made, kept = records(assemble(sample["id"], maker, part, bodies)), records((SAMPLES / sample["mesh"]["file"]).read_bytes())
+                fingers = len(records(part)) * (2 if scene["mate"]["part"] else 1)
+                self.assertEqual(made[:fingers], kept[:fingers], "re-assemble with tools/sample_grippers.py")
+                self.assertEqual(sorted(made[fingers:]), sorted(kept[fingers:]), "re-assemble with tools/sample_grippers.py")
+                self.assertEqual((SAMPLES / sample["mesh"]["file"]).read_bytes()[:84], assemble(sample["id"], maker, part, bodies)[:84], "its header and count")
 
     def test_the_assembly_on_a_fixture(self) -> None:
         # A one-facet part, a body under a mirror and a mate turned 180 degrees: the identity keeps the bytes, a

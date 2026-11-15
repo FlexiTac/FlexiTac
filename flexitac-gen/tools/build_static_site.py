@@ -24,6 +24,10 @@ The output:
     static/library/art/, scenes/, bodies/
                                each sensor's 3D view: its boards' art, the grippers' scenes and their bodies (web/library/,
                                docs/LIBRARY_VIEW.md), with web/
+    static/library/showcase.json, showcase/
+                               the showcase (the Library's first card and its page): its document and its pictures, with
+                               web/; its scene is one of scenes/, its gripper static/vendor/ufactory-g1/, its pad
+                               static/vendor/flexitac-v2/
     static/py/engine.zip      app.py, engine/, exporters/, surface/, profiles/ and bridge.py (byte-reproducible)
     static/py/pyodide/         the Pyodide core files the worker loads, from the pinned release
     static/py/BUILD.json       versions and SHA-256s of the above
@@ -273,6 +277,13 @@ def library(static: Path, source: Path = WEB / "library", only=None, jobs: int =
     unviewed = [identifier for identifier in chosen if images[identifier] is not None and views[identifier] is None]
     if unviewed:
         print(f"build_static_site: warning: {library_write.view_note(unviewed)}", file=sys.stderr, flush=True)
+    # The showcase (library.html's first card and its page, 2026-11-12: showcase.json, its pictures, its scene and the
+    # vendor's folder; copy_web publishes them): its problems stopped the build above (scenes() carries
+    # library_write.showcase()'s, with no part); pictures of older figure or view sources are published with a warning.
+    showcase = library_write.SHOWCASE_ID if (source / library_write.SHOWCASE_FILE).is_file() else None
+    if showcase and library_write.showcase_page(parts, source)[1]:
+        print(f"build_static_site: warning: the showcase's pictures are of older figure or view sources: {library_write.RESHOOT_SHOWCASE}",
+              file=sys.stderr, flush=True)
     work = []
     for identifier in chosen:
         variant = entries["variants"][identifier]
@@ -302,7 +313,7 @@ def library(static: Path, source: Path = WEB / "library", only=None, jobs: int =
     (folder / "files.json").write_text(text, encoding="utf-8")
     return {"variants": len(records), "files_json_sha256": hashlib.sha256(text.encode("ascii")).hexdigest(),
             "pictured": len([identifier for identifier in chosen if images[identifier]]),
-            "viewed": len([identifier for identifier in chosen if views[identifier]])}
+            "viewed": len([identifier for identifier in chosen if views[identifier]]), "showcase": showcase}
 
 
 def prepare(out: Path) -> None:
@@ -321,6 +332,26 @@ def build(out: Path, archive: Path | None = None, github: bool = True, jobs: int
     engine = engine_zip()
     counts = github_counts() if github else None
     prepare(out)
+    try:
+        return write(out, pyodide, engine, counts, jobs)
+    except BaseException:
+        # A refused build leaves the folder empty: web/ is copied before the Library's gates run, so what they refuse
+        # (a model of the deny-list, a copy of a vendor mesh) would stay in it otherwise (the review of 2026-11-13).
+        empty(out)
+        raise
+
+
+def empty(out: Path) -> None:
+    """Remove what a build wrote into ``out`` (prepare() made it this tool's), keeping the folder itself."""
+
+    for child in out.iterdir():
+        if child.is_dir() and not child.is_symlink():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+
+
+def write(out: Path, pyodide: dict, engine: bytes, counts, jobs: int) -> dict:
     (out / BUILD_MARKER).write_text("Written by tools/build_static_site.py; the next build replaces this folder.\n", encoding="utf-8")
     (out / ".nojekyll").write_bytes(b"")
     for name in PAGES:
@@ -371,7 +402,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"built {args.out} ({size / 1048576:.1f} MiB): generator {record['generator_version']}, "
           f"Pyodide {PYODIDE_VERSION}, engine.zip {record['engine_zip_sha256'][:12]}, GitHub {github}, "
           f"the Library's {record['library']['variants']} sensors current, {record['library']['pictured']} pictured, "
-          f"{record['library']['viewed']} with a 3D view")
+          f"{record['library']['viewed']} with a 3D view" + (", with the showcase" if record["library"]["showcase"] else ""))
     return 0
 
 

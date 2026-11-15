@@ -1,0 +1,44 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "widowx-250",
+ "about": "drawn after Trossen Robotics' product photos of the WidowX 250 S (2026-11-12): a gripper that is black all over and differs by finish: the printed fingers and carriages (the Library's part), the black anodised 10 mm rail with its bare sawn ends, the speckled black plate and bracket, the moulded servo case, the servo horn.  Three things are the project's own drawing, not the model's: the rail's four slots, as dark strips along its faces that notch its sawn ends into the extrusion's cross (the model's rail is a plain square bar; bodies/widowx-250/drawn-bar-rail-slots.stl); the two silver button-head screws on the plate's face with their sockets (drawn-bar-plate-screws.stl, drawn-bar-plate-sockets.stl); and on each carriage's outer face the two brass heat-set inserts with their bores, as plain cylinders (drawn-inserts-sensor.stl, drawn-insert-bores-sensor.stl and the mate's two).  The curved links from the horn to the carriages, their pivot screw, the servo's label, vents and cable and the fingers' ribs are not modelled.",
+ "smooth_deg": 35,
+ "part_look": "print-layered",
+ "looks": {
+  "print-layered": {"base": "print-black", "roughness": 0.8, "env_intensity": 2.6, "evidence": "trossen_Img0914 and trossen_grippers: layer lines on every printed face, an even matte with no highlight, #414141 under the lamp (#303030 at the 10th percentile), between the servo's case and the plate; under the base look the finger's back was #18181b at the turned views, the film's level; with the studio at 2 its side face beside the exploded film was #303032 at the Exploded home, 11 levels over the film's #252629 (the verification of 2026-11-13), and at 2.6 it is #3e3e40, the photos' lit #414141"},
+  "servo-case": {"base": "plastic-black-satin", "color": "#333335", "roughness": 0.8, "env_intensity": 1.6, "evidence": "trossen_Img0896 and trossen_Img0914: the XL430's moulded case is the lightest black of the gripper, an even satin with no mirror (#4d4c4d to #5e5e5e under the lamp, #646466 to #717072 at the 90th percentile; the fingers #3c3b3d to #414141, the plate #302f33 at most); at roughness 0.55 its broad face mirrored the key softbox when turned to it and read #858586, a grey slab, so the case is lighter in its colour and rougher"},
+  "screw-zinc": {"base": "steel-ground", "color": "#a6a8ab", "roughness": 0.5, "env_intensity": 0.8, "evidence": "trossen_Img0934 and trossen_Img0896: the plate's two button-head screws are a soft silver, #9a9798 at the median with a small glint (#f1edee at the 90th percentile); under the base look their flat drawn heads mirrored the softbox overhead and were blown (#edf1f5 all over)"},
+  "horn-black": {"base": "plastic-black-satin", "color": "#262628", "roughness": 0.75, "env_intensity": 1.6, "evidence": "trossen_Img0896: the horn in front of the plate is as dark as the plate, with no broad highlight on its face; under the base look its face mirrored the softbox overhead and read #747474 to #8f8f90, a grey disc on a black plate, and at roughness 0.6 still #656566 seen from behind"},
+  "sheet-speckled": {"base": "plastic-black-matte", "roughness": 0.85, "env_intensity": 2, "evidence": "trossen_Img0934 (the plate's face) and trossen_Img0876 (its back and the bracket): a fine speckled, hair-cell matte sheet with no highlight at all, #302f33 at the median and #3f3d42 at the 90th percentile; under the base look the plate's edge was below the film's level at the turned views"},
+  "rail-anodized": {"base": "anodized-black", "color": "#28292e", "metalness": 0, "roughness": 0.9, "env_intensity": 2, "evidence": "trossen_Img0934 and trossen_Img0896: the rail is the darkest part of the gripper, a satin black bar with no mirror (#030303 to #0a090a, #272628 at the 90th percentile), darker than the plate and far darker than its own bare ends; a flat face of a dark metal is one tone, that of the softbox or the flag it mirrors: under the base look the rail's long side read #101013 at the homes, darker than the film beside it, and with metalness 0.4 and env_intensity 2.6 the face turned to the key softbox read #7a7b7e to #848487, the lightest surface of the gripper; so the dyed anodised layer is drawn without the metal's mirror"},
+  "rail-sawn": {"base": "anodized-natural", "color": "#a9abae", "metalness": 0.4, "roughness": 0.6, "env_intensity": 1.5, "evidence": "trossen_Img0914 (the rail's cut end beside the carriage): bare sawn aluminium, #949393 at the median up to #efedea, duller than a milled face and the brightest surface of the gripper; as a full metal the flat end mirrored one patch of the room and read #6b6d6f to #86888b at the homes and from behind and #7a7c7e turned left, no lighter than the anodised face beside it there, so the saw's rough cut scatters a share of the light"},
+  "slot-shadow": {"base": "plastic-black-matte", "color": "#1c1c1e", "roughness": 0.9, "env_intensity": 2, "evidence": "trossen_Img0934 and trossen_Img0896: the rail's slots are the darkest lines of the gripper (#030303 to #0a090a beside the faces' highlights), in trossen_Img0914 the black notches of the bright cut end; the screws' sockets and the inserts' bores are as dark in trossen_Img0896 and trossen_Img0914; the rail's own roughness and env_intensity under a darker colour, so that a slot is darker than the face it lies in from every side"}
+ },
+ "bodies": {
+  "bodies/widowx-250/wx250s_7_gripper.stl": {"sha256": "4e4f1bb053c1946e5ba5c6d24dec9bbb9f29cb938654904a4996b618a042c5cf", "facets_sha256": "7fa45d7d4732e440d84a061cb69629e4d6439b8eccb95a46601bdda71fa3ef5e", "weld_mm": 0.01, "components": [
+   {"name": "gripper-bracket", "look": "sheet-speckled", "pick": [{"box": [[-21, -23.05, -21], [21, -19.95, 36]]}]},
+   {"name": "gripper-servo", "look": "servo-case", "pick": "rest"}]},
+  "bodies/widowx-250/wx250s_9_gripper_bar.stl": {"sha256": "aaa7b9b712cf789361fb2155a2a1ac54623bfe9c82aea2ba3ed8738447d17fd1", "facets_sha256": "d5d3d3c2855945153fd9d7e18239dddea9d0cedb7ff13f31892ea6ceaedd6a52", "weld_mm": 0.01, "components": [
+   {"name": "bar-plate", "look": "sheet-speckled", "pick": [{"component": {"box": [[-51.79, -66, -13.91], [51.79, -63, 35.25]], "triangles": 100}}]},
+   {"name": "bar-rail-ends", "look": "rail-sawn", "pick": [{"box": [[-50.05, -91.05, -5.05], [-49.95, -80.95, 5.05]]}, {"box": [[49.95, -91.05, -5.05], [50.05, -80.95, 5.05]]}]},
+   {"name": "bar-rail", "look": "rail-anodized", "pick": "rest"},
+   {"name": "bar-rail-slots", "look": "slot-shadow", "draw": [
+    {"box": [[-50.15, -87.3, 2.4], [50.15, -84.7, 5.15]]},
+    {"box": [[-50.15, -87.3, -5.15], [50.15, -84.7, -2.4]]},
+    {"box": [[-50.15, -91.15, -1.3], [50.15, -88.4, 1.3]]},
+    {"box": [[-50.15, -83.6, -1.3], [50.15, -80.85, 1.3]]}]},
+   {"name": "bar-plate-screws", "look": "screw-zinc", "draw": [
+    {"cylinder": {"from": [-11.2, -65.5, 31.6], "to": [-11.2, -67.2, 31.6], "radius": 2.3, "segments": 12}},
+    {"cylinder": {"from": [11.2, -65.5, 31.6], "to": [11.2, -67.2, 31.6], "radius": 2.3, "segments": 12}}]},
+   {"name": "bar-plate-sockets", "look": "slot-shadow", "draw": [
+    {"cylinder": {"from": [-11.2, -66.5, 31.6], "to": [-11.2, -67.35, 31.6], "radius": 0.95, "segments": 6}},
+    {"cylinder": {"from": [11.2, -66.5, 31.6], "to": [11.2, -67.35, 31.6], "radius": 0.95, "segments": 6}}]}]},
+  "bodies/widowx-250/wx250s_8_gripper_prop.stl": {"sha256": "0deb0cd3d6e310964ad3d446effaa41e19480b10c3435d478cbef71c3071fea5", "look": "horn-black"}
+ },
+ "drawn": [
+  {"name": "inserts-sensor", "look": "brass", "draw": [{"cylinder": {"from": [0, 0.5, 10], "to": [0, -0.2, 10], "radius": 1.8, "segments": 10}}, {"cylinder": {"from": [0, 0.5, -10], "to": [0, -0.2, -10], "radius": 1.8, "segments": 10}}], "finger": "sensor"},
+  {"name": "insert-bores-sensor", "look": "slot-shadow", "draw": [{"cylinder": {"from": [0, 0.5, 10], "to": [0, -0.35, 10], "radius": 1, "segments": 6}}, {"cylinder": {"from": [0, 0.5, -10], "to": [0, -0.35, -10], "radius": 1, "segments": 6}}], "finger": "sensor"},
+  {"name": "inserts-mate", "look": "brass", "draw": [{"cylinder": {"from": [0, 0.5, 10], "to": [0, -0.2, 10], "radius": 1.8, "segments": 10}}, {"cylinder": {"from": [0, 0.5, -10], "to": [0, -0.2, -10], "radius": 1.8, "segments": 10}}], "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, -1.0, 0.0, 84.0], [0.0, 0.0, -1.0, 0.0], [0.0, 0.0, 0.0, 1.0]], "finger": "mate"},
+  {"name": "insert-bores-mate", "look": "slot-shadow", "draw": [{"cylinder": {"from": [0, 0.5, 10], "to": [0, -0.35, 10], "radius": 1, "segments": 6}}, {"cylinder": {"from": [0, 0.5, -10], "to": [0, -0.35, -10], "radius": 1, "segments": 6}}], "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, -1.0, 0.0, 84.0], [0.0, 0.0, -1.0, 0.0], [0.0, 0.0, 0.0, 1.0]], "finger": "mate"}
+ ]
+}

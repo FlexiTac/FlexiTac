@@ -872,7 +872,7 @@ TESTS_AND_DOCS = (
     m("T/doc-ci", "L13/M12", "README: CI described on Python versions the workflow does not run",
       ("README.md", "runs the suite on Python 3.9 and 3.12", "runs the suite on Python 3.8 and 3.12")),
     m("T/doc-test-count", "M12", "handoff: a stale test count",
-      ("claude/APP_HANDOFF.md", " tests in 48 modules", "0 tests in 48 modules")),
+      ("claude/APP_HANDOFF.md", " tests in 52 modules", "0 tests in 52 modules")),
     m("T/doc-mutation-summary", "M12", "handoff: a mutation summary that the catalogue does not give",
       ("claude/APP_HANDOFF.md", "3 equivalent (`E/F1-inputs`,", "4 equivalent (`E/F1-inputs`,")),
     m("F/stale-banner", "M4", "browser: the 'Form changed' banner is never shown",
@@ -2608,11 +2608,11 @@ MUTANTS += LIBRARY_SHOTS
 LIBRARY_JS = "web/library.js"
 LIBRARY_PICTURES = (
     m("S/library-picture-eager", "2026-11-05 pictures", "the cards' pictures load at once, every card's as the page opens (not lazily)",
-      (LIBRARY_JS, '      loading: kind === "detail" ? null : "lazy"});', "      loading: null});"), killers=("test_library.",)),
+      (LIBRARY_JS, '      loading: kind === "card" ? "lazy" : null});', "      loading: null});"), killers=("test_library.",)),
     m("S/library-picture-unsized", "2026-11-05 pictures", "a picture without its width and height (its box sized only when it arrives)",
       (LIBRARY_JS, 'el("img", {src: BASE + src, width, height, alt:', 'el("img", {src: BASE + src, alt:'), killers=("test_library.",)),
     m("S/library-picture-card-full", "2026-11-05 pictures", "the cards load the 1280 x 800 Exploded picture, not its 640 x 400 card file",
-      (LIBRARY_JS, 'image?.[view]?.src : image?.exploded?.card;', 'image?.[view]?.src : image?.exploded?.src;'), killers=("test_library.",)),
+      (LIBRARY_JS, 'image?.card?.src : image?.exploded?.card;', 'image?.card?.src : image?.exploded?.src;'), killers=("test_library.",)),
     m("S/library-picture-broken", "2026-11-05 pictures", "a picture whose file does not load stays a broken image (no placeholder)",
       (LIBRARY_JS, "      shown.replaceWith(field(variant));\n      missed?.(view);\n", "      missed?.(view);\n"), killers=("test_library.",)),
     m("S/library-view-unnamed", "2026-11-05 pictures", "the Exploded | Assembled control without its legend (a screen reader hears two radios of no group)",
@@ -2757,6 +2757,98 @@ LIBRARY_VIEW = (
        "  const homeVector = () => new THREE.Vector3(...homeDirection(view.mode));\n"), killers=("test_surface_web.",)),
 )
 MUTANTS += LIBRARY_VIEW
+# The looks (the user's request of 2026-11-12: every gripper coloured after photos of the real product; docs/
+# LIBRARY_VIEW.md "The looks"): the writer's checks of a scene's and the rules' looks, of a shape the project drew and of
+# a fingertip's record of its part's look (test_library on its tiny scenes), and the split tool's rules, its pins and
+# its --check (tools/library_split.py; test_library_split on a tiny library built there).  Each killed alone when added.
+LIBRARY_SPLIT = "tools/library_split.py"
+LIBRARY_LOOKS = (
+    m("S/library-look-name", "2026-11-12 looks", "a body's look (or the part's) that is no look of its scene taken: the stage draws no gripper",
+      (LIBRARY_WRITE, "        if not (isinstance(name, str) and name in looks):\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/library-look-range", "2026-11-12 looks", "a look's metalness, roughness or clear coat outside 0 to 1 taken",
+      (LIBRARY_WRITE, "        if key in look and not (_number(look[key]) and 0 <= look[key] <= 1):\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/library-look-colour", "2026-11-12 looks", "a look's colour that is not an sRGB #rrggbb taken (three.js reads a name or an upper-case hex otherwise, or black)",
+      (LIBRARY_WRITE, '    if not (isinstance(look["color"], str) and LOOK_COLOR.fullmatch(look["color"])):\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-look-unused", "2026-11-12 looks", "a look that nothing names kept in a scene (hashed into its pictures' record, drawn nowhere)",
+      (LIBRARY_WRITE, "    for name in sorted(set(looks) - {name for name in used.values() if isinstance(name, str)}):\n", "    for name in ():\n"),
+      killers=("test_library.",)),
+    m("S/library-look-part-coat", "2026-11-12 looks", "a clear coat taken on the part's own look (the figure's standard material cannot draw it: the picture would not be the scene's)",
+      (LIBRARY_WRITE, "    if not coat and any(key in look for key in LOOK_COAT):\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/library-look-own-header", "2026-11-12 looks", "any body named drawn-<name>.stl taken as the project's own drawing, whatever its header (a vendor's mesh with no NOTICE row)",
+      (LIBRARY_WRITE, "    return data is None or (data[:80].startswith(OWN_HEADER) and OWN_WORDS in data[:80])\n", "    return True\n"),
+      killers=("test_library.",)),
+    m("S/library-look-part-hash", "2026-11-12 looks", "a fingertip's pictures of another look than the rules give its part taken (part_look_sha256 not compared)",
+      (LIBRARY_WRITE, '        if shot.get("part_look_sha256") != expected:\n', "        if False:\n"), killers=("test_library.",)),
+    m("S/library-look-part-gripper", "2026-11-12 looks", "the rules' part_looks naming a gripper taken (its scene's looks and the rules' disagreeing in silence)",
+      (LIBRARY_WRITE, "        if key not in plain | families:\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/library-split-weld", "2026-11-12 looks", "the split's weld at 0.1 mm (the ARX X5's motor can and its rail beam, 0.07 mm apart, one component)",
+      (LIBRARY_SPLIT, "\nWELD_MM = 0.01\n", "\nWELD_MM = 0.1\n"), killers=("test_library_split.",)),
+    m("S/library-split-box-any", "2026-11-12 looks", "a box rule taking the triangles that only touch the box (a neighbour's facets coloured as the rail)",
+      (LIBRARY_SPLIT, "        return {index for index, record in enumerate(records) if all(_inside(point, low, high) for point in corners(record))}\n",
+       "        return {index for index, record in enumerate(records) if any(_inside(point, low, high) for point in corners(record))}\n"),
+      killers=("test_library_split.",)),
+    m("S/library-split-component-one", "2026-11-12 looks", "a component rule that matches none or several taken (the wrong piece, or two, in one look)",
+      (LIBRARY_SPLIT, "        if len(found) != 1:\n", "        if not found:\n"), killers=("test_library_split.",)),
+    m("S/library-split-untaken", "2026-11-12 looks", "triangles that no component takes dropped in silence (a hole in the gripper)",
+      (LIBRARY_SPLIT, "        if left:\n", "        if False:\n"), killers=("test_library_split.",)),
+    m("S/library-split-pin", "2026-11-12 looks", "the body's facets not checked against the pin (components of another body, or a changed one, split again as if they were it)",
+      (LIBRARY_SPLIT, '        if entry.get("facets_sha256") != digest:\n', "        if False:\n"), killers=("test_library_split.",)),
+    m("S/library-split-sorted", "2026-11-12 looks", "a component's facets in the order found (the unsplit body and its components then give other bytes)",
+      (LIBRARY_SPLIT, "                data = stl(split_header(header), sorted(records[index] for index in taken))\n",
+       "                data = stl(split_header(header), [records[index] for index in sorted(taken)])\n"), killers=("test_library_split.",)),
+    m("S/library-split-check-scene", "2026-11-12 looks", "--check not comparing the scene (a scene edited by hand, or left behind by a changed look file, passing)",
+      (LIBRARY_SPLIT, '        if (library / "scenes" / f"{part}.json").read_text(encoding="utf-8") != built["scene"]:\n', "        if False:\n"),
+      killers=("test_library_split.",)),
+    m("S/library-split-check-file", "2026-11-12 looks", "--check not comparing the component files' bytes",
+      (LIBRARY_SPLIT, "            if not (library / path).is_file() or (library / path).read_bytes() != data:\n                said.append(f\"{path} is not what {where} gives\")\n",
+       "            if not (library / path).is_file():\n                said.append(f\"{path} is not what {where} gives\")\n"), killers=("test_library_split.",)),
+    m("S/library-split-base-name", "2026-11-12 looks", "a part's own look under a base look's name taken (a base name no longer the table's numbers in every scene)",
+      (LIBRARY_SPLIT, "        if name in base:\n", "        if False:\n"), killers=("test_library_split.",)),
+    m("S/library-split-evidence", "2026-11-12 looks", "a part's own look without its evidence taken (a base look overridden with no photo)",
+      (LIBRARY_SPLIT, '        if not (isinstance(entry, dict) and isinstance(entry.get("evidence"), str) and entry["evidence"].strip()):\n',
+       "        if not isinstance(entry, dict):\n"), killers=("test_library_split.",)),
+    # The reviews of 2026-11-12: the header's fallback, an unsplit body of other bytes, a look with no look file.
+    m("S/library-split-header-stable", "2026-11-12 looks review", "the split's own header given '; split' again when read back from the components (a body of another header: "
+      "--check failing on the files just written, a second run writing them all again)",
+      (LIBRARY_SPLIT, '    if text == SPLIT_HEADER or match.group(1).endswith("; split"):\n', '    if match.group(1).endswith("; split"):\n'),
+      killers=("test_library_split.",)),
+    m("S/library-split-unsplit-other", "2026-11-12 looks review", "an unsplit body of other bytes than the pin passed over for the components of the split before "
+      "(a body made anew split as the old one and removed as a stray)",
+      (LIBRARY_SPLIT, '            if digest != entry["sha256"]:\n                raise SplitError(f"{where}: {source}{\'\' if folder is library else f\' of {folder}\'} is not the file its sha256 pins "\n',
+       '            if digest != entry["sha256"]:\n                continue\n            if False:\n                raise SplitError(f"{where}: {source}{\'\' if folder is library else f\' of {folder}\'} is not the file its sha256 pins "\n'),
+      killers=("test_library_split.",)),
+    m("S/library-split-unowned", "2026-11-12 looks review", "--check passing a scene's looks, a drawn body or a split's rows of a part that has no look file "
+      "(a vendor's mesh under a drawn body's name and header in the Library with no NOTICE row)",
+      (LIBRARY_SPLIT, "            return 1 if differ or loose else 0\n", "            return 1 if differ else 0\n"), killers=("test_library_split.",)),
+    m("S/library-look-hint", "2026-11-12 looks review", "a look's problem sending its reader to the private scene builder, which writes no look (tools/library_split.py does)",
+      (LIBRARY_WRITE, '        problems += [(part_id, f"{message}: {RELOOK}") for message in scene_look_problems(part_id, document)]\n',
+       '        problems += [(part_id, f"{message}: {REBUILD}") for message in scene_look_problems(part_id, document)]\n'), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_LOOKS
+# Gen by Surface's figure and the Library's view of a part in its look (2026-11-12: the UMI finger and its tapered tips in
+# the real finger's orange TPU, where the Library's pictures had been Gen by Surface's figure byte for byte): the pieces
+# of tools/browser/library_shots.py --check-generator that need no browser (the pin's check, the pixel comparison, the
+# other colour, the scenes it serves).  Each killed alone by test_library when added.
+LIBRARY_SHOTS_TOOL = "tools/browser/library_shots.py"
+LIBRARY_FIGURE = (
+    m("S/library-figure-sheets-unheld", "2026-11-12 UMI look", "a pixel the part's colour does not reach taken whatever it is (a look that tints the sheets passes --check-generator)",
+      (LIBRARY_SHOTS_TOOL, '        if pixel != figure[k - 3:k + 1]:\n            counts["wrong"] += 1\n', '        if False:\n            counts["wrong"] += 1\n'),
+      killers=("test_library.",)),
+    m("S/library-figure-alpha-unheld", "2026-11-12 UMI look", "the view's alpha not held to the figure's (a part drawn larger, or moved, passes)",
+      (LIBRARY_SHOTS_TOOL, '        if look[k] != figure[k]:\n            counts["alpha"] += 1\n', '        if False:\n            counts["alpha"] += 1\n'),
+      killers=("test_library.",)),
+    m("S/library-figure-other-colour", "2026-11-12 UMI look", "the other colour the look's own (no pixel is the part's: every drawn pixel held to the grey figure)",
+      (LIBRARY_SHOTS_TOOL, "(int(look['color'][k:k + 2], 16) + 128) % 256", "(int(look['color'][k:k + 2], 16) + 0) % 256"), killers=("test_library.",)),
+    m("S/library-figure-look-undrawn", "2026-11-12 UMI look", "a view whose part the colour does not reach at all taken (the look not drawn: nothing was compared as the part's)",
+      (LIBRARY_SHOTS_TOOL, '    if counts["part"] < PART_SHARE_MIN * counts["drawn"]:\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-figure-looks-served", "2026-11-12 UMI look", "the view 'without the look' served the rules' looks all the same (the orange view compared with the grey figure)",
+      (LIBRARY_SHOTS_TOOL, '    for key in library_write.RULES_OPTIONAL:\n        served["rules"].pop(key, None)\n    if given is not None:\n', "    if given is not None:\n"),
+      killers=("test_library.",)),
+    m("S/library-figure-pin-build", "2026-11-12 UMI look", "a pin of another fit or build taken (Gen by Surface's figure of another sensor held as this one's)",
+      (LIBRARY_SHOTS_TOOL, '        elif (record.get("fit_sha256"), record.get("build_id")) != (variant["fit_sha256"], variant["build_id"]):\n', "        elif False:\n"),
+      killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_FIGURE
 # The look light by default and dark on the header's toggle (the user's request of 2026-11-06, web/theme.js; its review
 # of the same day): the page dark unless light is stored, a dark rule outranking more than it did under the system's
 # scheme, the toggle's state unsaid, a page following the system's scheme by a color-scheme meta, another tab's clear()
@@ -2857,6 +2949,200 @@ VERIFY_MINORS = (
       ("tools/mutation_check.py", "\nSUITE_TIMEOUT = 5400.0\n", "\nSUITE_TIMEOUT = 900.0\n"), killers=("test_docs_consistency.",)),
 )
 MUTANTS += VERIFY_MINORS
+# The Library's showcase (the project owner's decision of 2026-11-12: UFACTORY's 3D model of the xArm Gripper G1 shown in
+# one place, web/vendor/ufactory-g1/, by an explicit category of the writer's): its guards (tools/library_write.py
+# showcase(): the folder's files and pins, its budget, its notice, the vendor's own file, what may name the folder,
+# the scene's bodies), its builder (tools/library_showcase.py: the pinned source, the pinned build, the cut, the mirror)
+# and its decimator (tools/mesh_decimate.py: the gate, the border, the fifteen degrees, the probes); each killed alone
+# by the module named, on the tree of that day.  The two reviews of that day added four: the file under another
+# header, a copy of a mesh of the folder elsewhere under web/, the deny-list anywhere under web/, and a float's **.
+MESH_DECIMATE = "tools/mesh_decimate.py"
+SHOWCASE_TOOL = "tools/library_showcase.py"
+LIBRARY_SHOWCASE = (
+    m("S/showcase-source-published", "2026-11-12 showcase", "the vendor's own file, unsplit and undecimated, no longer refused under web/ (out of the deny-list since the decision)",
+      (LIBRARY_WRITE, "        if digest == SHOWCASE_SOURCE[1] or (len(data) == SHOWCASE_SOURCE[2] and hashlib.sha256(data[80:]).hexdigest() == SHOWCASE_SOURCE_TRIANGLES):\n",
+       "        if False:\n"), killers=("test_library.",)),
+    m("S/showcase-source-reheadered", "2026-11-12 showcase review", "the vendor's own file refused by its SHA-256 alone (the same triangles under another 80-byte header pass)",
+      (LIBRARY_WRITE, "        if digest == SHOWCASE_SOURCE[1] or (len(data) == SHOWCASE_SOURCE[2] and hashlib.sha256(data[80:]).hexdigest() == SHOWCASE_SOURCE_TRIANGLES):\n",
+       "        if digest == SHOWCASE_SOURCE[1]:\n"), killers=("test_library.",)),
+    m("S/showcase-copy", "2026-11-12 showcase review", "a byte copy of a mesh of the vendor's folder free to lie anywhere else under web/ (as another gripper's body, a sample's part)",
+      (LIBRARY_WRITE, "        if digest in places and relative != places[digest]:\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/showcase-denied-anywhere", "2026-11-12 showcase review", "a model of the deny-list (the vendor's file's undecimated pieces among them) refused only as a scene's body, not anywhere under web/",
+      (LIBRARY_WRITE, "        if digest in DENIED_SHA256:\n            found.append(f\"web/{relative} is a vendor model of the deny-list",
+       "        if False:\n            found.append(f\"web/{relative} is a vendor model of the deny-list"), killers=("test_library.",)),
+    m("S/showcase-pin", "2026-11-12 showcase", "a mesh of the vendor's folder not held to its pinned SHA-256 (another model could be put there)",
+      (LIBRARY_WRITE, "            if hashlib.sha256(files[name]).hexdigest() != pinned or stl_triangles(files[name]) is None:\n",
+       "            if stl_triangles(files[name]) is None:\n"), killers=("test_library.",)),
+    m("S/showcase-other-file", "2026-11-12 showcase", "the vendor's folder taking files beyond its twelve meshes and its notice",
+      (LIBRARY_WRITE, "    for name in sorted(set(held) - set(allowed)):\n", "    for name in ():\n"), killers=("test_library.",)),
+    m("S/showcase-budget", "2026-11-12 showcase", "the vendor's folder without its byte budget",
+      (LIBRARY_WRITE, "    if size > SHOWCASE_VENDOR_BUDGET_BYTES:\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/showcase-notice-words", "2026-11-12 showcase", "the notice's wording unchecked (whose the model is, the decision, that the repository's licence does not cover it)",
+      (LIBRARY_WRITE, '    found = [f"{name} does not say {words!r}" for words in SHOWCASE_WORDS if words not in folded]\n', "    found = []\n"),
+      killers=("test_library.",)),
+    m("S/showcase-notice-cad", "2026-11-12 showcase", "the notice free to say CAD (the page's words are 3D model)",
+      (LIBRARY_WRITE, '    if re.search(r"\\bCAD\\b", text):\n        found.append(f"{name} says CAD', '    if False:\n        found.append(f"{name} says CAD'),
+      killers=("test_library.",)),
+    m("S/showcase-notice-owner", "2026-11-12 showcase", "a row of the notice free to claim another owner or an open licence",
+      (LIBRARY_WRITE, "        if row[2].strip() != SHOWCASE_OWNER:\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/showcase-reference", "2026-11-12 showcase", "a part, entry, fit, sample or other scene free to name the vendor's folder",
+      (LIBRARY_WRITE, '        if path.is_file() and SHOWCASE_REFERENCE.search(path.read_text(encoding="utf-8", errors="replace")):\n', "        if False:\n"),
+      killers=("test_library.",)),
+    m("S/showcase-reference-samples", "2026-11-12 showcase", "the samples not among the files that may not name the vendor's folder",
+      (LIBRARY_WRITE, '               *sorted(path for path in (web / "samples").rglob("*") if path.suffix in (".json", ".md")),\n', ""),
+      killers=("test_library.",)),
+    m("S/showcase-vendor-body", "2026-11-12 showcase", "the showcase's scene free to draw a file from outside its folder as a vendor's body",
+      (LIBRARY_WRITE, "        if not mesh.startswith(prefix) or name not in SHOWCASE_VENDOR_FILES:\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/showcase-unchecked", "2026-11-12 showcase", "scenes() dropping the showcase's problems (library_write --check and the site build no longer stopped by them)",
+      (LIBRARY_WRITE, '    problems += [(None, message if message.startswith((SHOWCASE_FILE, "showcase/")) or message.endswith(REMOVE_FILE) else f"{message}: {REBUILD_SHOWCASE}")\n'
+                      "                 for message in shown]\n", ""),
+      killers=("test_library.",)),
+    m("S/showcase-source-any", "2026-11-12 showcase", "library_showcase.py: a rebuild taking another file under the pinned name",
+      (SHOWCASE_TOOL, "    if hashlib.sha256(data).hexdigest() != digest:\n", "    if False:\n"), killers=("test_library_showcase.",)),
+    m("S/showcase-repin", "2026-11-12 showcase", "library_showcase.py: a build of other bytes than the pinned ones written without --repin",
+      (SHOWCASE_TOOL, "    if unpinned and not repin:\n", "    if False:\n"), killers=("test_library_showcase.",)),
+    m("S/showcase-uncut", "2026-11-12 showcase", "library_showcase.py: the stock finger not cut where the holder sits (the coupler the whole finger bar)",
+      (SHOWCASE_TOOL, "    below = cut_below(taken(triangles, kept), CUT_Y)\n", "    below = taken(triangles, kept)\n"), killers=("test_library_showcase.",)),
+    m("S/showcase-glued", "2026-11-12 showcase", "library_showcase.py: the closed file's pieces joined through any shared edge (the pad and its rubber one piece, by neither's centre)",
+      (SHOWCASE_TOOL, "    for piece in pieces(triangles, None, pairs=True):\n", "    for piece in pieces(triangles, None):\n"),
+      killers=("test_library_showcase.",)),
+    m("S/showcase-holder-unmirrored", "2026-11-12 showcase", "library_showcase.py: the left holder drawn as the right one, not its mirror image",
+      (SHOWCASE_TOOL, '    out["holder_l"] = product(out["mate"], out["holder_r"])\n', '    out["holder_l"] = out["holder_r"]\n'),
+      killers=("test_library_showcase.",)),
+    m("S/decimate-ungated", "2026-11-12 showcase", "mesh_decimate.py: the gate off (the collapses' result kept whatever its measured deviation)",
+      (MESH_DECIMATE, "    if max(forth, back) > tolerance:\n        # No collapse at all", "    if False:\n        # No collapse at all"),
+      killers=("test_mesh_decimate.",)),
+    m("S/decimate-border", "2026-11-12 showcase", "mesh_decimate.py: a vertex on an open edge free to go (a cut's border moved)",
+      (MESH_DECIMATE, "        if owners != 2:\n            locked[i] = locked[j] = True\n", "        if owners > 2:\n            locked[i] = locked[j] = True\n"),
+      killers=("test_mesh_decimate.",)),
+    m("S/decimate-turn", "2026-11-12 showcase", "mesh_decimate.py: a face free to turn more than 15 degrees from its input normal",
+      (MESH_DECIMATE, "            if length == 0.0 or nx * was[0] + ny * was[1] + nz * was[2] < TURN_COSINE:\n", "            if length == 0.0:\n"),
+      killers=("test_mesh_decimate.",)),
+    m("S/decimate-probes", "2026-11-12 showcase", "mesh_decimate.py: the deviation measured at corners, middles and centres only (no grid inside a large triangle)",
+      (MESH_DECIMATE, "        if longest > spacing:\n", "        if False:\n"), killers=("test_mesh_decimate.",)),
+    m("S/decimate-pow", "2026-11-12 showcase review", "mesh_decimate.py: a probe's edge length squared with ** again (the C library's pow(): not the same float on every host)",
+      (MESH_DECIMATE, "            length = math.sqrt(dx * dx + dy * dy + dz * dz)\n", "            length = math.sqrt(dx ** 2 + dy ** 2 + dz ** 2)\n"),
+      killers=("test_mesh_decimate.",)),
+)
+MUTANTS += LIBRARY_SHOWCASE
+# The showcase as built and on the page (2026-11-12, the second stage): its scene about the gripper's left finger with a
+# camera of its own, no finger see-through, the shapes the project draws at their pins, its page's document
+# (web/library/showcase.json, library_write.showcase_page(): its words, its placed record, its pictures and what they were
+# shot from) and its card and page on library.html; each killed alone by the module named, on a scratch copy.
+LIBRARY_SPLIT = "tools/library_split.py"
+SHOWCASE_PAGE = (
+    m("S/showcase-page-unchecked", "2026-11-12 showcase page", "showcase() without the page's problems (showcase.json, its placed record and its pictures unchecked by every gate)",
+      (LIBRARY_WRITE, "    found += showcase_page(parts, library)[0]\n", ""), killers=("test_library.",)),
+    m("S/showcase-page-label", "2026-11-12 showcase page", "the showcase's label free not to say hand-designed, not auto-generated (the user's request)",
+      (LIBRARY_WRITE, '    if isinstance(document["label"], str) and not all(words in document["label"].lower() for words in SHOWCASE_LABEL_WORDS):\n', "    if False:\n"),
+      killers=("test_library.",)),
+    m("S/showcase-page-placed", "2026-11-12 showcase page", "showcase.json's placed record not held to the pad's own with the showcase's scene (another face, wrap or scene drawn)",
+      (LIBRARY_WRITE, '    elif document["placed"] != placed:\n', "    elif False:\n"), killers=("test_library.",)),
+    m("S/showcase-page-tutorial", "2026-11-12 showcase page", "the tutorial's link free to lead anywhere (not the address the pad's notice records)",
+      (LIBRARY_WRITE, """    elif not tutorial["href"].startswith("https://") or f"`{tutorial['href']}`" not in recorded:\n""", "    elif False:\n"), killers=("test_library.",)),
+    m("S/showcase-page-notices", "2026-11-12 showcase page", "the sources free to link other files than the gripper's and the pad's notices",
+      (LIBRARY_WRITE, '            and [item["notice"] for item in sources] == list(SHOWCASE_NOTICES)):\n', "            ):\n"), killers=("test_library.",)),
+    m("S/showcase-page-folder", "2026-11-12 showcase page", "showcase.json free to name the vendor's folder elsewhere than as its notice (a mesh, a picture)",
+      (LIBRARY_WRITE, "    if len(SHOWCASE_REFERENCE.findall(text)) != text.count(SHOWCASE_NOTICES[0]):\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/showcase-page-picture-bytes", "2026-11-12 showcase page", "a picture of the showcase not held to the bytes showcase.json names (another picture under its name)",
+      (LIBRARY_WRITE, '                if (record["bytes"], record["sha256"]) != (len(data), hashlib.sha256(data).hexdigest()):\n', "                if False:\n"),
+      killers=("test_library.",)),
+    m("S/showcase-page-picture-stray", "2026-11-12 showcase page", "showcase/ taking files that are no picture of showcase.json",
+      (LIBRARY_WRITE, "        if file.is_file() and file.relative_to(library).as_posix() not in named:\n", "        if False:\n"), killers=("test_library.",)),
+    m("S/showcase-page-stale", "2026-11-12 showcase page", "the showcase's pictures taken whatever scene, rules, art or placed record they were shot from (a changed scene keeps its old pictures)",
+      (LIBRARY_WRITE, "            if shot[key] != now[key]:\n", "            if False:\n"), killers=("test_library.",)),
+    m("S/showcase-page-rules-hash", "2026-11-12 showcase page", "the showcase's scene hash without the rules every scene is drawn by",
+      (LIBRARY_WRITE, '            "scene_sha256": scene_sha256(scene.read_bytes(), rules) if scene.is_file() and isinstance(rules, dict) else None,\n',
+       '            "scene_sha256": scene_sha256(scene.read_bytes(), {}) if scene.is_file() and isinstance(rules, dict) else None,\n'), killers=("test_library.",)),
+    m("S/showcase-page-older-silent", "2026-11-12 showcase page", "pictures of older figure or view sources never said (no warning to shoot the showcase again)",
+      (LIBRARY_WRITE, '        older = (shot["figure_sha256"], shot["view_sha256"]) != (now["figure_sha256"], now["view_sha256"])\n', "        older = False\n"),
+      killers=("test_library.",)),
+    m("S/showcase-body-unpinned", "2026-11-12 showcase page", "a body of the showcase's own folder not held to its pinned SHA-256 (a mesh under a drawn shape's name and header)",
+      (LIBRARY_WRITE, "        elif (library / mesh).is_file() and hashlib.sha256((library / mesh).read_bytes()).hexdigest() != SHOWCASE_BODIES[mesh]:\n", "        elif False:\n"),
+      killers=("test_library.",)),
+    m("S/showcase-site-older-silent", "2026-11-12 showcase page", "build_static_site.py: the showcase's pictures of older sources published without a warning",
+      ("tools/build_static_site.py", "    if showcase and library_write.showcase_page(parts, source)[1]:\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/split-showcase-drawn-any", "2026-11-12 showcase page", "library_split.py --check: any drawn body of the showcase's scene passed, pinned or not",
+      (LIBRARY_SPLIT, '                       and body["mesh"] not in library_write.SHOWCASE_BODIES})\n',
+       "                       and path.relative_to(library).as_posix() != library_write.SHOWCASE_SCENE})\n"), killers=("test_library_split.",)),
+    m("S/split-showcase-drawn-file", "2026-11-12 showcase page", "library_split.py --check: any drawn file of the showcase's folder passed, pinned or not",
+      (LIBRARY_SPLIT, "        if file.parent.name not in owned and file.relative_to(library).as_posix() not in library_write.SHOWCASE_BODIES:\n",
+       "        if file.parent.name not in owned and file.parent.name != library_write.SHOWCASE_ID:\n"), killers=("test_library_split.",)),
+    m("S/showcase-part-right", "2026-11-12 showcase page", "library_showcase.py: the part the gripper's right finger again (the pad's straps toward the logo's face)",
+      (SHOWCASE_TOOL, '"finger": finger, "part": product(HALF_TURN_Y, finger),', '"finger": finger, "part": finger,'), killers=("test_library_showcase.",)),
+    m("S/showcase-screws-half", "2026-11-12 showcase page", "library_showcase.py: the shell's screws drawn on its right half only",
+      (SHOWCASE_TOOL, '            out += [("shell-screw", product(into, shift(sign * x, y, z)), None) for sign in (1.0, -1.0)]\n',
+       '            out += [("shell-screw", product(into, shift(sign * x, y, z)), None) for sign in (1.0,)]\n'), killers=("test_library_showcase.",)),
+    m("S/showcase-camera-front", "2026-11-12 showcase page", "library_showcase.py: the showcase's camera on the side of the logo's face (the straps on the fingers' far sides)",
+      (SHOWCASE_TOOL, 'CAMERA = {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1},\n', 'CAMERA = {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": 1},\n'),
+      killers=("test_library_showcase.",)),
+    m("S/showcase-see-through", "2026-11-12 showcase page", "library_showcase.py: the showcase's near finger see-through again",
+      (SHOWCASE_TOOL, "SEE_THROUGH = []\n", 'SEE_THROUGH = ["mate"]\n'), killers=("test_library_showcase.",)),
+    m("S/library-showcase-entry", "2026-11-12 showcase page", "library.js: a showcase.json whose id is a sensor's or a part's taken (its page in place of theirs)",
+      (LIBRARY_JS, "      state.showcase = Object.hasOwn(index.variants, showcase?.id) || Object.hasOwn(index.parts, showcase?.id) ? null : showcaseOf(showcase);\n",
+       "      state.showcase = showcaseOf(showcase);\n"), killers=("test_library.",)),
+    m("S/library-showcase-after", "2026-11-12 showcase page", "library.js: the showcase's card after the grippers' section (not the grid's first)",
+      (LIBRARY_JS, "      ...(state.showcase ? [showcaseCard()] : []),\n      ...(parts.length ? [grippers(parts)] : []),\n",
+       "      ...(parts.length ? [grippers(parts)] : []),\n      ...(state.showcase ? [showcaseCard()] : []),\n"), killers=("test_library.",)),
+    m("S/library-showcase-route", "2026-11-12 showcase page", "library.js: the showcase's address not routed to its page (the grid with a note)",
+      (LIBRARY_JS, "    if (state.showcase?.id === id) { showShowcase(); return; }\n", ""), killers=("test_library.",)),
+    m("S/library-showcase-exploded", "2026-11-12 showcase page", "library.js: the showcase's page opening Exploded, not the view its card shows",
+      (LIBRARY_JS, "    state.picture = SHOWCASE_VIEW;\n", "    state.picture = VIEWS[0][0];\n"), killers=("test_library.",)),
+    m("S/library-showcase-fit", "2026-11-12 showcase page", "library.js: the showcase's 3D view asked for as a sensor's (a variant and a part it has not)",
+      (LIBRARY_JS, "      if (variant.view.placed) return live.view.show({base: BASE, id, placed: variant.view.placed, mode: state.picture});\n", ""), killers=("test_library.",)),
+    m("S/library-showcase-box", "2026-11-12 showcase page", "library.css: the showcase's page's box 16:10 (3:1 in one column) again, the upright gripper small in it",
+      ("web/library.css", ".lib-detail-showcase .lib-shot-detail { aspect-ratio:4 / 5; }\n", ""), killers=("test_library.",)),
+)
+MUTANTS += SHOWCASE_PAGE
+# The showcase's fixes after its two reviews (2026-11-12): the two guards no test held (a placed record about another
+# mesh, the writer's warning of older pictures), the stage's numbers held to the rules and the showcase's own bounds, a
+# problem of the showcase closed by its own fixes, the extender board placed along the pad's tails, the screws' own
+# black; each killed alone by the module named, on a scratch copy.
+SHOWCASE_FIX = (
+    m("S/showcase-page-placed-mesh", "2026-11-12 showcase fixes", "showcase.json's placed record free to be about another mesh than the UMI finger's (parts.json)",
+      (LIBRARY_WRITE, '    elif (placed.get("mesh") or {}).get("sha256") != parts["parts"][UMI_FINGER]["mesh"]["sha256"]:\n', "    elif False:\n"),
+      killers=("test_library.",)),
+    m("S/showcase-writer-older-silent", "2026-11-12 showcase fixes", "library_write.py: the showcase's pictures of older figure or view sources never warned of",
+      (LIBRARY_WRITE, "    if (library / SHOWCASE_FILE).is_file() and showcase_page(parts, library)[1]:\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/showcase-numbers-unheld", "2026-11-12 showcase fixes", "the showcase's stage numbers recorded only (a scene or camera that hides the pad passes every gate)",
+      (LIBRARY_WRITE, "        if isinstance(rules, dict):\n            found += [f\"{name}: {problem} (the scene or its camera hides the pad",
+       "        if False:\n            found += [f\"{name}: {problem} (the scene or its camera hides the pad"), killers=("test_library.",)),
+    m("S/showcase-numbers-bounds", "2026-11-12 showcase fixes", "the showcase's own bounds dropped (assembled_opaque, opaque_max and near_seen unheld)",
+      (LIBRARY_WRITE, '    held = [(key, "at least", checks.get(rule)) for key, rule in SHOWCASE_RULED] + list(SHOWCASE_BOUNDS)\n',
+       '    held = [(key, "at least", checks.get(rule)) for key, rule in SHOWCASE_RULED]\n'), killers=("test_library.",)),
+    m("S/showcase-numbers-rules", "2026-11-12 showcase fixes", "the showcase's numbers not held to the rules' checks (visible_min, clearance_mm, stacks_apart_px, card_px)",
+      (LIBRARY_WRITE, '    held = [(key, "at least", checks.get(rule)) for key, rule in SHOWCASE_RULED] + list(SHOWCASE_BOUNDS)\n',
+       "    held = list(SHOWCASE_BOUNDS)\n"), killers=("test_library.",)),
+    m("S/showcase-shots-unsound", "2026-11-12 showcase fixes", "library_shots.py --showcase writing the pictures of a shoot whose numbers are not sound",
+      ("tools/browser/library_shots.py", "    if unsound:\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/showcase-writer-closing", "2026-11-12 showcase fixes", "library_write.py --check closing a problem of the showcase alone with the private scene builder's fix",
+      (LIBRARY_WRITE, "        if len(unscened) > len(shown):\n", "        if unscened:\n"), killers=("test_library.",)),
+    m("S/showcase-board-unplaced", "2026-11-12 showcase fixes", "library_showcase.py: the extender board, its sockets and the cable stub in the part's axes, off the pad's tails",
+      (SHOWCASE_TOOL, '    places = {"board": board_place(), "cable": cable_place()}\n', '    places = {"board": IDENTITY, "cable": IDENTITY}\n'),
+      killers=("test_library_showcase.",)),
+    m("S/showcase-screws-anodized", "2026-11-12 showcase fixes", "library_showcase.py: the shell's screws in the anodized metal again (mid grey from the logo's side)",
+      (SHOWCASE_TOOL, '    "shell-screw": ("a shell screw\'s head in its well", "screw-black",\n', '    "shell-screw": ("a shell screw\'s head in its well", "anodized-black",\n'),
+      killers=("test_library.", "test_library_showcase.")),
+)
+MUTANTS += SHOWCASE_FIX
+# The verification of 2026-11-13: the art's gzip header the same on every Python, a file no tool writes closed by its
+# removal alone, a refused site build leaving its folder empty, a split body of one file worded so, the showcase's
+# Exploded camera; each killed alone by the module named, on a scratch copy.
+VERIFY_FIX = (
+    m("V/art-os-byte", "2026-11-13 verification", "library_write.art_bytes(): the gzip header's OS byte left as Python before 3.11 writes it (255)",
+      (LIBRARY_WRITE, '    return data[:9] + b"\\x03" + data[10:]\n', '    return data[:9] + b"\\xff" + data[10:]\n'), killers=("test_showcase.", "test_library.")),
+    m("V/remove-closing", "2026-11-13 verification", "library_write --check: a file to remove closed by the showcase's line, which says to rebuild it",
+      (LIBRARY_WRITE, "        if [problem for problem in shown if not problem.endswith(REMOVE_FILE)]:\n", "        if shown:\n"), killers=("test_library.",)),
+    m("V/site-refused-kept", "2026-11-13 verification", "build_static_site.py: a refused build leaving what it copied (a refused file among it) in its folder",
+      ("tools/build_static_site.py", "        empty(out)\n        raise\n", "        raise\n"), killers=("test_static_site.",)),
+    m("V/split-one-file", "2026-11-13 verification", "library_split.py: a split body of one file worded 'one of the 1 files' again",
+      (LIBRARY_SPLIT, "        note = (SPLIT_NOTE if len(components_) > 1 else SPLIT_NOTE_ONE).format(count=len(components_), stem=stem)\n",
+       "        note = SPLIT_NOTE.format(count=len(components_), stem=stem)\n"), killers=("test_library_split.",)),
+    m("V/showcase-exploded-camera", "2026-11-13 verification", "library_showcase.py: the showcase's Exploded home the Assembled camera again (the lifted layers edge-on)",
+      (SHOWCASE_TOOL, 'CAMERA = {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1},\n', 'CAMERA = {"exploded": {"tilt_deg": 60, "elevation_deg": 20, "front": -1},\n'),
+      killers=("test_library_showcase.", "test_library.")),
+)
+MUTANTS += VERIFY_FIX
 
 
 # --------------------------------------------------------------------------

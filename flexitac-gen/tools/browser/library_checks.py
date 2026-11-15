@@ -7,7 +7,7 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   umi finger在首页而可以显示重复,其他的夹爪后面就只出现一次,然后标注一下点进去我们有1-3mm customization" and "UMI
   Fin-Ray Gripper. ... 这个section可以放在夹爪的后面"): at 1440, 1100, 900, 768, 744, 735, 734, 600, 390, 360 and 320 px
   no horizontal page overflow (320 px since the header's below-360 rules of 2026-11-05); no tile and no "Start here.";
-  the grippers' section first ('Grippers. Seven, each fitted at four pitches.'), its seven cards in the parts' order
+  the showcase's card (2026-11-12; showcase_checks.py part_page), then the grippers' section ('Grippers. Seven, each fitted at four pitches.'), its seven cards in the parts' order
   (gripper-<part>, opening #<part>-2mm, named by the gripper, its two grey lines its range, '1 to 3 mm', and 'Pick your
   pitch', no badge line), four to a row from 735 px (4 + 3) and two below (2 + 2 + 2 + 1), never wider than the UMI
   shelf's cards from 735 px and as wide from 1100 px, every grey line on one line and no text past its card's box down
@@ -65,6 +65,17 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   150 ms network (five pitch and part changes with four mode toggles during each load; Back and Forward between the grid
   and two grippers' pages; Unitree Dex1's sensor left for Franka Hand's, which is drawn first): each time the sensor
   asked last drawn at its home exactly as a fresh page draws it, every pixel, its state that sensor's, no error.
+- part_looks (the looks, the user's request of 2026-11-12: every gripper coloured after photos of the real product;
+  docs/LIBRARY_VIEW.md "The looks"; the reviews of 2026-11-12: nothing in the browser had asserted them), at 1440 x 900,
+  on the first gripper whose scene has looks (Franka Hand's 2 mm sensor; none: said and left out): the view drawn with
+  no console error or warning, its stage's looks the scene's (#libViewState stage.looks: the bodies' looks by name, the
+  part's, the crease angle, and the part's corners sharing as many points as its file has at 1 um); at each home its
+  picture (as part_view compares one) where the picture was shot from the view; far from the same scene served without
+  its looks (the one grey of before); the UMI finger drawn after it on the same page exactly as on a page of its own
+  (the part's material put back, every pixel) and the gripper drawn again after the UMI exactly as on a fresh page; its
+  WebGL context lost and back: drawn again exactly as before (the gripper studio made again); and on Unitree Dex1's
+  sensor, whose part's file is in metres, its scene served with a look for the part and a crease angle: the part's
+  corners share its file's points at 1 um, not at 1 mm.
 - part_placeholders (no picture: every "image" null): every slot the drawing of its field (its rows and columns), no
   image, no view control and no request for a picture, as before the pictures.
 - part_family (the tapered tips, 2026-11-05): the family card ends the UMI shelf ('Tapered tips', its two lines), no
@@ -278,6 +289,12 @@ def library_case(page, case, missing=(), view=False):
         variant["view"] = view_of(key) if view and case == "pictures" else None
     body = json.dumps(served)
     page.route("**/static/library/entries.json", lambda route: route.fulfill(status=200, content_type="application/json", body=body))
+    if case == "placeholders":
+        # The Library as before its pictures: the showcase's card too (2026-11-12) without its picture, the drawing of
+        # its pad's field in its place (showcase.json's "image" with no file named).
+        showcase = LIBRARY / "showcase.json"
+        document = dict(json.loads(showcase.read_text(encoding="utf-8")), image={}) if showcase.is_file() else None
+        page.route("**/static/library/showcase.json", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(document)))
     if view:
         def art(route):
             name = route.request.url.split("?")[0].rsplit("/", 1)[-1]
@@ -327,7 +344,7 @@ LAYOUT = """() => { const de = document.documentElement;
               lineRows: [...card.querySelectorAll('.lib-card-line')].map(rowsOf), top: Math.round(r.top + scrollY), width: r.width, past: Math.round(past * 10) / 10}; })};
   const main = document.querySelector('main.lib');
   return {overflow: de.scrollWidth - de.clientWidth, main: main.scrollWidth - main.clientWidth, rows, grid,
-          order: [...document.getElementById('libShelves').children].map(n => n.id), tiles: document.querySelectorAll('.lib-tile, #libTiles').length}; }"""
+          order: [...document.getElementById('libShelves').children].map(n => n.id || n.className), tiles: document.querySelectorAll('.lib-tile, #libTiles').length}; }"""
 # The title's line (the review of 2026-11-05): each of its lines' right end against the content's right edge (the gutter),
 # its lines, and whether "open-source" (its no-break hyphen) or the mode's name "Gen by Surface" (with spaces or its
 # no-break spaces; the integration's review of 2026-11-05: "Gen by" / "Surface" from 860 to 1024 px and at 600 px) is
@@ -478,9 +495,10 @@ def part_layout(browser):
         check(f"layout {width}: the UMI shelf's heading 56 px below the grippers' last row", [(name, gap) for name, gap, _, _ in spacing if gap is not None] == [("grippers", 56)],
               [(name, gap, arrows) for name, gap, _, arrows in spacing])
         if width == 1440:
-            check("layout: no tile and no 'Start here.'; the grippers' section, then the UMI finger's shelf",
-                  layout["tiles"] == 0 and layout["order"] == ["grippers"] + [f"shelf-{part}" for part in SHELVES] and not page.query_selector("#shelf-start"),
-                  (layout["tiles"], layout["order"]))
+            # (Since 2026-11-12 the showcase's one card comes first, in a section of its own: showcase_checks part_page.)
+            check("layout: no tile and no 'Start here.'; the showcase's card, the grippers' section, then the UMI finger's shelf",
+                  layout["tiles"] == 0 and layout["order"] == ["lib-showcased", "grippers"] + [f"shelf-{part}" for part in SHELVES]
+                  and not page.query_selector("#shelf-start"), (layout["tiles"], layout["order"]))
             check("layout: the UMI shelf with its variants by pitch, closed by the Tapered tips card",
                   [(row["id"], row["cards"]) for row in layout["rows"]] == expected_rows, [(row["id"], row["cards"]) for row in layout["rows"]])
             got = [{key: card[key] for key in ("id", "href", "variant", "name", "lines")} for card in cards]
@@ -658,7 +676,9 @@ def part_grid(browser):
     page.evaluate("() => scrollTo(0, 0)")
     page.click("#gripper-makermods-metal"); page.wait_for_timeout(150)
     page.go_back(); page.wait_for_timeout(150)
-    page.evaluate("() => scrollTo(0, 200)"); page.wait_for_timeout(60)
+    # (The card in the window before the click, which then scrolls nothing: since the showcase's card of 2026-11-12 the
+    # grippers' lower row is below a 900 px window's first screen.)
+    page.evaluate("() => { document.getElementById('gripper-unitree-dex1').scrollIntoView({block: 'center'}); scrollBy(0, 40); }"); page.wait_for_timeout(60)
     before = page.evaluate(VIEW)
     page.click("#gripper-unitree-dex1"); page.wait_for_timeout(150)
     page.click(".lib-back"); page.wait_for_timeout(150)
@@ -1000,13 +1020,13 @@ def part_first_screen(browser):
         check(f"first screen ({label}): no console error", not any(errors.values()), {size: found for size, found in errors.items() if found})
 
 
-# Every visible picture slot: its owner (a card's variant or family, or the sensor's page), its box and
+# Every visible picture slot: its owner (a card's variant or family, the showcase's card, or the sensor's page), its box and
 # background, its children, the placeholder's drawing (its field and its lines), and an image's attributes, computed fit,
 # box within the slot and whether it has loaded (or broken: loaded with no picture).
 SLOTS = """() => [...document.querySelectorAll('.lib-shot')].filter(shot => shot.checkVisibility()).map(shot => {
   const owner = shot.closest('.lib-card'); const img = shot.querySelector('img'); const r = shot.getBoundingClientRect();
   const round = v => Math.round(v * 10) / 10;
-  return {owner: owner ? owner.dataset.variant || 'family:' + owner.dataset.family : 'detail',
+  return {owner: owner ? (owner.dataset.showcase ? 'showcase' : owner.dataset.variant || 'family:' + owner.dataset.family) : 'detail',
     box: [round(r.width), round(r.height)], background: getComputedStyle(shot).backgroundColor, children: [...shot.children].map(n => n.tagName.toLowerCase()),
     field: shot.querySelector('svg .lib-field') !== null, lines: shot.querySelectorAll('svg .lib-lines line').length,
     img: img && {src: img.getAttribute('src'), alt: img.getAttribute('alt'), loading: img.getAttribute('loading'), decoding: img.getAttribute('decoding'),
@@ -1116,6 +1136,12 @@ def pictures_case(browser, view):
           all(0 < count <= len(GRID_CARDS) and size <= FIRST_SCREEN_BYTES for count, size in opened.values()), opened)
     load_grid(page)
     slots = page.evaluate(SLOTS)
+    # The showcase's large card (2026-11-12) is the grid's first slot, a picture of its own kind: its own card file at its
+    # own size, loaded at once (showcase_checks part_page has its checks); the sensors' cards after it are as they were.
+    hero = [slot for slot in slots if slot["owner"] == "showcase"]
+    slots = [slot for slot in slots if slot["owner"] != "showcase"]
+    check(f"pictures{tag}: the showcase's card is the grid's one slot that is no sensor's, its picture loaded in the same light box",
+          len(hero) == 1 and (hero[0]["img"] or {}).get("loaded") and hero[0]["children"] == ["img"] and hero[0]["background"] == "rgb(245, 245, 247)", hero[:1])
     wrong = [result for result in map(card_picture_wrong, slots) if result is not None]
     owners = [slot["owner"] for slot in slots]
     check(f"pictures{tag}: every card (the grippers' seven, each its 2 mm sensor's, the UMI shelf's, the Tapered tips card its default tip's: "
@@ -1255,7 +1281,7 @@ def pictures_case(browser, view):
     library_case(page, "pictures", missing, view=view)
     open_library(page)
     load_grid(page)
-    slots = page.evaluate(SLOTS)
+    slots = [slot for slot in page.evaluate(SLOTS) if slot["owner"] != "showcase"]
     failed = [slot for slot in slots if slot["owner"] == card]
     check(f"pictures{tag}: a card picture that does not load ({card}'s) gives way to the placeholder, the field's drawing alone; no slot holds a broken image",
           failed and all(placeholder_wrong(slot) is None for slot in failed) and not [slot for slot in slots if (slot["img"] or {}).get("broken")]
@@ -1291,9 +1317,13 @@ def part_placeholders(browser):
     open_library(page)
     load_grid(page)
     slots = page.evaluate(SLOTS)
+    hero = [slot for slot in slots if slot["owner"] == "showcase"]
+    slots = [slot for slot in slots if slot["owner"] != "showcase"]
     wrong = [slot for slot in slots if placeholder_wrong(slot) is not None]
     check("placeholders: without pictures every card's slot is the drawing of its sensor's field (a line per row and column), no image",
           not wrong and len(slots) == len(GRID_CARDS), wrong[:2] or len(slots))
+    check("placeholders: the showcase's card too: the drawing of its pad's field (12 columns and 32 rows), no image",
+          len(hero) == 1 and hero[0]["children"] == ["svg"] and hero[0]["field"] and hero[0]["img"] is None and hero[0]["lines"] == 44, hero[:1])
     page.screenshot(path=f"{SHOTS}/library_placeholders_grid_1440_light.png")
     page.set_viewport_size({"width": 900, "height": 900}); page.wait_for_timeout(120)
     page.screenshot(path=f"{SHOTS}/library_placeholders_grid_900_light.png")
@@ -1645,6 +1675,30 @@ def comparable(key):
     return PICTURED and (bool(SHOTS_MANIFEST.get(key, {}).get("art")) or ENTRIES["variants"][key]["part"] not in SCENES)
 
 
+# A turn of ``presses`` times ArrowLeft (5 degrees each) on the view, then the canvas read in the frame it is drawn in
+# (the turn asks for that frame; three.js keeps no drawing buffer, so a frame later the read is blank).
+TURNED_READ = """async (presses) => {
+  const host = document.querySelector('#libDetail .lib-live');
+  const canvas = host.querySelector('canvas');
+  for (let k = 0; k < presses; k += 1) host.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowLeft', bubbles: true, cancelable: true}));
+  const url = await new Promise(resolve => requestAnimationFrame(() => resolve(canvas.toDataURL('image/png'))));
+  return {url, moved: JSON.parse(document.getElementById('libViewState').textContent).moved};
+}"""
+
+
+def edge_pixels(png):
+    """How many pixels of a canvas read (a PNG with the drawing's alpha) are drawn on its two outer rows and columns, or
+    None for a read with nothing drawn (a frame missed: no proof of anything)."""
+    from PIL import Image
+    alpha = Image.open(io.BytesIO(png)).getchannel("A")
+    if alpha.getbbox() is None:
+        return None
+    width, height = alpha.size
+    rows = [(x, y) for y in (0, 1, height - 2, height - 1) for x in range(width)]
+    columns = [(x, y) for x in (0, 1, width - 2, width - 1) for y in range(2, height - 2)]
+    return sum(1 for point in rows + columns if alpha.getpixel(point) > 0)
+
+
 def home_reads(page):
     """{mode: the view's canvas as a PNG at its home} with its host at the pictures' pane (library_shots.PANE: 640 x 400
     CSS px, a 1280 x 800 buffer) on a visitor's page (the view's own move to the middle), the host put back after."""
@@ -1808,6 +1862,19 @@ def part_view(browser):
                     page.screenshot(path=f"{SHOTS}/library_view_{key}_{size}_assembled.png")
             check(f"view {name}: the Exploded | Assembled switch drives the view both ways (its mode drawn, at its home)",
                   modes == {"assembled": ("assembled", "assembled", False, "drawn"), "exploded": ("exploded", "exploded", False, "drawn")}, modes)
+            # Turned, the drawing kept whole (library_view.js fitLens; the verification of 2026-11-13: half-way round, the UMI
+            # finger's Assembled tip left the canvas, a third of the way round the YAM's base): in each mode, turned 120,
+            # 180 and 240 degrees with ArrowLeft, no drawn pixel on the drawing buffer's two outer rows and columns.
+            edges = {}
+            for mode in ("assembled", "exploded"):
+                page.click(f"#libDetail .lib-view label:has(input[value='{mode}'])")
+                library_shots.poll(page, "(mode) => { const s = JSON.parse(document.getElementById('libViewState').textContent); return s.drawn_mode === mode; }", mode, 10)
+                for deg, turn in ((120, 24), (180, 12), (240, 12)):
+                    read = page.evaluate(TURNED_READ, turn)
+                    edges[f"{mode} {deg}"] = edge_pixels(base64.b64decode(read["url"].split(",", 1)[1])) if read["moved"] else None
+                page.focus("#libDetail .lib-live"); page.keyboard.press("0"); page.wait_for_timeout(120)
+            check(f"view {name}: turned 120, 180 and 240 degrees in both modes, the drawing stays whole on the canvas (no drawn pixel on its edge)",
+                  len(edges) == 6 and all(count == 0 for count in edges.values()), edges)
             page.focus("#libDetailTitle")
             for _ in range(20):
                 page.keyboard.press("Tab")
@@ -1997,6 +2064,161 @@ def part_view_race(browser):
         page.context.close()
 
 
+# The looks (docs/LIBRARY_VIEW.md "The looks"; the user's request of 2026-11-12).  LOOK_GRIPPER: the first gripper's 2 mm
+# sensor whose committed scene has looks (None before any has); LOOK_METRE: a gripper whose part's file is in metres (the
+# stage welds the part's corners for its smooth normals in mm: the review of 2026-11-12), its scene served here with a
+# look for the part and a crease angle.
+def looked_gripper():
+    for part in ENTRIES["order"]:
+        path = SCENES.get(part)
+        if path and (LIBRARY / path).is_file() and "looks" in json.loads((LIBRARY / path).read_text(encoding="utf-8")) and f"{part}-2mm" in ENTRIES["variants"]:
+            return f"{part}-2mm"
+    return None
+
+
+LOOK_METRE = "unitree-dex1-2mm"
+LOOK_METRE_SCENE = {"looks": {"metal": {"color": "#c9ccd0", "metalness": 1, "roughness": 0.45}}, "part_look": "metal", "smooth_deg": 35}
+UNIT_SCALES_MM = {"m": 1000, "cm": 10, "mm": 1, "in": 25.4}
+LOSE_CONTEXT = """async () => {
+  const gl = document.querySelector('#libDetail .lib-live canvas').getContext('webgl2');
+  const lose = gl && gl.getExtension('WEBGL_lose_context');
+  if (!lose) return 'no WEBGL_lose_context';
+  lose.loseContext();
+  await new Promise(resolve => setTimeout(resolve, 400));
+  const state = JSON.parse(document.getElementById('libViewState').textContent).state;
+  lose.restoreContext();
+  return state;
+}"""
+
+
+def part_points(part):
+    """How many points the corners of a part's mesh share at 1 um (the stage's weld for its smooth normals: each
+    coordinate in mm times 1000, rounded as JavaScript rounds)."""
+    import struct
+
+    mesh = ENTRIES["parts"][part]["mesh"]
+    data = (LIBRARY / mesh["file"]).read_bytes()
+    cell = 1e3 * UNIT_SCALES_MM[mesh["unit"]]
+    points = set()
+    for index in range(struct.unpack_from("<I", data, 80)[0]):
+        values = struct.unpack_from("<9f", data, 84 + 50 * index + 12)
+        for corner in range(3):
+            points.add(tuple(math.floor(value * cell + 0.5) for value in values[3 * corner:3 * corner + 3]))
+    return len(points)
+
+
+def same_drawings(one, two):
+    """Whether two home_reads() are the same drawings at both homes, every pixel (likeness: the margins, the colours,
+    the opaque pixels)."""
+    compared = {mode: mode in one and mode in two and likeness(one[mode]["png"], two[mode]["png"]) for mode in library_shots.MODES}
+    return all(item and item["margins"][0] == item["margins"][1] and item["mean"] == 0 and item["share"] == 1 for item in compared.values()), compared
+
+
+def part_looks(browser):
+    """The looks of a gripper's scene in the 3D view (the user's request of 2026-11-12; the reviews of 2026-11-12: the
+    stage's look code had no check in a browser)."""
+    if not any(arts(browser).values()):
+        check("looks: the 3D view's art is there for the sensors entries.json gives a view", not VIEWED, "a built site without the shoot's art/")
+        return
+    from PIL import Image
+
+    key = looked_gripper()
+    if key is None:
+        print("    looks: no gripper's scene has looks yet: its checks left out", flush=True)
+    else:
+        variant = ENTRIES["variants"][key]
+        name = variant["label"]
+        scene = json.loads((LIBRARY / SCENES[variant["part"]]).read_text(encoding="utf-8"))
+        page = view_page(browser)
+        library_case(page, "pictures", view=True)
+        settled = open_view(page, key) or {}
+        looks = (settled.get("stage") or {}).get("looks")
+        expected = {"bodies": sorted({body["look"] for body in scene["bodies"] if body.get("look")}), "part": scene.get("part_look"),
+                    "smooth_deg": scene.get("smooth_deg"), "part_points": part_points(variant["part"]) if "smooth_deg" in scene else None}
+        noise = [entry[:2] for entry in page.logs if entry[0] in ("error", "pageerror") or (entry[0] == "warning" and "GL Driver Message" not in entry[1])]
+        check(f"looks {name}: the view drawn, its stage's looks the scene's (the bodies' looks by name, the part's, the crease angle, the part's "
+              "corners sharing its file's points at 1 um); no console error or warning",
+              settled.get("state") == "drawn" and looks == expected and not noise, (settled.get("state"), looks, expected, noise[:3]))
+        fresh = home_reads(page)
+        page.screenshot(path=f"{SHOTS}/library_looks_{key}_home.png")
+        if comparable(key):
+            compared = {mode: None for mode in library_shots.MODES}
+            if sorted(fresh) == sorted(library_shots.MODES):
+                for mode in library_shots.MODES:
+                    picture = page.request.get(SITE["base"] + "static/library/" + IMAGES[key][mode]["src"]).body()
+                    compared[mode] = dict(likeness(library_shots.webp(Image.open(io.BytesIO(fresh[mode]["png"]))), picture),
+                                          margins=likeness(fresh[mode]["png"], picture)["margins"])
+            check(f"looks {name}: at each home the view's drawing is its picture (as part_view compares one: margins within 1 px, the colours "
+                  "within 1.5 levels on average, 99 % of them within 16, over 99 % of the picture's)",
+                  all(item and item["margins"] and all(abs(a - b) <= 1 for a, b in zip(*item["margins"])) and item["mean"] is not None
+                      and item["mean"] < 1.5 and item["close"] >= 0.99 and item["share"] >= 0.99 for item in compared.values()), compared)
+        else:
+            print(f"    looks {name}: its picture is not its 3D view's: drawing and picture not compared", flush=True)
+        # Its WebGL context lost and back: drawn again as before (the gripper studio is a render target of the context).
+        lost = page.evaluate(LOSE_CONTEXT)
+        page.wait_for_timeout(500)
+        again = view_settled(page, key) or {}
+        back = home_reads(page) if again.get("state") == "drawn" else {}
+        same, detail = same_drawings(fresh, back)
+        check(f"looks {name}: its WebGL context lost (the picture shown) and back: drawn again exactly as before (every pixel at both homes), "
+              "no console error", lost == "lost" and again.get("state") == "drawn" and same and not errors_of(page), (lost, again.get("state"), detail, errors_of(page)[:3]))
+        page.context.close()
+        # The same scene without its looks: the one grey of before, far from the drawing with them.
+        plain = {name_: value for name_, value in scene.items() if name_ not in ("looks", "part_look", "smooth_deg")}
+        plain["bodies"] = [{name_: value for name_, value in body.items() if name_ != "look"} for body in scene["bodies"]]
+        page = view_page(browser)
+        library_case(page, "pictures", view=True)
+        page.route(f"**/static/library/{SCENES[variant['part']]}", served("application/json", json.dumps(plain)))
+        bare = open_view(page, key) or {}
+        grey = home_reads(page)
+        apart = {mode: mode in fresh and mode in grey and likeness(fresh[mode]["png"], grey[mode]["png"]) for mode in library_shots.MODES}
+        check(f"looks {name}: the same scene served without its looks draws the one grey of before (its stage naming no look), far from the "
+              "drawing with them (the colours of the pixels both draw 10 levels apart or more on average, at both homes)",
+              bare.get("state") == "drawn" and (bare.get("stage") or {}).get("looks") == {"bodies": [], "part": None, "smooth_deg": None, "part_points": None}
+              and all(item and item["mean"] is not None and item["mean"] >= 10 for item in apart.values()), ((bare.get("stage") or {}).get("looks"), apart))
+        page.context.close()
+        # The UMI finger after the gripper on the same page as on a page of its own (the part's material put back, its
+        # facets flat), and the gripper again after it as on a fresh page.
+        page = view_page(browser)
+        library_case(page, "pictures", view=True)
+        open_view(page, VIEW_UMI)
+        alone = home_reads(page)
+        page.context.close()
+        page = view_page(browser)
+        library_case(page, "pictures", view=True)
+        open_view(page, key)
+        page.evaluate("(key) => { location.hash = '#' + key; }", VIEW_UMI)
+        then = view_settled(page, VIEW_UMI) or {}
+        same, detail = same_drawings(alone, home_reads(page) if then.get("state") == "drawn" else {})
+        check(f"looks {name}: the UMI finger drawn after it on the same page draws exactly as on a page of its own (the part's own material "
+              "put back: every pixel at both homes)", then.get("state") == "drawn" and then.get("gripper") is False and same, (then.get("state"), detail))
+        page.evaluate("(key) => { location.hash = '#' + key; }", key)
+        once_more = view_settled(page, key) or {}
+        same, detail = same_drawings(fresh, home_reads(page) if once_more.get("state") == "drawn" else {})
+        check(f"looks {name}: drawn again after the UMI finger exactly as on a fresh page (every pixel at both homes); no console error",
+              once_more.get("state") == "drawn" and same and not errors_of(page), (once_more.get("state"), detail, errors_of(page)[:3]))
+        page.context.close()
+    # A part whose file is in metres: its corners welded in mm for the smooth normals.  Its scene as committed once it
+    # has a crease angle of its own, else served with one and a look for the part.
+    part = ENTRIES["variants"][LOOK_METRE]["part"]
+    scene = json.loads((LIBRARY / SCENES[part]).read_text(encoding="utf-8"))
+    if "smooth_deg" not in scene:
+        scene = dict(scene, looks=dict(scene.get("looks") or {}, **LOOK_METRE_SCENE["looks"]), part_look=LOOK_METRE_SCENE["part_look"],
+                     smooth_deg=LOOK_METRE_SCENE["smooth_deg"])
+    page = view_page(browser)
+    library_case(page, "pictures", view=True)
+    page.route(f"**/static/library/{SCENES[part]}", served("application/json", json.dumps(scene)))
+    settled = open_view(page, LOOK_METRE) or {}
+    looks = (settled.get("stage") or {}).get("looks") or {}
+    points = part_points(part)
+    page.screenshot(path=f"{SHOTS}/library_looks_{LOOK_METRE}_part_smooth.png")
+    check(f"looks {ENTRIES['variants'][LOOK_METRE]['label']} (its part's file in {ENTRIES['parts'][part]['mesh']['unit']}): with a look for the part and a "
+          f"crease angle, the part's corners share its file's {points} points at 1 um (in mm, whatever the file's unit); no console error",
+          settled.get("state") == "drawn" and looks.get("smooth_deg") is not None and looks.get("part_points") == points and not errors_of(page),
+          (settled.get("state"), looks, points, errors_of(page)[:3]))
+    page.context.close()
+
+
 class QuietFiles(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
@@ -2023,8 +2245,8 @@ def main(argv=None):
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(args=WEBGL_ARGS)
-            parts = (part_layout, part_grid, part_routes, part_first_screen, part_pictures, part_view, part_view_race, part_placeholders, part_family,
-                     part_downloads, part_isolation, part_errors)
+            parts = (part_layout, part_grid, part_routes, part_first_screen, part_pictures, part_view, part_view_race, part_looks, part_placeholders,
+                     part_family, part_downloads, part_isolation, part_errors)
             for part in parts:
                 if args.parts and part.__name__ not in args.parts:
                     continue

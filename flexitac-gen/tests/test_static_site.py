@@ -236,6 +236,21 @@ class SiteBuildTests(unittest.TestCase):
             (earlier / "stale.js").write_text("", encoding="utf-8")
             build_static_site.prepare(earlier)
             self.assertEqual(list(earlier.iterdir()), [])
+            # A refused build leaves its folder empty: web/ is copied before the Library's gates refuse a file (the
+            # review of 2026-11-13: a model of the deny-list stayed in the output folder).
+            def copied(static: Path) -> None:
+                (static / "library" / "bodies").mkdir(parents=True)
+                (static / "library" / "bodies" / "refused.stl").write_bytes(b"x")
+
+            refused = build_static_site.BuildError("the library's scenes are stale (refused)")
+            with mock.patch.object(build_static_site, "pyodide_files", return_value={}), \
+                    mock.patch.object(build_static_site, "pyodide_archive", return_value=b""), \
+                    mock.patch.object(build_static_site, "engine_zip", return_value=b""), \
+                    mock.patch.object(build_static_site, "copy_web", side_effect=copied), \
+                    mock.patch.object(build_static_site, "library", side_effect=refused):
+                with self.assertRaisesRegex(build_static_site.BuildError, "scenes are stale"):
+                    build_static_site.build(earlier, github=False)
+            self.assertEqual(list(earlier.iterdir()), [])
 
 
 class PublicExportTests(unittest.TestCase):
@@ -266,6 +281,19 @@ class PublicExportTests(unittest.TestCase):
             self.assertFalse(covered(private), private)
         for shipped in ("web/library/scenes/scenes.json", "web/library/bodies/x.stl", "web/library/art/x.json.gz", "web/cad/library_view.js"):
             self.assertTrue(covered(shipped), shipped)
+        # The showcase of 2026-11-12: the vendor's folder with its notice goes with web/, and the tool that builds it
+        # and its decimator (stdlib; their --check needs no source) are public, so the public copy checks the files.
+        # Its page of that day's second stage: its document, its pictures and the shapes the project draws go with web/,
+        # the shots tool that shoots it and the check of its page with tools/browser, and the split tool whose shapes
+        # the builder draws with is public already.
+        for shipped in ("web/vendor/ufactory-g1/NOTICE.md", "web/vendor/ufactory-g1/body_shell.stl", "web/library/scenes/flexitac-g1.json",
+                        "tools/library_showcase.py", "tools/mesh_decimate.py", "web/library/showcase.json",
+                        "web/library/showcase/flexitac-g1.exploded.webp", "web/library/showcase/flexitac-g1.assembled.webp",
+                        "web/library/showcase/flexitac-g1.card.webp", "web/library/bodies/flexitac-g1/drawn-shell-screw.stl",
+                        "web/vendor/flexitac-v2/umi-finray.placed.json", "tools/library_split.py", "tools/browser/library_shots.py",
+                        "tools/browser/showcase_checks.py"):
+            self.assertTrue(covered(shipped), shipped)
+            self.assertTrue((ROOT / shipped).is_file(), shipped)
 
     def test_an_export_writes_the_commits_public_files_and_the_workflow(self) -> None:
         def run(*args: str, cwd: Path) -> None:

@@ -47,6 +47,12 @@ matrices, their bodies' files and notices, the deny-list).  Since the shoot of 2
 art and each gripper's stage (VIEW_REQUIRED), a record without them is refused (before it, a picture without them was
 shown with no 3D view, a warning).
 
+The Library's first section is a showcase (the project owner's decision of 2026-11-12): the hand-designed FlexiTac
+sensor on UFACTORY's xArm Gripper G1, no part or entry of this writer's (no fit, no build).  Its files are written by
+tools/library_showcase.py; this module holds its guards (SHOWCASE_*, showcase(), reported by scenes()): the one vendor
+model the Library shows, in its own folder beside the Library with its own notice, pinned file by file, named by the
+showcase's scene alone, and the vendor's own file never published.
+
 Stdlib only.  Re-run it after any change of the page's defaults (they are every sensor's request; the site build
 refuses a fit of another request) and after any change of the engine, the surface template or the profile that moves
 a build id:
@@ -100,6 +106,11 @@ ENTRIES_ABOUT = ("The Library's index (library.html; Gen by Surface's ./?part=<i
 # it from here, and tests/test_library.py holds the same list and asserts this one equal to it.  It lives in this
 # public module so that the public copy's tests and mutation catalogue check it too (the integration's review of
 # 2026-11-05: the importer's own copy, outside export_public.PUBLIC, broke the public copy's mutation --check).
+# Since the project owner's decision of 2026-11-12 one vendor model is shown, in one place: UFACTORY's Gripper G1 in
+# the Library's showcase (SHOWCASE_* below, web/vendor/ufactory-g1/ with its own notice).  Nothing else changes: the
+# names stay refused in every part, entry, fit and sample, and the Robotiq models, the MakerMods body and the seven
+# meshes of the video's split of the xArm file stay denied by SHA-256; so do, since the review of that day, the
+# pieces of the same file before any decimation (the FlexiTac Tactile Demo's split: together they are the whole file).
 DENIED_SHA256 = {
     "b0df0eaca944c7401185ada85d22e3111b477c3484c6fa3fd915fce6d6811aaf": "Robotiq 2F-85 (2F85_Opened.stl)",
     "49e96f7fceab20ebcf13b5c8467bf83d70716a846a109ad37818bc06d798f7a7": "Robotiq 3F (ROBOTIQ_AGS-001-XXXX.stl)",
@@ -111,7 +122,28 @@ DENIED_SHA256 = {
     "3d82a29a55c7fca3f08eeb441a97667d34e675901bc0fab8c22fec6e41ead7bd": "xArm (link_l_outer.stl)",
     "f256d6ca99bca7c32e991080ca5988015c96a535bf1edc14840ff5643f864904": "xArm (link_r_inner.stl)",
     "c97e95bafd0b0f5a66dfcccf5f398956ddae2facca3d4509f1754a0ba138888b": "xArm (link_r_outer.stl)",
-    "6c59aabbd22823819af1face17752cfd5b32f43529ed08da9596148770de332f": "xArm (Gripper G1 3D File (With).stl)",
+    # 2026-11-12: "xArm (Gripper G1 3D File (With).stl)", 6c59aabb...de332f, left this list by the project owner's
+    # decision of that day, so that the showcase's notice may name the file its meshes are split from.  The file itself,
+    # unsplit and undecimated, is still refused anywhere under web/: SHOWCASE_SOURCE, showcase().
+    # The same file split as the FlexiTac Tactile Demo splits it, not decimated (its seven first pieces, and the nine
+    # further pieces of its body and fingers; the links are in both): the review of 2026-11-12.  Only the decimated
+    # pieces of SHOWCASE_VENDOR_FILES are shown, in their folder.
+    "e18c8d350dd92e480cdcedc0c59d56369aa60c2b80f0e6d05198a9e657fb4e5d": "xArm Gripper G1, not decimated (body.stl)",
+    "fdab9b44c248c7b8cd738b9c3ca25c7abd8b36d27156078a585f4b13e970b43e": "xArm Gripper G1, not decimated (finger_r.stl)",
+    "303363c45801cc09e08daf2be914b9f9a237b671e455fe67ceb73e2e1fbeec16": "xArm Gripper G1, not decimated (finger_l.stl)",
+    "375ecfd2ebda0c82e73758c7d336cb139208c666cb10805d56dac85dbbca6b4b": "xArm Gripper G1, not decimated (link_r_outer.stl)",
+    "7190fb20f73f857dffa37ca44c373933213c6b9019133844e74d449fd274cef7": "xArm Gripper G1, not decimated (link_r_inner.stl)",
+    "c68097e5a999c4a858ab15a2b175072db1f4378eabb0875c50ac3f6351401f17": "xArm Gripper G1, not decimated (link_l_outer.stl)",
+    "7d2be86623b0e6ed83cca042e16980363fe30a5d8fab17b51866899ece960743": "xArm Gripper G1, not decimated (link_l_inner.stl)",
+    "8cf40e4911d8e30fc18a223ff9b2f4e06667b854b5da741520fafa0b21dabce1": "xArm Gripper G1, not decimated (body_shell.stl)",
+    "29c2cf986ead35efeace70442b253428962716784ada51254123eca9c0e81932": "xArm Gripper G1, not decimated (body_frame.stl)",
+    "1fc90b2f5e0a5e98f6ea419487f83bdf1176ce559e079370fe645276dbfd97dc": "xArm Gripper G1, not decimated (body_flange.stl)",
+    "51558812030bb692137d6bea813af792ee833569b4d38c763b14700af03877ff": "xArm Gripper G1, not decimated (body_pins.stl)",
+    "eba81d3da9a11fbbb1287c7a7d95f9d85c87d4d7ec1ff40384f40177d2d139f0": "xArm Gripper G1, not decimated (body_logo.stl)",
+    "2e938d7af2767bb811c97d37f1b2170b421390f93320345ec3cb61dbf6a04bf9": "xArm Gripper G1, not decimated (finger_r_coupler.stl)",
+    "fe62f783f423e575608cd2701106ee036ee6f2d1b061ed31236702e54db05f78": "xArm Gripper G1, not decimated (finger_r_pins.stl)",
+    "c4f8214b64116588b4c6d6aec3d07e268350e73b669a35efa89aa6bee6067991": "xArm Gripper G1, not decimated (finger_l_coupler.stl)",
+    "f6b588d88bd3f4788b237899092c8008119b8b5d3f7cdb8ec0c35d4f9742aa72": "xArm Gripper G1, not decimated (finger_l_pins.stl)",
     # The MakerMods Metal Arm's gripper body (metal-python-ros: its package.xml says "Business", no licence file), not
     # cleared for redistribution: the Library's whole-gripper scene draws its HandUMI tips on a plain rail of the
     # project's own instead (the user's decision of 2026-11-05, docs/LIBRARY_VIEW.md).
@@ -120,6 +152,119 @@ DENIED_SHA256 = {
     "62d0ed4072aea7e4d0655e16edbf8243317e3e106996f00f06e72afc78d091ec": "MakerMods Metal Arm (link8.STL): not cleared",
 }
 DENIED_NAME = re.compile(r"robotiq|xarm|ufactory", re.IGNORECASE)
+# The Library's showcase (the project owner's decision of 2026-11-12; the lead's spec of that day): the hand-designed
+# FlexiTac sensor on the xArm Gripper G1 with UMI soft fingers, at the top of the Library.  It is not a part or an
+# entry (no fit, no build, none of the generator's Gerbers): it has one scene of its own, scenes/flexitac-g1.json, in
+# the scenes' format, drawn about the UMI finger.  Its gripper is UFACTORY's 3D model, the one vendor model the Library
+# shows: the Tactile Demo's split of "Gripper G1 3D File (With).stl", each piece decimated to within 0.1 mm
+# (tools/library_showcase.py), in web/vendor/ufactory-g1/ beside its own NOTICE.md, outside web/library/ and its
+# budget.  The category is explicit so that nothing else can use it (showcase()):
+# - the folder holds exactly SHOWCASE_VENDOR_FILES, each at its pinned SHA-256, and its notice, within a byte budget of
+#   its own;
+# - the notice says whose the model is and why it is here (SHOWCASE_WORDS), never "CAD", and tables every file;
+# - only the showcase's scene names the folder: no part, entry, fit, sample or other scene (SHOWCASE_REFERENCE);
+# - the folder's meshes are nowhere else under web/ (by SHA-256: a copy under another name, as another gripper's body
+#   or a sample's part, would need no name of the folder);
+# - the file itself, unsplit and undecimated (SHOWCASE_SOURCE: its name, SHA-256 and bytes; SHOWCASE_SOURCE_TRIANGLES:
+#   the SHA-256 of its bytes after the 80-byte header, so a copy under another header is the file still), is never
+#   under web/, nor is any model of DENIED_SHA256 (its undecimated pieces among them).
+# The UMI finger holder the scene draws beside them is HandUMI's (Apache-2.0), a body of the Library as any other
+# (bodies/flexitac-g1/, a row of NOTICE.md), its SHA-256 pinned too (SHOWCASE_BODIES).
+SHOWCASE_ID = "flexitac-g1"
+SHOWCASE_SCENE = f"scenes/{SHOWCASE_ID}.json"
+SHOWCASE_VENDOR = "vendor/ufactory-g1"
+SHOWCASE_NOTICE = "NOTICE.md"
+SHOWCASE_SOURCE = ("Gripper G1 3D File (With).stl", "6c59aabbd22823819af1face17752cfd5b32f43529ed08da9596148770de332f", 6347684)
+SHOWCASE_SOURCE_TRIANGLES = "6fedf322985477e914f3160228e2b3c1fa7226843dc6f58e4ea19e9914d53393"
+SHOWCASE_VENDOR_FILES = {
+    "body_shell.stl": "17f20591f7ad00a5c19f8f915404df71b9332e971007f5afd58dc0ee83196000",
+    "body_frame.stl": "c3fac3ded9752ee3101a4eb0752d687404ff87989601ed853ce9dbde1fe1201c",
+    "body_flange.stl": "53d5b7376b3b15bae4974e93f60fc565d487d32337c88163718ef9e58071038f",
+    "body_pins.stl": "0e36e3e656bc3a5b684f20fe87aa1e76d3956eb7cd52e60fb638de4d2458424f",
+    "link_r_outer.stl": "a30b4e83a108cdc8d3cafbbcdf4dc87e2c33828440f28776e2a601ce4ab40588",
+    "link_r_inner.stl": "6d095d76626f53a5a7af281e86051fe18665dca5a56f5e03c9c83a19ffa66299",
+    "link_l_outer.stl": "6ab58ca8f67ed33fd07016a82c606938c142ca283bc7ab04218b772783d7376c",
+    "link_l_inner.stl": "93f51a6a5713d5ccec58ec8548ef63855d7e20561dd152dc81f273e20b3f8ea0",
+    "finger_r_coupler.stl": "a8526adbd71aaaad6bfd7b109baabc7eeaecfccc40fedb42624210455f3d5c8b",
+    "finger_r_pins.stl": "8af3cc1ad160fcac75e4db0f5a1b2b5546aeecdcecb639dd87fdf5f678c3ddf0",
+    "finger_l_coupler.stl": "b9c13ced96553fb2ee8038ccb78354f1a1ad1098818c2d9e8084bd524d0de849",
+    "finger_l_pins.stl": "be9bd6efe4aa156542836c82b13603a544760a88bab3e03f02afa8721841da9c",
+}
+# Just above the folder as built (the twelve meshes, 2,175,608 bytes, and the notice): nothing grows it unseen.
+SHOWCASE_VENDOR_BUDGET_BYTES = 2_200_000
+# Its bodies in the Library's own folder: HandUMI's holder, and the plain shapes the project draws after the owner's
+# photo of the gripper (tools/library_showcase.py DRAWN: screw and bolt heads, nuts, the block in the top slot, the
+# extender boards and cable stubs; each under the header of a shape the project drew, with no row of NOTICE.md).  The
+# tool draws them again on every run and --check; their pins here are what lets them stand without a look file
+# (tools/library_split.py unowned()).
+SHOWCASE_BODIES = {
+    "bodies/flexitac-g1/umi-right-finger-holder.stl": "bed7997d234957cd874aecec2be76e133ab14b4cd652abe4c0491ee06fe469dd",
+    "bodies/flexitac-g1/drawn-shell-screw.stl": "3e9be6a39e4c3324539b799a027ff2d11da071427abc9fdc4b18bbd11d218cdb",
+    "bodies/flexitac-g1/drawn-holder-bolt.stl": "4065ad795ec729b88544255a84ee9372498d6d8b7874504c1ecacbb9b119d3d8",
+    "bodies/flexitac-g1/drawn-holder-nut.stl": "19dfdb4cfc52e2aca385209251c9ae8bd063fcee2f776a8dc5540fc6e9ab7dcb",
+    "bodies/flexitac-g1/drawn-slot-block.stl": "4c931930fd990b0e76da2facd08e69b7d795b371264d58196b80b3b056685f0d",
+    "bodies/flexitac-g1/drawn-extender.stl": "ce9e3d2b69f27cb92a941e0580e2cd25c717f341515e9f022b3f5a8814b54559",
+    "bodies/flexitac-g1/drawn-extender-sockets.stl": "1fb0ee61d901a42382ed3ba2004b6e80912e45c99c31caff7e1ac7bbfd0fa042",
+    "bodies/flexitac-g1/drawn-cable-stub.stl": "13d5a943386e3cb4a92e55d8b135a99a0ff3b765496633cd774c46f9757ac1e5",
+}
+# The notice's wording, each found in its text (white space folded): whose the model is, where the file comes from,
+# why it is here, that the repository's licence does not cover it, and what was changed, by whom.
+SHOWCASE_WORDS = ("3D model", "the property of UFACTORY", "UFACTORY's download centre",
+                  "used by the project owner's decision of 2026-11-12", "not covered by this repository's Apache-2.0 licence",
+                  "split", "decimated", "by FlexiTac-Gen 2026")
+# Its table's rows (NOTICE_ROW's columns): the owner's column, and the change's with the deviation measured (mm).
+SHOWCASE_OWNER = "the property of UFACTORY, not Apache-2.0"
+SHOWCASE_CHANGE = re.compile(r"modified: split(?:, cut at the holder)?, decimated \(quadric error metrics, (0\.\d+) mm\)")
+SHOWCASE_TOLERANCE_MM = 0.1
+SHOWCASE_REFERENCE = re.compile(r"ufactory-g1", re.IGNORECASE)
+REBUILD_SHOWCASE = "rebuild the showcase with tools/library_showcase.py"
+# The fix of a file no tool writes and none may publish (the vendor's own file, a model of the deny-list, a copy of one
+# of the folder's meshes outside its place, a stranger in the folder): removing it, not a rebuild (the review of
+# 2026-11-13: a rebuild of the showcase leaves such a file where it is).
+REMOVE_FILE = "remove it"
+# The showcase's page (library.html's first card and its own page at #flexitac-g1; docs/LIBRARY_VIEW.md "The showcase's
+# page"): showcase.json beside entries.json, a document of its own format.  Its words are written by hand (the title,
+# the label that it is hand-designed and not auto-generated, one line, the sensor's size, the link to the FlexiTac
+# hardware tutorial for the Gerbers, the sources with their notices); its "placed" is the pad's placed record
+# (SHOWCASE_PLACED, a file of the pad's own folder) with the showcase's scene; its "image" and "shot" are written by
+# tools/browser/library_shots.py --showcase: the three pictures in showcase/ (their sizes below: 4:5, the gripper
+# upright), each with its bytes and SHA-256, and what they were shot from.  showcase_page() checks all of it.
+SHOWCASE_FILE = "showcase.json"
+SHOWCASE_FORMAT = "flexitac-library-showcase/v1"
+SHOWCASE_KEYS = ("about", "format", "id", "image", "label", "placed", "sensor", "shot", "sources", "text", "title", "tutorial")
+SHOWCASE_PLACED = "vendor/flexitac-v2/umi-finray.placed.json"
+SHOWCASE_PAD_NOTICE = "vendor/flexitac-v2/NOTICE.md"
+SHOWCASE_SHOT_SIZE = (1280, 1600)
+SHOWCASE_CARD_SIZE = (800, 1000)
+# kind: (the file relative to web/library/, its size, the mode it shows).
+SHOWCASE_SHOTS = {"exploded": (f"showcase/{SHOWCASE_ID}.exploded.webp", SHOWCASE_SHOT_SIZE, "exploded"),
+                  "assembled": (f"showcase/{SHOWCASE_ID}.assembled.webp", SHOWCASE_SHOT_SIZE, "assembled"),
+                  "card": (f"showcase/{SHOWCASE_ID}.card.webp", SHOWCASE_CARD_SIZE, "assembled")}
+SHOWCASE_SHOT_KEYS = ("art_sha256", "figure_sha256", "look", "margins_px", "numbers", "placed_sha256", "scene", "scene_sha256", "view_sha256")
+# The label's words (the user's request of 2026-11-12: "这个版本是人手design的不是autogenerate") and the sources' notices,
+# in the page's order: the gripper's (the one place showcase.json names the vendor's folder) and the pad's.
+SHOWCASE_LABEL_WORDS = ("hand-designed", "not auto-generated")
+SHOWCASE_NOTICES = (f"../{SHOWCASE_VENDOR}/{SHOWCASE_NOTICE}", f"../{SHOWCASE_PAD_NOTICE}")
+SHOWCASE_SOURCE_WORDS = (("UFACTORY", "3D model"), ("FlexiTac", "CC BY-NC 4.0"))
+SHOWCASE_ALT = "The hand-designed FlexiTac sensor on both soft fingers of the xArm gripper"
+RESHOOT_SHOWCASE = "re-shoot with tools/browser/library_shots.py --showcase"
+# The stage's numbers of the showcase's shoot (showcase.json's "shot"."numbers"; the rules' table of
+# docs/LIBRARY_VIEW.md).  Four of the rules' checks hold of the showcase as of any gripper (SHOWCASE_RULED: a number, the
+# rule it is held to).  Three cannot: both its fingers are drawn solid and its pad's tails wrap behind its finger, so it
+# has bounds of its own for them (SHOWCASE_BOUNDS), each a little past what was measured (2026-11-13, the shoot of the
+# scene of that day, and the same scene with one finger see-through, by a route), so that a scene or a camera that
+# hides more of the pad is refused:
+# - assembled_opaque, how much of the far (sensor) finger's top FPC the solid bodies cover in Assembled: 0.19, its own
+#   tails behind its own finger and their ends under the extender board (0 with that finger see-through);
+# - opaque_max, the same of any layer in Exploded: 0.679, the near finger's own pad behind its own finger (0.017 with
+#   that finger see-through);
+# - near_seen, what is seen of the near finger's bottom FPC: 0.321, its straps on the side face (0.858 with that
+#   finger see-through).
+SHOWCASE_RULED = (("visible_min", "layer_visible_min"), ("clearance_mm", "clearance_min_mm"), ("stacks_apart_px", "stacks_apart_min_px"),
+                  ("card_px", "card_min_px"))
+SHOWCASE_BOUNDS = (("assembled_opaque", "below", 0.25), ("opaque_max", "below", 0.75), ("near_seen", "at least", 0.25))
+# How the lines of a stale showcase end (each says its own fix: REBUILD_SHOWCASE or RESHOOT_SHOWCASE).
+SHOWCASE_STALE = "the showcase is stale: tools/library_showcase.py writes its scene, tools/browser/library_shots.py --showcase its pictures"
 
 
 class LibraryError(Exception):
@@ -634,7 +779,7 @@ def pictures(variants: dict, library: Path = LIBRARY, figure: str | None = None,
       bytes or document, not a gzip of an art document, or of another sensor or build (art_problems()), a file of art/
       the manifest does not name, a gripper's stage of another scene or rules (scene_sha256) or whose numbers break the
       rules' checks (stage_problems()), a stage recorded for a part that keeps the fingertip scene (the UMI finger and
-      its tips), and with ``require_view`` (VIEW_REQUIRED by default) a record without its art or a gripper's without
+      its tips), such a part's pictures of another look than the rules' part_looks give it now (part_look_sha256), and with ``require_view`` (VIEW_REQUIRED by default) a record without its art or a gripper's without
       its stage (library_write --check, the site build and tests/test_library.py refuse them);
     - older [id]: a current shot whose figure's sources (figure_sha256, or ``figure``) or 3D view's own modules
       (view_sha256, or ``view``) have changed since: still pictured, a warning only (re-shoot it; the public CI cannot);
@@ -656,6 +801,8 @@ def pictures(variants: dict, library: Path = LIBRARY, figure: str | None = None,
         return images, [(None, f"{SHOTS_MANIFEST}: the format is {manifest.get('format')!r}, not {SHOTS_FORMAT}")], older, views
     index = scenes_index(library)
     staged = index.get("scenes") or {}
+    # parts.json's parts (their families: a look the rules give a family), where the library has it.
+    families = json.loads((library / "parts.json").read_text(encoding="utf-8")) if (library / "parts.json").is_file() else {"parts": {}}
     named, arts = {SHOTS_MANIFEST}, set()
     for identifier, shot in sorted((manifest.get("shots") or {}).items()):
         files = shot_files(identifier)
@@ -686,6 +833,10 @@ def pictures(variants: dict, library: Path = LIBRARY, figure: str | None = None,
             broken += art_problems(identifier, variant, art, library)
         elif require_view:
             broken.append(f"no 3D view: its record names no art: {fix}")
+        # A part without a scene whose look scenes.json's rules give (part_look()): its pictures are of that look.
+        expected = part_look_sha256(part_look(index, families, variant["part"]))
+        if shot.get("part_look_sha256") != expected:
+            broken.append(f"its pictures are of another look of its part than {SCENES_INDEX}'s rules give now (part_looks): {fix}")
         if stage is not None and scene is None:
             broken.append(f"its record has a stage, but its part {variant['part']} keeps the fingertip scene (no scene in {SCENES_INDEX}): {fix}")
         elif stage is not None:
@@ -742,9 +893,13 @@ def canonical_json(document) -> str:
 
 
 def art_bytes(document: dict) -> bytes:
-    """The art file of its document: the canonical JSON, gzip at level 9 with no name and time 0."""
+    """The art file of its document: the canonical JSON, gzip at level 9 with no name, time 0 and OS byte 3 (Unix).
 
-    return gzip.compress(canonical_json(document).encode("ascii"), compresslevel=9, mtime=0)
+    Python before 3.11 writes the header's OS byte as 255 (unknown) and 3.11 on as 3, so the byte is set here: the
+    same document gives the same bytes on every Python the project runs on (3.9 is CI's floor)."""
+
+    data = gzip.compress(canonical_json(document).encode("ascii"), compresslevel=9, mtime=0)
+    return data[:9] + b"\x03" + data[10:]
 
 
 def read_art(data: bytes) -> dict:
@@ -790,10 +945,20 @@ UMI_FINGER = "umi-finray"
 # The bodies drawn by the project itself (no NOTICE row): the plain rail the MakerMods Metal Arm's two HandUMI tips stand
 # on, not MakerMods hardware (its gripper body is not cleared: DENIED_SHA256).
 OWN_BODIES = ("bodies/makermods-metal/rail.stl",)
+# And, since the looks of 2026-11-12, the plain shapes tools/library_split.py draws where a model lacks a component the
+# photos show (a screw head, a rail strip): bodies/<part>/drawn-<name>.stl, whose 80-byte header says so (OWN_HEADER and
+# OWN_WORDS), never a vendor's geometry.  The header is a label, not the guard: tools/library_split.py --check draws
+# each again from the numbers of its part's look file and refuses a scene that has a drawn body, a look or a crease
+# angle without a look file (library_split.unowned(); tests/test_library_split.py runs it on the committed library).
+OWN_BODY = re.compile(r"bodies/[a-z0-9-]+/drawn-[a-z0-9-]+\.stl")
+OWN_HEADER = b"FlexiTac-Gen: "
+OWN_WORDS = b"drawn by the project"
 OPEN_LICENCES = ("Apache-2.0", "MIT", "BSD-3-Clause")
 # NOTICE.md's tables: | `file` | source at commit | licence and holder | change | `sha256` |.
 NOTICE_ROW = re.compile(r"^\| `([\w./-]+)` \|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\| `([0-9a-f]{64})` \|$", re.MULTILINE)
 REBUILD = "rebuild the scenes with the private tools/library_scenes.py"
+# A scene's looks are written by the public tools/library_split.py from the part's look file, not by the scene builder.
+RELOOK = "write the scene's looks again with tools/library_split.py (the part's look file, tools/library_looks/<part>.json)"
 # The frozen keys (docs/LIBRARY_VIEW.md): scenes.json's, its rules', a scene's (and its optional overrides, within
 # these bounds), a body's, the art document's and each of its boards'.
 SCENES_KEYS = ("about", "format", "rules", "scenes")
@@ -811,6 +976,21 @@ CAMERA_BOUNDS = {"tilt_deg": (45, 70), "elevation_deg": (15, 45)}
 EXPLODE_BOUNDS = {"gap_share": (0.25, 0.45)}
 BODY_KEYS = ("bytes", "finger", "matrix", "mesh", "sha256", "triangles")
 FINGERS = ("sensor", "mate")
+# The looks (docs/LIBRARY_VIEW.md "The looks"; the amendment of 2026-11-12, the user's request that every gripper be
+# coloured after photos of the real product): optional keys of a scene ("looks": {name: look}, "part_look", "smooth_deg"),
+# of a body ("look") and of scenes.json's rules ("looks", "part_looks", "part_smooth_deg": the parts without a scene).  A
+# look is LOOK_KEYS and any of LOOK_OPTIONAL: an sRGB colour "#rrggbb" (lower case), numbers 0 to 1 (LOOK_UNIT), an
+# env_intensity of 0 or more; a name is LOOK_NAME (lower case, digits, hyphens).  A crease angle is SMOOTH_BOUNDS degrees.
+SCENE_OPTIONAL = ("camera", "explode", "looks", "part_look", "smooth_deg")
+BODY_OPTIONAL = ("look",)
+RULES_OPTIONAL = ("looks", "part_looks", "part_smooth_deg")
+LOOK_NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+LOOK_COLOR = re.compile(r"#[0-9a-f]{6}")
+LOOK_KEYS = ("color", "metalness", "roughness")
+LOOK_OPTIONAL = ("clearcoat", "clearcoat_roughness", "env_intensity")
+LOOK_UNIT = ("metalness", "roughness", "clearcoat", "clearcoat_roughness")
+LOOK_COAT = ("clearcoat", "clearcoat_roughness")
+SMOOTH_BOUNDS = (1, 90)
 ART_BOARD_KEYS = ("active_outline", "back", "front", "outline", "physical_side", "px", "region", "role", "view_box")
 # A unit vector's length (a scene's approach) within UNIT_TOL of 1; a rigid matrix's rows' within ORTHONORMAL_TOL of
 # 1 and their dot products of 0 (a scene builder writes its rotations' floats rounded).
@@ -820,6 +1000,87 @@ ORTHONORMAL_TOL = 1e-6
 # may name them): its asset folders, the recipes and an absolute path; a part's id with underscores is its recipe's key.
 PRIVATE_TEXT = re.compile(r"(?<![\w-])asset/|(?<![\w-])outputs/|gripper_recipes|\brecipes?\b"
                           r"|(?<![\w.~-])/(?:home|Users|tmp|root|mnt|opt|var|private|srv|media)/|\b[A-Za-z]:[\\/]|~/")
+
+
+def look_problem(look, coat: bool = True) -> str | None:
+    """Why ``look`` is not a look (docs/LIBRARY_VIEW.md "The looks"), or None: its keys LOOK_KEYS and any of
+    LOOK_OPTIONAL, its colour an sRGB "#rrggbb" in lower case, its metalness, roughness and clear coat numbers 0 to 1,
+    its env_intensity a number of 0 or more, a clearcoat_roughness only with a clearcoat; ``coat`` false: no clear coat
+    at all (the part's own material is the figure's standard one: the stage cannot coat it)."""
+
+    if not isinstance(look, dict) or not set(LOOK_KEYS) <= set(look) <= set(LOOK_KEYS) | set(LOOK_OPTIONAL):
+        return f"has not the keys {', '.join(LOOK_KEYS)} (and any of {', '.join(LOOK_OPTIONAL)})"
+    if not (isinstance(look["color"], str) and LOOK_COLOR.fullmatch(look["color"])):
+        return f"has the colour {look['color']!r}, not an sRGB #rrggbb in lower case"
+    for key in LOOK_UNIT:
+        if key in look and not (_number(look[key]) and 0 <= look[key] <= 1):
+            return f"has the {key} {look[key]!r}, not a number 0 to 1"
+    if "env_intensity" in look and not (_number(look["env_intensity"]) and look["env_intensity"] >= 0):
+        return f"has the env_intensity {look['env_intensity']!r}, not a number of 0 or more"
+    if "clearcoat_roughness" in look and "clearcoat" not in look:
+        return "has a clearcoat_roughness without a clearcoat"
+    if not coat and any(key in look for key in LOOK_COAT):
+        return "has a clear coat, which the part's own material cannot take (a body's look can)"
+    return None
+
+
+def looks_problems(looks, used: dict, uncoated=()) -> list:
+    """Why a set of looks and their uses are not sound: ``looks`` {name: look} (LOOK_NAME, look_problem()), ``used``
+    {what names it: the name}, each naming a look of ``looks``; the looks named ``uncoated`` (a part's own) without a
+    clear coat; and every look used (a look nothing names is left out of the file)."""
+
+    if not isinstance(looks, dict) or not looks:
+        return ["its looks are not a map of names to looks"]
+    found = []
+    for name, look in looks.items():
+        if not (isinstance(name, str) and LOOK_NAME.fullmatch(name)):
+            found.append(f"its look {name!r} is not named in lower case, digits and hyphens")
+            continue
+        problem = look_problem(look, coat=name not in uncoated)
+        if problem:
+            found.append(f"its look {name} {problem}")
+    for what, name in used.items():
+        if not (isinstance(name, str) and name in looks):
+            found.append(f"{what} names the look {name!r}, which is not one of its looks")
+    for name in sorted(set(looks) - {name for name in used.values() if isinstance(name, str)}):
+        found.append(f"its look {name!r} is used by nothing")
+    return found
+
+
+def own_body(mesh: str, data: bytes | None = None) -> bool:
+    """Whether a scene's body is the project's own drawing (no NOTICE row): the rail (OWN_BODIES), or a shape of
+    tools/library_split.py named bodies/<part>/drawn-<name>.stl whose header (``data``'s first 80 bytes, when given)
+    says so."""
+
+    if mesh in OWN_BODIES:
+        return True
+    if not (isinstance(mesh, str) and OWN_BODY.fullmatch(mesh)):
+        return False
+    return data is None or (data[:80].startswith(OWN_HEADER) and OWN_WORDS in data[:80])
+
+
+def part_look(index: dict, parts: dict, part_id: str):
+    """The look scenes.json's rules give a part without a scene (the UMI finger and its tapered tips; docs/LIBRARY_VIEW.md
+    "The looks"): {"look": the look, "smooth_deg": the rules' part_smooth_deg or None}, by the part's id, else by its
+    family's, in the rules' "part_looks" (a name of the rules' "looks", or the look itself); None without a rule (the
+    part as Gen by Surface draws it) and for a gripper (its scene's looks)."""
+
+    rules = index.get("rules") if isinstance(index, dict) else None
+    named = (rules or {}).get("part_looks")
+    if not isinstance(named, dict) or part_id in (index.get("scenes") or {}):
+        return None
+    family = parts["parts"].get(part_id, {}).get("family")
+    chosen = named.get(part_id, named.get(family) if family else None)
+    if chosen is None:
+        return None
+    look = (rules.get("looks") or {}).get(chosen) if isinstance(chosen, str) else chosen
+    return {"look": look, "smooth_deg": rules.get("part_smooth_deg")}
+
+
+def part_look_sha256(given) -> str | None:
+    """A record's part_look_sha256: the SHA-256 of part_look()'s canonical JSON (None without a look)."""
+
+    return None if given is None else hashlib.sha256(canonical_json(given).encode("ascii")).hexdigest()
 
 
 def view_record(identifier: str, scene: str | None = None) -> dict:
@@ -1014,8 +1275,8 @@ def _index_problems(index) -> list:
     if index["format"] != SCENES_FORMAT:
         return [f"{SCENES_INDEX}: the format is {index['format']!r}, not {SCENES_FORMAT}"]
     rules = index["rules"]
-    if not isinstance(rules, dict) or sorted(rules) != sorted(RULES_KEYS):
-        return [f"{SCENES_INDEX}: its rules have not the keys {', '.join(sorted(RULES_KEYS))}"]
+    if not isinstance(rules, dict) or not set(RULES_KEYS) <= set(rules) <= set(RULES_KEYS) | set(RULES_OPTIONAL):
+        return [f"{SCENES_INDEX}: its rules have not the keys {', '.join(sorted(RULES_KEYS))} (and any of {', '.join(RULES_OPTIONAL)})"]
     found = [f"{SCENES_INDEX}: its rule {key} ({rules[key]!r}) is not a positive number"
              for key in RULE_NUMBERS if not (_number(rules[key]) and rules[key] > 0)]
     size = rules["measure_px"]
@@ -1041,20 +1302,42 @@ def _index_problems(index) -> list:
                      f"ghosted in (distinct, of {', '.join(CAMERA_MODES)}, at least one)")
     if not isinstance(index["scenes"], dict):
         found.append(f"{SCENES_INDEX}: its scenes is not a map of parts to scene files")
+    # The looks of the parts without a scene (the amendment of 2026-11-12): part_looks {part or family: a name of the
+    # rules' looks, or a look}, no clear coat (the part's own material), every look of the rules used; a crease angle.
+    named = rules.get("part_looks")
+    if "part_looks" in rules and not (isinstance(named, dict) and named and all(isinstance(key, str) for key in named)):
+        found.append(f"{SCENES_INDEX}: its rule part_looks is not a map of parts (or families) to looks")
+        named = None
+    for key, value in (named or {}).items():
+        problem = None if isinstance(value, str) else look_problem(value, coat=False)
+        if problem:
+            found.append(f"{SCENES_INDEX}: its rule part_looks: the look of {key} {problem}")
+    by_name = {f"its rule part_looks ({key})": value for key, value in (named or {}).items() if isinstance(value, str)}
+    if "looks" in rules or by_name:
+        found += [f"{SCENES_INDEX}: {message}" for message in looks_problems(rules.get("looks"), by_name, set(by_name.values()))]
+    if "part_smooth_deg" in rules:
+        angle = rules["part_smooth_deg"]
+        if not (_number(angle) and SMOOTH_BOUNDS[0] <= angle <= SMOOTH_BOUNDS[1]):
+            found.append(f"{SCENES_INDEX}: its rule part_smooth_deg ({angle!r}) is not a crease angle of {SMOOTH_BOUNDS[0]} to {SMOOTH_BOUNDS[1]} degrees")
+        if "part_looks" not in rules:
+            found.append(f"{SCENES_INDEX}: its rule part_smooth_deg without part_looks")
     return found
 
 
-def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dict) -> list:
+def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dict, scene: str | None = None) -> list:
     """Why one gripper's scene (scenes/<part>.json) is not drawable as docs/LIBRARY_VIEW.md has it: its keys and format,
     its part and the part's mesh (parts.json's SHA-256), its frame, a unit approach, the mate (a rigid matrix whose
     determinant's sign is its kind, and a body for it when the part's own mesh is not drawn there), each body (its file
     in bodies/<part>/, its bytes, SHA-256 and triangles, a rigid matrix, its finger), the see-through fingers, the
     alt text's words, the overrides within their bounds with their reason in "about", each body file tabled in
-    NOTICE.md (``rows``) with an open licence or the project's own, and no denied model among them."""
+    NOTICE.md (``rows``) with an open licence or the project's own, and no denied model among them.  ``scene``: the
+    scene's own name where it is not its part's (the showcase's, drawn about the UMI finger: scenes/<scene>.json, its
+    bodies in bodies/<scene>/)."""
 
-    name = f"scenes/{part_id}.json"
-    if not isinstance(document, dict) or not set(SCENE_KEYS) <= set(document) <= set(SCENE_KEYS) | {"camera", "explode"}:
-        return [f"{name} has not the keys {', '.join(SCENE_KEYS)} (and camera, explode)"]
+    scene = scene or part_id
+    name = f"scenes/{scene}.json"
+    if not isinstance(document, dict) or not set(SCENE_KEYS) <= set(document) <= set(SCENE_KEYS) | set(SCENE_OPTIONAL):
+        return [f"{name} has not the keys {', '.join(SCENE_KEYS)} (and any of {', '.join(SCENE_OPTIONAL)})"]
     found = []
     if document["format"] != SCENE_FORMAT:
         found.append(f"{name}: the format is {document['format']!r}, not {SCENE_FORMAT}")
@@ -1090,12 +1373,12 @@ def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dic
         found.append(f"{name}: its bodies are not a list of bodies")
     for number, body in enumerate(bodies or []):
         label = f"{name}: body {number + 1}"
-        if not isinstance(body, dict) or sorted(body) != list(BODY_KEYS):
-            found.append(f"{label} has not the keys {', '.join(BODY_KEYS)}")
+        if not isinstance(body, dict) or not set(BODY_KEYS) <= set(body) <= set(BODY_KEYS) | set(BODY_OPTIONAL):
+            found.append(f"{label} has not the keys {', '.join(BODY_KEYS)} (and look)")
             continue
         mesh = body["mesh"]
-        if not (isinstance(mesh, str) and re.fullmatch(rf"bodies/{re.escape(part_id)}/[\w.-]+\.stl", mesh)):
-            found.append(f"{label}'s mesh {mesh!r} is not a file of bodies/{part_id}/")
+        if not (isinstance(mesh, str) and re.fullmatch(rf"bodies/{re.escape(scene)}/[\w.-]+\.stl", mesh)):
+            found.append(f"{label}'s mesh {mesh!r} is not a file of bodies/{scene}/")
             continue
         target = library / mesh
         if not target.is_file():
@@ -1107,7 +1390,10 @@ def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dic
             found.append(f"{label}: {mesh} is not the file its scene names (its SHA-256, bytes or triangles; a binary STL)")
         if digest in DENIED_SHA256 or DENIED_NAME.search(mesh):
             found.append(f"{label}: {mesh} is a vendor model of the deny-list ({DENIED_SHA256.get(digest, mesh)}): never in the Library")
-        if mesh not in OWN_BODIES:
+        if OWN_BODY.fullmatch(mesh) and not own_body(mesh, data):
+            found.append(f"{label}: {mesh} is named as the project's own drawing, but its header does not say so "
+                         f"({OWN_HEADER.decode('ascii')}... {OWN_WORDS.decode('ascii')}): draw it with tools/library_split.py")
+        elif not own_body(mesh, data):
             row = rows.get(mesh)
             if row is None or row[4] != digest:
                 found.append(f"{label}: {mesh} has no row of NOTICE.md with its SHA-256")
@@ -1141,6 +1427,397 @@ def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dic
     return found
 
 
+def scene_look_problems(part_id: str, document, scene: str | None = None) -> list:
+    """Why one gripper's scene's looks are not sound (the amendment of 2026-11-12, docs/LIBRARY_VIEW.md "The looks"):
+    every name a body or part_look gives is a look of the scene, every look is used, the part's has no clear coat (a
+    body's look or a part_look without looks is refused as a name of none), smooth_deg a crease angle.  These are
+    tools/library_split.py's to write (RELOOK), not the scene builder's.  ``scene``: the scene's own name where it is
+    not its part's (the showcase's, as scene_problems() has it; its looks are tools/library_showcase.py's to write)."""
+
+    name = f"scenes/{scene or part_id}.json"
+    if not isinstance(document, dict):
+        return []
+    found = []
+    bodies = document["bodies"] if isinstance(document.get("bodies"), list) else None
+    used = {f"body {number + 1}": body["look"] for number, body in enumerate(bodies or []) if isinstance(body, dict) and "look" in body}
+    if "part_look" in document:
+        used["its part_look"] = document["part_look"]
+    if "looks" in document or used:
+        part_name = document.get("part_look") if isinstance(document.get("part_look"), str) else None
+        found += [f"{name}: {message}" for message in looks_problems(document.get("looks"), used, {part_name})]
+    if "smooth_deg" in document:
+        angle = document["smooth_deg"]
+        if not (_number(angle) and SMOOTH_BOUNDS[0] <= angle <= SMOOTH_BOUNDS[1]):
+            found.append(f"{name}: its smooth_deg ({angle!r}) is not a crease angle of {SMOOTH_BOUNDS[0]} to {SMOOTH_BOUNDS[1]} degrees")
+    return found
+
+
+def showcase_notice_problems(text: str) -> list:
+    """Why the vendor showcase's notice (web/vendor/ufactory-g1/NOTICE.md) is not the one the decision of 2026-11-12
+    asks for: each wording of SHOWCASE_WORDS in its text (white space folded), never the word CAD, the source file's
+    name and SHA-256, a row for each file of SHOWCASE_VENDOR_FILES and no other (NOTICE_ROW's columns: the file, what
+    it is, SHOWCASE_OWNER, SHOWCASE_CHANGE with a deviation within the tolerance, its pinned SHA-256), and no hash of
+    the deny-list."""
+
+    name = f"web/{SHOWCASE_VENDOR}/{SHOWCASE_NOTICE}"
+    folded = " ".join(text.split())
+    found = [f"{name} does not say {words!r}" for words in SHOWCASE_WORDS if words not in folded]
+    if re.search(r"\bCAD\b", text):
+        found.append(f"{name} says CAD (the page's words are 3D model)")
+    for words in SHOWCASE_SOURCE[:2]:
+        if words not in folded:
+            found.append(f"{name} does not name the file its meshes are made from ({words})")
+    rows = {row[0]: row for row in NOTICE_ROW.findall(text)}
+    for path in sorted(set(rows) - set(SHOWCASE_VENDOR_FILES)):
+        found.append(f"{name} tables {path}, no file of the showcase")
+    for path, pinned in sorted(SHOWCASE_VENDOR_FILES.items()):
+        row = rows.get(path)
+        if row is None or row[4] != pinned:
+            found.append(f"{name} has no row of {path} with its pinned SHA-256")
+            continue
+        if row[2].strip() != SHOWCASE_OWNER:
+            found.append(f"{name}: the row of {path} does not say {SHOWCASE_OWNER!r}")
+        change = SHOWCASE_CHANGE.fullmatch(row[3].strip())
+        if not change or float(change.group(1)) > SHOWCASE_TOLERANCE_MM:
+            found.append(f"{name}: the row of {path} does not say how it was modified (split, decimated within {SHOWCASE_TOLERANCE_MM} mm)")
+    for digest in sorted(set(re.findall(r"\b[0-9a-f]{64}\b", text)) & set(DENIED_SHA256)):
+        found.append(f"{name} names {DENIED_SHA256[digest]} ({digest[:12]}), a vendor model of the deny-list")
+    return found
+
+
+def showcase(parts: dict, library: Path = LIBRARY, rows: dict | None = None) -> tuple:
+    """(problems, bodies) of the Library's showcase (the comment at SHOWCASE_ID): nothing of a library without it
+    (neither its scene nor its folder: the tests' own libraries); else problems, the messages library_write --check,
+    the site build and tests/test_library.py refuse, and bodies, the files of bodies/ its scene draws:
+
+    - the vendor's folder (``library``/../vendor/ufactory-g1/) holding other files than SHOWCASE_VENDOR_FILES and its
+      notice, one of them not at its pinned SHA-256 (a binary STL), the folder over its byte budget;
+    - the notice not the decision's (showcase_notice_problems());
+    - the vendor's file itself (SHOWCASE_SOURCE: its SHA-256, or its size and its triangles' under another header),
+      a model of the deny-list (DENIED_SHA256) or a copy of one of the folder's meshes outside its place, anywhere
+      under ``library``/../ (every file there is hashed);
+    - a part, entry, fit, picture record, sample or other scene naming the folder (SHOWCASE_REFERENCE);
+    - the scene (scenes/flexitac-g1.json) missing or not drawable: a scene of the UMI finger as scene_problems() has
+      every scene, its own bodies in bodies/flexitac-g1/ (tabled in NOTICE.md with an open licence, or a shape the
+      project drew; at their pinned SHA-256, SHOWCASE_BODIES), and the vendor's as "../vendor/ufactory-g1/<file>": a
+      file of the folder, the body's bytes, SHA-256 and triangles the file's, a rigid matrix, its finger; every file of
+      the folder drawn;
+    - the showcase's page's document (showcase.json), its placed record and its pictures (showcase_page())."""
+
+    web = library.parent
+    folder = web / SHOWCASE_VENDOR
+    target = library / SHOWCASE_SCENE
+    if not target.is_file() and not folder.is_dir():
+        return [], set()
+    found = []
+    held = sorted(path.relative_to(folder).as_posix() for path in folder.rglob("*") if path.is_file()) if folder.is_dir() else []
+    allowed = sorted([*SHOWCASE_VENDOR_FILES, SHOWCASE_NOTICE])
+    for name in sorted(set(held) - set(allowed)):
+        found.append(f"web/{SHOWCASE_VENDOR}/{name} is no file of the showcase (its meshes and its notice alone): {REMOVE_FILE}")
+    for name in sorted(set(allowed) - set(held)):
+        found.append(f"web/{SHOWCASE_VENDOR}/{name} is missing")
+    files = {}
+    for name, pinned in sorted(SHOWCASE_VENDOR_FILES.items()):
+        if name in held:
+            files[name] = (folder / name).read_bytes()
+            if hashlib.sha256(files[name]).hexdigest() != pinned or stl_triangles(files[name]) is None:
+                found.append(f"web/{SHOWCASE_VENDOR}/{name} is not the showcase's pinned file (its SHA-256; a binary STL)")
+    size = sum(path.stat().st_size for path in folder.rglob("*") if path.is_file()) if folder.is_dir() else 0
+    if size > SHOWCASE_VENDOR_BUDGET_BYTES:
+        found.append(f"web/{SHOWCASE_VENDOR}/ is {size} bytes, over its budget of {SHOWCASE_VENDOR_BUDGET_BYTES}")
+    if SHOWCASE_NOTICE in held:
+        found += showcase_notice_problems((folder / SHOWCASE_NOTICE).read_text(encoding="utf-8"))
+    # Every file under web/, by its SHA-256.  The vendor's own file, unsplit and undecimated, is never published (the
+    # file, or its triangles under another 80-byte header), nor is a model of the deny-list (the file's undecimated
+    # pieces among them); and the folder's meshes are nowhere but in their places: a copy elsewhere would be the
+    # vendor's 3D model outside its category, with no name of the folder to give it away (the review of 2026-11-12).
+    places = {pinned: f"{SHOWCASE_VENDOR}/{name}" for name, pinned in SHOWCASE_VENDOR_FILES.items()}
+    for path in sorted(web.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(web).as_posix()
+        data = path.read_bytes()
+        digest = hashlib.sha256(data).hexdigest()
+        if digest == SHOWCASE_SOURCE[1] or (len(data) == SHOWCASE_SOURCE[2] and hashlib.sha256(data[80:]).hexdigest() == SHOWCASE_SOURCE_TRIANGLES):
+            found.append(f"web/{relative} is {SHOWCASE_SOURCE[0]} itself, unsplit and undecimated: never published: {REMOVE_FILE}")
+        if digest in DENIED_SHA256:
+            found.append(f"web/{relative} is a vendor model of the deny-list ({DENIED_SHA256[digest]}): never published: {REMOVE_FILE}")
+        if digest in places and relative != places[digest]:
+            found.append(f"web/{relative} is a copy of web/{places[digest]}: the vendor's 3D model is shown in web/{SHOWCASE_VENDOR}/ alone: "
+                         f"{REMOVE_FILE}")
+    # Only the showcase's own scene names the folder: nothing the generator fits or draws may.
+    readers = [library / "parts.json", library / "entries.json", library / SHOTS_MANIFEST, *sorted((library / "fits").glob("*.json")),
+               *sorted(path for path in (library / "scenes").glob("*.json") if path != target),
+               *sorted(path for path in (web / "samples").rglob("*") if path.suffix in (".json", ".md")),
+               *sorted((web / "vendor" / "umi").glob("*.json"))]
+    for path in readers:
+        if path.is_file() and SHOWCASE_REFERENCE.search(path.read_text(encoding="utf-8", errors="replace")):
+            found.append(f"web/{path.relative_to(web).as_posix()} names the showcase's folder (web/{SHOWCASE_VENDOR}/): only {SHOWCASE_SCENE} may")
+    try:
+        document = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return found + [f"{SHOWCASE_SCENE} is missing or not JSON"], set()
+    listed = document.get("bodies") if isinstance(document, dict) and isinstance(document.get("bodies"), list) else []
+    prefix = f"../{SHOWCASE_VENDOR}/"
+    vendor = [(number, body) for number, body in enumerate(listed)
+              if isinstance(body, dict) and isinstance(body.get("mesh"), str) and body["mesh"].startswith("../")]
+    beside = {number for number, _ in vendor}
+    own = [body for number, body in enumerate(listed) if number not in beside]
+    if rows is None:
+        notice = (library / "NOTICE.md").read_text(encoding="utf-8") if (library / "NOTICE.md").is_file() else ""
+        rows = {row[0]: row for row in NOTICE_ROW.findall(notice)}
+    # The scene's looks by the Library's one rule (scene_look_problems(), as every gripper's: every name a look of the
+    # scene, every look used, the part's without a clear coat; the crease angle), over all its bodies, the vendor's
+    # too; then the scene as any gripper's (scene_problems()), about the UMI finger, with its own bodies (the scene
+    # lists them first, so a body's number is its place in the scene); then the vendor's bodies.
+    found += scene_look_problems(UMI_FINGER, document, scene=SHOWCASE_ID)
+    if isinstance(document, dict) and listed:
+        found += scene_problems(UMI_FINGER, dict(document, bodies=own), parts, library, rows, scene=SHOWCASE_ID)
+    else:
+        found += scene_problems(UMI_FINGER, document, parts, library, rows, scene=SHOWCASE_ID)
+    bodies = {body["mesh"] for body in own if isinstance(body, dict) and isinstance(body.get("mesh"), str)
+              and body["mesh"].startswith(f"bodies/{SHOWCASE_ID}/")}
+    for mesh in sorted(bodies):
+        if mesh not in SHOWCASE_BODIES:
+            found.append(f"{SHOWCASE_SCENE}: {mesh} is not a body of the showcase ({', '.join(SHOWCASE_BODIES)})")
+        elif (library / mesh).is_file() and hashlib.sha256((library / mesh).read_bytes()).hexdigest() != SHOWCASE_BODIES[mesh]:
+            found.append(f"{SHOWCASE_SCENE}: {mesh} is not the showcase's pinned file (its SHA-256)")
+    drawn = set()
+    for number, body in vendor:
+        label = f"{SHOWCASE_SCENE}: body {number + 1}"
+        mesh = body["mesh"]
+        name = mesh[len(prefix):]
+        if not mesh.startswith(prefix) or name not in SHOWCASE_VENDOR_FILES:
+            found.append(f"{label}'s mesh {mesh!r} is not a file of the showcase's folder ({prefix})")
+            continue
+        drawn.add(name)
+        if sorted(key for key in body if key != "look") != list(BODY_KEYS):
+            found.append(f"{label} has not the keys {', '.join(BODY_KEYS)}")
+            continue
+        data = files.get(name)
+        if data is None:
+            continue  # missing: said above
+        if (body["sha256"], body["bytes"], body["triangles"]) != (hashlib.sha256(data).hexdigest(), len(data), stl_triangles(data)):
+            found.append(f"{label}: {mesh} is not the file its scene names (its SHA-256, bytes or triangles; a binary STL)")
+        problem = _rigid(body["matrix"])
+        if problem:
+            found.append(f"{label}'s matrix {problem}")
+        if body["finger"] is not None and body["finger"] not in FINGERS:
+            found.append(f"{label}'s finger {body['finger']!r} is not sensor, mate or null")
+    for name in sorted(set(SHOWCASE_VENDOR_FILES) - drawn):
+        found.append(f"{SHOWCASE_SCENE} does not draw web/{SHOWCASE_VENDOR}/{name}")
+    # The showcase's page: its document, its placed record and its pictures (showcase_page()).
+    found += showcase_page(parts, library)[0]
+    return found, bodies
+
+
+def showcase_placed(library: Path = LIBRARY):
+    """The showcase's placed record: the pad's own (SHOWCASE_PLACED, beside the Library) with the showcase's scene; None
+    where that file is missing or not JSON."""
+
+    try:
+        record = json.loads((library.parent / SHOWCASE_PLACED).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return dict(record, scene=SHOWCASE_SCENE) if isinstance(record, dict) else None
+
+
+def showcase_image(files: dict) -> dict:
+    """showcase.json's "image" from its pictures ({kind: bytes}): each one's path, size, bytes and SHA-256, and the
+    alt text."""
+
+    image = {kind: {"src": path, "width": size[0], "height": size[1], "bytes": len(files[kind]), "sha256": hashlib.sha256(files[kind]).hexdigest()}
+             for kind, (path, size, _) in SHOWCASE_SHOTS.items()}
+    image["alt"] = SHOWCASE_ALT
+    return image
+
+
+def showcase_shot(library: Path = LIBRARY, figure: str | None = None, view: str | None = None) -> dict:
+    """What the showcase's pictures are of, as the files are now: the scene (its path and scene_sha256() with the rules),
+    the art's file and the placed record (their SHA-256), the figure's and the view's sources (figure_sha256(),
+    view_sha256(), or the ones given: the shots tool's, as the server served them).  showcase.json's "shot" holds these
+    beside the shoot's own look, margins and numbers."""
+
+    placed = showcase_placed(library) or {}
+    art = library / str(placed.get("art", ""))
+    scene = library / SHOWCASE_SCENE
+    try:
+        rules = scenes_index(library).get("rules")
+    except (OSError, ValueError, AttributeError):
+        rules = None  # (scenes() says what is wrong with the index)
+    return {"scene": SHOWCASE_SCENE,
+            "scene_sha256": scene_sha256(scene.read_bytes(), rules) if scene.is_file() and isinstance(rules, dict) else None,
+            "art_sha256": hashlib.sha256(art.read_bytes()).hexdigest() if art.is_file() else None,
+            "placed_sha256": hashlib.sha256(canonical_json(placed).encode("ascii")).hexdigest(),
+            "figure_sha256": figure or figure_sha256(), "view_sha256": view or view_sha256()}
+
+
+def showcase_numbers(numbers, rules) -> list:
+    """Why the stage's numbers of a shoot of the showcase are not sound ([] when they are): each number of
+    SHOWCASE_RULED at least its rule of ``rules`` (scenes.json's; a list's or a map's least value), each of
+    SHOWCASE_BOUNDS within the showcase's own bound."""
+
+    if not isinstance(numbers, dict):
+        return ["the stage's numbers are missing"]
+    checks = rules.get("checks") if isinstance(rules, dict) and isinstance(rules.get("checks"), dict) else {}
+    held = [(key, "at least", checks.get(rule)) for key, rule in SHOWCASE_RULED] + list(SHOWCASE_BOUNDS)
+    found = []
+    for key, sense, bound in held:
+        value = numbers.get(key)
+        if isinstance(value, dict):
+            value = list(value.values())
+        least = min(value) if isinstance(value, list) and value and all(_number(item) for item in value) else value
+        if not (_number(least) and _number(bound) and (least >= bound if sense == "at least" else least < bound)):
+            found.append(f"the stage's {key} is {value!r}, not {sense} {bound!r}")
+    return found
+
+
+def showcase_text(document: dict) -> str:
+    """showcase.json's file: JSON as the Library's other documents are written (indent 1, ASCII, a newline at its end)."""
+
+    return json.dumps(document, indent=1, ensure_ascii=True) + "\n"
+
+
+def showcase_page(parts: dict, library: Path = LIBRARY) -> tuple:
+    """(problems, older) of the showcase's page's document (showcase.json; docs/LIBRARY_VIEW.md "The showcase's page"):
+    problems, the messages showcase() adds to its own (so library_write --check, the site build and the tests refuse
+    them), and older, whether its pictures are of older figure or view sources (still shown: a warning, as a sensor's).
+
+    - the file missing or not JSON, its keys, its format, its id (SHOWCASE_ID: no part's, entry's or family's);
+    - its title, label and text not short plain strings, the label without its words (SHOWCASE_LABEL_WORDS), the word CAD;
+    - its sensor not {rows, columns, pitch_mm, field_mm} with the art's field;
+    - its placed record not the pad's own with the showcase's scene, or about another mesh than the UMI finger's;
+    - its tutorial not {label, href} with the address the pad's notice records;
+    - its sources not the two notices in order (the gripper's, the pad's), each a file, each text with its words; the
+      vendor's folder named anywhere but in that one notice's path;
+    - its pictures: "image" not {exploded, assembled, card: {src, width, height, bytes, sha256}, alt}, a file missing,
+      not the bytes named or not a WebP with alpha of its size, a file of showcase/ it does not name;
+    - "shot" not the record of what the pictures were shot from, or of another scene, rules, art or placed record than
+      the files now (stale: shoot again), or its stage's numbers outside the rules' checks and the showcase's own bounds
+      (showcase_numbers())."""
+
+    path = library / SHOWCASE_FILE
+    name = SHOWCASE_FILE
+    try:
+        text = path.read_text(encoding="utf-8")
+        document = json.loads(text)
+    except (OSError, ValueError):
+        return [f"{name} is missing or not JSON: write it (docs/LIBRARY_VIEW.md), then {RESHOOT_SHOWCASE}"], False
+    if not isinstance(document, dict) or sorted(document) != list(SHOWCASE_KEYS):
+        return [f"{name} has not the keys {', '.join(SHOWCASE_KEYS)}"], False
+    found = []
+    if document["format"] != SHOWCASE_FORMAT:
+        found.append(f"{name}: the format is {document['format']!r}, not {SHOWCASE_FORMAT}")
+    families = parts.get("families") or {}
+    if document["id"] != SHOWCASE_ID or SHOWCASE_ID in parts["parts"] or SHOWCASE_ID in families:
+        found.append(f"{name}: its id is not {SHOWCASE_ID}, or a part or a family has that id")
+    for key, most in (("title", 40), ("label", 60), ("text", 140), ("about", 2000)):
+        value = document[key]
+        if not (isinstance(value, str) and value.strip() == value and 0 < len(value) <= most and "\n" not in value):
+            found.append(f"{name}: its {key} is not one line of 1 to {most} characters")
+    if isinstance(document["label"], str) and not all(words in document["label"].lower() for words in SHOWCASE_LABEL_WORDS):
+        found.append(f"{name}: its label does not say {' and '.join(SHOWCASE_LABEL_WORDS)}")
+    said = re.search(r"\bCAD\b", text)
+    if said:
+        found.append(f"{name} says CAD (the page's words are 3D model)")
+    for match in PRIVATE_TEXT.finditer(text):
+        found.append(f"{name} names {match.group(0)!r}, the private importer's inputs")
+    # The placed record and, from its art, the pad's field.
+    placed = showcase_placed(library)
+    if placed is None:
+        found.append(f"web/{SHOWCASE_PLACED} is missing or not JSON")
+    elif document["placed"] != placed:
+        found.append(f"{name}: its placed record is not web/{SHOWCASE_PLACED} with the scene {SHOWCASE_SCENE}: {RESHOOT_SHOWCASE}")
+    elif (placed.get("mesh") or {}).get("sha256") != parts["parts"][UMI_FINGER]["mesh"]["sha256"]:
+        found.append(f"{name}: its placed record is about another mesh than {UMI_FINGER}'s (parts.json)")
+    sensor = document["sensor"]
+    region = None
+    try:
+        region = read_art((library / placed["art"]).read_bytes())["boards"]["row"]["region"][2:4] if placed else None
+    except (OSError, ValueError, KeyError, TypeError, EOFError):
+        found.append(f"{name}: its placed record's art is missing or not an art document")
+    if not (isinstance(sensor, dict) and sorted(sensor) == ["columns", "field_mm", "pitch_mm", "rows"]
+            and all(isinstance(sensor[key], int) and not isinstance(sensor[key], bool) and sensor[key] > 0 for key in ("rows", "columns"))
+            and _number(sensor["pitch_mm"]) and sensor["pitch_mm"] > 0
+            and isinstance(sensor["field_mm"], list) and len(sensor["field_mm"]) == 2 and all(_number(value) and value > 0 for value in sensor["field_mm"])):
+        found.append(f"{name}: its sensor is not {{rows, columns, pitch_mm, field_mm}}")
+    elif region is not None and [round6(value) for value in sensor["field_mm"]] != [round6(value) for value in region]:
+        found.append(f"{name}: its sensor's field {sensor['field_mm']} mm is not the art's ({region})")
+    # The tutorial: the address the pad's own notice records for its Gerbers.
+    tutorial = document["tutorial"]
+    notice = library.parent / SHOWCASE_PAD_NOTICE
+    recorded = notice.read_text(encoding="utf-8") if notice.is_file() else ""
+    if not (isinstance(tutorial, dict) and sorted(tutorial) == ["href", "label"] and all(isinstance(tutorial[key], str) and tutorial[key].strip() for key in tutorial)):
+        found.append(f"{name}: its tutorial is not {{label, href}}")
+    elif not tutorial["href"].startswith("https://") or f"`{tutorial['href']}`" not in recorded:
+        found.append(f"{name}: its tutorial's address is not the one web/{SHOWCASE_PAD_NOTICE} records")
+    sources = document["sources"]
+    if not (isinstance(sources, list) and all(isinstance(item, dict) and sorted(item) == ["notice", "text"]
+                                               and all(isinstance(item[key], str) and item[key].strip() for key in item) for item in sources)
+            and [item["notice"] for item in sources] == list(SHOWCASE_NOTICES)):
+        found.append(f"{name}: its sources are not [{{text, notice}}] of {' and '.join(SHOWCASE_NOTICES)}")
+    else:
+        for item, words in zip(sources, SHOWCASE_SOURCE_WORDS):
+            if not (library / item["notice"]).is_file():
+                found.append(f"{name}: its source's notice {item['notice']} is missing")
+            if not all(word in item["text"] for word in words):
+                found.append(f"{name}: its source of {item['notice']} does not say {' and '.join(words)}")
+    if len(SHOWCASE_REFERENCE.findall(text)) != text.count(SHOWCASE_NOTICES[0]):
+        found.append(f"{name} names the showcase's folder (web/{SHOWCASE_VENDOR}/) elsewhere than as its notice")
+    # The pictures.
+    image = document["image"]
+    named = {relative for relative, _, _ in SHOWCASE_SHOTS.values()}
+    if image is None:
+        found.append(f"{name}: no pictures yet: {RESHOOT_SHOWCASE}")
+    elif not (isinstance(image, dict) and sorted(image) == sorted([*SHOWCASE_SHOTS, "alt"]) and image["alt"] == SHOWCASE_ALT
+              and all(isinstance(image[kind], dict) and sorted(image[kind]) == ["bytes", "height", "sha256", "src", "width"] for kind in SHOWCASE_SHOTS)):
+        found.append(f"{name}: its image is not {{{', '.join(SHOWCASE_SHOTS)}: {{src, width, height, bytes, sha256}}, alt}}: {RESHOOT_SHOWCASE}")
+    else:
+        for kind, (relative, size, _) in SHOWCASE_SHOTS.items():
+            record = image[kind]
+            target = library / relative
+            if (record["src"], record["width"], record["height"]) != (relative, size[0], size[1]):
+                found.append(f"{name}: its {kind} picture is not {relative} at {size[0]} x {size[1]}: {RESHOOT_SHOWCASE}")
+            elif not target.is_file():
+                found.append(f"{relative} is missing: {RESHOOT_SHOWCASE}")
+            else:
+                data = target.read_bytes()
+                if (record["bytes"], record["sha256"]) != (len(data), hashlib.sha256(data).hexdigest()):
+                    found.append(f"{relative} is not the file {name} names: {RESHOOT_SHOWCASE}")
+                elif webp_info(data) != (size[0], size[1], True):
+                    found.append(f"{relative} is not a {size[0]} x {size[1]} WebP with alpha: {RESHOOT_SHOWCASE}")
+    folder = library / "showcase"
+    for file in sorted(folder.rglob("*")) if folder.is_dir() else []:
+        if file.is_file() and file.relative_to(library).as_posix() not in named:
+            found.append(f"{file.relative_to(library).as_posix()}: not a picture of {name}")
+    # What the pictures were shot from.
+    shot = document["shot"]
+    older = False
+    if image is not None and not (isinstance(shot, dict) and sorted(shot) == list(SHOWCASE_SHOT_KEYS)):
+        found.append(f"{name}: its shot is not {{{', '.join(SHOWCASE_SHOT_KEYS)}}}: {RESHOOT_SHOWCASE}")
+    elif image is not None:
+        now = showcase_shot(library)
+        for key, what in (("scene", "scene"), ("scene_sha256", "scene or rules"), ("art_sha256", "art"), ("placed_sha256", "placed record")):
+            if shot[key] != now[key]:
+                found.append(f"{name}: its pictures are of another {what} than the files now ({key}): {RESHOOT_SHOWCASE}")
+        older = (shot["figure_sha256"], shot["view_sha256"]) != (now["figure_sha256"], now["view_sha256"])
+        try:
+            rules = scenes_index(library).get("rules")
+        except (OSError, ValueError, AttributeError):
+            rules = None  # (scenes() says what is wrong with the index)
+        if isinstance(rules, dict):
+            found += [f"{name}: {problem} (the scene or its camera hides the pad, or the bounds are no longer the showcase's: "
+                      f"SHOWCASE_BOUNDS)" for problem in showcase_numbers(shot["numbers"], rules)]
+    return found, older
+
+
+def showcase_said(problem: str) -> bool:
+    """Whether a message of scenes() is the showcase's own (showcase(): of its page's document or pictures, or ending
+    with the showcase tool or the file's removal as its fix), not a gripper's scene's."""
+
+    return problem.startswith((SHOWCASE_FILE, "showcase/")) or problem.endswith((REBUILD_SHOWCASE, REMOVE_FILE))
+
+
 def scenes(parts: dict, library: Path = LIBRARY) -> tuple:
     """(index, problems) of the grippers' scenes (scenes/scenes.json, scenes/<part>.json, bodies/<part>/): index the
     scenes.json document (scenes_index()), problems [(part or None, message)] (library_write --check, the site build and
@@ -1153,7 +1830,8 @@ def scenes(parts: dict, library: Path = LIBRARY) -> tuple:
       matrix, the bodies' files and matrices, see_through, the overrides, the bodies' notices);
     - a file of scenes/ or bodies/ no scene names;
     - a vendor model of the deny-list named in NOTICE.md (by SHA-256: the bodies' upstream files too), any text of the
-      private importer's inputs (PRIVATE_TEXT, a recipe's key) in a scene, in scenes.json or in a body's NOTICE row."""
+      private importer's inputs (PRIVATE_TEXT, a recipe's key) in a scene, in scenes.json or in a body's NOTICE row;
+    - the showcase's (showcase(): its scene, the vendor's folder and notice, anything else naming that folder)."""
 
     index = scenes_index(library)
     problems = []
@@ -1162,6 +1840,15 @@ def scenes(parts: dict, library: Path = LIBRARY) -> tuple:
     problems += [(None, f"{message}: {REBUILD}") for message in _index_problems(index)]
     staged = index.get("scenes") if isinstance(index, dict) and isinstance(index.get("scenes"), dict) else {}
     grippers = gripper_parts(parts)
+    # The rules' part_looks name parts without a scene (the UMI finger, a tapered tip) or their family: a gripper's look
+    # is its scene's.
+    rules = index.get("rules") if isinstance(index, dict) and isinstance(index.get("rules"), dict) else {}
+    plain = {part_id for part_id in parts["parts"] if part_id not in grippers}
+    families = {parts["parts"][part_id].get("family") for part_id in plain} - {None}
+    for key in sorted(rules["part_looks"]) if isinstance(rules.get("part_looks"), dict) else ():
+        if key not in plain | families:
+            problems.append((None, f"{SCENES_INDEX}: its rule part_looks names {key!r}, not a part without a scene or its family "
+                                   f"(a gripper's look is its scene's)"))
     notice = (library / "NOTICE.md").read_text(encoding="utf-8") if (library / "NOTICE.md").is_file() else ""
     rows = {row[0]: row for row in NOTICE_ROW.findall(notice)}
     keys = re.compile(r"\b(" + "|".join(re.escape(part_id.replace("-", "_")) for part_id in parts["parts"]) + r")\b")
@@ -1188,7 +1875,20 @@ def scenes(parts: dict, library: Path = LIBRARY) -> tuple:
             continue
         texts.append((part_id, path, text))
         problems += [(part_id, f"{message}: {REBUILD}") for message in scene_problems(part_id, document, parts, library, rows)]
+        problems += [(part_id, f"{message}: {RELOOK}") for message in scene_look_problems(part_id, document)]
         used.update(body.get("mesh") for body in document.get("bodies") or [] if isinstance(body, dict))
+    # The showcase (2026-11-12): its own scene, no part's, with its bodies and the vendor's folder beside the Library.
+    shown, bodies = showcase(parts, library, rows)
+    # (The page's own problems say their own fix: its words are written by hand, its pictures shot.)
+    problems += [(None, message if message.startswith((SHOWCASE_FILE, "showcase/")) or message.endswith(REMOVE_FILE) else f"{message}: {REBUILD_SHOWCASE}")
+                 for message in shown]
+    if (library / SHOWCASE_SCENE).is_file():
+        named.add(SHOWCASE_SCENE)
+        used.update(bodies)
+        texts.append((None, SHOWCASE_SCENE, (library / SHOWCASE_SCENE).read_text(encoding="utf-8", errors="replace")))
+    if (library.parent / SHOWCASE_VENDOR / SHOWCASE_NOTICE).is_file():
+        texts.append((None, f"../{SHOWCASE_VENDOR}/{SHOWCASE_NOTICE}",
+                      (library.parent / SHOWCASE_VENDOR / SHOWCASE_NOTICE).read_text(encoding="utf-8", errors="replace")))
     for folder, kept in (("scenes", named), ("bodies", used)):
         if (library / folder).is_dir():
             for file in sorted((library / folder).rglob("*")):
@@ -1334,6 +2034,8 @@ def run(only=None, check: bool = False, jobs: int = 1, library: Path = LIBRARY, 
         out(f"{'stale' if check else 'library_write'}: picture {identifier}: no picture: {RESHOOT} --only {identifier}")
     if older:
         out(f"library_write: warning: {older_note(older)}")
+    if (library / SHOWCASE_FILE).is_file() and showcase_page(parts, library)[1]:
+        out(f"library_write: warning: the showcase's pictures are of older figure or view sources: {RESHOOT_SHOWCASE}")
     # A picture with no 3D view (no art in its record, or a gripper's no stage) while VIEW_REQUIRED is false: its
     # sensor's page shows the picture only (entries.json's view null), a warning.
     unviewed = [identifier for identifier, image in images.items() if image is not None and views[identifier] is None]
@@ -1349,8 +2051,12 @@ def run(only=None, check: bool = False, jobs: int = 1, library: Path = LIBRARY, 
             out(f"stale: {path} (no variant)")
         if unpictured or unshot:
             out(f"library_write: the library's pictures are stale: {RESHOOT}, then run tools/library_write.py")
-        if unscened:
+        # (The showcase's lines say their own fixes: the scene builder is not one of them.)
+        shown = [problem for _, problem in unscened if showcase_said(problem)]
+        if len(unscened) > len(shown):
             out(f"library_write: the library's scenes are stale: {REBUILD}")
+        if [problem for problem in shown if not problem.endswith(REMOVE_FILE)]:
+            out(f"library_write: {SHOWCASE_STALE}")
         if stale or entries_stale or orphans:
             out("library_write: the library is stale: run tools/library_write.py")
         if stale or entries_stale or orphans or unpictured or unshot or unscened:

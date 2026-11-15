@@ -1,0 +1,259 @@
+{
+ "about": "Gen by Surface's sensor on the part (./?part=<id>: web/cad/onpart.js with no stage, the part in the generator's grey) for each sensor of a Library part without a scene (the UMI finger and its tapered tips), as tools/browser/library_shots.py shoots and encodes it: the three pictures' bytes and SHA-256, the fit and the build they are of, and the hash of the figure's sources they were pinned from (figure_sha256: a record only; the pictures are what is held).  Until 2026-11-12 the Library's own pictures of these sensors were these files byte for byte; since then the Library draws the part in its look (scenes/scenes.json's rules) and library_shots.py --check-generator holds Gen by Surface's figure to this pin.  Written by --pin-generator, only for a deliberate change of the figure or a sensor's new build.",
+ "figure_sha256": "e38217818ff99c16f8d898f74079f4297bb51b7613218839c04ae9f2a59ab1c1",
+ "format": "flexitac-generator-figure/v1",
+ "shots": {
+  "umi-convex-tip13.8-2mm": {
+   "build_id": "surface-32x12-568f1bcff1cc",
+   "files": {
+    "assembled": {
+     "bytes": 27644,
+     "sha256": "67dcb6b3225dad6bd0261ff5babcb332303e889a5920bda9b9cc1f8c0c28aa00"
+    },
+    "card": {
+     "bytes": 14596,
+     "sha256": "ed2b9a7470dd928b7f471c952a19dbaf7db242f5f9f1bcc9ceb2db96089a75ff"
+    },
+    "exploded": {
+     "bytes": 30460,
+     "sha256": "4966ea72d37ac19d2e7c9556038f1ae6ce9ee853067b34a738b0ee8e78030474"
+    }
+   },
+   "fit_sha256": "52952cf3dd982d204cf01e585ad1b30c037ec0a1589fa81d6d46c382d79ddb9c"
+  },
+  "umi-convex-tip17.8-2mm": {
+   "build_id": "surface-32x12-a4e852337e7a",
+   "files": {
+    "assembled": {
+     "bytes": 27626,
+     "sha256": "daa5f489c68b446d9184a60f47b9937fdf212810c67b869fad9aafba15a6c853"
+    },
+    "card": {
+     "bytes": 14694,
+     "sha256": "df7fc5345b2f6bcc7f71289151819a2dc7ebcf38fcafe74b18a16157e4d6a989"
+    },
+    "exploded": {
+     "bytes": 29892,
+     "sha256": "9b279d91546e721baae854ba931e589cc65f87e60b202ce6887c01a4139500ba"
+    }
+   },
+   "fit_sha256": "94e0715552e2ceb9bc1cb6629fec69c7211f14ce07ec0081a90a8c9a1d029114"
+  },
+  "umi-convex-tip21.8-2mm": {
+   "build_id": "surface-32x12-a2448259d9c3",
+   "files": {
+    "assembled": {
+     "bytes": 28424,
+     "sha256": "eb7ad1165b880441c5e26d5d873d67ff4797cca69af4f93fd3954b78627e220e"
+    },
+    "card": {
+     "bytes": 14858,
+     "sha256": "e56ddf29a805c97e1ad589d27e692a619af32b5a84c3838dff3824a1b83b3615"
+    },
+    "exploded": {
+     "bytes": 30940,
+     "sha256": "bba8bb3afa2e56b7f43a9a39faa0c10a6d3935444393a8a6f870468c3e06536c"
+    }
+   },
+   "fit_sha256": "9cf5f42251da93381e5d1660d4e69c19eb4a81e6a9afcf286869f7b31b30ad0e"
+  },
+  "umi-convex-tip5.8-2mm": {
+   "build_id": "surface-32x11-e1778282dbcd",
+   "files": {
+    "assembled": {
+     "bytes": 27482,
+     "sha256": "dfc984c0516174f8f9e471bb6f5bb3f57338676c54b634f5282a7e9d2dc21c30"
+    },
+    "card": {
+     "bytes": 14250,
+     "sha256": "608b4a0e0153168c92d4377dbcb6094eecbd3f12a89f0f75dc86944ca34fa206"
+    },
+    "exploded": {
+     "bytes": 29174,
+     "sha256": "1c5f70a76604d0857355db61354dbe96d06cff0e04db9b75c8fb1280713a743d"
+    }
+   },
+   "fit_sha256": "9d8f9241a6370f8319e61c87b7b50a5b02f533b6ee94ca900e255e8fee9722fc"
+  },
+  "umi-convex-tip9.8-2mm": {
+   "build_id": "surface-32x12-7aea1fdee23c",
+   "files": {
+    "assembled": {
+     "bytes": 27540,
+     "sha256": "2bcb237b98e8ba9d6b7423a3857d9cd6589ecefa5929b2d520af276a493e1724"
+    },
+    "card": {
+     "bytes": 14432,
+     "sha256": "d53c8048b38ede005606027d2f754006cc285a92d01dc13cba46104bcc01c903"
+    },
+    "exploded": {
+     "bytes": 29768,
+     "sha256": "b621dc69979baf4983f67f0d67a342db7ee66fd62cb99fa30450d5262c2f4d7f"
+    }
+   },
+   "fit_sha256": "2f4c6c11113541ec088375118efd97deb7943caa71af7f84db45e4fe7affaa92"
+  },
+  "umi-finray-1.5mm": {
+   "build_id": "surface-32x17-23d2f6c5a920",
+   "files": {
+    "assembled": {
+     "bytes": 29098,
+     "sha256": "cbef2e30ea53819e4baa23a7ff079c578923f337dc58805b3dfe57f62206b661"
+    },
+    "card": {
+     "bytes": 14910,
+     "sha256": "9d609f0fca84132ac3854d3a7af975122548d328daf517f836f4bf77d0335ed7"
+    },
+    "exploded": {
+     "bytes": 31898,
+     "sha256": "864a2e63a5690c07ec13d1acb98f6920c0c9c80a5b227cae2b8c29675c1683e9"
+    }
+   },
+   "fit_sha256": "90a02212f4be1365c681fc36503c29db20e010edf72be3591a77780d45060ae4"
+  },
+  "umi-finray-1mm": {
+   "build_id": "surface-32x25-3b48a66c2948",
+   "files": {
+    "assembled": {
+     "bytes": 25680,
+     "sha256": "a196214f063868e9ff3d6c074aa566045bfcf33af5b466144635a8f5a80725a0"
+    },
+    "card": {
+     "bytes": 15198,
+     "sha256": "3e065953ed7c2e60c45b675a6f76d5a2afe5f8eb451834e2086a718b15d25280"
+    },
+    "exploded": {
+     "bytes": 31704,
+     "sha256": "a51031b52f010d20543c2df41161cc20fe6ac2d4e814e58b55ee670727afbc64"
+    }
+   },
+   "fit_sha256": "7dd0290ea23d914f18158852b637e41a3e814d5d74cc564b43daafd2ebcf444b"
+  },
+  "umi-finray-2mm": {
+   "build_id": "surface-32x12-3713abf9ee10",
+   "files": {
+    "assembled": {
+     "bytes": 27854,
+     "sha256": "e72bf5ba7c1065905720b36a4707599c2df389fdc47af2083d99a0b9aa982cff"
+    },
+    "card": {
+     "bytes": 14984,
+     "sha256": "6cadc0a3cb51803c27aeb65baa747d6abb5fdd99679f22703b73f4e1d0899741"
+    },
+    "exploded": {
+     "bytes": 31712,
+     "sha256": "c5525a0618a6e4a8ce8fbb31726f30c38d0d0841baf702fb7f42279cba164d5f"
+    }
+   },
+   "fit_sha256": "488dc0a3ab81bd398bee635cad5ee3c782f7559826944643a41349c40e546e1a"
+  },
+  "umi-finray-3mm": {
+   "build_id": "surface-21x8-4548f2e02ef6",
+   "files": {
+    "assembled": {
+     "bytes": 24036,
+     "sha256": "d21f11b994cc8fedade27ece4b63310510ec6bd3c8d5331921486229da1b6b1c"
+    },
+    "card": {
+     "bytes": 15518,
+     "sha256": "78f83e8761a9d3ebee6844427efa952d5479d212df6d9455e3be23979cfc57c3"
+    },
+    "exploded": {
+     "bytes": 29512,
+     "sha256": "7a60329280a10f8c1e8059e5557658ff98006da449e591ef17204f6b6ff84f01"
+    }
+   },
+   "fit_sha256": "910d5174be2cbe52052c6d450a6511c4b309e4a8d293ea971b947ec441e5a414"
+  },
+  "umi-trap-tip13.8-2mm": {
+   "build_id": "surface-32x11-3b33935dba27",
+   "files": {
+    "assembled": {
+     "bytes": 27392,
+     "sha256": "6ef273fc3a4aacad34658bdf7ac1221ef80843e493b689febd4360fda55befb4"
+    },
+    "card": {
+     "bytes": 14648,
+     "sha256": "f01204a9ada9cef5f553b68a0d39da42ba88c2d02cefbd9b6a2927385a0bc0d4"
+    },
+    "exploded": {
+     "bytes": 29472,
+     "sha256": "79552bb2832184268f50a34534bd9894c2dbf550d62936d7cb017298d0baa8d6"
+    }
+   },
+   "fit_sha256": "1746c1eb70d6d51feccae1b932dc349d9d0ab64af87b964add7830c17372781d"
+  },
+  "umi-trap-tip17.8-2mm": {
+   "build_id": "surface-32x11-0081149cd3fc",
+   "files": {
+    "assembled": {
+     "bytes": 26404,
+     "sha256": "29b9bf780d10d655e1b347c2651dfe7601dab6271394f774335f12ba61a72050"
+    },
+    "card": {
+     "bytes": 14726,
+     "sha256": "219f19b5c844683e458dd401d8698db776b4ac271a9bf76e189deee1b111c519"
+    },
+    "exploded": {
+     "bytes": 30732,
+     "sha256": "396b56640aa455ac5f70bfc0b407d5f516dcfc57d719df5b836fc9747922e526"
+    }
+   },
+   "fit_sha256": "3fb0ad9481deef8f266eefd35adf72a6710dc3a9bb4e5a5d096a2973ac19de0e"
+  },
+  "umi-trap-tip21.8-2mm": {
+   "build_id": "surface-32x11-b71429b37fb2",
+   "files": {
+    "assembled": {
+     "bytes": 27964,
+     "sha256": "74b487bd489e66b94ff8c6b229c266deaea35c7a415cc94fc59706ca7937c05a"
+    },
+    "card": {
+     "bytes": 14932,
+     "sha256": "8c05a89b8f42dfd5a3eba1a1b4234b011e07750f8adf5f92163dd334ab577964"
+    },
+    "exploded": {
+     "bytes": 31238,
+     "sha256": "4054da5810777b31d9599c3cca2cf387f28ea9c697d934ead569a2e2d14a6ba7"
+    }
+   },
+   "fit_sha256": "c3efa569930da76406473f94292e15d71f33cf63b4e21d77fbaa5dc2112f0928"
+  },
+  "umi-trap-tip5.8-2mm": {
+   "build_id": "surface-32x11-c3cf744e7a3c",
+   "files": {
+    "assembled": {
+     "bytes": 24944,
+     "sha256": "68e96c0bde68e928537638c52bdd85ae55c06aea19920c94e3505138f3574627"
+    },
+    "card": {
+     "bytes": 13894,
+     "sha256": "ba6aeb9b6a83fe5e7938f7488e65a3b384205a6222cdd4b881df018a89357e3d"
+    },
+    "exploded": {
+     "bytes": 28040,
+     "sha256": "77813872ef5e9d7df75a5896d7d3cfe12ee91c65a97a6d5eb9b2c59fb85873e7"
+    }
+   },
+   "fit_sha256": "15b39e0564c34532b4ec80c1f761ccba5358e4da204974bd93ffad77dce90cac"
+  },
+  "umi-trap-tip9.8-2mm": {
+   "build_id": "surface-32x11-11e36f96e75a",
+   "files": {
+    "assembled": {
+     "bytes": 26200,
+     "sha256": "1d0e2c53fd9e596917ba73cce7e32b2d26df95633ae2d2a1ff9aa30220a74396"
+    },
+    "card": {
+     "bytes": 14270,
+     "sha256": "31b4ada4d1a82693aed32be524f66ef3eab84df5e26883b1889519d9fb3e2bd5"
+    },
+    "exploded": {
+     "bytes": 29704,
+     "sha256": "3b2c732de304a3154a037b7864c19df2bb303fd1e4e17737d612085ca320c68f"
+    }
+   },
+   "fit_sha256": "73d4391e56d5a3af6bef03c08c9cfacb95ed6d263846c09c21077d6862f62920"
+  }
+ }
+}

@@ -9,8 +9,11 @@ into web/library/art/<id>.json.gz (docs/LIBRARY_VIEW.md).  tools/library_write.p
     FPC_PORT=18801 /tmp/fpc-browser-venv/bin/python tools/browser/library_shots.py            # every sensor
     ... library_shots.py --only widowx-250-1mm,i2rt-yam-2mm                                   # some; the others kept
     ... library_shots.py --check                                                              # shoot again, compare
-    ... library_shots.py --check-generator umi-finray-2mm,umi-trap-tip5.8-2mm                 # Gen by Surface's figure
+    ... library_shots.py --check-generator                                                    # Gen by Surface's figure
+    ... library_shots.py --check-generator umi-finray-2mm,umi-trap-tip5.8-2mm                 # ... of some sensors
+    ... library_shots.py --pin-generator                                                      # ... pinned anew
     ... library_shots.py --out /tmp/shots --sheet /tmp/shots/contact_sheet.png                # elsewhere, with a sheet
+    ... library_shots.py --showcase [--check]                                                 # the showcase's pictures
 
 Against a running app.py (--port, else FPC_PORT) that serves this project (its entries.json and scenes/scenes.json must
 be this tree's), in headless Chromium on SwiftShader (as cad_checks.py), one sensor at a time (app.py serves one surface
@@ -49,7 +52,7 @@ fits'), bytes and SHA-256, the entry's fit_sha256 and build_id it was shot from,
 (view_sha256: library_write.VIEW_SOURCES), both as the server served them, the look, the drawings' margins in px [left,
 top, right, bottom], the art (its path, bytes, SHA-256, the SHA-256 of its document's canonical JSON, json_sha256, and
 its build id) and, for a gripper, its stage (the scene's path, library_write.scene_sha256 of the scene and the rules,
-and the numbers).  A sensor shot from another fit, or with art of another build, is the wrong sensor pictured, which
+and the numbers); for a part without a scene that the rules give a look (their part_looks), part_look_sha256.  A sensor shot from another fit, or with art of another build, is the wrong sensor pictured, which
 library_write --check, the site build and tests/test_library.py refuse; one shot from older figure or view sources is
 only a warning there (the public CI runs no browser): re-shoot it here.
 
@@ -59,13 +62,38 @@ document by json_sha256 (never its gzip bytes, which another zlib may write othe
 art file's, and each gripper's stage (its scene hash and numbers), writing nothing.  The art goes into web/library/art/,
 or with --out into an art/ folder beside that folder (the manifest's paths stay relative to their parent: shots/...,
 art/...).  A full run removes the pictures and the art of sensors no longer listed; --only keeps the others' records.
---check-generator ID,... shoots those sensors in Gen by Surface instead (./?part=<id>, the figure on its own, the
-fingertip: generator_shoot(), as the pictures were shot until the 3D view) and compares their three files with the
-folder's: for the UMI finger and its tapered tips, whose Library view is the figure with no stage, every byte must agree
-(Gen by Surface unchanged, and the Library's view equal to it); a gripper's picture is its whole scene there, so it
-differs.  --sheet writes a contact sheet (PNG) of every sensor's Exploded card in the manifest, in the Library's order,
+--check-generator [ID,...] is the proof that Gen by Surface is as it was and that the Library's view of a part without a
+scene (the UMI finger and its tapered tips; every such sensor without ID) is that figure but for the part's look (since
+2026-11-12 scenes.json's rules draw those parts in the real finger's orange TPU, where the Library's pictures had been
+Gen by Surface's figure byte for byte; Gen by Surface keeps its grey part).  For each sensor, writing nothing:
+1. Gen by Surface's figure (./?part=<id>, the figure on its own: generator_shoot(), as the pictures were shot until the
+   3D view) is the picture pinned for it in tools/browser/generator_figure.json (its three files' bytes and SHA-256, of
+   the entry's fit and build: the Library's pictures of before the look, so the figure of today is the figure of then);
+2. the Library's view with the rules' looks served away is that figure, pixel for pixel (the same part, sheets, lights,
+   camera and frame: without a look the Library's view of such a part is the figure);
+3. the Library's view as the rules are gives the folder's three pictures, byte for byte (for a part the rules give no
+   look these are the figure's own files, the equality of before);
+4. for a part with a look, the view shot once more with that look in another colour (every channel half the range off):
+   the drawing's alpha is the figure's at every pixel (the same outline), and every drawn pixel that the part's colour
+   does not reach (the same in both colours: the sheets, and their edges on the ground) is the figure's pixel (the look
+   touches the part alone); the pixels it does reach (the part's) and the others must each be PART_SHARE_MIN and
+   SHEETS_SHARE_MIN of the drawing at least, so that neither statement is empty.
+A gripper's sensor is refused (its picture is the whole scene).  --pin-generator [ID,...] writes the pin from Gen by
+Surface's figure as it is now, saying which pictures changed: only for a deliberate change of the figure, or a sensor's
+new build.  Four drawings a sensor: 43 to 57 s on the shared host of 2026-11-12 (a shoot's one drawing 8 to 18 s there).
+--sheet writes a contact sheet (PNG) of every sensor's Exploded card in the manifest, in the Library's order,
 each in the page's light box.  About 6 to 10 s a sensor, the art 0.6 to 1.6 s of it (the 42 in 5.4 minutes on a shared
 host, 2026-11-05, with the scenes of the design: 126 files, 3.70 MB; the first screen's cards 0.21 MB; the art 0.41 MB).
+
+--showcase shoots the Library's showcase instead (the hand-designed FlexiTac sensor on the xArm gripper; no sensor of
+entries.json): its own page, library.html?probe=shoot#<its id>, with web/library/showcase.json served by this tool (the
+pad's placed record fresh, with the showcase's scene), the view's pane 640 x 800 CSS px (4:5: a 1280 x 1600 buffer, so
+the upright gripper fills the picture), each mode read, checked whole and centred as a sensor's; written to
+web/library/showcase/ (<id>.exploded.webp, <id>.assembled.webp, and <id>.card.webp, the Assembled drawing at 800 x 1000)
+with showcase.json's "placed", "image" (each file's bytes and SHA-256) and "shot" (the hashes of the scene with the
+rules, the art, the placed record, the figure's and the view's sources, the look, the margins and the stage's numbers);
+--check shoots again and compares the three keys and every file's bytes, writing nothing.  tools/library_write.py
+--check then holds the document and the files (showcase_page()).
 
 The pictures and the art are not committed on a branch that changes the figure, the view, the scenes or the Library's
 sensors: shoot them once those are merged, with the final look, then run tools/library_write.py.  Needs Playwright and
@@ -317,8 +345,9 @@ def rule_breaches(numbers: dict, checks: dict, see_through, explode_stacks=("sen
 
 def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> dict:
     """{mode: the Library view's PNG at its home, "stage": the stage's numbers or None} of one sensor (a new context,
-    closed after).  ``served``: {"entries": entries.json's text with every view, "art": this sensor's art file,
-    "gripper": whether its part has a scene, "pictured": the shots/ files this tree has}."""
+    closed after).  ``served``: {"entries": entries.json's text with every view, "art": this sensor's art file (None:
+    the server's own), "gripper": whether its part has a scene, "scenes": scenes/scenes.json's text in place of the
+    server's (--check-generator: the rules with another look for the part, or none)}."""
 
     context = browser.new_context(viewport=VIEWPORT, device_scale_factor=DPR, color_scheme="light")
     page = context.new_page()
@@ -334,7 +363,10 @@ def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> di
         else:
             route.continue_()
 
-    page.route("**/static/library/art/**", art)
+    if served.get("art") is not None:
+        page.route("**/static/library/art/**", art)
+    if served.get("scenes") is not None:
+        page.route(f"**/static/library/{library_write.SCENES_INDEX}", lambda route: route.fulfill(status=200, content_type="application/json", body=served["scenes"]))
     build = variant["build_id"]
     try:
         page.goto(f"{url}library.html?probe=shoot#{identifier}")
@@ -410,6 +442,170 @@ def generator_shoot(browser, url: str, identifier: str, variant: dict) -> dict:
     return shots
 
 
+# -- the showcase (the Library's first card and its page; docs/LIBRARY_VIEW.md "The showcase's page") ------------------------
+
+SHOWCASE_PANE_CSS = (library_write.SHOWCASE_SHOT_SIZE[0] // DPR, library_write.SHOWCASE_SHOT_SIZE[1] // DPR)
+# One transparent pixel (a PNG).
+PIXEL_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")
+
+
+def showcase_shoot(browser, url: str, document: dict) -> dict:
+    """{mode: the Library view's PNG at its home, "numbers": the stage's} of the showcase, from its own page as a visitor
+    opens it (library.html?probe=shoot#<its id>: the placed record drawn on the scene's gripper), ``document`` served as
+    its showcase.json (the placed record fresh, the pictures named as they will be).  The view's host at SHOWCASE_PANE_CSS, 640 x 800 CSS px (4:5): a 1280 x 1600 buffer, the scene framed
+    again at that aspect, so the upright gripper fills the picture."""
+
+    context = browser.new_context(viewport=VIEWPORT, device_scale_factor=DPR, color_scheme="light")
+    page = context.new_page()
+    errors = []
+    console_errors(page, errors)
+    page.route("**/static/library/showcase.json", lambda route: route.fulfill(status=200, content_type="application/json",
+                                                                               body=library_write.showcase_text(document)))
+    # Its pictures as the page asks for them (under the view, never seen in the shot): one transparent pixel each, so
+    # the first shoot, with none written yet, keeps the page's Exploded | Assembled switch (the page drops it once both
+    # of a page's pictures have failed to load).
+    page.route("**/static/library/showcase/*.webp", lambda route: route.fulfill(status=200, content_type="image/png", body=PIXEL_PNG))
+    size = list(library_write.SHOWCASE_SHOT_SIZE)
+    try:
+        page.goto(f"{url}library.html?probe=shoot#{document['id']}")
+        drawn = poll(page, VIEW_DRAWN, None, TIMEOUT_S)
+        if drawn != "drawn":
+            raise ShotError(f"the Library's 3D view is not drawn for the showcase: {drawn or 'timed out'}")
+        pane = page.evaluate(PANE, list(SHOWCASE_PANE_CSS))
+        if pane != list(SHOWCASE_PANE_CSS) or not poll(page, BUFFER, size, 60):
+            raise ShotError(f"the view's pane is {pane} CSS px, its buffer not {size}")
+        page.evaluate(TWO_FRAMES)
+        shots, state = {}, {}
+        for mode in MODES:
+            read = page.evaluate(SHOT, mode)
+            if "error" in read:
+                raise ShotError(f"{mode}: {read['error']}")
+            state = json.loads(read["state"])
+            offset = state.get("offset") or [0, 0]
+            if (state.get("state"), state.get("id"), state.get("build_id"), state.get("mode"), state.get("drawn_mode"), state.get("moved"),
+                    read["buffer"], list(offset[:2])) != ("drawn", document["id"], None, mode, mode, False, size, [0, 0]):
+                raise ShotError(f"{mode}: not at its home as drawn, unmoved: {dict(state, stage=None)} buffer {read['buffer']}")
+            shots[mode] = {"png": base64.b64decode(read["url"].split(",", 1)[1])}
+        if not state.get("gripper"):
+            raise ShotError("the view drew no gripper's scene for the showcase")
+        shots["numbers"] = ((state.get("stage") or {}).get("numbers")) or None
+        if not shots["numbers"]:
+            raise ShotError(f"the stage measured no numbers (#libViewState stage {state.get('stage')!r}): is the page's ?probe=shoot honoured?")
+    finally:
+        context.close()
+    if errors:
+        raise ShotError(f"console errors: {errors[:3]}")
+    return shots
+
+
+def showcase_encode(shots: dict) -> tuple:
+    """({kind: WebP bytes}, {mode: margins px}) of the showcase's drawings, each checked whole and centred as a sensor's
+    (encode()); the card the Assembled drawing downscaled (library_write.SHOWCASE_SHOTS)."""
+
+    from PIL import Image
+
+    images, margins = {}, {}
+    for mode in MODES:
+        image = Image.open(io.BytesIO(shots[mode]["png"]))
+        image.load()
+        width, height = image.size
+        if (image.mode, image.size) != ("RGBA", library_write.SHOWCASE_SHOT_SIZE):
+            raise ShotError(f"{mode}: the canvas read as {image.mode} {image.size}")
+        box = image.getchannel("A").getbbox()
+        if box is None:
+            raise ShotError(f"{mode}: nothing drawn")
+        drawn = [box[0], box[1], width - box[2], height - box[3]]
+        if min(drawn) == 0:
+            raise ShotError(f"{mode}: the drawing reaches the frame's edge (margins {drawn} px): the gripper is cut")
+        images[mode], margins[mode] = centred(image, box, drawn)
+    files = {}
+    for kind, (_, size, mode) in library_write.SHOWCASE_SHOTS.items():
+        files[kind] = webp(images[mode] if images[mode].size == size else images[mode].resize(size, Image.LANCZOS))
+        if library_write.webp_info(files[kind]) != (size[0], size[1], True):
+            raise ShotError(f"{kind}: Pillow wrote {library_write.webp_info(files[kind])}, not a {size} WebP with alpha")
+    return files, margins
+
+
+def showcase_run(url: str, port: int, check: bool, out: Path) -> int:
+    """--showcase: the showcase's three pictures shot from its own page and written into ``out`` (web/library/showcase/)
+    with showcase.json's "placed", "image" and "shot"; with ``check`` shot again and compared, nothing written."""
+
+    path = LIBRARY / library_write.SHOWCASE_FILE
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        print(f"library_shots: {path} is missing or not JSON ({error}): write its words first (docs/LIBRARY_VIEW.md)", file=sys.stderr)
+        return 2
+    placed = library_write.showcase_placed(LIBRARY)
+    if placed is None:
+        print(f"library_shots: web/{library_write.SHOWCASE_PLACED} is missing or not JSON", file=sys.stderr)
+        return 2
+    try:
+        figure = library_write.figure_sha256(library_write.figure_sources(lambda name: fetch(url + "static/" + name)))
+        view = library_write.view_sha256(library_write.view_sources(lambda name: fetch(url + "static/" + name)))
+        same = all(fetch(url + "static/library/" + relative) == (LIBRARY / relative).read_bytes()
+                   for relative in (library_write.SHOWCASE_SCENE, library_write.SCENES_INDEX, placed["art"], placed["mesh"]["file"]))
+    except OSError as error:
+        print(f"library_shots: app.py does not answer on port {port}, or does not serve the showcase's files: {error}", file=sys.stderr)
+        return 2
+    if not same:
+        print(f"library_shots: the server on port {port} serves another showcase than this tree's (its scene, rules, art or finger "
+              "differs): start app.py from this project", file=sys.stderr)
+        return 2
+    # The page's document for the shoot: the placed record fresh, the pictures named as they will be.
+    stub = {kind: {"src": relative, "width": size[0], "height": size[1]} for kind, (relative, size, _) in library_write.SHOWCASE_SHOTS.items()}
+    served = dict(document, placed=placed, image=dict(stub, alt=library_write.SHOWCASE_ALT))
+    from playwright.sync_api import Error as PlaywrightError
+    from playwright.sync_api import sync_playwright
+
+    started = time.monotonic()
+    files = problem = None
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(args=WEBGL_ARGS)
+        try:
+            for attempt in (1, 2):
+                try:
+                    drawn = showcase_shoot(browser, url, served)
+                    files, margins = showcase_encode(drawn)
+                    break
+                except (ShotError, PlaywrightError) as error:
+                    problem = error
+                    if attempt == 1:
+                        print(f"retry the showcase: {error}", flush=True)
+        finally:
+            browser.close()
+    if files is None:
+        print(f"FAIL the showcase: {problem}", flush=True)
+        return 1
+    # The stage's numbers within the rules' checks and the showcase's own bounds, or nothing is written.
+    unsound = library_write.showcase_numbers(drawn["numbers"], library_write.scenes_index(LIBRARY).get("rules"))
+    if unsound:
+        print(f"FAIL the showcase: {'; '.join(unsound)} (library_write.SHOWCASE_BOUNDS)", flush=True)
+        return 1
+    look = library_write.read_art((LIBRARY / placed["art"]).read_bytes()).get("look")
+    fresh = dict(document, placed=placed, image=library_write.showcase_image(files),
+                 shot=dict(library_write.showcase_shot(LIBRARY, figure, view), look=look, margins_px=margins, numbers=drawn["numbers"]))
+    sizes = " ".join(f"{kind} {len(data) / 1024:.1f} KB" for kind, data in files.items())
+    took = f"{time.monotonic() - started:.1f} s"
+    if check:
+        unlike = [key for key in ("placed", "image", "shot") if document.get(key) != fresh[key]]
+        unlike += [relative for kind, (relative, _, _) in library_write.SHOWCASE_SHOTS.items()
+                   if not (out / Path(relative).name).is_file() or (out / Path(relative).name).read_bytes() != files[kind]]
+        print(f"{'DIFFERS' if unlike else 'same'} the showcase ({took}): {sizes}" + (f"; differ: {', '.join(unlike)}" if unlike else ""), flush=True)
+        return 1 if unlike else 0
+    out.mkdir(parents=True, exist_ok=True)
+    for kind, (relative, _, _) in library_write.SHOWCASE_SHOTS.items():
+        target = out / Path(relative).name
+        if not target.is_file() or target.read_bytes() != files[kind]:
+            target.write_bytes(files[kind])
+    text = library_write.showcase_text(fresh)
+    if path.read_text(encoding="utf-8") != text:
+        path.write_text(text, encoding="utf-8")
+    print(f"shot the showcase ({took}): {sizes}, margins {margins['exploded']} / {margins['assembled']} px", flush=True)
+    print(f"library_shots: now run tools/library_write.py --check ({library_write.SHOWCASE_FILE}'s pictures and what they were shot from)")
+    return 0
+
+
 def encode(shots: dict) -> tuple:
     """({kind: WebP bytes}, {mode: margins px}) of one sensor's drawings, each checked whole and centred."""
 
@@ -476,9 +672,10 @@ def webp(image) -> bytes:
 
 
 def record(identifier: str, variant: dict, files: dict, margins: dict, figure: str, look: str, *, art=None, view=None,
-           stage=None) -> dict:
+           stage=None, part_look=None) -> dict:
     """The manifest's record of one sensor's pictures; shot from the Library's 3D view, with ``view`` (view_sha256 of
-    its modules), ``art`` (art_record()) and, for a gripper, ``stage`` ({scene, scene_sha256, numbers})."""
+    its modules), ``art`` (art_record()) and, for a gripper, ``stage`` ({scene, scene_sha256, numbers}); for a part
+    without a scene that scenes.json's rules give a look, ``part_look`` (library_write.part_look_sha256())."""
 
     paths = library_write.shot_files(identifier)
     entry = {"fit_sha256": variant["fit_sha256"], "build_id": variant["build_id"], "figure_sha256": figure, "look": look,
@@ -491,6 +688,8 @@ def record(identifier: str, variant: dict, files: dict, margins: dict, figure: s
         entry["art"] = art
     if stage is not None:
         entry["stage"] = stage
+    if part_look is not None:
+        entry["part_look_sha256"] = part_look
     return entry
 
 
@@ -563,38 +762,268 @@ def contact_sheet(browser, out: Path, entries: dict, shots: dict, sheet: Path) -
     context.close()
 
 
-def check_generator(browser, url: str, out: Path, entries: dict, chosen: list) -> int:
-    """--check-generator: each sensor shot in Gen by Surface (generator_shoot()) and its three files compared with
-    ``out``'s; writes nothing."""
+# -- Gen by Surface's figure and the Library's view of a part without a scene (--check-generator, --pin-generator) -----
+# The pin: Gen by Surface's figure of each sensor of a part without a scene, as encode() writes its three pictures (each
+# file's bytes and SHA-256), with the fit and the build it is of.  Written from the Library's pictures of before the
+# look (2026-11-12), which were that figure byte for byte, so the figure of today is held to the figure of then.
+GENERATOR_PIN = Path(__file__).resolve().parent / "generator_figure.json"
+GENERATOR_FORMAT = "flexitac-generator-figure/v1"
+GENERATOR_ABOUT = ("Gen by Surface's sensor on the part (./?part=<id>: web/cad/onpart.js with no stage, the part in the "
+                   "generator's grey) for each sensor of a Library part without a scene (the UMI finger and its tapered "
+                   "tips), as tools/browser/library_shots.py shoots and encodes it: the three pictures' bytes and SHA-256, "
+                   "the fit and the build they are of, and the hash of the figure's sources they were pinned from "
+                   "(figure_sha256: a record only; the pictures are what is held).  Until 2026-11-12 the Library's own "
+                   "pictures of these sensors were these files byte for byte; since then the Library draws the part in "
+                   "its look (scenes/scenes.json's rules) and library_shots.py --check-generator holds Gen by Surface's "
+                   "figure to this pin.  Written by --pin-generator, only for a deliberate change of the figure or a "
+                   "sensor's new build.")
+# The least share of a drawing's pixels that the part's colour must reach, and that it must not (--check-generator's
+# fourth comparison: with fewer of either, one of its two statements would be about almost nothing).  Measured on the
+# fourteen sensors of 2026-11-12: the part's 44 to 52 % of the Exploded drawing and 26 to 41 % of the Assembled one.
+PART_SHARE_MIN = 0.1
+SHEETS_SHARE_MIN = 0.25
+PIN_PROBLEM = "pin Gen by Surface's figure again with tools/browser/library_shots.py --pin-generator"
+
+
+def fingertip_sensors(entries: dict, staged: dict) -> list:
+    """The sensors, in the Library's order, of the parts without a scene (``staged``: scenes.json's scenes map): the
+    ones whose Library view is Gen by Surface's figure with no stage."""
+
+    return [identifier for identifier in order(entries) if entries["variants"][identifier]["part"] not in staged]
+
+
+def figure_record(variant: dict, files: dict) -> dict:
+    """The pin's record of one sensor's figure: the fit and the build it is of, each picture's bytes and SHA-256."""
+
+    return {"fit_sha256": variant["fit_sha256"], "build_id": variant["build_id"],
+            "files": {kind: {"bytes": len(files[kind]), "sha256": hashlib.sha256(files[kind]).hexdigest()} for kind in library_write.SHOT_KINDS}}
+
+
+def pin_text(shots: dict, figure: str) -> str:
+    document = {"format": GENERATOR_FORMAT, "about": GENERATOR_ABOUT, "figure_sha256": figure, "shots": shots}
+    return json.dumps(document, indent=1, sort_keys=True, ensure_ascii=True, allow_nan=False) + "\n"
+
+
+def read_pin(path: Path = GENERATOR_PIN) -> dict:
+    """The pin's document, or an empty one where there is none."""
+
+    if not path.is_file():
+        return {"format": GENERATOR_FORMAT, "figure_sha256": None, "shots": {}}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def pin_problems(pin: dict, entries: dict, staged: dict) -> list:
+    """What makes the pin not the pin of this library's sensors, one line each (none: []): another format, a sensor of
+    a part without a scene not pinned or pinned for another fit or build (the figure of another sensor), a record
+    without the three pictures' bytes and SHA-256, a record of no such sensor."""
+
+    if pin.get("format") != GENERATOR_FORMAT:
+        return [f"the pin's format is {pin.get('format')!r}, not {GENERATOR_FORMAT}"]
+    found, shots = [], pin.get("shots") or {}
+    wanted = fingertip_sensors(entries, staged)
+    for identifier in wanted:
+        record, variant = shots.get(identifier), entries["variants"][identifier]
+        if record is None:
+            found.append(f"{identifier}: Gen by Surface's figure is not pinned: {PIN_PROBLEM} {identifier}")
+        elif (record.get("fit_sha256"), record.get("build_id")) != (variant["fit_sha256"], variant["build_id"]):
+            found.append(f"{identifier}: the pin is of another fit or build than the entry's ({record.get('build_id')}, not {variant['build_id']}): "
+                         f"{PIN_PROBLEM} {identifier}")
+        elif (sorted(record.get("files") or {}) != sorted(library_write.SHOT_KINDS)
+              or not all(isinstance(item, dict) and isinstance(item.get("bytes"), int) and item["bytes"] > 0
+                         and re.fullmatch(r"[0-9a-f]{64}", str(item.get("sha256"))) for item in record["files"].values())):
+            found.append(f"{identifier}: the pin has not the bytes and SHA-256 of its {', '.join(library_write.SHOT_KINDS)} pictures: {PIN_PROBLEM} {identifier}")
+    found += [f"{identifier}: pinned, but no sensor of a part without a scene: {PIN_PROBLEM}" for identifier in sorted(set(shots) - set(wanted))]
+    return found
+
+
+def other_look(look: dict) -> dict:
+    """``look`` in another colour: every channel half the range off (#e85a1c -> #68da9c), so that every pixel the
+    part's colour reaches is drawn otherwise, whatever the colour."""
+
+    return dict(look, color="#" + "".join(f"{(int(look['color'][k:k + 2], 16) + 128) % 256:02x}" for k in (1, 3, 5)))
+
+
+def served_scenes(index: dict, part_id: str, given: dict | None) -> str:
+    """scenes/scenes.json's text as --check-generator serves it: the rules without their looks (``given`` None: the part
+    as Gen by Surface draws it) or with ``given`` ({"look", "smooth_deg"}, as library_write.part_look() gives it) for
+    ``part_id`` alone; everything else as it is."""
+
+    served = json.loads(json.dumps(index))
+    for key in library_write.RULES_OPTIONAL:
+        served["rules"].pop(key, None)
+    if given is not None:
+        served["rules"]["part_looks"] = {part_id: given["look"]}
+        if given.get("smooth_deg") is not None:
+            served["rules"]["part_smooth_deg"] = given["smooth_deg"]
+    return json.dumps(served)
+
+
+def view_differences(figure: bytes, look: bytes, other: bytes) -> dict:
+    """The Library's view of a part in its look against Gen by Surface's figure, pixel by pixel: three drawings of one
+    size as RGBA bytes (four a pixel): the figure, the view in the part's look, the view in that look's other colour
+    (other_look()).  {"drawn": the view's drawn pixels (alpha above 0), "alpha": the pixels whose alpha is not the
+    figure's (another outline), "part": the drawn pixels the part's colour reaches (not the same in both colours),
+    "sheets": the drawn pixels it does not reach (the same in both: the sheets, and their edges on the ground),
+    "wrong": those of the sheets' pixels that are not the figure's}."""
+
+    if not (len(figure) == len(look) == len(other)) or len(look) % 4:
+        raise ShotError(f"the drawings are not RGBA of one size ({len(figure)}, {len(look)} and {len(other)} bytes)")
+    counts = {"drawn": 0, "alpha": 0, "part": 0, "sheets": 0, "wrong": 0}
+    for k in range(3, len(look), 4):
+        if look[k] != figure[k]:
+            counts["alpha"] += 1
+        if not look[k]:
+            continue
+        counts["drawn"] += 1
+        pixel = look[k - 3:k + 1]
+        if pixel != other[k - 3:k + 1]:
+            counts["part"] += 1
+            continue
+        counts["sheets"] += 1
+        if pixel != figure[k - 3:k + 1]:
+            counts["wrong"] += 1
+    return counts
+
+
+def view_problems(counts: dict) -> list:
+    """What view_differences()'s counts show that the Library's view of a part in its look is not Gen by Surface's
+    figure with the part alone drawn otherwise, one line each (none: [])."""
+
+    found = []
+    if counts["alpha"]:
+        found.append(f"{counts['alpha']} px of another alpha than the figure's (another outline)")
+    if counts["wrong"]:
+        found.append(f"{counts['wrong']} of the {counts['sheets']} px the part's colour does not reach are not the figure's (the look is not the part's alone)")
+    if counts["part"] < PART_SHARE_MIN * counts["drawn"]:
+        found.append(f"the part's colour reaches {counts['part']} of the {counts['drawn']} px drawn, under {PART_SHARE_MIN:g} of them (is the look drawn?)")
+    if counts["sheets"] < SHEETS_SHARE_MIN * counts["drawn"]:
+        found.append(f"the part's colour reaches all but {counts['sheets']} of the {counts['drawn']} px drawn, under {SHEETS_SHARE_MIN:g} of them left "
+                     "(the sheets drawn otherwise too?)")
+    return found
+
+
+def rgba(png: bytes) -> bytes:
+    """A canvas's PNG as RGBA bytes (SHOT_SIZE)."""
+
+    from PIL import Image
+
+    image = Image.open(io.BytesIO(png))
+    image.load()
+    if (image.mode, image.size) != ("RGBA", library_write.SHOT_SIZE):
+        raise ShotError(f"the canvas read as {image.mode} {image.size}")
+    return image.tobytes()
+
+
+def twice(what: str, shot):
+    """``shot()``, once again after a ShotError or a Playwright error (a load that a busy host held back)."""
 
     from playwright.sync_api import Error as PlaywrightError
 
+    try:
+        return shot()
+    except (ShotError, PlaywrightError) as error:
+        print(f"retry {what}: {error}", flush=True)
+    return shot()
+
+
+def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, index: dict, parts: dict, pin: dict) -> int:
+    """--check-generator (the module's docstring): for each sensor of a part without a scene, Gen by Surface's figure
+    against its pin, the Library's view without the rules' looks against that figure, the view as the rules are against
+    the folder's pictures, and for a part with a look the view against the figure pixel by pixel (view_differences());
+    writes nothing."""
+
+    from playwright.sync_api import Error as PlaywrightError
+
+    staged = index.get("scenes") or {}
+    entries_text = viewed_entries(entries, staged)
     differ, failed, started = [], [], time.monotonic()
     for number, identifier in enumerate(chosen, 1):
         begun = time.monotonic()
-        files = None
-        for attempt in (1, 2):
-            try:
-                files, _ = encode(generator_shoot(browser, url, identifier, entries["variants"][identifier]))
-                break
-            except (ShotError, PlaywrightError) as error:
-                problem = error
-                if attempt == 1:
-                    print(f"retry {identifier}: {error}", flush=True)
-        if files is None:
+        variant = entries["variants"][identifier]
+        given = library_write.part_look(index, parts, variant["part"])
+
+        def viewed(look, identifier=identifier, variant=variant):
+            return shoot(browser, url, identifier, variant, {"entries": entries_text, "art": None, "gripper": False,
+                                                              "scenes": served_scenes(index, variant["part"], look)})
+
+        try:
+            figure = twice(identifier, lambda: generator_shoot(browser, url, identifier, variant))
+            bare = twice(identifier, lambda: viewed(None))
+            looked = twice(identifier, lambda: viewed(given)) if given else bare
+            other = twice(identifier, lambda: viewed(dict(given, look=other_look(given["look"])))) if given else None
+            files, _ = encode(figure)
+            pictures, _ = encode(looked)
+            unlike = []
+            # 1. Gen by Surface's figure is its pin.
+            pinned = (pin.get("shots") or {}).get(identifier) or {}
+            if (pinned.get("fit_sha256"), pinned.get("build_id")) != (variant["fit_sha256"], variant["build_id"]):
+                unlike.append(f"the figure is not pinned for the entry's build {variant['build_id']} ({PIN_PROBLEM} {identifier})")
+            else:
+                kinds = [kind for kind, item in figure_record(variant, files)["files"].items() if item != (pinned.get("files") or {}).get(kind)]
+                if kinds:
+                    unlike.append(f"Gen by Surface's figure is not the pinned one ({', '.join(kinds)})")
+            # 2. The Library's view without the rules' looks is the figure.
+            pixels = {mode: {"figure": rgba(figure[mode]["png"]), "bare": rgba(bare[mode]["png"])} for mode in MODES}
+            for mode in MODES:
+                if pixels[mode]["bare"] != pixels[mode]["figure"]:
+                    apart = sum(1 for k in range(0, len(pixels[mode]["bare"]), 4) if pixels[mode]["bare"][k:k + 4] != pixels[mode]["figure"][k:k + 4])
+                    unlike.append(f"{mode}: the Library's view without the look is not the figure ({apart} px)")
+            # 3. The Library's view as the rules are gives the folder's pictures.
+            paths = library_write.shot_files(identifier)
+            kinds = [kind for kind, data in pictures.items()
+                     if not (out / Path(paths[kind][0]).name).is_file() or (out / Path(paths[kind][0]).name).read_bytes() != data]
+            if kinds:
+                unlike.append(f"the folder's pictures are not the Library's view ({', '.join(kinds)})")
+            # 4. In its look, the view differs from the figure on the part's pixels alone.
+            said = "no look: the pictures are the figure's"
+            if given:
+                counted = {mode: view_differences(pixels[mode]["figure"], rgba(looked[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}
+                unlike += [f"{mode}: {problem}" for mode in MODES for problem in view_problems(counted[mode])]
+                said = "; ".join(f"{mode} {counted[mode]['part']} of {counted[mode]['drawn']} px the part's, the other {counted[mode]['sheets']} the figure's"
+                                 for mode in MODES)
+        except (ShotError, PlaywrightError) as error:
             failed.append(identifier)
-            print(f"FAIL {identifier}: {problem}", flush=True)
+            print(f"FAIL {identifier}: {error}", flush=True)
             continue
-        paths = library_write.shot_files(identifier)
-        unlike = [kind for kind, data in files.items()
-                  if not (out / Path(paths[kind][0]).name).is_file() or (out / Path(paths[kind][0]).name).read_bytes() != data]
         if unlike:
             differ.append(identifier)
-        print(f"{'DIFFERS' if unlike else 'same'} {identifier} ({number}/{len(chosen)}, {time.monotonic() - begun:.1f} s)"
-              + (f": {', '.join(unlike)}" if unlike else ""), flush=True)
-    print(f"library_shots: Gen by Surface's figure shot for {len(chosen) - len(failed)} of {len(chosen)} sensors in "
-          f"{time.monotonic() - started:.0f} s; {len(differ)} differ from {out}" + (f": {', '.join(differ)}" if differ else ""))
+        print(f"{'DIFFERS' if unlike else 'same'} {identifier} ({number}/{len(chosen)}, {time.monotonic() - begun:.1f} s): "
+              + ("; ".join(unlike) if unlike else f"the figure as pinned, the view without a look the figure, the pictures the view's; {said}"), flush=True)
+    print(f"library_shots: Gen by Surface's figure and the Library's view of it checked for {len(chosen) - len(failed)} of {len(chosen)} sensors in "
+          f"{time.monotonic() - started:.0f} s; {len(differ)} differ" + (f": {', '.join(differ)}" if differ else ""))
     return 1 if failed or differ else 0
+
+
+def pin_generator(browser, url: str, entries: dict, chosen: list, pin: dict, figure: str, path: Path = GENERATOR_PIN) -> int:
+    """--pin-generator: Gen by Surface's figure of each sensor as it is now written into the pin (the others' records
+    kept, a record of no sensor of a part without a scene dropped), each change said."""
+
+    from playwright.sync_api import Error as PlaywrightError
+
+    shots = {identifier: record for identifier, record in (pin.get("shots") or {}).items() if identifier in entries["variants"]}
+    failed = []
+    for number, identifier in enumerate(chosen, 1):
+        variant = entries["variants"][identifier]
+        try:
+            files, _ = encode(twice(identifier, lambda: generator_shoot(browser, url, identifier, variant)))
+        except (ShotError, PlaywrightError) as error:
+            failed.append(identifier)
+            print(f"FAIL {identifier}: {error}", flush=True)
+            continue
+        fresh = figure_record(variant, files)
+        was = shots.get(identifier)
+        print(f"{'kept' if was == fresh else 'pinned anew' if was else 'pinned'} {identifier} ({number}/{len(chosen)})"
+              + ("" if was in (None, fresh) else ": " + ", ".join(kind for kind in fresh["files"] if fresh["files"][kind] != (was.get("files") or {}).get(kind))
+                 + (" (another build)" if was.get("build_id") != fresh["build_id"] else "")), flush=True)
+        shots[identifier] = fresh
+    if failed:
+        print(f"library_shots: {len(failed)} sensors not shot; the pin is not written", file=sys.stderr)
+        return 1
+    text = pin_text(shots, figure)
+    if not path.is_file() or path.read_text(encoding="utf-8") != text:
+        path.write_text(text, encoding="utf-8")
+    print(f"library_shots: {len(chosen)} sensors pinned in {path.name} ({len(shots)} in all)")
+    return 0
 
 
 def main(argv=None) -> int:
@@ -605,13 +1034,23 @@ def main(argv=None) -> int:
     parser.add_argument("--out", type=Path, default=OUT, help=f"the pictures' folder (default {OUT.relative_to(ROOT)}; the art goes "
                         "into an art/ folder beside it)")
     parser.add_argument("--check", action="store_true", help="shoot again and compare with the manifest and the art; write nothing")
-    parser.add_argument("--check-generator", default=None, metavar="ID,...",
-                        help="shoot these sensors in Gen by Surface and compare their files with the folder's; write nothing")
+    parser.add_argument("--check-generator", default=None, nargs="?", const="", metavar="ID,...",
+                        help="Gen by Surface's figure of these sensors (of every part without a scene) against its pin, and the Library's "
+                        "view against that figure; write nothing")
+    parser.add_argument("--pin-generator", default=None, nargs="?", const="", metavar="ID,...",
+                        help="write Gen by Surface's figure of these sensors (of every part without a scene) into the pin")
     parser.add_argument("--sheet", type=Path, default=None, help="write a contact sheet (PNG) of the manifest's Exploded cards")
+    parser.add_argument("--showcase", action="store_true",
+                        help="shoot the showcase's three pictures from its own page instead (into web/library/showcase/, with "
+                             "showcase.json's placed, image and shot); with --check compare and write nothing")
     args = parser.parse_args(argv)
     if args.port is None:
         parser.error("give --port (or FPC_PORT): the port of a running app.py serving this project")
     url = f"http://127.0.0.1:{args.port}/"
+    if args.showcase:
+        if args.only is not None or args.check_generator is not None or args.pin_generator is not None or args.sheet is not None:
+            parser.error("--showcase shoots the showcase alone (with --check and --out only)")
+        return showcase_run(url, args.port, args.check, (LIBRARY / "showcase") if args.out == OUT else args.out.resolve())
     out = args.out.resolve()
     art_dir = out.parent / "art"
     local = (LIBRARY / "entries.json").read_bytes()
@@ -626,8 +1065,9 @@ def main(argv=None) -> int:
               "differs): start app.py from this project", file=sys.stderr)
         return 2
     entries = json.loads(local.decode("utf-8"))
-    listed = args.check_generator if args.check_generator is not None else args.only
-    chosen = order(entries) if listed is None else [item for item in re.split(r"[,\s]+", listed) if item]
+    generator = args.check_generator if args.check_generator is not None else args.pin_generator
+    listed = generator if generator is not None else args.only
+    chosen = order(entries) if not listed else [item for item in re.split(r"[,\s]+", listed) if item]
     unknown = [identifier for identifier in chosen if identifier not in entries["variants"]]
     if unknown or not chosen:
         print(f"library_shots: no sensor is named {', '.join(unknown) or repr(listed)}", file=sys.stderr)
@@ -635,13 +1075,6 @@ def main(argv=None) -> int:
     from playwright.sync_api import Error as PlaywrightError
     from playwright.sync_api import sync_playwright
 
-    if args.check_generator is not None:
-        with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(args=WEBGL_ARGS)
-            try:
-                return check_generator(browser, url, out, entries, chosen)
-            finally:
-                browser.close()
     # The Library view's modules and the scenes as the server serves them (its scenes.json this tree's).
     try:
         view = library_write.view_sha256(library_write.view_sources(lambda path: fetch(url + "static/" + path)))
@@ -656,6 +1089,26 @@ def main(argv=None) -> int:
               "differs): start app.py from this project", file=sys.stderr)
         return 2
     rules = scenes.get("rules") or {}
+    # parts.json's parts (their families): a part without a scene may take a look from the rules (part_looks).
+    parts = json.loads((LIBRARY / "parts.json").read_text(encoding="utf-8"))
+    if generator is not None:
+        # Gen by Surface's figure: of the sensors of parts without a scene (a gripper's picture is its whole scene).
+        fingertips = fingertip_sensors(entries, scenes.get("scenes") or {})
+        chosen = chosen if generator else fingertips
+        whole = [identifier for identifier in chosen if identifier not in fingertips]
+        if whole:
+            print(f"library_shots: {', '.join(whole)}: a gripper's sensor, pictured as its whole scene: Gen by Surface's figure is compared for "
+                  "the parts without a scene only", file=sys.stderr)
+            return 2
+        pin = read_pin()
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(args=WEBGL_ARGS)
+            try:
+                if args.pin_generator is not None:
+                    return pin_generator(browser, url, entries, chosen, pin, figure)
+                return check_generator(browser, url, out, entries, chosen, scenes, parts, pin)
+            finally:
+                browser.close()
     scene_files = {}
     for part in sorted({entries["variants"][identifier]["part"] for identifier in chosen} & set(scenes.get("scenes") or {})):
         relative = scenes["scenes"][part]
@@ -716,7 +1169,7 @@ def main(argv=None) -> int:
             stage = None if scene is None else {"scene": scene["path"], "scene_sha256": library_write.scene_sha256(scene["bytes"], rules),
                                                 "numbers": drawn["stage"]}
             fresh = record(identifier, variant, files, margins, figure, document["look"], art=art_record(identifier, art, document),
-                           view=view, stage=stage)
+                           view=view, stage=stage, part_look=library_write.part_look_sha256(library_write.part_look(scenes, parts, variant["part"])))
             timings.append((identifier, time.monotonic() - begun, art_s, shot_s))
             sizes = " ".join(f"{kind} {len(data) / 1024:.1f} KB" for kind, data in files.items()) + f", art {len(art) / 1024:.1f} KB"
             took = f"{time.monotonic() - begun:.1f} s: art {art_s:.2f} s, view {shot_s:.1f} s"
@@ -730,7 +1183,7 @@ def main(argv=None) -> int:
                 same_art = ({key: kept_art.get(key) for key in ("path", "json_sha256", "build_id")}
                             == {key: fresh["art"][key] for key in ("path", "json_sha256", "build_id")}
                             and art_file.is_file() and json_sha256(library_write.read_art(art_file.read_bytes())) == fresh["art"]["json_sha256"])
-                same_stage = kept.get("stage") == fresh.get("stage")
+                same_stage = kept.get("stage") == fresh.get("stage") and kept.get("part_look_sha256") == fresh.get("part_look_sha256")
                 unlike = [name for name, same in (("pictures", same_files), ("art", same_art), ("stage", same_stage)) if not same]
                 if unlike:
                     differ.append(identifier)

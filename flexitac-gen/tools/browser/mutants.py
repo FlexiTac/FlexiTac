@@ -16,7 +16,10 @@ web/cad/library_view.js, web/cad/library_stage.js or (its second round) web/libr
 (part_view, part_view_race, part_routes, part_layout) in the same WebGL browser, after a control run of each part with
 the unmutated files through the same routes that must pass every check: a later show not winning, the lens shift the
 other way, the see-through finger's depth pass writing no depth, the see-through finger opaque; the first route not
-clearing an address's mark (the footer hidden), a card Tabbed to left cut by its row.
+clearing an address's mark (the footer hidden), a card Tabbed to left cut by its row; and since the reviews of 2026-11-12
+five of the looks (library_stage.js, served to part_looks): the bodies drawn without their looks, the part left in a
+gripper's look when its scene goes, the part's corners welded in its file's unit, the gripper studio not made again for a
+context that comes back, the looks without their share of the studio's diffuse light.
 """
 from __future__ import annotations
 
@@ -192,6 +195,8 @@ MUTANTS += [
      "    if (serial !== current.serial) return false;\n    if (art.format", "    if (art.format", "part_view_race"),
     ("the Library view's lens shift the other way: the drawing off the middle, not where its picture's is (library_view.js)", "lib",
      "camera.setViewOffset(W, H, -dx, -dy, W, H)", "camera.setViewOffset(W, H, dx, dy, W, H)", "part_view"),
+    ("a turned Library view keeping the home's lens: the drawing run off the canvas half-way round (library_view.js; the verification of 2026-11-13)", "lib",
+     "          tan = Math.max(tan, Math.max(across, high) / depth);\n", "", "part_view"),
     ("the see-through finger's depth pass writing no depth: its faces behind each other veiling twice (library_stage.js)", "lib",
      "const ghostDepth = new THREE.MeshBasicMaterial({colorWrite: false, depthWrite: true,",
      "const ghostDepth = new THREE.MeshBasicMaterial({colorWrite: false, depthWrite: false,", "part_view"),
@@ -203,6 +208,18 @@ MUTANTS += [
      "    if (!state.index) return;\n    opened();\n", "    if (!state.index) return;\n", "part_routes"),
     ("a UMI card Tabbed to that its row shows in part left cut: the row not moved to it (library.js)", "lib",
      "      if (shift) track.scrollBy({left: shift});\n", "", "part_layout"),
+    # The looks (docs/LIBRARY_VIEW.md "The looks"; the reviews of 2026-11-12: no mutant had reached the stage's look code).
+    ("a scene's looks not drawn: every body in the part's own material (library_stage.js)", "lib",
+     "new THREE.Mesh(geometryOf(body.positions, smooth), looks.get(body.look) || partLook);", "new THREE.Mesh(geometryOf(body.positions, smooth), partLook);",
+     "part_looks"),
+    ("the part left in a gripper's look when its scene goes: the UMI finger after a black-padded gripper black (library_stage.js)", "lib",
+     "      dress(null);\n      smoothPart(null);\n", "      smoothPart(null);\n", "part_looks"),
+    ("the part's corners welded in its file's unit for its smooth normals: a part in metres welded at 1 mm, its normals wrong (library_stage.js)", "lib",
+     "{deg, mm, ...creased(positions, deg, mm)}", "{deg, mm, ...creased(positions, deg)}", "part_looks"),
+    ("the gripper studio not made again when a lost context comes back: the looks mirroring a lost context's texture (library_stage.js)", "lib",
+     "      if (state.studio !== undefined) state.studio = gripperStudio(renderer);\n", "", "part_looks"),
+    ("the looks without their share of the gripper studio's diffuse light: a white shell's faces turned from the key grey again (library_stage.js)", "lib",
+     "`iblIrradiance += ${GRIPPER_STUDIO.diffuse.toFixed(3)} * getIBLIrradiance( geometryNormal );`", "``", "part_looks"),
 ]
 LIB_FILES = {"**/static/cad/library_view.js": LIB_VIEW, "**/static/cad/library_stage.js": LIB_STAGE, "**/static/library.js": LIBRARY_JS}
 

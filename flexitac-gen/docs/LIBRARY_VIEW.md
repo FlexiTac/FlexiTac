@@ -15,8 +15,15 @@ This document freezes the files and interfaces that the work is built on
 amendment is the one exploding stack: the rules' `explode_stacks` and
 `see_through_modes`, the checks `stacks_apart_min_mm`, `stacks_apart_min_px`
 and `near_seen_min`, the numbers `near_seen` and `stacks_apart_px`, and
-`see_through` drawn in both views; both formats stay v1.  Paths are relative
-to `web/` unless they start with `tools/` or `tests/`.
+`see_through` drawn in both views; both formats stay v1.  A second
+amendment, of 2026-11-12, adds the looks (the user's request that every
+gripper be coloured after photos of the real product, with a metal's
+lustre): optional keys only (a scene's `looks`, `part_look` and
+`smooth_deg`, a body's `look`, the rules' `looks`, `part_looks` and
+`part_smooth_deg`, a record's `part_look_sha256`), so a file written before
+it is still a v1 file and is drawn as it was, pixel for pixel; see "The
+looks" below.  Paths are relative to `web/` unless they start with `tools/`
+or `tests/`.
 
 ## One renderer
 
@@ -39,6 +46,19 @@ to `web/` unless they start with `tools/` or `tests/`.
   builds the stack with `drape.js` `buildStack` and draws it with
   `createOnPartView`).  `library.js` imports `cad/library_view.js` (and so
   three.js) on a sensor's page only, never on the grid.
+- Turned (a drag, the arrow keys), the Library's view keeps the whole
+  drawing on its canvas (`library_view.js` `fitLens`, since the
+  verification of 2026-11-13: a turn keeps the home's distance, and a third
+  of a turn round the YAM's base and the Franka's fingertips had left the
+  canvas): at every change of the camera the lens widens just enough that
+  every point the home frames (the stack's home points, `frameView`'s)
+  lies within the frame's margin (`drape.js` `FRAME_MARGIN`) where the lens
+  shift puts it, never narrower than `FOV_DEG`, and `FOV_DEG` at a home.
+  The camera stays where it is, so its lamp, near and far and the edge
+  bands are those of the home; the homes, the pictures and the shots
+  tool's views are as they were.  Gen by Surface's figure keeps its lens.
+  `library_checks.py` `part_view` turns the view 120, 180 and 240 degrees
+  in both modes and finds no drawn pixel on the canvas's edge.
 
 ## Files
 
@@ -47,19 +67,31 @@ to `web/` unless they start with `tools/` or `tests/`.
 | `library/art/<id>.json.gz` | `tools/browser/library_shots.py` (the shoot) | the generator's art of the sensor's two boards (below) |
 | `library/scenes/scenes.json` | by hand; its `scenes` map by `tools/library_scenes.py` | the index of the grippers' scenes and the rules |
 | `library/scenes/<part>.json` | `tools/library_scenes.py` (private) | one gripper's scene |
-| `library/bodies/<part>/<name>.stl` | `tools/library_scenes.py` (private) | the scene's bodies: binary STL, mm |
+| `library/bodies/<part>/<name>.stl` | `tools/library_scenes.py` (private), then `tools/library_split.py` | the scene's bodies: binary STL, mm; with looks, one file per component (one look each) |
+| `tools/library_looks/<part>.json`, `base.json` | by hand | a gripper's look file (what `tools/library_split.py` writes its components, looks and scene from) and the base looks |
 | `library/shots/manifest.json` | `tools/browser/library_shots.py` | the pictures' manifest, with the records below |
+| `tools/browser/generator_figure.json` | `tools/browser/library_shots.py --pin-generator` | Gen by Surface's figure of each sensor of a part without a scene, pinned ("Parts without a scene") |
 | `library/entries.json` | `tools/library_write.py` | each variant's `view` (below) |
+| `vendor/flexitac-v2/geometry.json` | `tools/flexitac_v2.py` | the original FlexiTac pad's two FPCs, read from its official Gerbers ("A placed sensor") |
+| `vendor/flexitac-v2/art.json.gz` | `tools/browser/flexitac_v2_art.py` | the art of that pad's two boards, of no build |
+| `vendor/flexitac-v2/umi-finray.placed.json` | by hand | where that pad lies on the UMI finger: a placed record |
+| `library/showcase.json` | by hand (its words); `tools/browser/library_shots.py --showcase` (its `placed`, `image` and `shot`) | the showcase's page's document ("The showcase's page") |
+| `library/showcase/flexitac-g1.{exploded,assembled,card}.webp` | `tools/browser/library_shots.py --showcase` | the showcase's three pictures |
+| `library/bodies/flexitac-g1/drawn-<name>.stl` | `tools/library_showcase.py` | the plain shapes the project draws for the showcase (screw and bolt heads, nuts, the block in the top slot, the extender boards, cable stubs) |
 
 The bodies are third-party files (each one a row of `library/NOTICE.md`'s
 tables, its licence text in `library/licenses/`, modified as its row says)
 or the project's own (`bodies/makermods-metal/rail.stl`: a plain rail drawn
-by the project, not MakerMods hardware).  No MakerMods body is ever
-committed (`tools/library_write.py` `DENIED_SHA256`).
+by the project, not MakerMods hardware; and any
+`bodies/<part>/drawn-<name>.stl`: a plain shape `tools/library_split.py`
+draws where a model lacks a component the photos show, its STL header
+saying so, as the MakerMods tips' steel guide rail, its bores and end
+stops drawn on that rail).  No MakerMods body is ever committed (`tools/library_write.py`
+`DENIED_SHA256`).
 
 ## The art: `library/art/<id>.json.gz`
 
-The gzip (level 9, no name, time 0) of one JSON document written canonically
+The gzip (level 9, no name, time 0, OS byte 3 on every Python) of one JSON document written canonically
 (sorted keys, `,` and `:` without spaces, ASCII):
 
 ```json
@@ -116,6 +148,9 @@ one stack explodes.
   fingers are drawn see-through (`ghost_opacity`): `["exploded",
   "assembled"]`, the near finger see-through in both views.
 - The stage has no defaults: without either key it draws no gripper.
+- Optional, since 2026-11-12 (see "The looks"): `looks` `{name: look}`,
+  `part_looks` `{part or family: a name of looks, or a look}` and
+  `part_smooth_deg`, the look of the parts that have no scene.
 
 `library/scenes/<part>.json` (`"format": "flexitac-library-scene/v1"`):
 
@@ -128,14 +163,598 @@ one stack explodes.
 | `approach` | a unit vector: the fingers' approach axis (the camera's up) |
 | `opening` | `{q_mm, limit_mm, joint, source}`: each finger's stroke, fully open |
 | `mate` | `{kind: "turned" or "mirror", matrix, part}`: `matrix` takes the sensor finger onto the other one (`kind` is its determinant's sign); `part` true draws the part's own mesh there, false a body whose `finger` is `"mate"` |
-| `bodies` | `[{mesh: "bodies/<part>/<name>.stl", sha256, bytes, triangles, matrix, finger}]`: `matrix` takes the body's file into the part's frame; `finger` is `"sensor"`, `"mate"` or `null` |
+| `bodies` | `[{mesh: "bodies/<part>/<name>.stl", sha256, bytes, triangles, matrix, finger}]`: `matrix` takes the body's file into the part's frame; `finger` is `"sensor"`, `"mate"` or `null`; optional `look`: a name of `looks` (without it the body is the part's grey) |
 | `see_through` | a subset of `["sensor", "mate"]`: the fingers drawn see-through, in the rules' `see_through_modes` (the near finger, `["mate"]`, on every gripper: the user's decision of 2026-11-06) |
 | `picture` | the words after the label in the pictures' alt text (`"on both fingers of the open gripper"`) |
 | `camera` | optional: `{exploded or assembled: {tilt_deg, elevation_deg, front}}` over the rules' (tilt 45 to 70, elevation 15 to 45), its reason in `about` |
 | `explode` | optional: `{gap_share}` over the rules' (0.25 to 0.45), its reason in `about` |
+| `looks` | optional: `{name: look}`, the scene's looks (below); each one used by a body or by `part_look` |
+| `part_look` | optional: a name of `looks`, the look of the part (the sensor finger's own mesh) and of its mate where the mate is the part; no clear coat |
+| `smooth_deg` | optional: the crease angle of smooth normals, 1 to 90 degrees (35 where a scene has looks); absent: flat facets |
 
 Every matrix is a 4 x 4 array of rows, applied to column vectors, its last
 row `[0, 0, 0, 1]`, its upper 3 x 3 orthonormal.
+
+## The looks
+
+The user's request of 2026-11-12: every gripper coloured after photos of
+the real product, in the 3D view and in the pictures, with a metal's
+lustre.  Gen by Surface is not part of it: its figure, its 3D view and its
+files are as they were.
+
+A look is
+
+```json
+{"color": "#c9ccd0", "metalness": 1, "roughness": 0.45,
+ "clearcoat": 0.6, "clearcoat_roughness": 0.15, "env_intensity": 1.5}
+```
+
+`color` an sRGB `#rrggbb` in lower case (the base colour, picked from a
+photo), `metalness` and `roughness` 0 to 1; optional `clearcoat` and
+`clearcoat_roughness` 0 to 1 (a clear coat makes the body a
+`MeshPhysicalMaterial`, about 1.6 times a standard body's cost on a
+software renderer: only where a part truly has one), and `env_intensity`,
+0 or more, the strength of the studio's reflections on it (1 without it).
+A name is lower case letters, digits and hyphens.
+
+- One STL file is one component and has one look:
+  `bodies/<part>/<component>.stl`, its entry's `look`.
+- `part_look` is the look of the part and of its mate.  The part keeps the
+  figure's own material (the contact shade lives in its shader), so its
+  look cannot have a clear coat.
+- `smooth_deg`: at each corner the stage sums, weighted by area, the
+  normals of the facets that share the point (to 1 um) and face within
+  that angle of the corner's own facet.  The bodies' files are in mm; the
+  part's own file may be in metres (the Unitree Dex1's, the I2RT YAM's,
+  the MakerMods finger's), so the stage welds its corners in the fit's
+  unit times its scale to mm (the review of 2026-11-12: at 1 mm cells the
+  YAM's tip had 11258 of 24000 corners more than 5 degrees off).  The
+  bodies were decimated to within 15 degrees of the upstream normals, so
+  35 degrees smooths every curved face and keeps the real edges.
+- Every key is optional and a scene without them is drawn as before the
+  amendment, pixel for pixel (`tools/browser/library_shots.py --check` on
+  the scenes that have none; for a part without a scene,
+  `--check-generator`'s view with the rules' looks served away).
+- A finger's see-through copy takes its look's colour as a matte
+  dielectric (never lighter than the part's own grey: a white ghost is
+  lost on the card), at the rules' `ghost_opacity`.
+
+### How the stage draws them (`cad/library_stage.js`)
+
+- A material per look and drawing; the part's own material wears
+  `part_look` for the drawing and is put back when the scene goes, so a
+  UMI finger drawn after a gripper is as on a fresh page.  The sheets
+  (film, boards) keep their own look.
+- The **gripper studio** (`GRIPPER_STUDIO`): a second environment, built in
+  the stage with `studio.js`'s recipe and its own numbers, made on the
+  first drawing that has a look and again when a lost WebGL context comes
+  back.  `studio.js`'s `STUDIO`, `LIGHTS` and tone mapping are untouched
+  (they light the sheets and Gen by Surface).  It is a darker room above
+  the horizon (radiance 0.22 overhead, 0.10 at the horizon: the flags) with
+  softboxes and rim strips at 1.6 to 5 where `STUDIO`'s stand, a lighter
+  floor (0.6) and a front bounce (2.2) low behind the camera: at the
+  Library's homes every upright face of a metal mirrors the room below and
+  behind the camera, and with a dark floor aluminium fingers were black.
+  No panel is above 5 (a blown highlight is a hole in a drawing on a light
+  card).  128 px a cube face.
+- The looks mirror it and take 0.45 of its diffuse light
+  (`GRIPPER_STUDIO.diffuse`) on top of the lights': with the lights alone
+  a white shell's faces turned from the key were a mid grey, with all of
+  it the shell was lost in the card's ground.
+- The floor, the front bounce and the diffuse share were raised after the
+  reviews of 2026-11-12 (0.38, 1.3 and 0.3 before).  On the Franka Hand
+  the shell's broad face, turned from the key at the homes, had read
+  `#b1b3b7` (the photos: `#cfcfd7` to `#eeeeee`), the fingers `#9b9ea1`
+  (`#c1c3d0` to `#d8d5d4`) and the black pad's side `#08090c`, darker than
+  the film beside it; now `#cdd0d4`, `#c6c9cd` and `#272729`.  These
+  numbers are every gripper's: a look that reads too dark or too light on
+  one body is that part's own look with its `env_intensity`, never a
+  change of the studio.
+- Where the studio cannot be made (no half-float render target, a later
+  three.js whose shader text changed) the looks are lit by the lights
+  alone: the colours stay, the lustre goes.
+
+### The base looks
+
+One convention for every gripper, tuned on real bodies in the stage (the
+Unitree Dex1, the ARX X5 and the Franka Hand, 2026-11-12, in the page's
+light and dark scheme; the picture's box is the same light `#f5f5f7` in
+both).  The data is `tools/library_looks/base.json`; a test keeps this
+table equal to it.
+
+| Name | Colour | Metalness | Roughness | Clear coat / its roughness | env_intensity | For |
+| --- | --- | --- | --- | --- | --- | --- |
+| `anodized-black` | `#232428` | 0.6 | 0.45 | - | 2.4 | black anodised aluminium: a dark metal with a soft sheen |
+| `anodized-natural` | `#c9ccd0` | 1 | 0.45 | - | - | natural or clear-anodised aluminium, milled or bead-blasted |
+| `steel-ground` | `#b4b7ba` | 1 | 0.35 | - | - | ground or zinc-plated steel: a rail, a shaft, a screw head |
+| `steel-polished` | `#c8cacc` | 1 | 0.18 | - | - | polished or stainless steel: sharp reflections |
+| `plastic-black-satin` | `#222224` | 0 | 0.4 | - | 1.8 | black moulded plastic with a satin skin |
+| `plastic-black-matte` | `#262628` | 0 | 0.75 | - | 1.8 | matte black plastic, a cable's jacket |
+| `plastic-white-gloss` | `#e2e4e6` | 0 | 0.3 | 0.6 / 0.15 | - | glossy white shell under a clear coat |
+| `plastic-white-satin` | `#e6e8ea` | 0 | 0.45 | - | - | satin white shell or white printed part |
+| `rubber-black` | `#232325` | 0 | 0.92 | - | 2.2 | black rubber: the flattest black |
+| `print-black` | `#2a2a2c` | 0 | 0.65 | - | 1.5 | black FDM or SLS print |
+| `tpu-orange` | `#f2601c` | 0 | 0.6 | - | - | orange printed TPU (the UMI soft finger) |
+| `brass` | `#c9a45c` | 1 | 0.35 | - | - | brass: an insert, a bushing |
+| `pcb-green` | `#1f6b3a` | 0 | 0.5 | - | - | green solder mask |
+
+- The blacks.  Real grippers are mostly black, and the film is near black
+  (linear 0.014, about `#1e1e1f`; `#323335` under its lamp at the Exploded
+  home).  A faithful `#101012` body next to it would be one black shape,
+  so no black of the table is darker than `#1c1c1c` (a part's own looks
+  too: `tests/test_library_split.py`), and every black carries an
+  `env_intensity` above 1: a black's base colour gives it almost nothing
+  under the lights (a face turned from the key was `#08080a`, the review
+  of 2026-11-12), so what a black shows is what it mirrors of the room,
+  as a product photo's black does.  They differ by sheen, not by level
+  alone: anodised aluminium is part metal with stronger reflections (its
+  edges and curved faces catch the softboxes), satin plastic has a broad
+  soft highlight, matte plastic and print almost none, rubber none.
+  Measured on the ARX X5, all of it in one look, at the Assembled home
+  (the sRGB luminance of the pane's pixels that are not its ground or the
+  amber boards: the solids, the see-through finger's veil among them), in
+  the table's order of the blacks: median 64, 69, 56, 49 and 57; the 2nd
+  percentile 19, 22, 31, 30 and 30; the share below the film's 30: 11 %,
+  8 %, 0.5 %, 2 % and 2 %; highlights up to about 180.  On the Franka Hand
+  the rubber pad reads `#3c3c3e` on its face and `#272729` on its side
+  next to the film's `#323335`.
+- The metals.  Aluminium and steel read as bright metal with dark bands:
+  on the Dex1 at the Exploded home natural aluminium spans 35 to 243
+  (2nd to 98th percentile; median 172, 4 % of the pixels at 240 or more),
+  polished steel 35 to 250 (median 138, 7 % at 240 or more).
+- The whites sit close to the card's ground; the shading that separates
+  them is the lights' (a near-white top, `#eef0f3` on the Franka Hand's
+  shell, over faces at about `#cdd0d4`): an edge against the card's
+  `#f5f5f7` is faint where a top face meets it.
+
+### Overriding a base look
+
+A gripper's look file (`tools/library_looks/<part>.json`) names base looks
+directly (`"look": "anodized-black"`).  Where a photo shows that a
+component differs, the file defines a look of its own:
+
+```json
+"looks": {"inlay-brushed": {"base": "anodized-natural", "color": "#c6c9cd", "roughness": 0.4, "env_intensity": 1.5,
+                            "evidence": "the FR3 close-up: lengthwise brush lines, a wide streaked highlight"}}
+```
+
+`base` is the base look it starts from, the other keys are the numbers
+that differ (a key set to `null` is dropped), and `evidence` (required)
+says which photo shows it.  A part's own look may not take a base look's
+name, so in every scene a base name means the table's numbers.  The scenes
+hold the numbers themselves (the page reads only the scene): changing
+`base.json` changes no scene until `tools/library_split.py` is run and the
+part is shot again.
+
+### Sharing a body out by material (`tools/library_split.py`)
+
+The scene builder (`tools/library_scenes.py`, private, numpy and trimesh)
+writes one decimated body per upstream mesh.  `tools/library_split.py`
+(standard library, deterministic, public) is the step after it, driven by
+one look file per part (an example; the committed
+`tools/library_looks/arx-x5.json` shares that body into four components
+with looks of its own):
+
+```json
+{"format": "flexitac-library-look/v1", "part": "arx-x5", "smooth_deg": 35, "part_look": "print-black",
+ "about": "drawn after ...",
+ "looks": {},
+ "bodies": {"bodies/arx-x5/link6.stl": {"sha256": "...", "facets_sha256": "...", "weld_mm": 0.01, "components": [
+   {"name": "link6-rail", "look": "steel-ground",
+    "pick": [{"component": {"box": [[71.57, -85, -4.5], [78.07, 85, 4.5]], "triangles": 1294}}]},
+   {"name": "link6-body", "look": "anodized-black", "pick": "rest"}]}}}
+```
+
+- `bodies` names every body of the scene as the scene builder wrote it,
+  with the SHA-256 of that file: kept whole (`{"sha256", "look"}`; `look`
+  may be `null`) or shared out into `components`, read in order; a
+  triangle goes to the first component that takes it.
+- `pick` rules: `{"component": {"box", "triangles", "tol_mm"}}`, the one
+  connected component (triangles joined through corners welded at
+  `weld_mm`, 0.01 mm by default) whose bounding box is that box within
+  `tol_mm` (0.05) and whose triangle count is `triangles` if given;
+  `{"components_inside": box}`, every connected component inside the box;
+  `{"box": box}`, the triangles whose three corners are in the box;
+  `"rest"`.  Every triangle must be taken; no component may be empty.
+- `draw` instead of `pick`: plain shapes the project draws for a component
+  the model lacks (`{"box": box}`, `{"cylinder": {"from", "to", "radius",
+  "segments"}}`), in the frame of the body they are listed under, so they
+  stand on every copy of it; or under the file's `drawn` list, in the
+  part's frame.  They are written as `bodies/<part>/drawn-<name>.stl`,
+  the project's own (no row in `NOTICE.md`; say so in the file's `about`,
+  which the tool puts after the scene's own `about`).
+- It writes the component files (a picked one holds its triangles' facet
+  records as the body's file has them, sorted, under the body's header
+  with "; split"), the part's scene (each body's entry by its components'
+  with the same matrix and finger, then `looks`, `part_look`,
+  `smooth_deg`; every other key and byte as it was) and the bodies' rows
+  of `library/NOTICE.md` (a split body's row by one row per component).
+- The unsplit body stays pinned: `sha256` is the scene builder's file
+  (also the scene's record before the split and git's history),
+  `facets_sha256` the hash of its facet records sorted.  With the unsplit
+  file at hand the tool splits it; without it, it splits the committed
+  components' records together, which must have that hash: the same
+  triangles give the same files.  So `--check` needs only committed files,
+  and it proves that they are what the look files give.  An unsplit file
+  of other bytes than `sha256` is refused, never passed over for the
+  components of the split before: a body the scene builder made anew is
+  pinned anew (`--pin`), on purpose.
+- `--check` also reads every scene (the reviews of 2026-11-12): a look, a
+  `part_look`, a `smooth_deg`, a body the project drew, a drawn file in a
+  part's folder or a split body's `NOTICE.md` row, of a part that has no
+  look file, fails it.  A drawn body's header only labels it; its look
+  file's numbers are what draws it again, so a mesh under a drawn body's
+  name cannot stay in the Library without a look file that draws exactly
+  it.  One scene's looks are another tool's: the showcase's
+  (`scenes/flexitac-g1.json`, below), written by
+  `tools/library_showcase.py` from its own copy of the base looks and held
+  to it by that tool's `--check`; so are the shapes that tool draws for
+  it, each pinned by its SHA-256 (`tools/library_write.py`
+  `SHOWCASE_BODIES`, which `showcase()` holds the files to) and drawn again
+  by that tool on every run: a drawn body of the showcase's that is not
+  pinned there is refused as any other.  `tests/test_library_split.py`
+  runs the check on the committed library.
+- A part without a look file is not touched.  `--pin FILE` prints a
+  body's two hashes, `--components FILE` its connected components,
+  `--out DIR` writes a dry run elsewhere.
+- Order after a change: (the scene builder, when the geometry changes,)
+  `tools/library_split.py`, `tools/library_write.py`, the shoot of that
+  part's sensors, `tools/library_write.py`, `--check` of all three.
+
+### Parts without a scene
+
+The UMI finger and its tapered tips have no scene.  `scenes.json`'s rules
+give them their look, the real finger's orange TPU (2026-11-12, with the
+user's request that every gripper be coloured after photos of the real
+product; Gen by Surface keeps its grey part):
+
+```json
+"rules": {"looks": {"umi-tpu-orange": {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}},
+          "part_looks": {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"}}
+```
+
+- `part_looks` maps a part's id, or its family's (`parts.json`), to a name
+  of the rules' `looks` or to a look itself; the part's id wins over its
+  family.  No clear coat.  A gripper is not named there (its look is its
+  scene's).  A base name means the base's numbers here too
+  (`tests/test_library.py` compares them with `base.json`); a look of the
+  rules' own has another name, as `umi-tpu-orange` has.
+- The orange (`umi-tpu-orange`, the rules' own look, tuned on the UMI
+  finger itself in the stage, 2026-11-12).  The photos of the real finger
+  (UMI's hardware guide, FlexiTac's own pictures, the owner's photo of
+  the xArm gripper; Polymaker TPU 95A "Orange") read `#ec660e` where lit
+  (from `#dc531c` to `#fd7301`), `#c14809` in the mid-tones and `#9c3802`
+  to `#833205` in the ribs' shadow.  A saturated colour must take little
+  of the room: the base look `tpu-orange` (`#f2601c` with all of the
+  studio) drew the finger's lit face `#f56e42`, a salmon, the white of
+  the studio's reflections and of its diffuse light added to the orange
+  and the tone mapping pulling the bright red toward white.  With
+  `env_intensity` 0.3 and `#e85a1c` the finger's pixels (those of the
+  pane that the look changes) at the Exploded home are `#e65814` (the
+  brightest quarter's median), `#c0480f` (the middle half) and `#973604`
+  (the darkest quarter); at the Assembled home `#db5416`, `#c74b0e` and
+  `#8f3304`.  The sensor lies on it: the amber boards (`#d07404`, hue 33
+  degrees) are of the same lightness as the lit orange (hue 19),
+  so they stand apart by hue and by their dark edges, not by lightness (a
+  luminance ratio of 1.07 to 1.10 on the lit face, 1.3 to 1.5 on the
+  rest), as the real sensor does on the real finger; the film is far
+  darker (2.4 to 3.7).  That is why the orange is at the red end of the
+  photos' range: `#ee6606`, nearer the photos' mean, drew the boards and
+  the finger in one hue (23 against 33 degrees).  The base look
+  `tpu-orange` keeps its numbers: the base table is not the rules' to
+  change.  The showcase's fingers wear the same numbers under the same
+  name, as a look of the showcase's own (since the merge of 2026-11-13;
+  `tests/test_library_showcase.py` holds the two equal), so the showcase
+  and the UMI rows below it are one orange.  Its roughness is 0.85 since
+  the verification of 2026-11-13: at 0.6 the faces turned up to the
+  lights took their white sheen, a washed salmon (the showcase's near
+  finger's back `#cb654a`, saturation 0.64, beside the photo's `#d44a1b`,
+  0.87; the UMI finger's fin windows a third of a turn round), and a
+  printed TPU is matte; now that back is `#c44b17` (0.88) and the
+  salmon pixels of those two views a ninth and a twentieth of what they
+  were, the homes' other pixels as they were.
+- `part_smooth_deg` is the crease angle for those parts (absent: flat
+  facets).  The committed rules have none: the finger is a printed prism,
+  flat faces and sharp ribs with a few small fillets, and 35 degrees
+  changes almost nothing.  Measured on the finger and a convex tip,
+  Exploded and Assembled, at the home and turned left, right, behind and
+  above (twenty views of the pane at twice the CSS size; the flat view
+  shot twice is the same pixels): under 0.46 % of the pane's pixels
+  change at all, in sixteen of the views none by more than 14 of 255,
+  and in the four turned to the right under 0.05 % by more, at most 28:
+  a highlight along the mount block's rounded corner.  Side by side the
+  two are the same picture.  Flat, the part's geometry and normals are
+  exactly Gen by Surface's.
+- `cad/library_view.js` reads the rules for such a part and hands the
+  stage `{look, smooth_deg}`; the stage draws the part's own material in
+  it for that drawing.  Without a rule the part is Gen by Surface's grey.
+- The rules are hashed into every gripper's `scene_sha256`, and a record
+  of such a part keeps `part_look_sha256`
+  (`tools/library_write.py` `part_look_sha256(part_look(...))`): a changed
+  look makes the pictures stale.
+
+Until the look, the Library's pictures of these sensors were Gen by
+Surface's figure byte for byte, and `library_shots.py --check-generator`
+held the two together.  They differ now by design, so the check holds what
+still holds (for each sensor of a part without a scene, in a browser,
+writing nothing):
+
+1. Gen by Surface's figure (`./?part=<id>`) is the picture pinned for it:
+   `tools/browser/generator_figure.json`
+   (`"format": "flexitac-generator-figure/v1"`; per sensor the fit and the
+   build it is of, and the bytes and SHA-256 of its three pictures as the
+   shots tool encodes them).  The pin was written from the figure on
+   2026-11-12 and is, record for record, the Library's manifest of before
+   the look: the figure of today is the figure of then.
+   `--pin-generator` writes it anew, only for a deliberate change of the
+   figure or a sensor's new build.
+2. The Library's view with the rules' looks served away is that figure,
+   pixel for pixel: without a look, the Library's view of such a part is
+   Gen by Surface's (the same part, sheets, lights, camera and frame).
+3. The Library's view as the rules are gives the committed pictures, byte
+   for byte.
+4. The look touches the part alone.  The view is shot once more with the
+   look in another colour (every channel half the range off).  Its alpha
+   is the figure's at every pixel (the same outline), and every drawn
+   pixel that is the same in both colours (what the part's colour does
+   not reach: the sheets, and their edges on the ground) is the figure's
+   pixel.  The pixels the colour does reach, and the others, must each be
+   a share of the drawing (0.1 and 0.25 at least), so neither statement
+   is about nothing; on the fourteen sensors the part's are 44 to 52 % of
+   the Exploded drawing and 26 to 41 % of the Assembled one.
+
+`tests/test_library.py` holds, without a browser, that the pin is of
+exactly these sensors and their builds, and that the committed pictures
+are the pinned files where the rules give no look and other files where
+they give one.
+
+## The showcase's scene and files
+
+The Library's first section is a showcase (the project owner's decision of
+2026-11-12): the hand-designed FlexiTac sensor on the xArm Gripper G1 with
+UMI soft fingers, as the FlexiTac Tactile Demo shows the gripper and as the
+owner's photo of the gripper as built shows it.  It is not a part or an
+entry: no fit, no build, none of the generator's downloads.  Its geometry
+is written by `tools/library_showcase.py`:
+
+| Path | What it is |
+| --- | --- |
+| `library/scenes/flexitac-g1.json` | the showcase's scene: a scene as above, about the UMI finger (`part` is `umi-finray`), with looks and a camera of its own; not in `scenes.json`'s `scenes` map |
+| `library/bodies/flexitac-g1/umi-right-finger-holder.stl` | HandUMI's finger holder (Apache-2.0, a row of `library/NOTICE.md`), decimated to within 0.1 mm; drawn twice, the left one by a mirror matrix |
+| `library/bodies/flexitac-g1/drawn-<name>.stl` | seven plain shapes the project draws (below): no vendor's geometry, no row of `NOTICE.md` |
+| `vendor/ufactory-g1/<name>.stl` | twelve meshes made from UFACTORY's 3D model of the Gripper G1 (split, decimated to within 0.1 mm), in the model's own axes, mm; the property of UFACTORY, not under the repository's licence |
+| `vendor/ufactory-g1/NOTICE.md` | whose they are, why they are here, what was changed, each file's SHA-256 |
+
+- A body of the showcase's scene is a file of `bodies/flexitac-g1/` or, for
+  the vendor's meshes, `"../vendor/ufactory-g1/<name>.stl"`: every `mesh`
+  stays a path relative to `library/`, as `parts.json` gives the UMI
+  finger's (`"../vendor/umi/..."`).  No other scene may hold a path that
+  leaves `library/`.
+- The scene lists the two holders first (the sensor finger's, then the
+  mate's), then the vendor's twelve: `body_shell`, `body_frame`,
+  `body_flange`, `body_pins`, `link_{r,l}_{outer,inner}`,
+  `finger_{r,l}_coupler`, `finger_{r,l}_pins`; then the drawn shapes, each
+  file once for every place it stands in.
+- **The part is the gripper's left finger** (`PART_SIDE`): the UMI finger's
+  file placed as the right finger and turned half a turn about the
+  gripper's axis (the finger is its own mirror image through the middle of
+  its thickness, to 1e-9 mm, so it is the same finger there).  The pad's
+  placed record rolls its tails over the finger's side face at file
+  y -25.8, as the FlexiTac team mount it (the tails to the viewer's left
+  with the fingertip up); on the left finger that face looks the way of
+  the shell's face **without** the logo.  The owner's photo, taken from
+  the logo's side, shows both fingers' straps on the far side, through the
+  fin's windows: so they are here.  `finger` is `"sensor"` for the left
+  finger's coupler, pins and holder, `"mate"` for the right one's, `null`
+  for the body and the links.
+- The pose: the links turned until the two sensors' centres are 55 mm apart
+  (24.35 degrees of 45; `opening.q_mm` 22.905 of `limit_mm` 39.699, each
+  finger's shift across the jaws: the showcase is not fully open).  The
+  mate is drawn as the mirror image across the gripper's middle plane (the
+  lead's decision of 2026-11-12), so both fingers' straps are on the same
+  side, as in the photo, and the mate carries the mirror-image pad.  (The
+  gripper as built differs in its holders: two plain printed blocks that
+  read as one part used twice, the second turned half a turn about the
+  gripper's axis, not HandUMI's tapered holder and its mirror image.)
+- **Its camera is its own** (`camera`, a scene's override of the rules'
+  within their bounds, its reason in `about`): 60 degrees off the pad's
+  normal, 20 degrees up, `front` -1 (with this part: the side of the
+  shell's face without the logo); Exploded from the same side 70 degrees
+  off and 40 up (since the verification of 2026-11-13: at the Assembled
+  camera the lifted layers stood edge-on, a column 90 px wide, and 8 % of
+  the drawing told the two modes apart).  At the rules' camera the
+  far finger's pad was edge-on and its straps on its far side; from here
+  the pad's face, the straps crossing both fingers' side faces, the near
+  finger's back and the gripper's body are all seen.  The logo, on the
+  shell's other face, is not drawn.
+- **No finger is see-through** (`see_through` `[]`): the jaws are 55 mm
+  apart and from this camera the near finger hides nothing of the far
+  one's pad, in either mode; the showcase is the gripper as built.  (Every
+  generated gripper keeps the near finger see-through, the user's decision
+  of 2026-11-06.)
+- What the project draws (`tools/library_showcase.py` `DRAWN`; each a file
+  `bodies/flexitac-g1/drawn-<name>.stl` of `tools/library_split.py`'s boxes
+  and cylinders under its header of a shape the project drew): what the
+  owner's photo shows and the models have only as holes, or not at all.
+  `shell-screw`: a black screw head in each of the shell's twelve wells
+  (six a face; found in the vendor's mesh at x 41.25 / 41.25 / 33.5,
+  y 38.5 / 12.0 or 3.75 / -15.0 mm).  The six on the logo's face are where
+  the owner's photo shows them; the six on the face without the logo,
+  which the home camera shows and no photo does, are in the wells the
+  model has there.  `holder-bolt` and `holder-nut`: each
+  holder's three socket heads in its counterbores and three hex nuts in its
+  pockets, through the soft finger's own three holes.  `slot-block`: the
+  black block with its round cap in the shell's top slot (the frame behind
+  it is white, as the photo's channel is).  `extender`, `extender-sockets`
+  and `cable-stub`, behind each finger, placed by eye on the pad's tails:
+  the yellow extender board, its two white sockets, and a short stub of
+  the white flat cable.  Past the roll over the side face both tails lie
+  in one plane that leaves the fin's sloping back (`TAILS_PLANE`, 21.7
+  degrees to the finger's length, within 0.3 mm); the board lies along it
+  (`board_place()`), over the Top FPC's strap, with each tail's end in one
+  of its sockets: the wide tail's stiffened end (`TAIL_END`) in the upper
+  one at the board's edge, the Top FPC's tab (`TAB_END`) in the lower one,
+  through the board; the stub runs from the lower socket down the finger's
+  back between the holder's flanges and ends above the finger's base
+  (`cable_place()`).  The ends are where the Library's view lays the placed
+  pad: `tests/test_library_showcase.py` holds the sockets round them and
+  `tools/browser/showcase_checks.py` `part_tails` measures them in the
+  view.  The gripper as built has one small board for each tail; here one
+  board stands for both.  16 KB in all.
+  They need no source: the tool draws them again on every run, their
+  SHA-256 pinned with the holder's (`library_write.SHOWCASE_BODIES`).
+- It carries the optional keys of the amendment of 2026-11-12: `looks`,
+  each body's `look`, `part_look` and `smooth_deg` (35).  Its looks are
+  base looks under their base names with the base's numbers
+  (`tools/library_showcase.py` `BASE_LOOKS`; a base name always means the
+  base's numbers): `anodized-black` (the links, the flange, the slot's
+  block); and seven of its own (`OWN_LOOKS`, a base look with the numbers
+  that differ and its evidence).  The four
+  of the gripper's own bodies were judged at the home and turned 60, 120,
+  180, 240 and 300 degrees, half-way round being the logo's side the
+  owner's photo was taken from (sRGB medians of each body's own pixels,
+  found by drawing the bodies once in flat colours; the base looks, tuned
+  at the home only, had left the shell `#e9ebee` and a holder `#e4e6e9`
+  there, all but lost in the card's `#f5f5f7`, the pins' flat ends white
+  discs `#f6f8fa` and the screws a mid grey `#6c6d72`):
+  `shell-white-gloss` (the shell, the one clear coat: the base
+  `plastic-white-gloss` with a smoother skin, roughness 0.1, under a full,
+  sharper coat, 1 at 0.02, with seven tenths of the studio; its face
+  `#c3c5c8` at the home and `#dbdddf` half-way round, its rounded edges
+  carrying a bright line, as the photo's shell, `#c4bfbb` on its face,
+  carries the windows' streak on its top edge), `print-white` (the
+  frame's channel, the printed couplers and holders: the base
+  `plastic-white-satin` at `#d8dadc`; a holder `#c8cace` and `#d9dbde`,
+  the photo's `#c8c9ca`), `steel-pin` (the pivot pins: the base
+  `steel-polished` brushed, roughness 0.7, at `#a0a2a4` with half of the
+  studio; the flat ends `#7a7c7e` from the logo's side, the photo's
+  brushed mid-grey discs, and the Phillips heads `#585a5c` at the home)
+  and `screw-black` (the drawn screws, bolts and nuts: the base
+  `anodized-black`'s colour as a matte black, no metal, roughness 0.9,
+  the studio at 1.9; `#25262b` at the home, `#2e2f33` half-way round,
+  where the anodized metal mirrored the studio); `umi-tpu-orange` (the
+  soft fingers: the base `tpu-orange` at `#e85a1c` with three tenths of
+  the studio, the UMI rows' look of the rules, number for number; chosen
+  by the merge of 2026-11-13 next to the owner's photo, whose fingers read
+  `#d85623` / `#c94917` / `#8f1601` (sRGB medians of the brightest quarter,
+  the middle half and the darkest quarter of their orange pixels): the
+  base orange drew them `#f17c5b` / `#e15c28` / `#d2571b` in the Assembled
+  picture, the near finger's lit back a salmon `#f08265`, and this look
+  draws them `#cd5d3c` / `#ba460b` / `#a53e0a`, at roughness 0.85 since
+  the verification of 2026-11-13, the lit back no longer salmon); and two of what the
+  project draws: `pcb-yellow` (the extender boards: the base `pcb-green`
+  in the photo's yellow) and `ffc-white` (the sockets and cable stubs:
+  the base `plastic-white-satin`, warmer).  The blacks: at its homes the
+  pixels of the `anodized-black` bodies (then the links, the flange, the
+  screws, bolts and block; found by drawing them once in another colour)
+  had a median sRGB luminance of 40, the 2nd percentile 17, the 90th 122
+  and the 98th 164, and 4.8 % of them were below the film's 30 (the
+  convention's own measure on the ARX X5: 11 %); at the rules' camera a
+  link's face had sampled `#181a20`.  The photo's links are a deep black
+  with a sheen, so the base look stands for them.  `showcase()` checks the
+  looks over all its bodies with
+  `scene_look_problems()`, the grippers' scenes' own check, and
+  `tests/test_library_showcase.py` holds `BASE_LOOKS` to
+  `tools/library_looks/base.json` and the own looks to their numbers.
+- What still differs from the photo: the holders' shape (above); one
+  extender board for both tails; the polyimide tape, the laminating
+  sheets, the silkscreen, the second adapter board on a holder's face and
+  the cables' run to the reading boards are not drawn; the screws are
+  plain discs; the tails' gold ends read dark brown, not gold (the pad's
+  art, as on every sensor); the near finger's lit back (`#cc6346`) is a
+  little pinker than the photo's lit orange (`#d85623`).
+
+`tools/library_write.py` `showcase()` is its guard, and `scenes()` reports
+its problems with no part (so `--check`, the site build and the tests stop
+on them): the vendor's folder holds exactly its twelve meshes, each at its
+pinned SHA-256 (`SHOWCASE_VENDOR_FILES`), and its notice, within
+`SHOWCASE_VENDOR_BUDGET_BYTES`; the notice has the decision's wording
+(`SHOWCASE_WORDS`), never "CAD", and a row for each file; the vendor's own
+file, unsplit and undecimated (`SHOWCASE_SOURCE`: by its SHA-256, or by its
+size and the SHA-256 of its triangles under another header), is nowhere
+under `web/`, nor is a model of the deny-list (the file's undecimated
+pieces are on it), nor a byte copy of one of the folder's meshes outside
+its place (every file under `web/` is hashed);
+no part, entry, fit, picture record, sample or other scene names the folder;
+the scene is a scene of the UMI finger whose own bodies are tabled with an
+open licence as every body or are shapes the project drew, each at its
+pinned SHA-256 (`SHOWCASE_BODIES`), whose vendor bodies are files of the
+folder with their bytes, SHA-256 and triangles, and which draws every file
+of the folder; and the showcase's page's document is sound
+(`showcase_page()`, below).  `tools/library_showcase.py --check` adds that
+the drawn shapes and the scene are the ones the tool writes from the
+committed meshes.
+
+## The showcase's page
+
+The user's request of 2026-11-12: at the top of the Library, the original
+version, hand-designed and not auto-generated.  `library/showcase.json`
+(`"format": "flexitac-library-showcase/v1"`) is its document, beside
+`entries.json`; `library.js` reads both as the page opens, and a Library
+without it (or with a document of another format, or whose `id` is an
+entry's) is the Library of before.
+
+| Key | What it is |
+| --- | --- |
+| `id` | `"flexitac-g1"`: the page's address (`library.html#flexitac-g1`); no part's, variant's or family's |
+| `title`, `label`, `text` | the card's and the page's words, one line each: "FlexiTac on xArm"; "Hand-designed, not auto-generated" (the label must say both); one line of text |
+| `sensor` | `{rows, columns, pitch_mm, field_mm}`: the pad (32 x 12 at 2 mm, the art's 23 x 63 mm field), for the picture's placeholder |
+| `placed` | the pad's placed record (`vendor/flexitac-v2/umi-finray.placed.json`, "A placed sensor") with `"scene": "scenes/flexitac-g1.json"`: what the 3D view draws |
+| `image` | `{exploded, assembled, card: {src, width, height, bytes, sha256}, alt}`: the three pictures, paths relative to `library/` |
+| `shot` | what the pictures were shot from: `scene`, `scene_sha256` (the scene file and the rules, as a gripper's record), `art_sha256`, `placed_sha256` (the placed record's canonical JSON), `figure_sha256`, `view_sha256`, and the shoot's `look`, `margins_px` and the stage's `numbers` (held by `showcase_numbers()`: four to the rules' checks, three to the showcase's own bounds, below) |
+| `tutorial` | `{label, href}`: the FlexiTac hardware tutorial, for the Gerbers; `href` is the address `vendor/flexitac-v2/NOTICE.md` records |
+| `sources` | `[{text, notice}]`: UFACTORY's 3D model by the owner's decision (`../vendor/ufactory-g1/NOTICE.md`), then the FlexiTac V2 design, CC BY-NC 4.0 (`../vendor/flexitac-v2/NOTICE.md`) |
+| `about` | what the file is and who writes which key |
+
+- The pictures are 4:5 (1280 x 1600; the card 800 x 1000, the Assembled
+  drawing downscaled): the gripper stands upright, and in a 16:10 picture
+  four fifths were empty.  `tools/browser/library_shots.py --showcase`
+  shoots them from the showcase's own page
+  (`library.html?probe=shoot#flexitac-g1`, the view's pane 640 x 800 CSS px
+  at a pixel ratio of 2), each drawing checked whole and moved to the
+  middle as a sensor's, and writes the files with `placed`, `image` and
+  `shot` (nothing when the stage's numbers are not sound, below);
+  `--check` shoots again and compares every byte.
+- The grid: its first section is the showcase's one card
+  (`a.lib-card.lib-showcase#showcase`), as wide as the row: its picture
+  (`slot()`'s third kind, `"showcase"`: the card file, loaded at once; a
+  picture, as every card: no 3D on the grid) on the right of its label, its
+  title and its line from 735 px, above them below.
+- The page: the picture in its frame with the Exploded | Assembled control,
+  the 3D view drawn over it from `placed`
+  (`show({base, id, placed, mode})`, the one dynamic import), opening
+  Assembled, the view its card shows; beside it the label, the title, the
+  line, a grey pill to the tutorial and the sources with their notices.
+  No pitch, no Open in Gen by Surface, no generator download.  Its box is
+  4:5 at every width (a sensor's is 3:1 in one column, to keep Open in a
+  phone's first screen: this page has no such action).
+- `tools/library_write.py` `showcase_page(parts, library)` returns
+  `(problems, older)`: the file missing or not JSON, its keys, format and
+  id; the words (one line each, the label's two claims, never "CAD", no
+  host path); the placed record other than the pad's own with the
+  showcase's scene, or about another mesh than the UMI finger's; the
+  sensor's field other than the art's; a tutorial address the pad's notice
+  does not record; sources other than the two notices in order, each a
+  file, each text with its words; the vendor's folder named anywhere but
+  as that notice; a picture missing, not the bytes named, not a WebP with
+  alpha of its size, or a stray file of `showcase/`; and pictures of
+  another scene, rules, art or placed record than the files now (stale:
+  shoot again), or whose stage's numbers are not sound
+  (`showcase_numbers(numbers, rules)`: `visible_min`, `clearance_mm`,
+  `stacks_apart_px` and `card_px` at least the rules' checks, as any
+  gripper's; `assembled_opaque` below 0.25, `opaque_max` below 0.75 and
+  `near_seen` at least 0.25, `SHOWCASE_BOUNDS`, the showcase's own: both
+  its fingers are solid, so its own tails behind its finger and the near
+  finger's pad behind the near finger count as covered; each bound a
+  little past what was measured, 0.19, 0.679 and 0.321, so that a scene
+  or a camera that hides more of the pad is refused).  `older`: pictures
+  of older figure or view sources, a warning as a sensor's.  `showcase()`
+  carries the problems, so `scenes()`, `library_write --check`,
+  `tools/library_showcase.py --check` and the site build stop on them;
+  `library_write --check` closes a problem of the showcase alone with the
+  showcase's own fixes (`SHOWCASE_STALE`), not the scene builder's.
+- Order after a change of the scene: `tools/library_showcase.py`,
+  `tools/browser/library_shots.py --showcase`, then the three `--check`s.
 
 ## The pictures' manifest
 
@@ -156,6 +775,8 @@ shot from the Library's 3D view adds:
   document's canonical JSON).
 - `stage`, for a part of `scenes.json` only: `scene_sha256()` of the scene
   file and the rules, and the stage's measured numbers (the shot's checks).
+- `part_look_sha256`, only for a part without a scene that the rules give
+  a look ("The looks").
 
 The numbers are exactly these (measured by the stage with `?probe=shoot`;
 distances capped at 12 mm), each kept by the rule of `rules.checks` beside
@@ -184,13 +805,138 @@ written by `tools/library_write.py` for a sensor whose record is current.
 The alt text of a sensor whose record has `stage` is its label and the
 scene's `picture`; of any other, its label and "on the part".
 
+## A placed sensor
+
+The user's request of 2026-11-12: the top of the Library shows the
+original, hand-designed FlexiTac sensor (FlexiTac V2, 12 x 32 taxels at
+2 mm), labelled as hand-designed, not auto-generated.  No fit of the
+generator places that pad and no build of the engine made its boards, so
+the 3D view takes it from a **placed record** in place of a variant:
+`createLibraryView(host, options).show({base, id, placed, mode})`, with
+`placed` the parsed record and `base` the Library's folder as for a
+variant.  `variant` and `part` are not given; `id` is whatever the page
+calls the drawing (the probe state's `id`), and the state's `build_id` is
+`null`.  Every sensor of `entries.json` is drawn as before: the stack
+builder's `mapper` argument below is the placed stack's alone
+(`tests/test_showcase.py` reads that from the sources, and the pictures of
+the generated sensors are byte for byte the ones they were).
+
+`vendor/flexitac-v2/umi-finray.placed.json`
+(`"format": "flexitac-library-placed/v1"`, `drape.js` `PLACED_FORMAT`):
+
+| Key | What it is |
+| --- | --- |
+| `id`, `about` | the record's name and its words (how the real pad is mounted) |
+| `sensor` | the art's `id` (`"flexitac-v2"`) |
+| `art` | the art's file, relative to `library/` as a variant's `view.art` (`"../vendor/flexitac-v2/art.json.gz"`) |
+| `mesh` | `{file, sha256, unit}`: the part's STL, relative to `library/` (`"../vendor/umi/UMI-Soft-Gripper-Finger.stl"`), and its unit (one of `surface/mesh.py` `UNIT_SCALES_MM`: `show()` refuses a record of another) |
+| `frame` | `"the mesh's file axes, mm"`: the face's vectors are in it |
+| `face` | `{origin, x, y}`: the field's centre on the part's flat face and the boards' x and y there, seen from outside (unit vectors at right angles; the outward normal is x cross y).  On the UMI finger: the middle of its 25.8 mm width, 37 mm from the fingertip, y toward the tip |
+| `wrap` | `{side: "left" or "right", radius_mm}`: the side edge the sheet rolls over (left: toward -x, the viewer's left with y up) and how far off the part it bends |
+| `scene` | `null`, or a scene's path as a variant's `view.scene`: its `part_mesh_sha256` must be the record's `mesh.sha256`.  With a scene the part is drawn in the scene's `part_look`; without one as Gen by Surface draws it (the rules' `part_looks` go by a part's id or family, which a record has not, and are not read for it) |
+
+The art (`vendor/flexitac-v2/art.json.gz`) is a `flexitac-library-art/v1`
+document as above with `"id": "flexitac-v2"` and `"build_id": null`.
+`tools/flexitac_v2.py` reads the pad's two Gerber ZIPs (a folder given on
+its command line; their SHA-256s and the result's are pinned, `--check`)
+into `vendor/flexitac-v2/geometry.json`: each FPC's outline, its slots and
+window, electrodes, traces, gold fingers, coverlay openings and
+stiffeners.  `tools/browser/flexitac_v2_art.py` gives those two boards, in
+the engine's layout mapping (`flexitac_v2.engine_boards`), to the engine's
+SVG writer and the generator's page (`"fpc:board-art"`, the Photo look), as
+the shots tool does for a build, so the pad is drawn exactly as a
+generated board is; the slots and the window are the boards' `cutouts`.
+Of the stiffeners the boards carry only the 0.2 mm ones under the two gold
+ends (`flexitac_v2.DRAWN_STIFFENER_MIN_MM`): the writer and the Photo look
+paint a stiffener as a connector's, opaque and dark, and the pad's 0.1 mm
+ones (the strip under the Top FPC's traces below the field, the patches at
+the A's corners) are thin polyimide through which the real pad stays
+amber; `geometry.json` keeps them all.  The art is made for the 3D view,
+which cuts the slots out of the sheets itself (`outline.cutouts`).  Shown
+flat, a board's copper side (`front`) would lack its slots: the writer
+draws the coverlay's openings after the cut-outs, and this pad's openings
+span the whole field (the Top FPC's all 22 slots and 30 of the Bottom
+FPC's 31 are painted over; the `back` documents show every one).  A page
+that shows this art flat must draw the cut-outs last.
+`column` is the Top FPC (12 sense lines along the finger, `physical_side`
+`"bottom"`: against the finger, its copper outward) and `row` the Bottom
+FPC (32 drive lines across it, `"top"`: the outer layer, turned over), as
+the pad is mounted and as a generated sensor's boards are named.  The
+folder's `NOTICE.md` states the design's licence (CC BY-NC 4.0, Columbia
+University): these files are not Apache-2.0.
+
+How `drape.js` lays it (pure functions, as the rest of the module):
+
+- `wrapMapper(placed, vertices)` is `chartMapper`'s kind of map,
+  `{xyz(uv) -> {xyz, on}, outward(uv)}`, with `uv` in mm on the face from
+  its origin.  On the face it is the face's plane to the last bit.  Past
+  the wrap's side edge (the part's farthest corner that way) each height
+  of the sheet rolls round the part's section in the plane across y,
+  keeping its length: a quarter turn of `radius_mm`, down the side
+  `radius_mm` off it as far as the **fold line**, a quarter turn about it,
+  then across the back.  The fold line is the part's own section seen
+  from that side: the concave majorant of its corners' depth behind the
+  face against their height (on the fin-ray finger its slanted, curved
+  back, bridging the dip under the screw boss as a taut strap does).  So
+  the A's two arms and the Top FPC's tail cross the finger's side face as
+  level straps and the gold ends lie behind the finger, 66 to 81 mm from
+  its tip.  Up to the fold line the sheet is laid rigidly; on the back a
+  slanted fold line shears it.  It also gives `width_mm` (the part's width
+  across the fold), `wrap` (`{edge_mm, radius_mm, fold}`) and `lifted(h)`:
+  the same map of the sheet held `h` mm off the face, its tail coming back
+  round the fold line by `h`.
+- `buildStack({..., mapper})`: with a mapper (never for a generated
+  sensor) the stack's `explode` is `"lift"`: each layer's sheet is the
+  mapper's `lifted(layer x step)`, the step `EXPLODE_SHARE` of `width_mm`
+  (14.19 mm on the finger): the layers stand apart along the face's
+  normal and their tails hang from them, never through the part, nothing
+  stretched.  Its sheets carry `liftedNormals` (their normals so exploded;
+  `onpart.js` draws an exploded sheet with them), and the stack
+  `respace(step)`, which lays the exploded sheets again for another step:
+  `library_stage.js` calls it where it spaces a gripper's stack between
+  the jaws.
+- `placedStack({placed, vertices, arts, boards, partBox})` is the stack of
+  a placed record: the field's centre on the face's origin, the boards'
+  axes the face's.  It sets `film_seen` where a board is cut out over the
+  field (the pad's slots): `onpart.js` then draws the film's face in
+  Assembled too, the dark stripes of the real pad.
+
+What changed in the shared modules for it, all behind keys only a placed
+stack has: `onpart.js` (the film's face shown assembled for `film_seen`;
+a sheet's normal buffer the mode's where it has `liftedNormals`, and its
+edge band then across those normals when exploded, `bandOf`'s `lifted`),
+`library_stage.js` (two lines: `stack.respace(step)` where a stack has it,
+and the still stack's film face shown for `film_seen`),
+`library_view.js` (`show()`'s `placed`).  `tools/library_write.py` knows
+nothing of placed records: the showcase is no entry, and its files live
+outside `library/`.
+
+The showcase's page draws it on the gripper ("The showcase's page" above).
+For the pad alone on its finger, `tools/browser/showcase_checks.py`
+serves a probe of the server's origin that mounts the view as that
+page does (the Library's style sheets, a sensor page's `.lib-stage`,
+`show({base: "library/", id, placed, mode})`), checks the wrap
+(`tools/browser/wrap_checks.js`, which `tests/test_showcase.py` runs under
+node where there is one: the face, the folds, the lift, the exploded
+sheets' normals against the lifted sheet's own, a part thinner than the
+bend) and shoots it Exploded and Assembled from five sides in both
+schemes; its `part_page` checks the showcase's card and page on the
+Library itself (on a built static site too, `--url`).  What the pad's
+drawing leaves out of the real assembly: the laminating sheets, the
+polyimide tape over the fingertip and the silkscreen; the extender boards
+and stubs of the flat cables, the second finger and the gripper are the
+showcase's scene's.
+
 ## The page's reads (checks only)
 
 With `?probe` in the address, `library.js` keeps `<pre id="libViewState"
 hidden>`, a JSON `{state, note, id, build_id, mode, drawn_mode, moved,
 gripper, offset, buffer, ms, stage}`: `state` one of `off`, `loading`,
 `drawn`, `failed`, `unavailable` and `lost`; `offset` the drawing's move to
-the middle at its home in device pixels; `stage` the stage's numbers.  With
+the middle at its home in device pixels; `stage` the stage's numbers and,
+as `stage.looks`, what of the scene's looks is drawn (`{bodies: the looks'
+names, part: the part's look or null, smooth_deg, part_points: how many
+points the part's corners share at that angle}`).  With
 `?probe=shoot` the view also leaves the drawing where the figure frames it
 (the shots tool moves the picture to the middle, by whole pixels) and the
 stage measures its numbers.  A visitor's page does neither.
@@ -203,8 +949,9 @@ stage measures its numbers.  A visitor's page does neither.
   2026-11-06 did), and from then on it is a problem.
 - An art file that is not the manifest's bytes, or of another build than
   the variant's, is a problem; so is a gripper's `scene_sha256` other than
-  its scene's and rules', a UMI record with `stage`, or recorded numbers
-  that break the rules' `checks`.
+  its scene's and rules', a UMI record with `stage`, recorded numbers
+  that break the rules' `checks`, or a `part_look_sha256` other than the
+  rules' look of the part now (none where they give none).
 - A `view_sha256` other than the served modules' is a warning (re-shoot),
   as an older `figure_sha256` is.
 - `tools/library_write.py --check`, the site build and `tests/` refuse the
@@ -244,7 +991,11 @@ and the tests' too):
   file in `bodies/<part>/` with its bytes, SHA-256 and triangles (a binary
   STL), its finger, a row of `NOTICE.md` with its SHA-256, an open licence
   (Apache-2.0, MIT, BSD-3-Clause) and its text (`OWN_BODIES`, the rail,
-  none); `see_through` and `picture`; the overrides within their bounds
+  none; a `drawn-` shape whose header says it is the project's); the looks
+  (each name a look of the scene, each look used and in range, the part's
+  without a clear coat; the rules' `part_looks` naming only parts without
+  a scene or their families); `see_through` and `picture`; the overrides
+  within their bounds
   with "reason" in `about`; a file of `scenes/` or `bodies/` no scene
   names; `DENIED_SHA256` over every body and every hash `NOTICE.md` names,
   `DENIED_NAME` over every body's file; and no text of the private
@@ -257,6 +1008,7 @@ and the tests' too):
   have one; writing reports them and writes each sensor's `view`.
 
 `tools/build_static_site.py` stops on the same problems (the scenes of the
-parts it builds and the index's), on a `view` in `entries.json` other than
-`pictures()`' and warns as the writer does; `BUILD.json`'s library record
-counts the sensors `viewed`.
+parts it builds and the index's, the showcase's among them), on a `view` in
+`entries.json` other than `pictures()`' and warns as the writer does (of
+the showcase's pictures of older sources too); `BUILD.json`'s library
+record counts the sensors `viewed` and names the `showcase`.

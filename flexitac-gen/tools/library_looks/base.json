@@ -1,0 +1,19 @@
+{
+ "format": "flexitac-library-looks/v1",
+ "about": "The Library's base looks (docs/LIBRARY_VIEW.md \"The looks\"): the named materials every gripper's look file starts from, tuned on real bodies in the stage's gripper studio (the Unitree Dex1, the ARX X5 and the Franka Hand, 2026-11-12; the blacks lifted by what they mirror of the room, env_intensity, after the reviews of that day: no face of a black body darker than the film beside it).  A look file names one of them in \"look\", or bases a look of its own on one (\"base\") with the numbers that differ and the photo that shows it (\"evidence\").  tools/library_split.py writes the numbers into each scene.",
+ "looks": {
+  "anodized-black": {"for": "black anodised aluminium (a motor can, a machined bracket): a dark metal with a soft sheen", "color": "#232428", "metalness": 0.6, "roughness": 0.45, "env_intensity": 2.4},
+  "anodized-natural": {"for": "natural or clear-anodised aluminium, milled or bead-blasted: a bright satin metal", "color": "#c9ccd0", "metalness": 1, "roughness": 0.45},
+  "steel-ground": {"for": "ground or zinc-plated steel (a guide rail, a shaft, a screw head): brighter edges than aluminium, a cooler grey", "color": "#b4b7ba", "metalness": 1, "roughness": 0.35},
+  "steel-polished": {"for": "polished or stainless steel (a mirror-bright rail, a pin): sharp reflections of the softboxes and the flags", "color": "#c8cacc", "metalness": 1, "roughness": 0.18},
+  "plastic-black-satin": {"for": "black moulded plastic with a satin skin (a connector, a servo case, an injection-moulded shell)", "color": "#222224", "metalness": 0, "roughness": 0.4, "env_intensity": 1.8},
+  "plastic-black-matte": {"for": "matte black plastic (a textured moulding, a cable's jacket)", "color": "#262628", "metalness": 0, "roughness": 0.75, "env_intensity": 1.8},
+  "plastic-white-gloss": {"for": "glossy white painted or moulded shell under a clear coat", "color": "#e2e4e6", "metalness": 0, "roughness": 0.3, "clearcoat": 0.6, "clearcoat_roughness": 0.15},
+  "plastic-white-satin": {"for": "satin white shell or white printed part (no clear coat: also a part's own look)", "color": "#e6e8ea", "metalness": 0, "roughness": 0.45},
+  "rubber-black": {"for": "black rubber or elastomer (a pad, a grip): the flattest black, no sheen", "color": "#232325", "metalness": 0, "roughness": 0.92, "env_intensity": 2.2},
+  "print-black": {"for": "black FDM or SLS print (PLA, PETG, nylon): a matte black a little lighter than the mouldings", "color": "#2a2a2c", "metalness": 0, "roughness": 0.65, "env_intensity": 1.5},
+  "tpu-orange": {"for": "orange printed TPU (the UMI soft finger)", "color": "#f2601c", "metalness": 0, "roughness": 0.6},
+  "brass": {"for": "brass (an insert, a bushing, a standoff)", "color": "#c9a45c", "metalness": 1, "roughness": 0.35},
+  "pcb-green": {"for": "green solder mask of a rigid board", "color": "#1f6b3a", "metalness": 0, "roughness": 0.5}
+ }
+}

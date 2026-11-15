@@ -3,9 +3,23 @@
 - Files: every file of web/library/ is a third-party file of its NOTICE.md table, whose SHA-256 re-hashes, or one of
   this project's own (NOTICE.md, parts.json, entries.json, fits/<id>.json, the pictures shots/<id>.exploded.webp,
   shots/<id>.assembled.webp, shots/<id>.exploded.card.webp and shots/manifest.json); every tabled file
-  exists; no file anywhere under web/ is one of the deny-list's vendor models (Robotiq 2F-85 and 3F, the xArm
-  gripper), and no id, title or file name names them; web/library/ stays within its 12 MB budget, its pictures within
-  theirs (8 MB, the grid's first screen about 1 MB).
+  exists; no file anywhere under web/ is one of the deny-list's vendor models (Robotiq 2F-85 and 3F, the video's
+  split of the xArm gripper, the MakerMods body), and no id, title or file name names them; web/library/ stays within
+  its 12 MB budget, its pictures within theirs (8 MB, the grid's first screen about 1 MB).
+- The showcase (the project owner's decision of 2026-11-12: the hand-designed FlexiTac sensor on UFACTORY's xArm
+  Gripper G1, the one vendor model shown): an explicit category (library_write.showcase): web/vendor/ufactory-g1/
+  holds exactly its twelve meshes at their pinned SHA-256 (this module's list, equal to the writer's) and its notice,
+  within a byte budget of its own; the notice says whose the model is, why it is here and what was changed ("3D
+  model", never CAD) and tables every file; only the showcase's own scene (scenes/flexitac-g1.json, about the UMI
+  finger, with the looks of 2026-11-12) names the folder: no part, entry, fit, picture record, sample or other scene;
+  the vendor's own file, unsplit and undecimated, out of the deny-list since that day, still refused anywhere under
+  web/; the holder a body of the Library with its open licence; on a copy of the committed files, each of these
+  broken and named; the site's copy and the public export carry the folder.  Since its second stage that day: the
+  scene as built (the part the gripper's left finger, a camera of its own, no finger see-through) with the seven plain
+  shapes the project draws, each at its pin; the showcase's page's document (showcase.json, library_write.showcase_page:
+  its words, the label's two claims, the placed record, the tutorial, the two notices, its three pictures and what
+  they were shot from, stale with another scene, rules, art or placed record) in every gate; and on the page, the
+  grid's first card and its own page with no generator action.
 - The pictures (shots/, tools/browser/library_shots.py; the user's request of 2026-11-05: the cards show the finger with
   the sensor on it): each sensor's "image" the one shots/manifest.json gives (library_write.pictures: null without a
   shot), none of another fit (the wrong sensor pictured), one of older figure sources a warning only (the public CI runs
@@ -126,7 +140,26 @@ DENIED_SHA256 = {
     "3d82a29a55c7fca3f08eeb441a97667d34e675901bc0fab8c22fec6e41ead7bd": "xArm (link_l_outer.stl)",
     "f256d6ca99bca7c32e991080ca5988015c96a535bf1edc14840ff5643f864904": "xArm (link_r_inner.stl)",
     "c97e95bafd0b0f5a66dfcccf5f398956ddae2facca3d4509f1754a0ba138888b": "xArm (link_r_outer.stl)",
-    "6c59aabbd22823819af1face17752cfd5b32f43529ed08da9596148770de332f": "xArm (Gripper G1 3D File (With).stl)",
+    # 2026-11-12: "xArm (Gripper G1 3D File (With).stl)" left this list by the project owner's decision of that day (the
+    # showcase's notice names it); the file itself is still refused anywhere under web/ (SHOWCASE_SOURCE below).
+    # The same file split as the FlexiTac Tactile Demo splits it, not decimated (the review of 2026-11-12): its seven
+    # first pieces and the nine further pieces of its body and fingers.
+    "e18c8d350dd92e480cdcedc0c59d56369aa60c2b80f0e6d05198a9e657fb4e5d": "xArm Gripper G1, not decimated (body.stl)",
+    "fdab9b44c248c7b8cd738b9c3ca25c7abd8b36d27156078a585f4b13e970b43e": "xArm Gripper G1, not decimated (finger_r.stl)",
+    "303363c45801cc09e08daf2be914b9f9a237b671e455fe67ceb73e2e1fbeec16": "xArm Gripper G1, not decimated (finger_l.stl)",
+    "375ecfd2ebda0c82e73758c7d336cb139208c666cb10805d56dac85dbbca6b4b": "xArm Gripper G1, not decimated (link_r_outer.stl)",
+    "7190fb20f73f857dffa37ca44c373933213c6b9019133844e74d449fd274cef7": "xArm Gripper G1, not decimated (link_r_inner.stl)",
+    "c68097e5a999c4a858ab15a2b175072db1f4378eabb0875c50ac3f6351401f17": "xArm Gripper G1, not decimated (link_l_outer.stl)",
+    "7d2be86623b0e6ed83cca042e16980363fe30a5d8fab17b51866899ece960743": "xArm Gripper G1, not decimated (link_l_inner.stl)",
+    "8cf40e4911d8e30fc18a223ff9b2f4e06667b854b5da741520fafa0b21dabce1": "xArm Gripper G1, not decimated (body_shell.stl)",
+    "29c2cf986ead35efeace70442b253428962716784ada51254123eca9c0e81932": "xArm Gripper G1, not decimated (body_frame.stl)",
+    "1fc90b2f5e0a5e98f6ea419487f83bdf1176ce559e079370fe645276dbfd97dc": "xArm Gripper G1, not decimated (body_flange.stl)",
+    "51558812030bb692137d6bea813af792ee833569b4d38c763b14700af03877ff": "xArm Gripper G1, not decimated (body_pins.stl)",
+    "eba81d3da9a11fbbb1287c7a7d95f9d85c87d4d7ec1ff40384f40177d2d139f0": "xArm Gripper G1, not decimated (body_logo.stl)",
+    "2e938d7af2767bb811c97d37f1b2170b421390f93320345ec3cb61dbf6a04bf9": "xArm Gripper G1, not decimated (finger_r_coupler.stl)",
+    "fe62f783f423e575608cd2701106ee036ee6f2d1b061ed31236702e54db05f78": "xArm Gripper G1, not decimated (finger_r_pins.stl)",
+    "c4f8214b64116588b4c6d6aec3d07e268350e73b669a35efa89aa6bee6067991": "xArm Gripper G1, not decimated (finger_l_coupler.stl)",
+    "f6b588d88bd3f4788b237899092c8008119b8b5d3f7cdb8ec0c35d4f9742aa72": "xArm Gripper G1, not decimated (finger_l_pins.stl)",
     # The MakerMods Metal Arm's gripper body, not cleared (2026-11-05: its tips are drawn on the project's own rail).
     "19ab43c406f349d62dc7a9932b66fb28053cf96152ab00d71a93945a43ddd8cd": "MakerMods Metal Arm (gripper_base.STL): not cleared",
     "3c813623f4c273bfb6f4fd483fc8ee23dc4325de32e9d89d7c44cb1a0e97c033": "MakerMods Metal Arm (link7.STL): not cleared",
@@ -134,11 +167,56 @@ DENIED_SHA256 = {
 }
 DENIED_NAME = re.compile(r"robotiq|xarm|ufactory", re.IGNORECASE)
 NOTICE_ROW = re.compile(r"^\| `([\w./-]+)` \|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\| `([0-9a-f]{64})` \|$", re.MULTILINE)
+# The showcase (the project owner's decision of 2026-11-12; library_write.SHOWCASE_*): UFACTORY's 3D model of the xArm
+# Gripper G1, split and decimated, in a folder of its own beside the Library: exactly these files at these hashes (the
+# same list as the writer's), within this budget and nowhere else under web/; the file they are made from (its
+# SHA-256 and bytes; the SHA-256 of its bytes after the 80-byte header), never under web/; the holder, a body.
+SHOWCASE = WEB / "vendor" / "ufactory-g1"
+SHOWCASE_SCENE = "scenes/flexitac-g1.json"
+SHOWCASE_SOURCE = ("Gripper G1 3D File (With).stl", "6c59aabbd22823819af1face17752cfd5b32f43529ed08da9596148770de332f", 6347684)
+SHOWCASE_SOURCE_TRIANGLES = "6fedf322985477e914f3160228e2b3c1fa7226843dc6f58e4ea19e9914d53393"
+SHOWCASE_FILES = {
+    "body_shell.stl": "17f20591f7ad00a5c19f8f915404df71b9332e971007f5afd58dc0ee83196000",
+    "body_frame.stl": "c3fac3ded9752ee3101a4eb0752d687404ff87989601ed853ce9dbde1fe1201c",
+    "body_flange.stl": "53d5b7376b3b15bae4974e93f60fc565d487d32337c88163718ef9e58071038f",
+    "body_pins.stl": "0e36e3e656bc3a5b684f20fe87aa1e76d3956eb7cd52e60fb638de4d2458424f",
+    "link_r_outer.stl": "a30b4e83a108cdc8d3cafbbcdf4dc87e2c33828440f28776e2a601ce4ab40588",
+    "link_r_inner.stl": "6d095d76626f53a5a7af281e86051fe18665dca5a56f5e03c9c83a19ffa66299",
+    "link_l_outer.stl": "6ab58ca8f67ed33fd07016a82c606938c142ca283bc7ab04218b772783d7376c",
+    "link_l_inner.stl": "93f51a6a5713d5ccec58ec8548ef63855d7e20561dd152dc81f273e20b3f8ea0",
+    "finger_r_coupler.stl": "a8526adbd71aaaad6bfd7b109baabc7eeaecfccc40fedb42624210455f3d5c8b",
+    "finger_r_pins.stl": "8af3cc1ad160fcac75e4db0f5a1b2b5546aeecdcecb639dd87fdf5f678c3ddf0",
+    "finger_l_coupler.stl": "b9c13ced96553fb2ee8038ccb78354f1a1ad1098818c2d9e8084bd524d0de849",
+    "finger_l_pins.stl": "be9bd6efe4aa156542836c82b13603a544760a88bab3e03f02afa8721841da9c",
+}
+SHOWCASE_BUDGET_BYTES = 2_200_000
+SHOWCASE_HOLDER = ("bodies/flexitac-g1/umi-right-finger-holder.stl", "bed7997d234957cd874aecec2be76e133ab14b4cd652abe4c0491ee06fe469dd")
+# The plain shapes the project draws for the showcase after the owner's photo of the gripper (tools/library_showcase.py
+# DRAWN; the same pins as the writer's): screw and bolt heads, nuts, the block in the top slot, the extender boards with
+# their sockets and the cable stubs.  In the scene's order of them.
+SHOWCASE_DRAWN = {
+    "bodies/flexitac-g1/drawn-shell-screw.stl": "3e9be6a39e4c3324539b799a027ff2d11da071427abc9fdc4b18bbd11d218cdb",
+    "bodies/flexitac-g1/drawn-holder-bolt.stl": "4065ad795ec729b88544255a84ee9372498d6d8b7874504c1ecacbb9b119d3d8",
+    "bodies/flexitac-g1/drawn-holder-nut.stl": "19dfdb4cfc52e2aca385209251c9ae8bd063fcee2f776a8dc5540fc6e9ab7dcb",
+    "bodies/flexitac-g1/drawn-slot-block.stl": "4c931930fd990b0e76da2facd08e69b7d795b371264d58196b80b3b056685f0d",
+    "bodies/flexitac-g1/drawn-extender.stl": "ce9e3d2b69f27cb92a941e0580e2cd25c717f341515e9f022b3f5a8814b54559",
+    "bodies/flexitac-g1/drawn-extender-sockets.stl": "1fb0ee61d901a42382ed3ba2004b6e80912e45c99c31caff7e1ac7bbfd0fa042",
+    "bodies/flexitac-g1/drawn-cable-stub.stl": "13d5a943386e3cb4a92e55d8b135a99a0ff3b765496633cd774c46f9757ac1e5",
+}
+SHOWCASE_BODIES = dict([SHOWCASE_HOLDER], **SHOWCASE_DRAWN)
+# The showcase's page (2026-11-12): its document beside entries.json, its three pictures in a folder of their own.
+SHOWCASE_FILE = "showcase.json"
+SHOWCASE_PICTURES = ("showcase/flexitac-g1.exploded.webp", "showcase/flexitac-g1.assembled.webp", "showcase/flexitac-g1.card.webp")
+REBUILD_SHOWCASE = "rebuild the showcase with tools/library_showcase.py"
 # Since the 3D view of 2026-11-05 (docs/LIBRARY_VIEW.md): each sensor's art, the scenes and the MakerMods scene's rail,
 # drawn by the project (the grippers' other bodies are third-party files, tabled in NOTICE.md).
 OWN_FILE = re.compile(r"^(NOTICE\.md|parts\.json|entries\.json|fits/[a-z0-9.-]+\.json|shots/manifest\.json"
                       r"|shots/[a-z0-9.-]+\.(exploded|assembled|exploded\.card)\.webp"
-                      r"|art/[a-z0-9.-]+\.json\.gz|scenes/[a-z0-9-]+\.json|bodies/makermods-metal/rail\.stl)$")
+                      r"|art/[a-z0-9.-]+\.json\.gz|scenes/[a-z0-9-]+\.json|bodies/makermods-metal/rail\.stl"
+                      # Since the looks of 2026-11-12: a plain shape tools/library_split.py drew where a model lacks a component.
+                      r"|bodies/[a-z0-9-]+/drawn-[a-z0-9-]+\.stl"
+                      # The showcase's page (2026-11-12): its document and its three pictures.
+                      r"|showcase\.json|showcase/flexitac-g1\.(exploded|assembled|card)\.webp)$")
 # The pictures' budgets (2026-11-05): the whole set (126 files of 42 sensors), and the grid's first screen: since the
 # layout of 2026-11-06 every card of the grid (the grippers' seven, then the UMI shelf's four pitches and its Tapered
 # tips card), all asked for as the page opens (it is short; library_checks part_pictures measures the bytes).
@@ -225,7 +303,16 @@ APPROVED_RULES = {"gap_share": 0.42, "min_step_mm": 2, "ghost_opacity": 0.28, "m
                              "assembled": {"tilt_deg": 57, "elevation_deg": 30, "front": 1}},
                   "checks": {"opaque_cover_max": 0.1, "layer_visible_min": 0.25, "clearance_min_mm": 3, "stacks_apart_min_g": 0.2,
                              "stacks_apart_min_mm": 3, "stacks_apart_min_px": 20, "near_seen_min": 0.5, "card_min_px": 20,
-                             "ghost_cover_min": 0.02}}
+                             "ghost_cover_min": 0.02},
+                  # The UMI finger and its tapered tips in the real finger's orange TPU (the user's request of 2026-11-12:
+                  # every gripper coloured after photos of the real product): a look of the rules' own, umi-tpu-orange,
+                  # tuned on the finger in the stage against its photos (the base look tpu-orange is left as it was: the
+                  # base table and the showcase's copy of it are not this change's), with flat facets (no part_smooth_deg:
+                  # at 35 degrees under 0.46 % of the pane's pixels change at all and under 0.05 % by more than 14 of
+                  # 255, at most 28, a highlight along the mount block's rounded corner; docs/LIBRARY_VIEW.md).  Roughness 0.85
+                  # since the verification of 2026-11-13 (0.6 drew the faces turned up to the lights a washed salmon).
+                  "looks": {"umi-tpu-orange": {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}},
+                  "part_looks": {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"}}
 # The near finger (the mate) see-through on every gripper (the user's decision of 2026-11-06).
 SEE_THROUGH = {"franka-hand": ["mate"], "widowx-250": ["mate"], "trossen-widowx-ai": ["mate"], "arx-x5": ["mate"], "i2rt-yam": ["mate"],
                "unitree-dex1": ["mate"], "makermods-metal": ["mate"]}
@@ -240,6 +327,8 @@ MIRROR = [[-1, 0, 0, -88], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 # The hash of the Library view's modules the tiny records are shot with (pictures(view=...): the modules need not exist).
 VIEW = "5" * 64
 REBUILD = "rebuild the scenes with the private tools/library_scenes.py"
+# A scene's looks are tools/library_split.py's to write (the review of 2026-11-12: their problems had named the scene builder).
+RELOOK = "write the scene's looks again with tools/library_split.py (the part's look file, tools/library_looks/<part>.json)"
 # Stage numbers that keep every rule (a gripper's record's, docs/LIBRARY_VIEW.md).
 NUMBERS = {"jaw_gap_mm": 80.0, "step_mm": 10.0, "drape_step_mm": 2.0, "face_tilt_deg": 0.0, "visible_min": 0.5, "opaque_max": 0.01,
            "assembled_opaque": 0.0, "ghost_cover": 0.1, "clearance_mm": {"bodies": 12, "other_finger": 12, "stacks": 30},
@@ -296,6 +385,23 @@ def _scene_library(library: Path, parts: dict) -> Path:
     return library
 
 
+def _showcase_web(folder: Path) -> Path:
+    """``folder``/web holding a copy of the committed files the showcase's checks read (web/library/'s parts, entries,
+    notice, licences, scenes, bodies, fits and the pictures' manifest, and the showcase's document and pictures;
+    web/vendor/ufactory-g1/, web/vendor/umi/ and the pad's web/vendor/flexitac-v2/; web/samples/'s index and notice);
+    returns its library."""
+
+    web = folder / "web"
+    for relative in ("library/parts.json", "library/entries.json", "library/NOTICE.md", "library/shots/manifest.json",
+                     f"library/{SHOWCASE_FILE}", "samples/samples.json", "samples/NOTICE.md"):
+        (web / relative).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(WEB / relative, web / relative)
+    for relative in ("library/licenses", "library/scenes", "library/bodies", "library/fits", "library/showcase", "vendor/ufactory-g1",
+                     "vendor/umi", "vendor/flexitac-v2"):
+        shutil.copytree(WEB / relative, web / relative)
+    return web / "library"
+
+
 def _edit_scene(library: Path, part_id: str, edit) -> None:
     """``edit`` (the scene's document -> None) applied to scenes/<part>.json."""
 
@@ -347,18 +453,23 @@ def _view_library(library: Path, variants: dict, parts: dict, identifiers=("wido
 
 def _shot_library(library: Path, variants: dict, identifiers=("widowx-250-2mm",), files=None, **changes) -> Path:
     """``library``/shots/ holding the fixture as the pictures of ``identifiers`` (``files`` {kind: bytes} in its place),
-    with the manifest the tool writes for them (its record() and manifest_text(), at the figure's sources of now),
-    ``changes`` over each record."""
+    with the manifest the tool writes for them (its record() and manifest_text(), at the figure's sources of now, a
+    part without a scene in the look the library's rules give it), ``changes`` over each record."""
 
     (library / "shots").mkdir(parents=True, exist_ok=True)
     records = {}
+    # A part without a scene in the look the library's rules give it (the UMI finger's orange; none in a library
+    # without scenes), read as pictures() reads it: the library's scenes.json and its parts.json, if any.
+    index = library_write.scenes_index(library)
+    families = _json(library / "parts.json") if (library / "parts.json").is_file() else {"parts": {}}
     for identifier in identifiers:
         data = dict({"exploded": SHOT, "assembled": SHOT, "card": SHOT_CARD}, **(files or {}))
         for kind, payload in data.items():
             (library / library_write.shot_files(identifier)[kind][0]).write_bytes(payload)
         margins = {"exploded": [590, 240, 590, 240], "assembled": [590, 240, 590, 240]}
-        records[identifier] = dict(SHOTS_TOOL.record(identifier, variants[identifier], data, margins, library_write.figure_sha256(), "photo"),
-                                   **changes)
+        look = library_write.part_look_sha256(library_write.part_look(index, families, variants[identifier]["part"]))
+        records[identifier] = dict(SHOTS_TOOL.record(identifier, variants[identifier], data, margins, library_write.figure_sha256(), "photo",
+                                                     part_look=look), **changes)
     (library / library_write.SHOTS_MANIFEST).write_text(SHOTS_TOOL.manifest_text(records), encoding="utf-8")
     return library
 
@@ -457,14 +568,19 @@ class FileTests(LibraryTestCase):
                          "then run tools/library_write.py")
         index = _json(LIBRARY / library_write.SCENES_INDEX)
         scenes = {path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "scenes").glob("*")}
-        self.assertEqual(scenes, {library_write.SCENES_INDEX, *index["scenes"].values()})
+        self.assertEqual(scenes, {library_write.SCENES_INDEX, *index["scenes"].values(), SHOWCASE_SCENE})
         named = {body["mesh"] for path in index["scenes"].values() for body in _json(LIBRARY / path)["bodies"]}
+        # The showcase's own scene (no part's: not in the index) and its bodies of the Library (the vendor's are
+        # beside it, web/vendor/ufactory-g1/: ShowcaseTests).
+        named |= {body["mesh"] for body in _json(LIBRARY / SHOWCASE_SCENE)["bodies"] if not body["mesh"].startswith("../")}
         bodies = {path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "bodies").rglob("*") if path.is_file()} if (LIBRARY / "bodies").is_dir() else set()
         self.assertEqual(bodies, named)
         rows = _notice()
         for mesh in sorted(named):
             with self.subTest(body=mesh):
-                self.assertTrue(mesh in rows or mesh == RAIL, "a body neither tabled in NOTICE.md nor the project's own rail")
+                self.assertTrue(mesh in rows or library_write.own_body(mesh, (LIBRARY / mesh).read_bytes()),
+                                "a body neither tabled in NOTICE.md nor the project's own (the rail, a shape tools/library_split.py drew)")
+                self.assertFalse(mesh in rows and library_write.own_body(mesh), "the project's own drawing has no row")
         self.assertNotIn(RAIL, rows, "the rail is the project's own (NOTICE.md says so, with no row)")
         # Each view's scene its part's (a gripper's), a fingertip's none.
         for identifier, variant in self.entries["variants"].items():
@@ -473,12 +589,28 @@ class FileTests(LibraryTestCase):
                     self.assertEqual(variant["view"], library_write.view_record(identifier, index["scenes"].get(variant["part"])))
 
     def test_no_vendor_model_of_the_deny_list(self) -> None:
+        places = {pinned: f"vendor/ufactory-g1/{name}" for name, pinned in SHOWCASE_FILES.items()}
+        self.assertEqual(len(places), len(SHOWCASE_FILES))
+        seen = set()
         for path in sorted(WEB.rglob("*")):
             if path.is_file():
-                with self.subTest(file=path.relative_to(WEB).as_posix()):
-                    self.assertNotIn(hashlib.sha256(path.read_bytes()).hexdigest(), DENIED_SHA256)
+                relative = path.relative_to(WEB).as_posix()
+                with self.subTest(file=relative):
+                    data = path.read_bytes()
+                    digest = hashlib.sha256(data).hexdigest()
+                    self.assertNotIn(digest, DENIED_SHA256)
+                    # The showcase's vendor file itself, unsplit and undecimated (out of the list since 2026-11-12),
+                    # under its own header or another.
+                    self.assertNotEqual(digest, SHOWCASE_SOURCE[1], "the vendor's own file is never published")
+                    if len(data) == SHOWCASE_SOURCE[2]:
+                        self.assertNotEqual(hashlib.sha256(data[80:]).hexdigest(), SHOWCASE_SOURCE_TRIANGLES, "nor under another header")
+                    # The showcase's meshes are in their folder alone: no copy under another name anywhere under web/.
+                    if digest in places:
+                        self.assertEqual(relative, places[digest], "a copy of a mesh of the vendor's folder")
+                        seen.add(digest)
                     if LIBRARY in path.parents:
                         self.assertIsNone(DENIED_NAME.search(path.name))
+        self.assertEqual(seen, set(places), "each mesh of the vendor's folder once, in its place")
         names = [*self.entries["order"], *self.entries["variants"]]
         for part in self.parts["parts"].values():
             names += [part["title"], part["mesh"]["file"], part["mesh"]["name"]]
@@ -487,22 +619,27 @@ class FileTests(LibraryTestCase):
                 self.assertIsNone(DENIED_NAME.search(name))
 
     def test_the_library_stays_within_its_budget(self) -> None:
-        # Its pictures have their own (below).
-        size = sum(path.stat().st_size for path in LIBRARY.rglob("*") if path.is_file() and path.parent != LIBRARY / "shots")
+        # Its pictures have their own (below): the sensors' (shots/) and, since 2026-11-12, the showcase's three
+        # (showcase/: 217 KB, which the 12 MB of the fits, meshes, bodies and art had no room to spare for).
+        pictures = (LIBRARY / "shots", LIBRARY / "showcase")
+        size = sum(path.stat().st_size for path in LIBRARY.rglob("*") if path.is_file() and path.parent not in pictures)
         self.assertLessEqual(size, BUDGET_BYTES, f"web/library/ is {size} bytes")
 
     def test_the_pictures_stay_within_their_budget(self) -> None:
-        shots = sorted((LIBRARY / "shots").glob("*")) if (LIBRARY / "shots").is_dir() else []
+        shots = [path for folder in ("shots", "showcase") for path in sorted((LIBRARY / folder).glob("*"))]
         size = sum(path.stat().st_size for path in shots)
-        self.assertLessEqual(size, SHOTS_BUDGET_BYTES, f"web/library/shots/ is {size} bytes")
+        self.assertLessEqual(size, SHOTS_BUDGET_BYTES, f"web/library/shots/ and showcase/ are {size} bytes")
+        # The grid's first screen: every card's picture, the showcase's large card's with them (it is the first).
         first = sum((LIBRARY / self.entries["variants"][identifier]["image"]["exploded"]["card"]).stat().st_size
                     for identifier in grid_cards(self.entries) if self.entries["variants"][identifier]["image"])
+        first += (LIBRARY / _json(LIBRARY / SHOWCASE_FILE)["image"]["card"]["src"]).stat().st_size
         self.assertLessEqual(first, FIRST_SCREEN_BYTES, f"the grid's first screen's pictures are {first} bytes")
+        self.assertLess(sum(path.stat().st_size for path in (LIBRARY / "showcase").glob("*")), 300_000, "the showcase's three pictures")
 
     def test_the_page_never_says_cad(self) -> None:
         # The page's word is Gen by Surface; the Library shows these texts (its notice is linked from its footer).
-        for path in (LIBRARY / "NOTICE.md", LIBRARY / "parts.json", LIBRARY / "entries.json"):
-            with self.subTest(file=path.name):
+        for path in (LIBRARY / "NOTICE.md", LIBRARY / "parts.json", LIBRARY / "entries.json", SHOWCASE / "NOTICE.md"):
+            with self.subTest(file=path.relative_to(WEB).as_posix()):
                 self.assertNotRegex(path.read_text(encoding="utf-8"), r"\bCAD\b")
 
 
@@ -768,6 +905,106 @@ class PictureTests(LibraryTestCase):
                 with self.subTest(sensor=identifier, mode=mode):
                     self.assertEqual((right - left in (0, 1), bottom - top in (0, 1), min(left, top, right, bottom) > 0), (True, True, True))
 
+    def test_gen_by_surface_s_figure_is_pinned_apart_from_the_library_s_look(self) -> None:
+        # Until 2026-11-12 the Library's pictures of the UMI finger and its tapered tips were Gen by Surface's figure byte
+        # for byte (library_shots.py --check-generator).  The Library now draws those parts in the real finger's orange;
+        # Gen by Surface keeps its grey part, and its figure of each such sensor is pinned (tools/browser/
+        # generator_figure.json: the three pictures as the shots tool encodes them, of the entry's fit and build), which
+        # --check-generator holds it to in the browser.  Here, without one: the pin is of exactly these sensors, and the
+        # Library's pictures are the figure's own files where the rules give the part no look, other files where they do.
+        tool = SHOTS_TOOL
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        pin = tool.read_pin()
+        fingertips = tool.fingertip_sensors(self.entries, index["scenes"])
+        self.assertEqual(sorted(fingertips), sorted(identifier for identifier, variant in self.entries["variants"].items() if variant["part"].startswith("umi-")))
+        self.assertEqual(len(fingertips), 14)
+        self.assertEqual(tool.pin_problems(pin, self.entries, index["scenes"]), [])
+        self.assertEqual(tool.GENERATOR_PIN.read_text(encoding="utf-8"), tool.pin_text(pin["shots"], pin["figure_sha256"]), "as --pin-generator writes it")
+        self.assertRegex(pin["figure_sha256"], r"^[0-9a-f]{64}$")
+        shots = _json(LIBRARY / library_write.SHOTS_MANIFEST)["shots"]
+        for identifier in fingertips:
+            variant = self.entries["variants"][identifier]
+            pictured = {kind: {"bytes": item["bytes"], "sha256": item["sha256"]} for kind, item in shots[identifier]["files"].items()}
+            with self.subTest(sensor=identifier):
+                self.assertEqual((pin["shots"][identifier]["fit_sha256"], pin["shots"][identifier]["build_id"]), (variant["fit_sha256"], variant["build_id"]))
+                self.assertEqual(tool.figure_record(variant, {kind: b"abc" for kind in pictured})["files"]["card"],
+                                 {"bytes": 3, "sha256": hashlib.sha256(b"abc").hexdigest()})
+                if library_write.part_look(index, self.parts, variant["part"]) is None:
+                    self.assertEqual(pictured, pin["shots"][identifier]["files"], "no look: the Library's pictures are Gen by Surface's figure")
+                else:
+                    for kind, item in pictured.items():
+                        self.assertNotEqual(item["sha256"], pin["shots"][identifier]["files"][kind]["sha256"], f"{kind}: in its look, not the grey figure's")
+        # What makes a pin not this library's.
+        first, gripper = fingertips[0], "widowx-250-2mm"
+        fix = "pin Gen by Surface's figure again with tools/browser/library_shots.py --pin-generator"
+
+        def problems(edit) -> list:
+            changed = json.loads(json.dumps(pin))
+            edit(changed)
+            return tool.pin_problems(changed, self.entries, index["scenes"])
+
+        other = "surface-32x12-000000000000"
+        self.assertEqual(problems(lambda document: document.update(format="flexitac-generator-figure/v0")),
+                         ["the pin's format is 'flexitac-generator-figure/v0', not flexitac-generator-figure/v1"])
+        self.assertEqual(problems(lambda document: document["shots"].pop(first)), [f"{first}: Gen by Surface's figure is not pinned: {fix} {first}"])
+        self.assertEqual(problems(lambda document: document["shots"][first].update(build_id=other)),
+                         [f"{first}: the pin is of another fit or build than the entry's ({other}, not {self.entries['variants'][first]['build_id']}): {fix} {first}"])
+        self.assertEqual(len(problems(lambda document: document["shots"][first].update(fit_sha256="0" * 64))), 1)
+        missing = f"{first}: the pin has not the bytes and SHA-256 of its exploded, assembled, card pictures: {fix} {first}"
+        self.assertEqual(problems(lambda document: document["shots"][first]["files"].pop("card")), [missing])
+        self.assertEqual(problems(lambda document: document["shots"][first]["files"]["card"].update(sha256="0" * 63)), [missing])
+        self.assertEqual(problems(lambda document: document["shots"][first]["files"]["card"].update(bytes=0)), [missing])
+        self.assertEqual(problems(lambda document: document["shots"].update({gripper: document["shots"][first]})),
+                         [f"{gripper}: pinned, but no sensor of a part without a scene: {fix}"])
+        self.assertEqual(tool.read_pin(Path("no-such-folder") / "generator_figure.json")["shots"], {})
+
+    def test_the_look_is_held_to_the_part_s_pixels(self) -> None:
+        # library_shots.py --check-generator's fourth comparison (view_differences(), view_problems()): the Library's view
+        # of a part in its look against Gen by Surface's figure, with the view in that look's other colour as the witness
+        # of which pixels the part's colour reaches.  Tiny drawings: RGBA, one row; g the grey part, o its orange, b the
+        # other colour, s a sheet's pixel, e a sheet's edge on the ground (half alpha), _ the transparent ground.
+        tool = SHOTS_TOOL
+        pixel = {"g": (200, 204, 206, 255), "o": (232, 90, 5, 255), "b": (104, 218, 133, 255), "s": (207, 121, 0, 255), "t": (30, 30, 31, 255),
+                 "e": (207, 121, 0, 128), "_": (0, 0, 0, 0), "x": (1, 2, 3, 255), "h": (232, 90, 5, 128)}
+        drawing = lambda text: bytes(value for letter in text for value in pixel[letter])  # noqa: E731
+        figure, look, other = drawing("_gggssste_"), drawing("_ooossste_"), drawing("_bbbssste_")
+        counts = tool.view_differences(figure, look, other)
+        self.assertEqual(counts, {"drawn": 8, "alpha": 0, "part": 3, "sheets": 5, "wrong": 0})
+        self.assertEqual(tool.view_problems(counts), [])
+        # A sheet's pixel drawn otherwise in the look (the look not the part's alone): the same in both colours, not the figure's.
+        counts = tool.view_differences(figure, drawing("_oooxsste_"), drawing("_bbbxsste_"))
+        self.assertEqual(counts, {"drawn": 8, "alpha": 0, "part": 3, "sheets": 5, "wrong": 1})
+        self.assertEqual(tool.view_problems(counts), ["1 of the 5 px the part's colour does not reach are not the figure's (the look is not the part's alone)"])
+        # Another outline: a pixel drawn where the figure draws none, one not drawn where it does, an edge of another alpha.
+        counts = tool.view_differences(figure, drawing("ooooss_teh"), drawing("bbbbss_teh"))
+        self.assertEqual((counts["alpha"], counts["drawn"]), (3, 9))
+        self.assertEqual(tool.view_problems(counts)[0], "3 px of another alpha than the figure's (another outline)")
+        # The look not drawn (the view the grey figure in both colours): the part's colour reaches nothing.
+        counts = tool.view_differences(figure, figure, figure)
+        self.assertEqual(counts, {"drawn": 8, "alpha": 0, "part": 0, "sheets": 8, "wrong": 0})
+        self.assertEqual(tool.view_problems(counts), ["the part's colour reaches 0 of the 8 px drawn, under 0.1 of them (is the look drawn?)"])
+        # Everything drawn otherwise: nothing left to hold to the figure.
+        counts = tool.view_differences(drawing("gggggggs"), drawing("ooooooos"), drawing("bbbbbbbs"))
+        self.assertEqual(tool.view_problems(counts), ["the part's colour reaches all but 1 of the 8 px drawn, under 0.25 of them left (the sheets drawn otherwise too?)"])
+        self.assertEqual((tool.PART_SHARE_MIN, tool.SHEETS_SHARE_MIN), (0.1, 0.25))
+        with self.assertRaises(tool.ShotError):
+            tool.view_differences(figure, look, other[:-4])
+        # The other colour: every channel half the range off, whatever the colour (a mid grey too); the rest of the look kept.
+        orange = {"color": "#e85a1c", "metalness": 0, "roughness": 0.6, "env_intensity": 0.3}
+        self.assertEqual(tool.other_look(orange), dict(orange, color="#68da9c"))
+        self.assertEqual((tool.other_look({"color": "#808080"}), tool.other_look({"color": "#00ff7f"})), ({"color": "#000000"}, {"color": "#807fff"}))
+        # scenes.json as the check serves it: the rules without their looks (the part as Gen by Surface draws it), or with
+        # one look for the one part; the scenes and every other rule as they are.
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        plain = dict(index, rules={key: value for key, value in index["rules"].items() if key not in library_write.RULES_OPTIONAL})
+        self.assertEqual(json.loads(tool.served_scenes(index, "umi-finray", None)), plain)
+        given = {"look": tool.other_look(orange), "smooth_deg": None}
+        self.assertEqual(json.loads(tool.served_scenes(index, "umi-trap-tip5.8", given)),
+                         dict(plain, rules=dict(plain["rules"], part_looks={"umi-trap-tip5.8": given["look"]})))
+        self.assertEqual(json.loads(tool.served_scenes(index, "umi-finray", dict(given, smooth_deg=35)))["rules"]["part_smooth_deg"], 35)
+        self.assertEqual(library_write.part_look(json.loads(tool.served_scenes(index, "umi-trap-tip5.8", given)), self.parts, "umi-trap-tip5.8"), given)
+        self.assertIsNone(library_write.part_look(json.loads(tool.served_scenes(index, "umi-finray", None)), self.parts, "umi-finray"))
+
     def test_a_picture_is_a_webp_with_alpha_of_its_size(self) -> None:
         info = library_write.webp_info
         # The fixture as the tool's encoder writes it: the extended layout (VP8X), its canvas and its alpha flag.
@@ -923,13 +1160,20 @@ class SceneTests(LibraryTestCase):
                 self.assertEqual(scene["picture"], PICTURES.get(part_id, PICTURE))
                 meshes = [body["mesh"] for body in scene["bodies"]]
                 if part_id == "makermods-metal":
-                    self.assertEqual(meshes, [RAIL], "the project's own rail, no MakerMods body")
+                    # Since the looks of 2026-11-12: the rail, then the steel rail, its bores and end stops the
+                    # project drew on it (bodies/makermods-metal/drawn-*.stl), all its own drawing.
+                    self.assertEqual(meshes[0], RAIL, "the project's own rail, no MakerMods body")
+                    for mesh in meshes[1:]:
+                        self.assertRegex(mesh, r"^bodies/makermods-metal/drawn-[a-z0-9-]+\.stl$")
+                        self.assertTrue(library_write.own_body(mesh, (LIBRARY / mesh).read_bytes()), mesh)
                     self.assertIn("not MakerMods hardware", scene["about"])
+                    rail_meshes = meshes
                 else:
                     self.assertNotIn(RAIL, meshes)
                 self.assertNotIn("camera", scene, "the approved homes (Exploded 65, Assembled 57 degrees)")
                 self.assertNotIn("explode", scene, "the approved explode (the rules' gap share)")
-        self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "bodies" / "makermods-metal").iterdir()), [RAIL])
+        self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "bodies" / "makermods-metal").iterdir()),
+                         sorted(rail_meshes), "the folder holds the scene's meshes and nothing else")
 
     def test_one_stack_explodes_and_the_near_finger_is_see_through_in_both_views(self) -> None:
         # The user's decision of 2026-11-06 ("每一个夹爪只用爆炸一个sensor, 靠近外面的finger透明, 夹爪不爆炸; 靠近里面的finger
@@ -1039,7 +1283,7 @@ class SceneTests(LibraryTestCase):
             (lambda scene: scene.update(opening={"q_mm": 41, "limit_mm": 40}), f"{name}: its opening is not {{q_mm, limit_mm, joint, source}} with 0 < q_mm <= limit_mm"),
             (lambda scene: scene.update(picture=" "), f"{name}: its picture (the alt text's words) is empty"),
             (lambda scene: scene.update(see_through=["sensor", "other"]), f"{name}: its see_through ['sensor', 'other'] is not a subset of ['sensor', 'mate']"),
-            (lambda scene: scene.update(cad=True), f"{name} has not the keys {', '.join(library_write.SCENE_KEYS)} (and camera, explode)"),
+            (lambda scene: scene.update(cad=True), f"{name} has not the keys {', '.join(library_write.SCENE_KEYS)} (and any of camera, explode, looks, part_look, smooth_deg)"),
             (lambda scene: scene["mate"].update(part="yes"), f"{name}: its mate's part is not true or false"),
             (lambda scene: scene["mate"].update(part=False), f"{name}: its mate draws no part and no body is the mate's finger"),
             (lambda scene: scene["bodies"][0].update(finger="left"), f"{name}: body 1's finger 'left' is not sensor, mate or null"),
@@ -1134,9 +1378,9 @@ class SceneTests(LibraryTestCase):
         cases = (
             (lambda index: index.update(format="x"), "scenes/scenes.json: the format is 'x', not flexitac-library-scenes/v1"),
             (lambda index: index["rules"].pop("ghost_opacity"), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, "
-             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes"),
+             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg)"),
             (lambda index: index["rules"].pop("explode_stacks"), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, "
-             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes"),
+             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg)"),
             (lambda index: index["rules"].update(gap_share=-1), "scenes/scenes.json: its rule gap_share (-1) is not a positive number"),
             (lambda index: index["rules"]["camera"]["exploded"].update(tilt_deg=80), "scenes/scenes.json: its rules' camera is not {exploded, assembled} each of elevation_deg, front, tilt_deg within their bounds"),
             (lambda index: index["rules"]["checks"].pop("card_min_px"), "scenes/scenes.json: its rules' checks are not card_min_px, clearance_min_mm, ghost_cover_min, "
@@ -1202,6 +1446,1043 @@ class SceneTests(LibraryTestCase):
         # Upstream names are no recipe key ("assets/", menagerie's model folders).
         self.assertEqual(self.problems(lambda scene: scene.update(about="menagerie franka_emika_panda/assets/hand.obj, trossen_wxai"), "arx-x5"), [])
 
+    # -- the looks (docs/LIBRARY_VIEW.md "The looks"; the amendment of 2026-11-12) ------------------------------------------
+
+    LOOKS = {"anodized-black": {"color": "#1c1d20", "metalness": 0.6, "roughness": 0.45, "env_intensity": 1.5},
+             "shell": {"color": "#eceef0", "metalness": 0, "roughness": 0.3, "clearcoat": 0.6, "clearcoat_roughness": 0.15},
+             "pad": {"color": "#232325", "metalness": 0, "roughness": 0.92}}
+
+    def looked(self, scene: dict, **changes) -> None:
+        """The tiny scene with looks: its one body the shell, its part the pad, smooth normals; ``changes`` over it."""
+
+        scene["bodies"][0]["look"] = "shell"
+        scene.update(looks={name: dict(look) for name, look in self.LOOKS.items() if name != "anodized-black"}, part_look="pad", smooth_deg=35)
+        scene.update(changes)
+
+    def test_a_scene_may_name_its_looks(self) -> None:
+        # Every key is optional: the committed scenes without them stay sound (test_the_committed_scenes_are_current), and
+        # a scene with them is sound when each name is a look of the scene, each look is used, the numbers are in range.
+        name = "scenes/franka-hand.json"
+        self.assertEqual(self.problems(self.looked, "franka-hand"), [])
+        self.assertEqual(self.problems(lambda scene: scene.update(smooth_deg=35), "franka-hand"), [], "smooth normals alone")
+        self.assertEqual(self.problems(lambda scene: scene.update(looks={"pad": self.LOOKS["pad"]}, part_look="pad"), "franka-hand"), [], "the part alone")
+        self.assertEqual(library_write.SCENE_OPTIONAL, ("camera", "explode", "looks", "part_look", "smooth_deg"))
+        self.assertEqual(library_write.BODY_OPTIONAL, ("look",))
+        self.assertEqual((library_write.LOOK_KEYS, library_write.LOOK_OPTIONAL), (("color", "metalness", "roughness"), ("clearcoat", "clearcoat_roughness", "env_intensity")))
+        look = lambda **changes: (lambda scene: (self.looked(scene), scene["looks"]["shell"].update(changes)))  # noqa: E731
+        cases = (
+            (lambda scene: (self.looked(scene), scene["bodies"][0].update(look="steel")), f"{name}: body 1 names the look 'steel', which is not one of its looks",
+             f"{name}: its look 'shell' is used by nothing"),
+            (lambda scene: self.looked(scene, part_look="steel"), f"{name}: its part_look names the look 'steel', which is not one of its looks",
+             f"{name}: its look 'pad' is used by nothing"),
+            (lambda scene: scene["bodies"][0].update(look="shell"), f"{name}: its looks are not a map of names to looks"),
+            (lambda scene: scene.update(part_look="pad"), f"{name}: its looks are not a map of names to looks"),
+            (lambda scene: self.looked(scene, looks=dict(scene.get("looks", {}), shell=self.LOOKS["shell"], pad=self.LOOKS["pad"], spare=self.LOOKS["pad"])),
+             f"{name}: its look 'spare' is used by nothing"),
+            (look(color="#ECEEF0"), f"{name}: its look shell has the colour '#ECEEF0', not an sRGB #rrggbb in lower case"),
+            (look(color="white"), f"{name}: its look shell has the colour 'white', not an sRGB #rrggbb in lower case"),
+            (look(metalness=1.2), f"{name}: its look shell has the metalness 1.2, not a number 0 to 1"),
+            (look(roughness=-0.1), f"{name}: its look shell has the roughness -0.1, not a number 0 to 1"),
+            (look(roughness=True), f"{name}: its look shell has the roughness True, not a number 0 to 1"),
+            (look(clearcoat=2), f"{name}: its look shell has the clearcoat 2, not a number 0 to 1"),
+            (look(env_intensity=-1), f"{name}: its look shell has the env_intensity -1, not a number of 0 or more"),
+            (look(emissive="#ffffff"), f"{name}: its look shell has not the keys color, metalness, roughness (and any of clearcoat, clearcoat_roughness, env_intensity)"),
+            (lambda scene: (self.looked(scene), scene["looks"]["shell"].pop("roughness")),
+             f"{name}: its look shell has not the keys color, metalness, roughness (and any of clearcoat, clearcoat_roughness, env_intensity)"),
+            (lambda scene: (self.looked(scene), scene["looks"]["shell"].pop("clearcoat")), f"{name}: its look shell has a clearcoat_roughness without a clearcoat"),
+            (lambda scene: (self.looked(scene), scene["looks"]["pad"].update(clearcoat=0.5)),
+             f"{name}: its look pad has a clear coat, which the part's own material cannot take (a body's look can)"),
+            (lambda scene: (self.looked(scene), scene["looks"].update({"Shell_1": scene["looks"].pop("shell")}), scene["bodies"][0].update(look="Shell_1")),
+             f"{name}: its look 'Shell_1' is not named in lower case, digits and hyphens"),
+            (lambda scene: self.looked(scene, smooth_deg=0), f"{name}: its smooth_deg (0) is not a crease angle of 1 to 90 degrees"),
+            (lambda scene: self.looked(scene, smooth_deg="35"), f"{name}: its smooth_deg ('35') is not a crease angle of 1 to 90 degrees"),
+        )
+        for edit, *expected in cases:
+            with self.subTest(problem=expected[0]):
+                self.assertEqual(self.problems(edit, "franka-hand"), [("franka-hand", f"{problem}: {RELOOK}") for problem in expected])
+        # A look's problem names the tool that writes the looks; a body's key that is none stays the scene builder's.
+        self.assertEqual((library_write.RELOOK, library_write.REBUILD), (RELOOK, REBUILD))
+        self.assertEqual(self.problems(lambda scene: scene["bodies"][0].update(colour="#ffffff"), "franka-hand"),
+                         [("franka-hand", f"{name}: body 1 has not the keys {', '.join(library_write.BODY_KEYS)} (and look): {REBUILD}")])
+
+    def test_the_stage_draws_the_looks_and_puts_the_figure_back(self) -> None:
+        # web/cad/library_stage.js (docs/LIBRARY_VIEW.md "The looks"): a studio of its own for the looks (studio.js's is
+        # the sheets' and Gen by Surface's: its numbers are pinned by test_surface_web), made again when a lost context
+        # comes back; the part's own material and normals changed in place for a drawing and put back when it goes, the
+        # looks' materials disposed; one ghost material per colour, a copy of ghostLook (so the rules' opacity reaches
+        # each); the view hands a part without a scene the rules' look.
+        stage = (ROOT / "web" / "cad" / "library_stage.js").read_text(encoding="utf-8")
+        view = (ROOT / "web" / "cad" / "library_view.js").read_text(encoding="utf-8")
+        for text in ('import {lookOf, measure as timed} from "./studio.js";', "const GRIPPER_STUDIO = {",
+                     "      if (state.studio !== undefined) state.studio = gripperStudio(renderer);\n",
+                     "        normal.array.set(kept.normals);\n        normal.needsUpdate = true;\n",
+                     "      dress(null);\n      smoothPart(null);\n",
+                     "        extras.looks.forEach(material => material.dispose());\n        extras.ghostLooks.forEach(material => material.dispose());\n",
+                     "      const material = ghostLook.clone();\n",
+                     "        const mesh = new THREE.Mesh(geometryOf(body.positions, smooth), looks.get(body.look) || partLook);\n",
+                     "          if (!given) return figure.show(args);\n"):
+            self.assertIn(text, stage)
+        self.assertEqual(len(re.findall(r'setAttribute\("normal"', stage)), 3, "a body's own geometry and the still stack's two; never the part's drawn geometry")
+        self.assertNotRegex(stage, r"\bSTUDIO\.(room|panels)\b|LIGHTS\b|toneMapping", "studio.js's own numbers are not the stage's to change")
+        self.assertIn("partLook: given || placed ? null : partLookOf(rules, variant.part, part.family)", view)
+        self.assertIn("scenePath || placed ? null : rulesOf(base)", view)
+
+    def test_the_rules_may_give_a_part_without_a_scene_its_look(self) -> None:
+        # The UMI finger and its tapered tips have no scene: scenes.json's rules may name their look (part_looks: a part
+        # or its family -> a name of the rules' looks, or a look), without a clear coat (the part's own material), and a
+        # crease angle; never a gripper's (its scene's looks).  The committed rules give the finger and its tips'
+        # family one look of their own, umi-tpu-orange, and no crease angle (the UMI coloured, 2026-11-12).
+        def rules_edit(**changes):
+            def change(library: Path) -> None:
+                index = _json(library / library_write.SCENES_INDEX)
+                for key, value in changes.items():
+                    if value is None:
+                        index["rules"].pop(key, None)
+                    else:
+                        index["rules"][key] = value
+                _write_json(library / library_write.SCENES_INDEX, index)
+            return change
+
+        orange = {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        self.assertEqual(library_write.RULES_OPTIONAL, ("looks", "part_looks", "part_smooth_deg"))
+        self.assertEqual((index["rules"]["looks"], index["rules"]["part_looks"]),
+                         ({"umi-tpu-orange": orange}, {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"}))
+        self.assertNotIn("part_smooth_deg", index["rules"], "flat facets, as Gen by Surface draws the part")
+        # A base name means the base's numbers in the rules too (docs/LIBRARY_VIEW.md "The base looks"): a look of the
+        # rules' own, as the committed one is, has another name.
+        base = _json(ROOT / "tools" / "library_looks" / "base.json")["looks"]
+        for name, look in index["rules"]["looks"].items():
+            with self.subTest(look=name):
+                if name in base:
+                    self.assertEqual(look, {key: value for key, value in base[name].items() if key != "for"})
+        self.assertNotIn("umi-tpu-orange", base)
+        self.assertEqual(self.problems(rules_edit()), [], "the committed rules")
+        self.assertEqual(self.problems(rules_edit(looks={"tpu-orange": orange}, part_looks={"umi-finray": "tpu-orange", "umi-tapers": "tpu-orange"}, part_smooth_deg=35)), [])
+        self.assertEqual(self.problems(rules_edit(looks=None, part_looks={"umi-finray": orange})), [], "a look given in place")
+        self.assertEqual(self.problems(rules_edit(looks=None, part_looks=None)), [], "no look: the parts as Gen by Surface draws them")
+        cases = (
+            (dict(looks=None, part_looks={"umi-finray": "tpu-orange"}), "scenes/scenes.json: its looks are not a map of names to looks"),
+            (dict(looks={"tpu-red": orange}, part_looks={"umi-finray": "tpu-red", "umi-tapers": "tpu-orange"}),
+             "scenes/scenes.json: its rule part_looks (umi-tapers) names the look 'tpu-orange', which is not one of its looks"),
+            (dict(looks={"tpu-orange": orange, "spare": orange}, part_looks={"umi-finray": "tpu-orange"}), "scenes/scenes.json: its look 'spare' is used by nothing"),
+            (dict(part_looks=None), "scenes/scenes.json: its look 'umi-tpu-orange' is used by nothing"),
+            (dict(looks={"tpu-orange": dict(orange, clearcoat=1)}, part_looks={"umi-finray": "tpu-orange"}),
+             "scenes/scenes.json: its look tpu-orange has a clear coat, which the part's own material cannot take (a body's look can)"),
+            (dict(looks=None, part_looks={"umi-finray": dict(orange, color="orange")}),
+             "scenes/scenes.json: its rule part_looks: the look of umi-finray has the colour 'orange', not an sRGB #rrggbb in lower case"),
+            (dict(looks=None, part_looks={}), "scenes/scenes.json: its rule part_looks is not a map of parts (or families) to looks"),
+            (dict(looks=None, part_looks={"umi-finray": orange}, part_smooth_deg=120), "scenes/scenes.json: its rule part_smooth_deg (120) is not a crease angle of 1 to 90 degrees"),
+            (dict(looks=None, part_looks=None, part_smooth_deg=35), "scenes/scenes.json: its rule part_smooth_deg without part_looks"),
+            (dict(colours={}), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, gap_share, ghost_opacity, measure_px, "
+                               "min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg)"),
+        )
+        for changes, problem in cases:
+            with self.subTest(problem=problem):
+                self.assertEqual(self.problems(rules_edit(**changes)), [(None, f"{problem}: {REBUILD}")])
+        # A gripper's look is its scene's; a name that is no part and no family is refused too.
+        self.assertEqual(self.problems(rules_edit(looks=None, part_looks={"franka-hand": orange})),
+                         [(None, "scenes/scenes.json: its rule part_looks names 'franka-hand', not a part without a scene or its family (a gripper's look is its scene's)")])
+        # part_look(): the part's id before its family's, a gripper none; its hash the record's.  The committed rules:
+        # the finger by its id, each tip by its family, in the one orange, flat.
+        for part_id in ("umi-finray", "umi-convex-tip5.8", "umi-trap-tip21.8"):
+            with self.subTest(part=part_id):
+                self.assertEqual(library_write.part_look(index, self.parts, part_id), {"look": orange, "smooth_deg": None})
+        self.assertIsNone(library_write.part_look(index, self.parts, "franka-hand"))
+        index["rules"].update(looks={"tpu-orange": orange, "tip": dict(orange, roughness=0.5)}, part_looks={"umi-tapers": "tpu-orange", "umi-trap-tip5.8": "tip"},
+                              part_smooth_deg=35)
+        self.assertEqual(library_write.part_look(index, self.parts, "umi-convex-tip5.8"), {"look": orange, "smooth_deg": 35})
+        self.assertEqual(library_write.part_look(index, self.parts, "umi-trap-tip5.8"), {"look": dict(orange, roughness=0.5), "smooth_deg": 35})
+        self.assertIsNone(library_write.part_look(index, self.parts, "umi-finray"))
+        self.assertIsNone(library_write.part_look(index, self.parts, "franka-hand"))
+        for key in library_write.RULES_OPTIONAL:
+            index["rules"].pop(key, None)
+        self.assertIsNone(library_write.part_look(index, self.parts, "umi-finray"), "no rule: the part as Gen by Surface draws it")
+        self.assertIsNone(library_write.part_look_sha256(None))
+        self.assertRegex(library_write.part_look_sha256({"look": orange, "smooth_deg": None}), r"^[0-9a-f]{64}$")
+        self.assertNotEqual(library_write.part_look_sha256({"look": orange, "smooth_deg": None}), library_write.part_look_sha256({"look": orange, "smooth_deg": 35}))
+
+    def test_a_shape_the_project_drew_needs_no_row_but_says_so(self) -> None:
+        # tools/library_split.py draws plain shapes where a model lacks a component: bodies/<part>/drawn-<name>.stl, the
+        # project's own (no NOTICE row), its header saying so; a file so named whose header does not is refused, and any
+        # other body still needs its row.
+        name, mesh = "scenes/arx-x5.json", "bodies/arx-x5/drawn-screw.stl"
+        own = b"FlexiTac-Gen: screw, drawn by the project, not a vendor's part, mm".ljust(80, b" ") + _stl()[80:]
+
+        def drawn(data: bytes, path: str = mesh):
+            def change(library: Path) -> None:
+                (library / path).write_bytes(data)
+                _edit_scene(library, "arx-x5", lambda scene: scene["bodies"].append(
+                    {"mesh": path, "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data), "triangles": 1, "matrix": IDENTITY, "finger": None}))
+            return change
+
+        self.assertEqual(self.problems(drawn(own)), [])
+        self.assertTrue(library_write.own_body(mesh, own))
+        self.assertTrue(library_write.own_body(RAIL))
+        self.assertFalse(library_write.own_body("bodies/arx-x5/screw.stl", own))
+        self.assertFalse(library_write.own_body("bodies/arx-x5/drawn-Screw 1.stl", own))
+        self.assertEqual(self.problems(drawn(_stl(seed=9))), [("arx-x5", f"{name}: body 2: {mesh} is named as the project's own drawing, but its header does "
+                         f"not say so (FlexiTac-Gen: ... drawn by the project): draw it with tools/library_split.py: {REBUILD}")])
+        self.assertEqual(self.problems(drawn(own, "bodies/arx-x5/screw.stl")),
+                         [("arx-x5", f"{name}: body 2: bodies/arx-x5/screw.stl has no row of NOTICE.md with its SHA-256: {REBUILD}")])
+
+
+class ShowcaseTests(LibraryTestCase):
+    """The showcase (the project owner's decision of 2026-11-12: the hand-designed FlexiTac sensor on UFACTORY's xArm
+    Gripper G1, the one vendor model the Library shows): the committed files as the decision has them, and
+    library_write.showcase() naming each way they could stop being so, on a copy of them."""
+
+    def test_the_showcase_is_committed_and_current(self) -> None:
+        self.assertEqual(library_write.showcase(self.parts), ([], set(SHOWCASE_BODIES)))
+        # The same pins here and in the writer: the folder, its files, the budget, the file they are made from.
+        self.assertEqual(WEB / library_write.SHOWCASE_VENDOR, SHOWCASE)
+        self.assertEqual(library_write.SHOWCASE_VENDOR_FILES, SHOWCASE_FILES)
+        self.assertEqual(library_write.SHOWCASE_VENDOR_BUDGET_BYTES, SHOWCASE_BUDGET_BYTES)
+        self.assertEqual(library_write.SHOWCASE_SOURCE, SHOWCASE_SOURCE)
+        self.assertEqual(library_write.SHOWCASE_SOURCE_TRIANGLES, SHOWCASE_SOURCE_TRIANGLES)
+        self.assertEqual(library_write.SHOWCASE_BODIES, SHOWCASE_BODIES)
+        # The drawn shapes are the project's own by their names and headers (no row of NOTICE.md), each a few triangles.
+        for mesh in SHOWCASE_DRAWN:
+            with self.subTest(drawn=mesh):
+                data = (LIBRARY / mesh).read_bytes()
+                self.assertTrue(library_write.own_body(mesh, data))
+                self.assertNotIn(mesh, _notice())
+                self.assertLessEqual(len(data), 6_000, "a plain shape: 50 bytes a triangle")
+        self.assertEqual((library_write.SHOWCASE_SCENE, library_write.SHOWCASE_ID), (SHOWCASE_SCENE, "flexitac-g1"))
+        self.assertNotIn(SHOWCASE_SOURCE[1], library_write.DENIED_SHA256, "out of the deny-list since 2026-11-12, refused by showcase()")
+        self.assertIsNone(DENIED_NAME.search(library_write.SHOWCASE_ID), "the showcase's id is no vendor's name")
+        # Exactly its meshes and its notice, each mesh the pinned bytes, a binary STL whose header says what was changed.
+        held = {path.relative_to(SHOWCASE).as_posix(): path.read_bytes() for path in SHOWCASE.rglob("*") if path.is_file()}
+        self.assertEqual(sorted(held), sorted([*SHOWCASE_FILES, "NOTICE.md"]))
+        for name, pinned in SHOWCASE_FILES.items():
+            with self.subTest(file=name):
+                self.assertEqual(hashlib.sha256(held[name]).hexdigest(), pinned)
+                self.assertIsNotNone(library_write.stl_triangles(held[name]))
+                self.assertRegex(held[name][:80].decode("ascii"), r"^modified \(split(, cut)?, decimated <= 0\.1 mm\) by FlexiTac-Gen 2026, see NOTICE\.md *$")
+                self.assertRegex(name, r"^[a-z0-9_]+\.stl$", "no space or parenthesis in a published name")
+        size = sum(len(data) for data in held.values())
+        self.assertLessEqual(size, SHOWCASE_BUDGET_BYTES, f"web/vendor/ufactory-g1/ is {size} bytes")
+        self.assertGreater(size, SHOWCASE_BUDGET_BYTES - 50_000, "the budget is just above the folder as built")
+        # The folder is beside the Library, outside its 12 MB budget and its bodies' 2.5 MB.
+        self.assertNotIn(LIBRARY, SHOWCASE.parents)
+
+    def test_the_notice_says_whose_the_model_is(self) -> None:
+        text = (SHOWCASE / "NOTICE.md").read_text(encoding="utf-8")
+        folded = " ".join(text.split())
+        for words in ("3D model", "the property of UFACTORY", "UFACTORY's download centre", "used by the project owner's decision of 2026-11-12",
+                      "not covered by this repository's Apache-2.0 licence", "split", "decimated", "by FlexiTac-Gen 2026",
+                      SHOWCASE_SOURCE[0], SHOWCASE_SOURCE[1], "unsplit and undecimated, is not published"):
+            with self.subTest(words=words):
+                self.assertIn(words, folded)
+        self.assertNotRegex(text, r"\bCAD\b")
+        self.assertNotRegex(text, r"https?://", "no address is recorded that was not confirmed")
+        rows = {row[0]: row for row in NOTICE_ROW.findall(text)}
+        self.assertEqual(sorted(rows), sorted(SHOWCASE_FILES))
+        for name, row in rows.items():
+            with self.subTest(row=name):
+                self.assertEqual(row[4], SHOWCASE_FILES[name])
+                self.assertEqual(row[2].strip(), "the property of UFACTORY, not Apache-2.0")
+                change = re.fullmatch(r"modified: split(, cut at the holder)?, decimated \(quadric error metrics, (0\.\d+) mm\)", row[3].strip())
+                self.assertIsNotNone(change, row[3])
+                self.assertLessEqual(float(change.group(2)), 0.1)
+                self.assertEqual(bool(change.group(1)), name.endswith("_coupler.stl"), "the couplers are the cut fingers")
+                self.assertFalse(SPDX & set(re.findall(r"[\w.-]+", row[2])) - {"Apache-2.0"}, "no open licence is claimed")
+        # The Library's notice links it, and tables the holder (HandUMI's, Apache-2.0) as it does every body.
+        library = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        self.assertIn("(../vendor/ufactory-g1/NOTICE.md)", library)
+        self.assertIn("the property of UFACTORY", " ".join(library.split()))
+        holder = _notice()[SHOWCASE_HOLDER[0]]
+        self.assertEqual(holder[4], SHOWCASE_HOLDER[1])
+        self.assertIn("Apache-2.0", holder[2])
+        self.assertIn("`licenses/handumi-hw.txt`", holder[2])
+        self.assertIn("`1448278`", holder[1])
+        self.assertIn("UMI-RIGHT-Finger-Holder.stl", holder[1])
+        self.assertRegex(holder[3].strip(), r"^modified: decimated \(quadric error metrics, 0\.\d+ mm\)$")
+
+    def test_only_the_showcase_s_scene_names_the_folder(self) -> None:
+        # No part, entry, fit, picture record, art, sample or other scene: nothing the generator fits, draws or offers.
+        readers = [path for folder in (LIBRARY, WEB / "samples", WEB / "vendor" / "umi") for path in sorted(folder.rglob("*"))
+                   if path.is_file() and path.suffix in (".json", ".md", ".gz")]
+        self.assertGreater(len(readers), 90, "the fits, the art, the scenes, the indexes and the notices")
+        for path in readers:
+            relative = path.relative_to(WEB).as_posix()
+            data = path.read_bytes()
+            text = (gzip.decompress(data) if path.suffix == ".gz" else data).decode("utf-8")
+            with self.subTest(file=relative):
+                if relative == f"library/{SHOWCASE_FILE}":
+                    # The showcase's page names the folder once: its sources' link to the folder's notice.
+                    self.assertEqual(re.findall(r"[^\s\"]*ufactory-g1[^\s\"]*", text, re.IGNORECASE), ["../vendor/ufactory-g1/NOTICE.md"])
+                elif relative in (f"library/{SHOWCASE_SCENE}", "library/NOTICE.md"):
+                    self.assertIn("ufactory-g1", text)
+                else:
+                    self.assertNotIn("ufactory-g1", text.lower())
+        # Nor is the showcase a part, an entry or a scene of the index: it has no fit and none of the generator's files.
+        self.assertNotIn("flexitac-g1", self.parts["parts"])
+        self.assertNotIn("flexitac-g1", self.entries["parts"])
+        self.assertFalse([identifier for identifier in self.entries["variants"] if identifier.startswith("flexitac-g1")])
+        self.assertNotIn("flexitac-g1", _json(LIBRARY / library_write.SCENES_INDEX)["scenes"])
+
+    def test_the_scene_is_the_tactile_demo_s_gripper_about_the_umi_finger(self) -> None:
+        scene = _json(LIBRARY / SHOWCASE_SCENE)
+        umi = self.parts["parts"]["umi-finray"]
+        self.assertEqual((scene["format"], scene["part"], scene["part_mesh_sha256"], scene["frame"]),
+                         ("flexitac-library-scene/v1", "umi-finray", umi["mesh"]["sha256"], "the part's file axes, mm"))
+        # Both fingers solid (the showcase is the gripper as built; from its camera the near finger hides nothing of the
+        # far one's pad), seen by a camera of its own: from the side of the shell's face without the logo (front -1 with
+        # the part the left finger), 60 degrees off the pad's normal, 20 degrees up; exploded 70 off and 40 up, the
+        # lifted layers seen apart (the verification of 2026-11-13: edge-on at the Assembled camera).
+        self.assertEqual((scene["mate"]["kind"], scene["mate"]["part"], scene["see_through"]), ("mirror", True, []))
+        self.assertAlmostEqual(library_write.determinant(scene["mate"]["matrix"]), -1, places=8)
+        self.assertEqual(scene["camera"], {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1},
+                                           "assembled": {"tilt_deg": 60, "elevation_deg": 20, "front": -1}})
+        # Twice the holder (the sensor finger's, the gripper's left: HandUMI's right one as its mirror image; then the
+        # mate's, as it is), then the vendor's twelve, then the shapes the project draws: the shell's twelve screws,
+        # each holder's three bolt heads and three nuts, the block in the top slot, and behind each finger the extender
+        # board, its sockets and the cable stub.
+        meshes = [body["mesh"] for body in scene["bodies"]]
+        drawn = (["shell-screw"] * 12 + (["holder-bolt"] * 3 + ["holder-nut"] * 3) * 2 + ["slot-block"]
+                 + ["extender", "extender-sockets", "cable-stub"] * 2)
+        self.assertEqual(meshes, [SHOWCASE_HOLDER[0]] * 2 + [f"../vendor/ufactory-g1/{name}" for name in SHOWCASE_FILES]
+                         + [f"bodies/flexitac-g1/drawn-{name}.stl" for name in drawn])
+        self.assertEqual({mesh for mesh in meshes if not mesh.startswith("../")}, set(SHOWCASE_BODIES))
+        self.assertEqual([round(library_write.determinant(body["matrix"])) for body in scene["bodies"]],
+                         [-1, 1] + [1] * 12 + [1] * 12 + [-1] * 6 + [1] * 6 + [1] + [1] * 3 + [-1] * 3)
+        fingers = {body["mesh"].rpartition("/")[2]: body["finger"] for body in scene["bodies"][2:14]}
+        self.assertEqual(fingers, {name: "sensor" if name.startswith("finger_l") else "mate" if name.startswith("finger_r") else None
+                                   for name in SHOWCASE_FILES})
+        self.assertEqual([body["finger"] for body in scene["bodies"][:2]], ["sensor", "mate"])
+        self.assertEqual([body["finger"] for body in scene["bodies"][14:]],
+                         [None] * 12 + ["sensor"] * 6 + ["mate"] * 6 + [None] + ["sensor"] * 3 + ["mate"] * 3)
+        # The pose: the two sensors' centres 55 mm apart (the Tactile Demo's), each on its finger's contact face.
+        centre = [0.0, -12.9, -91.86]
+        matrix = scene["mate"]["matrix"]
+        other = [math.fsum(matrix[row][axis] * centre[axis] for axis in range(3)) + matrix[row][3] for row in range(3)]
+        self.assertAlmostEqual(math.dist(centre, other), 55.0, places=6)
+        self.assertLess(scene["opening"]["q_mm"], scene["opening"]["limit_mm"], "not fully open: the Tactile Demo's opening")
+        self.assertIn("55 mm apart", scene["opening"]["source"])
+        # The looks of 2026-11-12: every body and the part with one of the scene's own, the shell alone clear-coated;
+        # base looks under their names (the links' and the flange's black) and seven looks of the showcase's own: the
+        # shell's gloss, the printed parts' white, the pins' steel and the drawn screws' black (each judged at the home
+        # and turned round to the side the owner's photo was taken from), the fingers' orange (the UMI rows' look of the
+        # rules, since the merge of 2026-11-13), and the boards' yellow and the cables' white behind the fingers (the
+        # builder's tests hold the numbers).
+        looks = scene["looks"]
+        self.assertEqual(scene["smooth_deg"], 35)
+        self.assertEqual(scene["part_look"], "umi-tpu-orange")
+        self.assertEqual({body["look"] for body in scene["bodies"]} | {scene["part_look"]}, set(looks))
+        self.assertEqual(sorted(looks), ["anodized-black", "ffc-white", "pcb-yellow", "print-white", "screw-black",
+                                         "shell-white-gloss", "steel-pin", "umi-tpu-orange"])
+        self.assertEqual([name for name, look in looks.items() if "clearcoat" in look], ["shell-white-gloss"])
+        by_look = {}
+        for body in scene["bodies"]:
+            by_look.setdefault(body["look"], set()).add(body["mesh"].rpartition("/")[2])
+        self.assertEqual(by_look, {
+            "shell-white-gloss": {"body_shell.stl"},
+            # (The frame white, as the photo's channel in the top slot is; the black block in it is drawn.)
+            "print-white": {"body_frame.stl", "finger_r_coupler.stl", "finger_l_coupler.stl", "umi-right-finger-holder.stl"},
+            "anodized-black": {"body_flange.stl", "link_r_outer.stl", "link_r_inner.stl", "link_l_outer.stl", "link_l_inner.stl",
+                               "drawn-slot-block.stl"},
+            "steel-pin": {"body_pins.stl", "finger_r_pins.stl", "finger_l_pins.stl"},
+            "screw-black": {"drawn-shell-screw.stl", "drawn-holder-bolt.stl", "drawn-holder-nut.stl"},
+            "pcb-yellow": {"drawn-extender.stl"},
+            "ffc-white": {"drawn-extender-sockets.stl", "drawn-cable-stub.stl"}})
+        self.assertEqual(looks["steel-pin"]["metalness"], 1)
+        # (A matte black: the screws are near-black from both sides, where a metal's flat head mirrors the studio.)
+        self.assertEqual((looks["screw-black"]["metalness"], looks["screw-black"]["color"]), (0, looks["anodized-black"]["color"]))
+        self.assertEqual(looks["umi-tpu-orange"]["metalness"], 0)
+        # (The UMI rows' orange: the showcase's fingers and the Library's UMI finger drawn in one look.)
+        self.assertEqual(looks["umi-tpu-orange"], _json(LIBRARY / library_write.SCENES_INDEX)["rules"]["looks"]["umi-tpu-orange"])
+        for words in ("hand-designed", "the property of UFACTORY", "project owner's decision of 2026-11-12", "Apache-2.0", "handumi-hw 1448278",
+                      "drawn as the mirror image", "as the Tactile Demo draws it", "The gripper as built differs there",
+                      "the Library's base looks", "looks of the showcase's own", "Drawn by the project", "no vendor's geometry",
+                      "for this reason", "the gripper's left finger", "is not drawn", "which no photo shows",
+                      "each tail's end in one of its two sockets", "one small board for each tail", "each judged from both sides"):
+            with self.subTest(about=words):
+                self.assertIn(words, scene["about"])
+        # What the other sensor is (the same board turned, or its mirror image) is not this scene's to say.
+        self.assertNotIn("mirror-image board", scene["about"])
+        self.assertNotRegex(json.dumps(scene), r"\bCAD\b")
+
+    # What a changed scene or changed rules always add (ShowcasePageTests has it): the showcase's pictures are stale.
+    STALE = (f"{SHOWCASE_FILE}: its pictures are of another scene or rules than the files now (scene_sha256): "
+             "re-shoot with tools/browser/library_shots.py --showcase")
+
+    def problems(self, edit, patch=None, stale: bool = False) -> list:
+        """showcase()'s problems of a copy of the committed files with ``edit`` (the copy's web folder -> None) applied,
+        under ``patch`` (a context manager) when given; without the pictures' staleness that any change of the scene
+        brings (STALE) unless ``stale``."""
+
+        with tempfile.TemporaryDirectory() as folder, (patch or contextlib.nullcontext()):
+            library = _showcase_web(Path(folder))
+            edit(library.parent)
+            found = library_write.showcase(self.parts, library)[0]
+            return found if stale else [message for message in found if message != self.STALE]
+
+    @staticmethod
+    def edit_scene(edit):
+        def apply(web: Path) -> None:
+            path = web / "library" / SHOWCASE_SCENE
+            document = _json(path)
+            edit(document)
+            path.write_text(json.dumps(document, indent=1) + "\n", encoding="utf-8")
+        return apply
+
+    @staticmethod
+    def edit_notice(edit):
+        def apply(web: Path) -> None:
+            path = web / "vendor" / "ufactory-g1" / "NOTICE.md"
+            path.write_text(edit(path.read_text(encoding="utf-8")), encoding="utf-8")
+        return apply
+
+    def test_a_copy_of_the_committed_files_has_no_problem(self) -> None:
+        self.assertEqual(self.problems(lambda web: None), [])
+        with tempfile.TemporaryDirectory() as folder:
+            self.assertEqual(library_write.scenes(self.parts, _showcase_web(Path(folder)))[1], [])
+        # A library without the showcase (neither its scene nor its folder: the tests' tiny ones) has nothing to check.
+        with tempfile.TemporaryDirectory() as folder:
+            self.assertEqual(library_write.showcase(self.parts, _scene_library(Path(folder) / "library", self.parts)), ([], set()))
+
+    def test_the_folder_holds_its_pinned_files_alone_within_its_budget(self) -> None:
+        folder = "web/vendor/ufactory-g1"
+        self.assertEqual(self.problems(lambda web: (web / "vendor" / "ufactory-g1" / "extra.stl").write_bytes(_stl())),
+                         [f"{folder}/extra.stl is no file of the showcase (its meshes and its notice alone): remove it"])
+        self.assertEqual(self.problems(lambda web: (web / "vendor" / "ufactory-g1" / "more").mkdir() or (web / "vendor" / "ufactory-g1" / "more" / "README.md").write_text("x")),
+                         [f"{folder}/more/README.md is no file of the showcase (its meshes and its notice alone): remove it"])
+        self.assertEqual(self.problems(lambda web: (web / "vendor" / "ufactory-g1" / "body_pins.stl").unlink()), [f"{folder}/body_pins.stl is missing"])
+
+        def changed(web: Path) -> None:
+            path = web / "vendor" / "ufactory-g1" / "link_r_outer.stl"
+            path.write_bytes(b"M" + path.read_bytes()[1:])
+
+        self.assertEqual(self.problems(changed), [
+            f"{folder}/link_r_outer.stl is not the showcase's pinned file (its SHA-256; a binary STL)",
+            f"{SHOWCASE_SCENE}: body 7: ../vendor/ufactory-g1/link_r_outer.stl is not the file its scene names (its SHA-256, bytes or triangles; a binary STL)"])
+        size = sum(path.stat().st_size for path in SHOWCASE.rglob("*") if path.is_file())
+        self.assertEqual(self.problems(lambda web: None, mock.patch.object(library_write, "SHOWCASE_VENDOR_BUDGET_BYTES", size - 1)),
+                         [f"{folder}/ is {size} bytes, over its budget of {size - 1}"])
+        self.assertEqual(self.problems(lambda web: None, mock.patch.object(library_write, "SHOWCASE_VENDOR_BUDGET_BYTES", size)), [])
+        # The whole folder gone while its scene stays: every file missing (and nothing drawn from it is checked twice).
+        self.assertEqual(self.problems(lambda web: shutil.rmtree(web / "vendor" / "ufactory-g1")),
+                         [f"{folder}/{name} is missing" for name in sorted([*SHOWCASE_FILES, "NOTICE.md"])]
+                         + [f"{SHOWCASE_FILE}: its source's notice ../vendor/ufactory-g1/NOTICE.md is missing"])
+
+    def test_the_notice_s_wording_and_rows_are_checked(self) -> None:
+        name = "web/vendor/ufactory-g1/NOTICE.md"
+
+        def without(words: str):
+            return self.edit_notice(lambda text: re.sub(r"\s+".join(re.escape(word) for word in words.split()), "it", text))
+
+        for words in ("UFACTORY's download centre", "used by the project owner's decision of 2026-11-12",
+                      "not covered by this repository's Apache-2.0 licence", "by FlexiTac-Gen 2026"):
+            with self.subTest(words=words):
+                self.assertEqual(self.problems(without(words)), [f"{name} does not say {words!r}"])
+        # Whose it is: said in the text and in every row.
+        found = self.problems(without("the property of UFACTORY"))
+        self.assertEqual(found, [f"{name} does not say 'the property of UFACTORY'"]
+                         + [f"{name}: the row of {path} does not say 'the property of UFACTORY, not Apache-2.0'" for path in sorted(SHOWCASE_FILES)])
+        # Every wording, the file's name and SHA-256 and every row, of a notice that says nothing.
+        empty = library_write.showcase_notice_problems("")
+        self.assertEqual(empty, [f"{name} does not say {words!r}" for words in library_write.SHOWCASE_WORDS]
+                         + [f"{name} does not name the file its meshes are made from ({words})" for words in SHOWCASE_SOURCE[:2]]
+                         + [f"{name} has no row of {path} with its pinned SHA-256" for path in sorted(SHOWCASE_FILES)])
+        self.assertEqual(library_write.SHOWCASE_WORDS, ("3D model", "the property of UFACTORY", "UFACTORY's download centre",
+                                                        "used by the project owner's decision of 2026-11-12",
+                                                        "not covered by this repository's Apache-2.0 licence", "split", "decimated", "by FlexiTac-Gen 2026"))
+        self.assertEqual(self.problems(self.edit_notice(lambda text: text + "\nThe CAD file.\n")), [f"{name} says CAD (the page's words are 3D model)"])
+        self.assertEqual(self.problems(without(SHOWCASE_SOURCE[1])), [f"{name} does not name the file its meshes are made from ({SHOWCASE_SOURCE[1]})"])
+        row = "| `body_frame.stl` | the inner frame | the property of UFACTORY, not Apache-2.0 | modified: split, decimated (quadric error metrics, 0.058 mm) |"
+        self.assertIn(row, (SHOWCASE / "NOTICE.md").read_text(encoding="utf-8"))
+        cases = (
+            (row.replace("the property of UFACTORY, not Apache-2.0", "Apache-2.0, UFACTORY"),
+             [f"{name}: the row of body_frame.stl does not say 'the property of UFACTORY, not Apache-2.0'"]),
+            (row.replace("0.058 mm", "0.2 mm"), [f"{name}: the row of body_frame.stl does not say how it was modified (split, decimated within 0.1 mm)"]),
+            (row.replace("modified: split, decimated (quadric error metrics, 0.058 mm)", "unchanged"),
+             [f"{name}: the row of body_frame.stl does not say how it was modified (split, decimated within 0.1 mm)"]),
+            (row.replace("`body_frame.stl`", "`body_logo.stl`"),
+             [f"{name} tables body_logo.stl, no file of the showcase", f"{name} has no row of body_frame.stl with its pinned SHA-256"]),
+        )
+        for changed, problems in cases:
+            with self.subTest(row=changed[:60]):
+                self.assertEqual(self.problems(self.edit_notice(lambda text: text.replace(row, changed))), problems)
+        self.assertEqual(self.problems(self.edit_notice(lambda text: text.replace(SHOWCASE_FILES["body_frame.stl"], "0" * 64))),
+                         [f"{name} has no row of body_frame.stl with its pinned SHA-256"])
+        denied = "b0df0eaca944c7401185ada85d22e3111b477c3484c6fa3fd915fce6d6811aaf"
+        self.assertEqual(self.problems(self.edit_notice(lambda text: text + f"\nAlso `{denied}`.\n")),
+                         [f"{name} names Robotiq 2F-85 (2F85_Opened.stl) (b0df0eaca944), a vendor model of the deny-list"])
+
+    def test_the_vendor_s_own_file_is_never_under_web(self) -> None:
+        # The file itself, by its size and SHA-256 (a stand-in here: the real one is no file of this repository's tests).
+        data = _stl(3, seed=9)
+        stand_in = mock.patch.object(library_write, "SHOWCASE_SOURCE", ("Gripper.stl", hashlib.sha256(data).hexdigest(), len(data)))
+        for relative in ("samples/whole.stl", "vendor/ufactory-g1/body_shell.stl", "library/meshes/finger.stl", "cad/x.bin"):
+            def placed(web: Path, relative=relative) -> None:
+                (web / relative).parent.mkdir(parents=True, exist_ok=True)
+                (web / relative).write_bytes(data)
+            with self.subTest(file=relative):
+                found = self.problems(placed, stand_in)
+                self.assertIn(f"web/{relative} is Gripper.stl itself, unsplit and undecimated: never published: remove it", found)
+        # Under another 80-byte header it is the file still (its size and the SHA-256 of its triangles); a file of its
+        # size with other triangles is not, nor is one of the same triangles and another length.
+        renamed = b"exported by another program".ljust(80, b" ") + data[80:]
+        triangles = mock.patch.object(library_write, "SHOWCASE_SOURCE_TRIANGLES", hashlib.sha256(data[80:]).hexdigest())
+
+        def files(found: list) -> list:
+            # Without the notice's (it names the real file, not the stand-in).
+            return [message for message in found if not message.startswith("web/vendor/ufactory-g1/NOTICE.md ")]
+
+        with stand_in, triangles:
+            self.assertEqual(files(self.problems(lambda web: (web / "cad").mkdir() or (web / "cad" / "x.stl").write_bytes(renamed))),
+                             ["web/cad/x.stl is Gripper.stl itself, unsplit and undecimated: never published: remove it"])
+            self.assertEqual(files(self.problems(lambda web: (web / "samples" / "x.stl").write_bytes(_stl(3, seed=8)))), [])
+            self.assertEqual(files(self.problems(lambda web: (web / "samples" / "x.stl").write_bytes(renamed + b"\0"))), [])
+        self.assertEqual(files(self.problems(lambda web: (web / "samples" / "x.stl").write_bytes(renamed), stand_in)), [],
+                         "the real file's triangles are not the stand-in's")
+        # Its notice may name the real one (it does); the committed web/ holds no file of its size.
+        self.assertFalse([path for path in WEB.rglob("*") if path.is_file() and path.stat().st_size == SHOWCASE_SOURCE[2]])
+
+    def test_the_folder_s_meshes_are_nowhere_else_under_web(self) -> None:
+        # A byte copy of a mesh of the folder under another name needs no name of the folder: refused by its SHA-256,
+        # wherever it is put (the review of 2026-11-12: as another gripper's body with an open-licence row it passed).
+        folder = "web/vendor/ufactory-g1"
+        for relative, name in (("vendor/umi/link.stl", "link_r_outer.stl"), ("cad/link.bin", "link_r_outer.stl"), ("samples/frame.stl", "body_frame.stl"),
+                               ("library/meshes/shell.stl", "body_shell.stl"), ("library/bodies/arx-x5/frame.stl", "body_frame.stl")):
+            def copied(web: Path, relative=relative, name=name) -> None:
+                (web / relative).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(web / "vendor" / "ufactory-g1" / name, web / relative)
+            with self.subTest(file=relative):
+                self.assertEqual(self.problems(copied), [f"web/{relative} is a copy of {folder}/{name}: the vendor's 3D model is shown in {folder}/ alone: remove it"])
+
+        # In the folder itself: a mesh under another's name, or a second copy beside it.
+        def swapped(web: Path) -> None:
+            shutil.copyfile(web / "vendor" / "ufactory-g1" / "link_r_outer.stl", web / "vendor" / "ufactory-g1" / "extra.stl")
+
+        size = sum(path.stat().st_size for path in SHOWCASE.rglob("*") if path.is_file()) + (SHOWCASE / "link_r_outer.stl").stat().st_size
+        self.assertEqual(self.problems(swapped), [f"{folder}/extra.stl is no file of the showcase (its meshes and its notice alone): remove it",
+                                                  f"{folder}/ is {size} bytes, over its budget of {SHOWCASE_BUDGET_BYTES}",
+                                                  f"{folder}/extra.stl is a copy of {folder}/link_r_outer.stl: the vendor's 3D model is shown in {folder}/ alone: remove it"])
+
+        # As another gripper's body, tabled with an open licence and drawn by its scene: its scene's check passes it
+        # (a body with a row), the showcase's refuses it, and so library_write --check and the site build stop.
+        with tempfile.TemporaryDirectory() as scratch:
+            library = _showcase_web(Path(scratch))
+            data = (library.parent / "vendor" / "ufactory-g1" / "body_frame.stl").read_bytes()
+            digest = hashlib.sha256(data).hexdigest()
+            (library / "bodies" / "arx-x5" / "frame.stl").write_bytes(data)
+            notice = library / "NOTICE.md"
+            notice.write_text(notice.read_text(encoding="utf-8") + f"\n| `bodies/arx-x5/frame.stl` | a frame | BSD-3-Clause, "
+                              f"`licenses/mujoco_menagerie-arx_l5.txt` | unchanged | `{digest}` |\n", encoding="utf-8")
+            first = _json(library / "scenes" / "arx-x5.json")["bodies"][0]
+            _edit_scene(library, "arx-x5", lambda scene: scene["bodies"].append(
+                dict(first, mesh="bodies/arx-x5/frame.stl", sha256=digest, bytes=len(data), triangles=library_write.stl_triangles(data))))
+            self.assertEqual(library_write.scenes(self.parts, library)[1], [
+                (None, f"web/library/bodies/arx-x5/frame.stl is a copy of {folder}/body_frame.stl: the vendor's 3D model is shown in {folder}/ alone: remove it")])
+
+        # A model of the deny-list anywhere under web/ (the undecimated pieces of the vendor's file are on it).
+        stand = _stl(2, seed=5)
+        with mock.patch.dict(library_write.DENIED_SHA256, {hashlib.sha256(stand).hexdigest(): "xArm Gripper G1, not decimated (body.stl)"}):
+            self.assertEqual(self.problems(lambda web: (web / "samples" / "body.stl").write_bytes(stand)),
+                             ["web/samples/body.stl is a vendor model of the deny-list (xArm Gripper G1, not decimated (body.stl)): never published: remove it"])
+        undecimated = {label for label in DENIED_SHA256.values() if label.startswith("xArm Gripper G1, not decimated (")}
+        self.assertEqual(len(undecimated), 16, "the Tactile Demo's seven first pieces and the nine of its body and fingers")
+        self.assertFalse(set(DENIED_SHA256) & set(SHOWCASE_FILES.values()), "the decimated pieces are the ones shown")
+
+    def test_nothing_else_may_name_the_folder(self) -> None:
+        def naming(relative: str):
+            def apply(web: Path) -> None:
+                path = web / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                text = path.read_text(encoding="utf-8") if path.is_file() else "{}\n"
+                path.write_text(text + '{"mesh": "../vendor/ufactory-g1/body_shell.stl"}\n', encoding="utf-8")
+            return apply
+
+        for relative in ("library/parts.json", "library/entries.json", "library/shots/manifest.json", "library/fits/widowx-250-2mm.json",
+                         "library/fits/new-part-2mm.json", "library/scenes/arx-x5.json", "library/scenes/scenes.json", "samples/samples.json",
+                         "samples/NOTICE.md", "vendor/umi/default-fit.json"):
+            with self.subTest(file=relative):
+                self.assertEqual(self.problems(naming(relative)),
+                                 [f"web/{relative} names the showcase's folder (web/vendor/ufactory-g1/): only {SHOWCASE_SCENE} may"])
+        # In any case of its letters; the Library's notice, which links the folder's own, may.
+        self.assertEqual(self.problems(lambda web: (web / "library" / "fits" / "x.json").write_text('"UFACTORY-G1"', encoding="utf-8")),
+                         [f"web/library/fits/x.json names the showcase's folder (web/vendor/ufactory-g1/): only {SHOWCASE_SCENE} may"])
+        self.assertIn("ufactory-g1", (LIBRARY / "NOTICE.md").read_text(encoding="utf-8"))
+        # A gripper's scene drawing a vendor's mesh: refused as a body of its own folder's, and as a name of the folder.
+        with tempfile.TemporaryDirectory() as folder:
+            library = _showcase_web(Path(folder))
+            first = json.loads((library / "scenes" / "arx-x5.json").read_text(encoding="utf-8"))["bodies"][0]["mesh"]
+            _edit_scene(library, "arx-x5", lambda scene: scene["bodies"][0].update(mesh="../vendor/ufactory-g1/body_shell.stl"))
+            self.assertEqual(library_write.scenes(self.parts, library)[1], [
+                ("arx-x5", f"scenes/arx-x5.json: body 1's mesh '../vendor/ufactory-g1/body_shell.stl' is not a file of bodies/arx-x5/: {REBUILD}"),
+                (None, f"web/library/scenes/arx-x5.json names the showcase's folder (web/vendor/ufactory-g1/): only {SHOWCASE_SCENE} may: {REBUILD_SHOWCASE}"),
+                (None, f"{first}: a file of no scene: {REBUILD}")])
+
+    def test_the_scene_draws_the_folder_s_files_and_the_holder(self) -> None:
+        name = SHOWCASE_SCENE
+        shell = "../vendor/ufactory-g1/body_shell.stl"
+        cases = (
+            (lambda scene: scene["bodies"][2].update(mesh="../vendor/umi/UMI-Soft-Gripper-Finger.stl"),
+             [f"{name}: body 3's mesh '../vendor/umi/UMI-Soft-Gripper-Finger.stl' is not a file of the showcase's folder (../vendor/ufactory-g1/)",
+              f"{name} does not draw web/vendor/ufactory-g1/body_shell.stl"]),
+            (lambda scene: scene["bodies"][2].update(mesh="../vendor/ufactory-g1/../umi/LICENSE"),
+             [f"{name}: body 3's mesh '../vendor/ufactory-g1/../umi/LICENSE' is not a file of the showcase's folder (../vendor/ufactory-g1/)",
+              f"{name} does not draw web/vendor/ufactory-g1/body_shell.stl"]),
+            (lambda scene: scene["bodies"].pop(13), [f"{name} does not draw web/vendor/ufactory-g1/finger_l_pins.stl"]),
+            (lambda scene: scene["bodies"][2].update(sha256="0" * 64),
+             [f"{name}: body 3: {shell} is not the file its scene names (its SHA-256, bytes or triangles; a binary STL)"]),
+            (lambda scene: scene["bodies"][2].update(triangles=3),
+             [f"{name}: body 3: {shell} is not the file its scene names (its SHA-256, bytes or triangles; a binary STL)"]),
+            (lambda scene: scene["bodies"][2].update(matrix=[[2, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]),
+             [f"{name}: body 3's matrix is not orthonormal (its upper 3 x 3)"]),
+            (lambda scene: scene["bodies"][2].update(finger="left"), [f"{name}: body 3's finger 'left' is not sensor, mate or null"]),
+            (lambda scene: scene["bodies"][2].update(colour="white"), [f"{name}: body 3 has not the keys {', '.join(library_write.BODY_KEYS)}"]),
+            (lambda scene: scene.update(part="arx-x5"), [f"{name} is the scene of 'arx-x5'"]),
+            (lambda scene: scene.update(part_mesh_sha256="0" * 64), [f"{name} is drawn about another mesh of umi-finray than parts.json's (part_mesh_sha256)"]),
+            (lambda scene: scene["mate"].update(kind="turned"), [f"{name}: its mate is 'turned', but its matrix's determinant is -1"]),
+            (lambda scene: scene["bodies"][0].update(mesh="bodies/umi-finray/holder.stl"),
+             [f"{name}: body 1's mesh 'bodies/umi-finray/holder.stl' is not a file of bodies/flexitac-g1/"]),
+            (lambda scene: scene["bodies"][0].update(sha256="0" * 64),
+             [f"{name}: body 1: {SHOWCASE_HOLDER[0]} is not the file its scene names (its SHA-256, bytes or triangles; a binary STL)"]),
+        )
+        for edit, problems in cases:
+            with self.subTest(problems=problems[0]):
+                self.assertEqual(self.problems(self.edit_scene(edit)), problems)
+        self.assertEqual(self.problems(lambda web: (web / "library" / SHOWCASE_SCENE).unlink()), [f"{name} is missing or not JSON"])
+
+        # The holder: the pinned file, tabled in the Library's notice with its open licence, as every body.
+        def other(web: Path) -> None:
+            path = web / "library" / SHOWCASE_HOLDER[0]
+            path.write_bytes(_stl())
+            data = path.read_bytes()
+            self.edit_scene(lambda scene: [body.update(sha256=hashlib.sha256(data).hexdigest(), bytes=len(data), triangles=1)
+                                           for body in scene["bodies"][:2]])(web)
+
+        self.assertEqual(self.problems(other), [f"{name}: body 1: {SHOWCASE_HOLDER[0]} has no row of NOTICE.md with its SHA-256",
+                                                f"{name}: body 2: {SHOWCASE_HOLDER[0]} has no row of NOTICE.md with its SHA-256",
+                                                f"{name}: {SHOWCASE_HOLDER[0]} is not the showcase's pinned file (its SHA-256)"])
+
+        def another(web: Path) -> None:
+            shutil.copyfile(web / "library" / SHOWCASE_HOLDER[0], web / "library" / "bodies" / "flexitac-g1" / "other.stl")
+            notice = web / "library" / "NOTICE.md"
+            notice.write_text(notice.read_text(encoding="utf-8").replace(f"`{SHOWCASE_HOLDER[0]}`", "`bodies/flexitac-g1/other.stl`"), encoding="utf-8")
+            self.edit_scene(lambda scene: [body.update(mesh="bodies/flexitac-g1/other.stl") for body in scene["bodies"][:2]])(web)
+
+        self.assertEqual(self.problems(another), [f"{name}: bodies/flexitac-g1/other.stl is not a body of the showcase ({', '.join(SHOWCASE_BODIES)})"])
+
+        # A shape the project drew: its header says so and its bytes are the pinned ones, or it is refused (a mesh under
+        # a drawn shape's name, a shape the showcase's tool does not draw).
+        def redrawn(web: Path) -> None:
+            path = web / "library" / "bodies" / "flexitac-g1" / "drawn-slot-block.stl"
+            data = library_write.OWN_HEADER + b"slot-block, drawn by the project, not a vendor's part, mm".ljust(66) + _stl()[80:]
+            path.write_bytes(data)
+            self.edit_scene(lambda scene: [body.update(sha256=hashlib.sha256(data).hexdigest(), bytes=len(data), triangles=1)
+                                           for body in scene["bodies"] if body["mesh"].endswith("drawn-slot-block.stl")])(web)
+
+        self.assertEqual(self.problems(redrawn), [f"{name}: bodies/flexitac-g1/drawn-slot-block.stl is not the showcase's pinned file (its SHA-256)"])
+
+        def unlabelled(web: Path) -> None:
+            path = web / "library" / "bodies" / "flexitac-g1" / "drawn-slot-block.stl"
+            data = _stl()
+            path.write_bytes(data)
+            self.edit_scene(lambda scene: [body.update(sha256=hashlib.sha256(data).hexdigest(), bytes=len(data), triangles=1)
+                                           for body in scene["bodies"] if body["mesh"].endswith("drawn-slot-block.stl")])(web)
+
+        found = self.problems(unlabelled)
+        self.assertEqual(len(found), 2, found)
+        self.assertIn("drawn-slot-block.stl is named as the project's own drawing, but its header does not say so", found[0])
+        self.assertEqual(found[1], f"{name}: bodies/flexitac-g1/drawn-slot-block.stl is not the showcase's pinned file (its SHA-256)")
+
+    def test_the_scene_s_looks_are_the_amendment_s(self) -> None:
+        # The looks of 2026-11-12, by the Library's one rule (scene_look_problems(), as every gripper's scene), over all
+        # the scene's bodies, the vendor's too: a name a look of the scene, a look a colour and numbers within their
+        # ranges, every look used, no clear coat on the part's own, the crease angle 1 to 90 degrees.
+        name = SHOWCASE_SCENE
+        cases = (
+            (lambda scene: scene.update(part_look="gold"),
+             [f"{name}: its part_look names the look 'gold', which is not one of its looks", f"{name}: its look 'umi-tpu-orange' is used by nothing"]),
+            (lambda scene: scene["bodies"][5].update(look="gold"), [f"{name}: body 6 names the look 'gold', which is not one of its looks"]),
+            (lambda scene: scene["bodies"][0].update(look="gold"), [f"{name}: body 1 names the look 'gold', which is not one of its looks"]),
+            (lambda scene: scene["bodies"][2].update(look=["shell-white-gloss"]),
+             [f"{name}: body 3 names the look ['shell-white-gloss'], which is not one of its looks", f"{name}: its look 'shell-white-gloss' is used by nothing"]),
+            (lambda scene: scene["looks"]["umi-tpu-orange"].update(color="orange"), [f"{name}: its look umi-tpu-orange has the colour 'orange', not an sRGB #rrggbb in lower case"]),
+            (lambda scene: scene["looks"]["umi-tpu-orange"].update(color="#E85A1C"), [f"{name}: its look umi-tpu-orange has the colour '#E85A1C', not an sRGB #rrggbb in lower case"]),
+            (lambda scene: scene["looks"]["steel-pin"].update(metalness=2), [f"{name}: its look steel-pin has the metalness 2, not a number 0 to 1"]),
+            (lambda scene: scene["looks"]["steel-pin"].update(metalness=True), [f"{name}: its look steel-pin has the metalness True, not a number 0 to 1"]),
+            (lambda scene: scene["looks"]["steel-pin"].pop("roughness"),
+             [f"{name}: its look steel-pin has not the keys color, metalness, roughness (and any of clearcoat, clearcoat_roughness, env_intensity)"]),
+            (lambda scene: scene["looks"]["steel-pin"].update(texture="brushed"),
+             [f"{name}: its look steel-pin has not the keys color, metalness, roughness (and any of clearcoat, clearcoat_roughness, env_intensity)"]),
+            (lambda scene: scene["looks"]["shell-white-gloss"].update(env_intensity=-1),
+             [f"{name}: its look shell-white-gloss has the env_intensity -1, not a number of 0 or more"]),
+            (lambda scene: scene["looks"]["shell-white-gloss"].pop("clearcoat"), [f"{name}: its look shell-white-gloss has a clearcoat_roughness without a clearcoat"]),
+            (lambda scene: scene["looks"]["umi-tpu-orange"].update(clearcoat=0.5),
+             [f"{name}: its look umi-tpu-orange has a clear coat, which the part's own material cannot take (a body's look can)"]),
+            (lambda scene: scene["looks"].update(gold={"color": "#c9a45c", "metalness": 1, "roughness": 0.35}), [f"{name}: its look 'gold' is used by nothing"]),
+            (lambda scene: scene["looks"].update(Gold=scene["looks"].pop("steel-pin")),
+             [f"{name}: its look 'Gold' is not named in lower case, digits and hyphens"]
+             + [f"{name}: body {number} names the look 'steel-pin', which is not one of its looks" for number in (6, 12, 14)]
+             + [f"{name}: its look 'Gold' is used by nothing"]),
+            (lambda scene: scene.update(smooth_deg="35"), [f"{name}: its smooth_deg ('35') is not a crease angle of 1 to 90 degrees"]),
+            (lambda scene: scene.update(smooth_deg=0), [f"{name}: its smooth_deg (0) is not a crease angle of 1 to 90 degrees"]),
+            (lambda scene: scene.update(looks=[]), [f"{name}: its looks are not a map of names to looks"]),
+            (lambda scene: scene.pop("looks"), [f"{name}: its looks are not a map of names to looks"]),
+            (lambda scene: scene.update(shine=1),
+             [f"{name} has not the keys {', '.join(library_write.SCENE_KEYS)} (and any of {', '.join(library_write.SCENE_OPTIONAL)})"]),
+        )
+        for edit, problems in cases:
+            with self.subTest(problems=problems[0]):
+                self.assertEqual(self.problems(self.edit_scene(edit)), problems)
+        self.assertEqual(self.problems(self.edit_scene(lambda scene: scene["looks"]["shell-white-gloss"].update(env_intensity=1.5))), [])
+        # The same function as the grippers' scenes: the showcase has no check of the looks of its own.
+        with tempfile.TemporaryDirectory() as folder:
+            library = _showcase_web(Path(folder))
+            scene = _json(library / SHOWCASE_SCENE)
+            scene["bodies"][5]["look"] = "gold"
+            self.assertEqual(library_write.scene_look_problems("umi-finray", scene, scene="flexitac-g1"),
+                             [f"{name}: body 6 names the look 'gold', which is not one of its looks"])
+            self.assertEqual(library_write.scene_look_problems("umi-finray", scene),
+                             ["scenes/umi-finray.json: body 6 names the look 'gold', which is not one of its looks"])
+
+    def test_the_scenes_check_takes_the_showcase_in(self) -> None:
+        def problems(edit) -> list:
+            with tempfile.TemporaryDirectory() as folder:
+                library = _showcase_web(Path(folder))
+                edit(library)
+                return library_write.scenes(self.parts, library)[1]
+
+        def indexed(library: Path) -> None:
+            index = _json(library / library_write.SCENES_INDEX)
+            index["scenes"]["flexitac-g1"] = SHOWCASE_SCENE
+            (library / library_write.SCENES_INDEX).write_text(json.dumps(index, indent=1) + "\n", encoding="utf-8")
+
+        # The showcase is no part: its scene is not the index's.
+        self.assertEqual(problems(indexed), [(None, f"flexitac-g1: a scene for no part of parts.json: {REBUILD}")])
+        self.assertEqual(problems(lambda library: (library / "bodies" / "flexitac-g1" / "old.stl").write_bytes(_stl())),
+                         [(None, f"bodies/flexitac-g1/old.stl: a file of no scene: {REBUILD}")])
+        self.assertEqual(problems(lambda library: (library / SHOWCASE_SCENE).unlink()),
+                         [(None, f"{SHOWCASE_SCENE} is missing or not JSON: {REBUILD_SHOWCASE}")]
+                         + [(None, f"{mesh}: a file of no scene: {REBUILD}") for mesh in sorted(SHOWCASE_BODIES)])
+        self.assertEqual(problems(lambda library: (library.parent / "vendor" / "ufactory-g1" / "extra.stl").write_bytes(_stl())),
+                         [(None, f"web/vendor/ufactory-g1/extra.stl is no file of the showcase (its meshes and its notice alone): remove it")])
+
+        # No host path or private input in the scene or the folder's notice, as in every scene.
+        def pathed(library: Path) -> None:
+            notice = library.parent / "vendor" / "ufactory-g1" / "NOTICE.md"
+            notice.write_text(notice.read_text(encoding="utf-8") + "\nRead from /home/someone/files.\n", encoding="utf-8")
+
+        self.assertEqual(problems(pathed), [(None, f"../vendor/ufactory-g1/NOTICE.md names '/home/', the private importer's inputs: {REBUILD}")])
+        # library_write --check and the site build stop on them (scenes()' problems with no part).
+        with tempfile.TemporaryDirectory() as folder:
+            library = _showcase_web(Path(folder))
+            (library.parent / "vendor" / "ufactory-g1" / "extra.stl").write_bytes(_stl())
+            _, found = library_write.scenes(self.parts, library)
+            self.assertEqual([part for part, _ in found], [None])
+
+
+class ShowcasePageTests(LibraryTestCase):
+    """The showcase's page's document (showcase.json, 2026-11-12; docs/LIBRARY_VIEW.md "The showcase's page"): the
+    committed one current, and library_write.showcase_page() naming each way it could stop being so, on a copy."""
+
+    RESHOOT = "re-shoot with tools/browser/library_shots.py --showcase"
+
+    def test_the_committed_document_is_current(self) -> None:
+        self.assertEqual(library_write.showcase_page(self.parts), ([], False))
+        document = _json(LIBRARY / SHOWCASE_FILE)
+        self.assertEqual(sorted(document), list(library_write.SHOWCASE_KEYS))
+        self.assertEqual((document["format"], document["id"], document["title"]), ("flexitac-library-showcase/v1", "flexitac-g1", "FlexiTac on xArm"))
+        # The user's request of 2026-11-12: labelled as hand-designed, not auto-generated; one line beside it.
+        self.assertEqual(document["label"], "Hand-designed, not auto-generated")
+        self.assertLessEqual(len(document["text"]), 100)
+        self.assertNotRegex(json.dumps(document), r"\bCAD\b")
+        # It is no entry: no fit, no build, no download of the generator's; its id is no part's, variant's or family's.
+        for key in ("fit", "build_id", "files", "variants", "pitch_mm"):
+            self.assertNotIn(key, document)
+        for names in (self.entries["variants"], self.entries["parts"], self.entries.get("families") or {}):
+            self.assertNotIn(document["id"], names)
+        self.assertIsNone(DENIED_NAME.search(document["id"]))
+        # The placed record: the pad's own, with the showcase's scene; the finger the Library's UMI finger.
+        placed = _json(WEB / library_write.SHOWCASE_PLACED)
+        self.assertIsNone(placed["scene"], "the pad's own record names no scene")
+        self.assertEqual(document["placed"], dict(placed, scene=SHOWCASE_SCENE))
+        self.assertEqual(document["placed"]["mesh"]["sha256"], self.parts["parts"]["umi-finray"]["mesh"]["sha256"])
+        self.assertEqual(_json(LIBRARY / SHOWCASE_SCENE)["part_mesh_sha256"], document["placed"]["mesh"]["sha256"])
+        self.assertEqual(document["sensor"], {"rows": 32, "columns": 12, "pitch_mm": 2, "field_mm": [23, 63]})
+        # The tutorial: the address the pad's notice records for its Gerbers.
+        self.assertIn(f"`{document['tutorial']['href']}`", (WEB / library_write.SHOWCASE_PAD_NOTICE).read_text(encoding="utf-8"))
+        self.assertIn("tutorial", document["tutorial"]["label"])
+        # The sources: UFACTORY's 3D model by the owner's decision, the FlexiTac V2 design and its licence, each with
+        # its notice, a file of the site.
+        self.assertEqual([item["notice"] for item in document["sources"]], ["../vendor/ufactory-g1/NOTICE.md", "../vendor/flexitac-v2/NOTICE.md"])
+        self.assertIn("project owner's decision", document["sources"][0]["text"])
+        self.assertIn("CC BY-NC 4.0", document["sources"][1]["text"])
+        for item in document["sources"]:
+            self.assertTrue((LIBRARY / item["notice"]).is_file())
+        # The pictures: 4:5 (the gripper upright), WebP with alpha, in showcase/ alone, the bytes the document names.
+        image = document["image"]
+        self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "showcase").rglob("*") if path.is_file()), sorted(SHOWCASE_PICTURES))
+        self.assertEqual([image[kind]["src"] for kind in ("exploded", "assembled", "card")], list(SHOWCASE_PICTURES))
+        self.assertEqual((library_write.SHOWCASE_SHOT_SIZE, library_write.SHOWCASE_CARD_SIZE), ((1280, 1600), (800, 1000)))
+        for kind in ("exploded", "assembled", "card"):
+            with self.subTest(picture=kind):
+                data = (LIBRARY / image[kind]["src"]).read_bytes()
+                self.assertEqual((image[kind]["bytes"], image[kind]["sha256"]), (len(data), hashlib.sha256(data).hexdigest()))
+                self.assertEqual(library_write.webp_info(data), (image[kind]["width"], image[kind]["height"], True))
+                self.assertEqual(image[kind]["width"] * 5, image[kind]["height"] * 4)
+                self.assertLess(len(data), 200_000)
+        self.assertIn("hand-designed", image["alt"])
+        # What they were shot from: this scene and these rules, this art, this placed record; the gripper fills the
+        # picture's height (its margins above and below under a tenth of it), in the middle.
+        shot = document["shot"]
+        self.assertEqual({key: shot[key] for key in ("scene", "scene_sha256", "art_sha256", "placed_sha256", "figure_sha256", "view_sha256")},
+                         library_write.showcase_shot())
+        for mode in ("exploded", "assembled"):
+            left, top, right, bottom = shot["margins_px"][mode]
+            with self.subTest(margins=mode):
+                self.assertLess(max(top, bottom), 160)
+                self.assertLessEqual(abs(left - right), 1)
+                self.assertLessEqual(abs(top - bottom), 1)
+        self.assertTrue(53 < shot["numbers"]["jaw_gap_mm"] < 55, "the two pads' faces: their centres 55 mm apart")
+        self.assertIsNone(shot["numbers"]["ghost_cover"], "no finger is see-through")
+        self.assertTrue((LIBRARY / SHOWCASE_FILE).read_text(encoding="utf-8").isascii())
+        self.assertEqual((LIBRARY / SHOWCASE_FILE).read_text(encoding="utf-8"), library_write.showcase_text(document))
+
+    def problems(self, edit=None, files=None, older: bool = False):
+        """showcase_page()'s problems (``older``: its second value) of a copy of the committed files with ``edit``
+        (showcase.json's document -> None) and ``files`` (the copy's library -> None) applied."""
+
+        with tempfile.TemporaryDirectory() as folder:
+            library = _showcase_web(Path(folder))
+            if edit:
+                document = _json(library / SHOWCASE_FILE)
+                edit(document)
+                (library / SHOWCASE_FILE).write_text(library_write.showcase_text(document), encoding="utf-8")
+            if files:
+                files(library)
+            found = library_write.showcase_page(self.parts, library)
+            return found[1] if older else found[0]
+
+    def test_its_words_are_checked(self) -> None:
+        name = SHOWCASE_FILE
+        self.assertEqual(self.problems(), [])
+        cases = (
+            (lambda d: d.update(format="flexitac-library-showcase/v2"), [f"{name}: the format is 'flexitac-library-showcase/v2', not flexitac-library-showcase/v1"]),
+            (lambda d: d.update(id="umi-finray"), [f"{name}: its id is not flexitac-g1, or a part or a family has that id"]),
+            (lambda d: d.update(note="x"), [f"{name} has not the keys {', '.join(library_write.SHOWCASE_KEYS)}"]),
+            (lambda d: d.pop("tutorial"), [f"{name} has not the keys {', '.join(library_write.SHOWCASE_KEYS)}"]),
+            (lambda d: d.update(title=""), [f"{name}: its title is not one line of 1 to 40 characters"]),
+            (lambda d: d.update(title="FlexiTac on xArm\nand more"), [f"{name}: its title is not one line of 1 to 40 characters"]),
+            (lambda d: d.update(text="x" * 141), [f"{name}: its text is not one line of 1 to 140 characters"]),
+            # The label says both: hand-designed, and not auto-generated.
+            (lambda d: d.update(label="Hand-designed"), [f"{name}: its label does not say hand-designed and not auto-generated"]),
+            (lambda d: d.update(label="Not auto-generated"), [f"{name}: its label does not say hand-designed and not auto-generated"]),
+            (lambda d: d.update(text="The original CAD of the sensor."), [f"{name} says CAD (the page's words are 3D model)"]),
+            (lambda d: d.update(text="Read from /home/someone/files."), [f"{name} names '/home/', the private importer's inputs"]),
+            (lambda d: d["sensor"].update(field_mm=[24, 64]), [f"{name}: its sensor's field [24, 64] mm is not the art's ([23, 63])"]),
+            (lambda d: d["sensor"].update(rows=0), [f"{name}: its sensor is not {{rows, columns, pitch_mm, field_mm}}"]),
+            (lambda d: d["tutorial"].update(href="https://example.com/tutorial"), [f"{name}: its tutorial's address is not the one web/vendor/flexitac-v2/NOTICE.md records"]),
+            (lambda d: d["tutorial"].update(href="//docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/"),
+             [f"{name}: its tutorial's address is not the one web/vendor/flexitac-v2/NOTICE.md records"]),
+            (lambda d: d["tutorial"].pop("label"), [f"{name}: its tutorial is not {{label, href}}"]),
+            (lambda d: d["sources"].reverse(), [f"{name}: its sources are not [{{text, notice}}] of ../vendor/ufactory-g1/NOTICE.md and ../vendor/flexitac-v2/NOTICE.md"]),
+            (lambda d: d["sources"][1].update(notice="../vendor/umi/NOTICE.md"),
+             [f"{name}: its sources are not [{{text, notice}}] of ../vendor/ufactory-g1/NOTICE.md and ../vendor/flexitac-v2/NOTICE.md"]),
+            (lambda d: d["sources"][0].update(text="Gripper: a model of the gripper"), [f"{name}: its source of ../vendor/ufactory-g1/NOTICE.md does not say UFACTORY and 3D model"]),
+            (lambda d: d["sources"][1].update(text="Sensor: the FlexiTac V2 design"), [f"{name}: its source of ../vendor/flexitac-v2/NOTICE.md does not say FlexiTac and CC BY-NC 4.0"]),
+            # The vendor's folder named only as its notice: not as a mesh, a picture or a word of the text.
+            (lambda d: d.update(text="See ../vendor/ufactory-g1/body_shell.stl."), [f"{name} names the showcase's folder (web/vendor/ufactory-g1/) elsewhere than as its notice"]),
+        )
+        for edit, problems in cases:
+            with self.subTest(problems=problems[0]):
+                self.assertEqual(self.problems(edit), problems)
+
+    def test_its_placed_record_is_the_pad_s_own_on_the_showcase_s_scene(self) -> None:
+        name = SHOWCASE_FILE
+        other = f"{name}: its placed record is not web/vendor/flexitac-v2/umi-finray.placed.json with the scene scenes/flexitac-g1.json: {self.RESHOOT}"
+        self.assertEqual(self.problems(lambda d: d["placed"].update(scene=None)), [other])
+        self.assertEqual(self.problems(lambda d: d["placed"].update(scene="scenes/arx-x5.json")), [other])
+        self.assertEqual(self.problems(lambda d: d["placed"]["wrap"].update(side="right")), [other])
+        self.assertEqual(self.problems(lambda d: d.update(placed=None)), [other])
+
+        # The pad's own record changed under it: the document's copy is no longer it, and the pictures are of another.
+        def moved(library: Path) -> None:
+            path = library.parent / library_write.SHOWCASE_PLACED
+            record = _json(path)
+            record["face"]["origin"][2] -= 1
+            _write_json(path, record)
+
+        self.assertEqual(self.problems(files=moved), [other, f"{name}: its pictures are of another placed record than the files now (placed_sha256): {self.RESHOOT}"])
+        self.assertEqual(self.problems(files=lambda library: (library.parent / library_write.SHOWCASE_PLACED).unlink())[0],
+                         "web/vendor/flexitac-v2/umi-finray.placed.json is missing or not JSON")
+
+        # The pad's own record about another finger's mesh, the document's copy with it (the review of 2026-11-12: no
+        # test held this guard): the record is the pad's own, but not about the Library's UMI finger.
+        def other_mesh(library: Path) -> None:
+            path = library.parent / library_write.SHOWCASE_PLACED
+            record = _json(path)
+            record["mesh"]["sha256"] = "0" * 64
+            _write_json(path, record)
+            document = _json(library / SHOWCASE_FILE)
+            document["placed"]["mesh"]["sha256"] = "0" * 64
+            (library / SHOWCASE_FILE).write_text(library_write.showcase_text(document), encoding="utf-8")
+
+        self.assertEqual(self.problems(files=other_mesh), [f"{name}: its placed record is about another mesh than umi-finray's (parts.json)",
+                                                           f"{name}: its pictures are of another placed record than the files now (placed_sha256): {self.RESHOOT}"])
+
+    def test_its_pictures_are_the_files_it_names(self) -> None:
+        name = SHOWCASE_FILE
+        card = SHOWCASE_PICTURES[2]
+        self.assertEqual(self.problems(lambda d: d.update(image=None, shot=None)), [f"{name}: no pictures yet: {self.RESHOOT}"])
+        self.assertEqual(self.problems(lambda d: d["image"].pop("alt")),
+                         [f"{name}: its image is not {{exploded, assembled, card: {{src, width, height, bytes, sha256}}, alt}}: {self.RESHOOT}"])
+        self.assertEqual(self.problems(lambda d: d["image"]["card"].update(width=640, height=800)), [f"{name}: its card picture is not {card} at 800 x 1000: {self.RESHOOT}"])
+        self.assertEqual(self.problems(lambda d: d["image"]["card"].update(src="shots/umi-finray-2mm.exploded.card.webp")),
+                         [f"{name}: its card picture is not {card} at 800 x 1000: {self.RESHOOT}"])
+        self.assertEqual(self.problems(files=lambda library: (library / card).unlink()), [f"{card} is missing: {self.RESHOOT}"])
+
+        def changed(library: Path) -> None:
+            (library / card).write_bytes((library / card).read_bytes() + b"\0")
+
+        self.assertEqual(self.problems(files=changed), [f"{card} is not the file {name} names: {self.RESHOOT}"])
+
+        # Another picture under its name, recorded as it is: not a WebP with alpha of the card's size.
+        def other(library: Path) -> None:
+            data = (LIBRARY / "shots" / "umi-finray-2mm.exploded.card.webp").read_bytes()
+            (library / card).write_bytes(data)
+            document = _json(library / SHOWCASE_FILE)
+            document["image"]["card"].update(bytes=len(data), sha256=hashlib.sha256(data).hexdigest())
+            (library / SHOWCASE_FILE).write_text(library_write.showcase_text(document), encoding="utf-8")
+
+        self.assertEqual(self.problems(files=other), [f"{card} is not a 800 x 1000 WebP with alpha: {self.RESHOOT}"])
+        self.assertEqual(self.problems(files=lambda library: (library / "showcase" / "old.webp").write_bytes(b"x")), [f"showcase/old.webp: not a picture of {name}"])
+
+    def test_its_pictures_go_stale_with_what_they_were_shot_from(self) -> None:
+        name = SHOWCASE_FILE
+
+        def stale(what: str, key: str) -> list:
+            return [f"{name}: its pictures are of another {what} than the files now ({key}): {self.RESHOOT}"]
+
+        self.assertEqual(stale("scene or rules", "scene_sha256"), [ShowcaseTests.STALE])
+        self.assertEqual(self.problems(lambda d: d["shot"].update(scene_sha256="0" * 64)), stale("scene or rules", "scene_sha256"))
+        self.assertEqual(self.problems(lambda d: d["shot"].update(art_sha256="0" * 64)), stale("art", "art_sha256"))
+        self.assertEqual(self.problems(lambda d: d["shot"].update(placed_sha256="0" * 64)), stale("placed record", "placed_sha256"))
+        self.assertEqual(self.problems(lambda d: d["shot"].pop("numbers")),
+                         [f"{name}: its shot is not {{{', '.join(library_write.SHOWCASE_SHOT_KEYS)}}}: {self.RESHOOT}"])
+        # The scene itself changed (a look), or the rules every scene is drawn by.
+        self.assertEqual(self.problems(files=lambda library: _edit_scene(library, "flexitac-g1", lambda scene: scene["looks"]["umi-tpu-orange"].update(roughness=0.5))),
+                         stale("scene or rules", "scene_sha256"))
+
+        def ruled(library: Path) -> None:
+            index = _json(library / library_write.SCENES_INDEX)
+            index["rules"]["gap_share"] = 0.4
+            _write_json(library / library_write.SCENES_INDEX, index)
+
+        self.assertEqual(self.problems(files=ruled), stale("scene or rules", "scene_sha256"))
+        # Older figure or view sources: still shown, a warning (the public CI runs no browser), as a sensor's pictures.
+        self.assertFalse(self.problems(older=True))
+        self.assertEqual(self.problems(lambda d: d["shot"].update(view_sha256="0" * 64)), [])
+        self.assertTrue(self.problems(lambda d: d["shot"].update(view_sha256="0" * 64), older=True))
+        self.assertTrue(self.problems(lambda d: d["shot"].update(figure_sha256="0" * 64), older=True))
+
+    def test_its_stage_numbers_hold_the_rules_and_its_own_bounds(self) -> None:
+        # The stage's numbers recorded with the pictures (the review of 2026-11-12: no gate looked at them, so a scene or
+        # a camera that hid the pad would pass): four held to the rules' checks as any gripper's, three to the
+        # showcase's own bounds (its fingers solid, its tails behind its finger); the committed ones within all.
+        name = SHOWCASE_FILE
+        numbers = _json(LIBRARY / SHOWCASE_FILE)["shot"]["numbers"]
+        rules = _json(LIBRARY / library_write.SCENES_INDEX)["rules"]
+        self.assertEqual(library_write.showcase_numbers(numbers, rules), [])
+        self.assertEqual([key for key, _ in library_write.SHOWCASE_RULED], ["visible_min", "clearance_mm", "stacks_apart_px", "card_px"])
+        self.assertEqual(library_write.SHOWCASE_BOUNDS, (("assembled_opaque", "below", 0.25), ("opaque_max", "below", 0.75), ("near_seen", "at least", 0.25)))
+        bounds = "(the scene or its camera hides the pad, or the bounds are no longer the showcase's: SHOWCASE_BOUNDS)"
+        cases = (
+            ({"visible_min": 0.2}, "the stage's visible_min is 0.2, not at least 0.25"),
+            ({"clearance_mm": {"bodies": 2, "other_finger": 12, "stacks": 30.9}}, "the stage's clearance_mm is [2, 12, 30.9], not at least 3"),
+            ({"stacks_apart_px": 19}, "the stage's stacks_apart_px is 19, not at least 20"),
+            ({"card_px": [82, 19]}, "the stage's card_px is [82, 19], not at least 20"),
+            ({"assembled_opaque": 0.25}, "the stage's assembled_opaque is 0.25, not below 0.25"),
+            ({"opaque_max": 0.8}, "the stage's opaque_max is 0.8, not below 0.75"),
+            ({"near_seen": 0.2}, "the stage's near_seen is 0.2, not at least 0.25"),
+            ({"near_seen": None}, "the stage's near_seen is None, not at least 0.25"),
+        )
+        for change, problem in cases:
+            with self.subTest(problem=problem):
+                self.assertEqual(library_write.showcase_numbers(dict(numbers, **change), rules), [problem])
+                self.assertEqual(self.problems(lambda d: d["shot"]["numbers"].update(change)), [f"{name}: {problem} {bounds}"])
+        self.assertEqual(library_write.showcase_numbers(None, rules), ["the stage's numbers are missing"])
+        # The rules' own numbers, not copies: a stricter rule refuses what the committed numbers are.
+        self.assertEqual(library_write.showcase_numbers(numbers, dict(rules, checks=dict(rules["checks"], layer_visible_min=0.6))),
+                         [f"the stage's visible_min is {numbers['visible_min']!r}, not at least 0.6"])
+        # The shots tool writes nothing of a shoot whose numbers are not sound.
+        source = (ROOT / "tools" / "browser" / "library_shots.py").read_text(encoding="utf-8")
+        held = source.index('    unsound = library_write.showcase_numbers(drawn["numbers"], library_write.scenes_index(LIBRARY).get("rules"))\n'
+                            '    if unsound:\n')
+        self.assertLess(held, source.index("    fresh = dict(document, placed=placed, image=library_write.showcase_image(files),"))
+
+    def test_the_writer_says_the_showcase_s_own_fixes(self) -> None:
+        # tools/library_write.py run() on a copy of web/ (its fits read, none fitted: only=[]): current; a warning, not a
+        # failure, for pictures of older figure or view sources (the review of 2026-11-12: no test held that line); and
+        # a problem of the showcase alone closed by the showcase's own fixes, not the private scene builder's (that
+        # review: a changed card picture ended with "rebuild the scenes with the private tools/library_scenes.py").
+        reshoot = "re-shoot with tools/browser/library_shots.py --showcase"
+        with tempfile.TemporaryDirectory() as folder:
+            web = Path(folder) / "web"
+            for relative in ("library", "vendor", "samples"):
+                shutil.copytree(WEB / relative, web / relative)
+            library = web / "library"
+            done = "library_write: 42 sensors, all current, each with its picture, 42 with a 3D view"
+
+            def run(check: bool = True):
+                said = []
+                return library_write.run(only=[], check=check, library=library, out=said.append), said
+
+            self.assertEqual(run(), (0, [done]))
+            path = library / SHOWCASE_FILE
+            kept = path.read_text(encoding="utf-8")
+            document = json.loads(kept)
+            document["shot"]["view_sha256"] = "0" * 64
+            path.write_text(library_write.showcase_text(document), encoding="utf-8")
+            self.assertEqual(run(), (0, [f"library_write: warning: the showcase's pictures are of older figure or view sources: {reshoot}", done]))
+            path.write_text(kept, encoding="utf-8")
+            card = library / SHOWCASE_PICTURES[2]
+            picture = card.read_bytes()
+            card.write_bytes(picture + b"\0")
+            self.assertEqual(run(), (1, [f"stale: scene {SHOWCASE_PICTURES[2]} is not the file {SHOWCASE_FILE} names: {reshoot}",
+                                         f"library_write: {library_write.SHOWCASE_STALE}"]))
+            self.assertEqual(run(check=False)[1], [f"library_write: scene {SHOWCASE_PICTURES[2]} is not the file {SHOWCASE_FILE} names: {reshoot}",
+                                                   "library_write: 0 fitted, 0 written, 42 sensors, 42 with a 3D view"])
+            card.write_bytes(picture)
+            # A file no tool writes (here a copy of a vendor mesh in the samples) says its own fix, its removal, and no
+            # closing line of a rebuild or a shoot (the review of 2026-11-13: it said to rebuild the showcase).
+            copy = web / "samples" / "frame.stl"
+            shutil.copyfile(web / "vendor" / "ufactory-g1" / "body_frame.stl", copy)
+            self.assertEqual(run(), (1, ["stale: scene web/samples/frame.stl is a copy of web/vendor/ufactory-g1/body_frame.stl: "
+                                         "the vendor's 3D model is shown in web/vendor/ufactory-g1/ alone: remove it"]))
+            copy.unlink()
+            # A gripper's scene's problem is the scene builder's, and of the two closing lines only that one is said (its
+            # pictures and entries.json are stale with it, each with a line of its own).
+            _edit_scene(library, "widowx-250", lambda scene: scene["bodies"][0].update(sha256="0" * 64))
+            code, said = run()
+            self.assertEqual(code, 1)
+            self.assertIn(f"library_write: the library's scenes are stale: {library_write.REBUILD}", said)
+            self.assertNotIn(f"library_write: {library_write.SHOWCASE_STALE}", said)
+
+    def test_every_gate_takes_it_in(self) -> None:
+        # showcase() carries the page's problems, so scenes(), library_write --check and the site build stop on them,
+        # each with its own fix (the scene's with the scene builder's).
+        with tempfile.TemporaryDirectory() as folder:
+            library = _showcase_web(Path(folder))
+            self.assertEqual(library_write.scenes(self.parts, library)[1], [])
+            (library / SHOWCASE_FILE).unlink()
+            missing = f"{SHOWCASE_FILE} is missing or not JSON: write it (docs/LIBRARY_VIEW.md), then {self.RESHOOT}"
+            self.assertEqual(library_write.showcase(self.parts, library)[0], [missing])
+            self.assertEqual(library_write.scenes(self.parts, library)[1], [(None, missing)])
+        with tempfile.TemporaryDirectory() as folder:
+            library = _showcase_web(Path(folder))
+            _edit_scene(library, "flexitac-g1", lambda scene: scene["looks"]["umi-tpu-orange"].update(roughness=0.5))
+            self.assertEqual(library_write.scenes(self.parts, library)[1], [(None, ShowcaseTests.STALE)])
+            self.assertEqual(library_write.showcase(self.parts, library)[0], [ShowcaseTests.STALE])
+        # A library without the showcase (the tests' tiny ones) has no page to check.
+        with tempfile.TemporaryDirectory() as folder:
+            self.assertEqual(library_write.showcase(self.parts, _scene_library(Path(folder) / "library", self.parts)), ([], set()))
+
 
 class ViewTests(LibraryTestCase):
     """Each sensor's 3D view in entries.json (library_write.pictures(): its record's art and a gripper's stage, the user's
@@ -1248,7 +2529,7 @@ class ViewTests(LibraryTestCase):
             self.assertEqual(document["variants"][self.GRIPPER]["image"]["alt"], "WidowX 250, 2 mm on both fingers of the open gripper")
             # The art as the shots tool writes it: its document's canonical JSON, gzip at level 9 with no name and time 0.
             data = (library / "art" / "widowx-250-2mm.json.gz").read_bytes()
-            self.assertEqual((data[:4], data[4:8], library_write.read_art(data)["id"]), (b"\x1f\x8b\x08\x00", bytes(4), self.GRIPPER))
+            self.assertEqual((data[:4], data[4:8], data[9], library_write.read_art(data)["id"]), (b"\x1f\x8b\x08\x00", bytes(4), 3, self.GRIPPER))
             self.assertEqual(library_write.art_bytes(library_write.read_art(data)), data)
 
     def test_the_transition_both_ways(self) -> None:
@@ -1415,6 +2696,51 @@ class ViewTests(LibraryTestCase):
             with self.subTest(changed=path):
                 self.assertNotEqual(library_write.view_sha256(dict(sources, **{path: b"x"})), library_write.view_sha256(sources))
         self.assertEqual(library_write.VIEW_SOURCES, ("cad/library_view.js", "cad/library_stage.js", "cad/stl.js"))
+
+    def test_a_fingertip_s_pictures_follow_the_rules_look_of_its_part(self) -> None:
+        # A part without a scene whose look scenes.json's rules give (part_looks; docs/LIBRARY_VIEW.md "The looks"): its
+        # record keeps the look's hash (the shots tool's part_look_sha256), so pictures of another look, of none where
+        # one is given, or of one where none is given are refused; a gripper's record never has it.  The committed rules
+        # give the UMI finger its orange: the fixture's record (_shot_library) is of it.
+        orange = {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}
+        fix = f"re-shoot with tools/browser/library_shots.py --only {self.FINGERTIP}"
+        stale = f"its pictures are of another look of its part than scenes/scenes.json's rules give now (part_looks): {fix}"
+        of = lambda look: library_write.part_look_sha256({"look": look, "smooth_deg": None})  # noqa: E731
+
+        def looked(rule_look, record_look):
+            def change(records, library):
+                index = _json(library / library_write.SCENES_INDEX)
+                for key in library_write.RULES_OPTIONAL:
+                    index["rules"].pop(key, None)
+                if rule_look is not None:
+                    index["rules"]["part_looks"] = {"umi-finray": rule_look}
+                _write_json(library / library_write.SCENES_INDEX, index)
+                records[self.GRIPPER]["stage"]["scene_sha256"] = library_write.scene_sha256((library / "scenes" / "widowx-250.json").read_bytes(), index["rules"])
+                records[self.FINGERTIP].pop("part_look_sha256", None)
+                if record_look is not None:
+                    records[self.FINGERTIP]["part_look_sha256"] = of(record_look)
+            return change
+
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        images, problems, _, views = self.pictures(require_view=True, edit=lambda records, library: self.assertEqual(
+            (records[self.FINGERTIP]["part_look_sha256"], "part_look_sha256" in records[self.GRIPPER]),
+            (library_write.part_look_sha256(library_write.part_look(index, self.parts, "umi-finray")), False)))
+        self.assertEqual(problems, [])
+        self.assertEqual(library_write.part_look_sha256(library_write.part_look(index, self.parts, "umi-finray")), of(orange))
+        images, problems, _, views = self.pictures(require_view=True, edit=looked(dict(orange, color="#102030"), dict(orange, color="#102030")))
+        self.assertEqual(problems, [], "a look given in place, the record of it")
+        self.assertEqual(views[self.FINGERTIP], {"art": "art/umi-finray-2mm.json.gz", "scene": None})
+        self.assertEqual(self.pictures(require_view=True, edit=looked(None, None))[1], [], "no look: no hash")
+        self.refused(self.FINGERTIP, stale, edit=looked(orange, None))
+        self.refused(self.FINGERTIP, stale, edit=looked(None, orange))
+        self.refused(self.FINGERTIP, stale, edit=looked(orange, dict(orange, roughness=0.5)))
+        self.refused(self.FINGERTIP, stale, edit=lambda records, library: records[self.FINGERTIP].pop("part_look_sha256"))
+        self.refused(self.FINGERTIP, stale, edit=lambda records, library: records[self.FINGERTIP].update(part_look_sha256="0" * 64))
+        self.refused(self.GRIPPER, stale.replace(self.FINGERTIP, self.GRIPPER), edit=lambda records, library: records[self.GRIPPER].update(part_look_sha256="0" * 64))
+        # The shots tool writes the key only with a look.
+        record = SHOTS_TOOL.record(self.FINGERTIP, self.entries["variants"][self.FINGERTIP], {}, {}, "f" * 64, "photo")
+        self.assertNotIn("part_look_sha256", record)
+        self.assertEqual(SHOTS_TOOL.record(self.FINGERTIP, self.entries["variants"][self.FINGERTIP], {}, {}, "f" * 64, "photo", part_look="a" * 64)["part_look_sha256"], "a" * 64)
 
 
 class RequestTests(LibraryTestCase):
@@ -1707,6 +3033,9 @@ class PublicTests(unittest.TestCase):
         # its scenes and bodies are public with web/, and the documents name it in backticks only (no link).
         self.assertFalse(covered("tools/library_scenes.py"))
         self.assertTrue(covered("web/library/scenes/scenes.json"))
+        # The showcase's builder and its decimator (2026-11-12, stdlib) are public, with the folder they write.
+        for shipped in ("tools/library_showcase.py", "tools/mesh_decimate.py", "web/vendor/ufactory-g1/NOTICE.md", f"web/library/{SHOWCASE_SCENE}"):
+            self.assertTrue(covered(shipped), shipped)
         for document in (ROOT / "README.md", ROOT / "tools" / "README.md", ROOT / "docs" / "LIBRARY_VIEW.md", ROOT / "docs" / "INTEGRATION.md"):
             with self.subTest(document=document.name):
                 self.assertNotRegex(document.read_text(encoding="utf-8"), r"\]\([^)]*library_scenes\.py")
@@ -1738,7 +3067,8 @@ class PublicTests(unittest.TestCase):
     def test_the_new_files_are_python_3_9(self) -> None:
         # CI runs the suite on 3.9 too: no match, parenthesised context managers or other later syntax.
         for path in (ROOT / "tools" / "library_write.py", ROOT / "tools" / "library_import.py", ROOT / "tools" / "library_tips.py",
-                     ROOT / "tools" / "library_scenes.py", ROOT / "tools" / "browser" / "library_shots.py", Path(__file__)):
+                     ROOT / "tools" / "library_scenes.py", ROOT / "tools" / "browser" / "library_shots.py",
+                     ROOT / "tools" / "library_showcase.py", ROOT / "tools" / "mesh_decimate.py", Path(__file__)):
             if not path.exists():
                 continue  # the importer, the tips' tool and the scene builder are private: not in the public copy
             with self.subTest(file=path.name):
@@ -1928,7 +3258,11 @@ class PageTests(unittest.TestCase):
         rules, _ = parse_css(self.style)
         aspects = [(selector, value, rule.conditions) for rule in rules for selector in rule.selectors
                    for name, value, _ in rule.declarations if name == "aspect-ratio"]
-        self.assertEqual(aspects, [(".lib-shot", "16 / 10", ()), (".lib-shot-detail", "3 / 1", ("@media (max-width:899px)",))])
+        # Since 2026-11-12 the showcase's two boxes are 4:5 (its large card's, and its own page's at every width): the
+        # gripper stands upright, and at 16:10 four fifths of its picture were empty; its page has no Open to keep in a
+        # phone's first screen, so its box is not squashed there.
+        self.assertEqual(aspects, [(".lib-shot", "16 / 10", ()), (".lib-shot-detail", "3 / 1", ("@media (max-width:899px)",)),
+                                   (".lib-shot-showcase", "4 / 5", ()), (".lib-detail-showcase .lib-shot-detail", "4 / 5", ())])
         fitted = {name: value for rule in rules if ".lib-shot > img" in rule.selectors and not rule.conditions for name, value, _ in rule.declarations}
         self.assertEqual((fitted.get("object-fit"), fitted.get("width"), fitted.get("height")), ("contain", "100%", "100%"))
         # No rule hides a picture, moves its image off the centre or sets a box's height past its aspect.
@@ -1953,11 +3287,14 @@ class PageTests(unittest.TestCase):
         self.assertIn("const CARD = [640, 400];", self.script)
         self.assertIn('const VIEWS = [["exploded", "Exploded"], ["assembled", "Assembled"]];', self.script)
         slot = _inner(self.script, "slot")
-        self.assertIn('const src = kind === "detail" ? image?.[view]?.src : image?.exploded?.card;', slot)
+        # (Since 2026-11-12 a third kind, the showcase's large card: its own card file at its own size, loaded at once,
+        # being the grid's first picture; a card's and a sensor's page's as they were.)
+        self.assertIn('const src = kind === "detail" ? image?.[view]?.src : kind === "showcase" ? image?.card?.src : image?.exploded?.card;', slot)
         self.assertIn("if (!src) {\n      box.append(field(variant));\n      return box;\n    }", slot)
-        self.assertIn('const [width, height] = kind === "detail" ? [image[view].width, image[view].height] : CARD;', slot)
+        self.assertIn('const [width, height] = kind === "detail" ? [image[view].width, image[view].height] '
+                      ': kind === "showcase" ? [image.card.width, image.card.height] : CARD;', slot)
         self.assertIn('el("img", {src: BASE + src, width, height, alt: image.alt || "", decoding: "async",\n'
-                      '      loading: kind === "detail" ? null : "lazy"});', slot)
+                      '      loading: kind === "card" ? "lazy" : null});', slot)
         self.assertIn('shown.addEventListener("error", () => {\n      shown.replaceWith(field(variant));\n      missed?.(view);\n    }, {once: true});', slot)
         self.assertIn("return drawing;", _inner(self.script, "field"))
         # Every picture is slot()'s: the shelf's cards, the family card (its default sensor's), a gripper's card (its
@@ -1965,6 +3302,7 @@ class PageTests(unittest.TestCase):
         self.assertIn('slot(variant, "card")', _inner(self.script, "card"))
         self.assertIn('slot(state.index.variants[family.default], "card")', _inner(self.script, "familyCard"))
         self.assertIn('slot(state.index.variants[part.default], "card")', _inner(self.script, "gripperCard"))
+        self.assertIn('slot(entry, "showcase", SHOWCASE_VIEW)', _inner(self.script, "showcaseCard"))
         self.assertNotIn('"tile"', self.script)
         self.assertEqual(len(re.findall(r'el\("img"', self.script)), 1, "one image: slot()'s")
 
@@ -2010,11 +3348,13 @@ class PageTests(unittest.TestCase):
         present = _inner(script, "present")
         self.assertIn("if (!variant.view || navigator.connection?.saveData || live.off) {", present)
         self.assertLess(present.index("navigator.connection?.saveData"), present.index("draw();"))
-        # present() from a sensor's page alone; the grid takes the view down (rest()) and draws none.
-        self.assertEqual(len(re.findall(r"\bpresent\(id\);", script)), 1)
+        # present() from a sensor's page and, since 2026-11-12, from the showcase's own page (its 3D view is the same
+        # one, drawn from its placed record); the grid takes the view down (rest()) and draws none.
+        self.assertEqual(len(re.findall(r"\bpresent\(id\);", script)), 2)
         self.assertIn("    present(id);\n", _inner(script, "renderDetail"))
+        self.assertIn("    present(id);\n", _inner(script, "renderShowcase"))
         self.assertIn("rest();", _inner(script, "showGrid"))
-        for name in ("renderGrid", "card", "gripperCard", "grippers", "familyCard", "slot", "gallery"):
+        for name in ("renderGrid", "card", "gripperCard", "grippers", "familyCard", "showcaseCard", "slot", "gallery"):
             with self.subTest(function=name):
                 self.assertNotRegex(_inner(script, name), r"\b(present|draw|import)\(")
         # Drawn, the stage shows the view and hides the picture under it (is-live): only once it is drawn.
@@ -2101,6 +3441,87 @@ class PageTests(unittest.TestCase):
                 self.assertEqual(entries["variants"][record["default"]]["pitch_mm"], 2)
                 self.assertEqual(min(entries["variants"][key]["pitch_mm"] for key in record["variants"]), 1)
         self.assertEqual(len(grid_cards(entries)), 12, "the grippers' seven cards, the UMI shelf's four and its Tapered tips card")
+
+    def test_the_showcase_is_the_grid_s_first_card_and_a_page_of_its_own(self) -> None:
+        # The user's request of 2026-11-12 ("在lib最上面一栏放置flexitac+xarm gripper的原始版本的visualization; 这个版本是人手
+        # design的不是autogenerate"): the grid's first section is one large card from showcase.json, a picture as every
+        # card (slot(): no 3D on the grid), its label, its title and one line; it opens the showcase's own page, where the
+        # 3D view of a sensor's page is drawn from the placed record.  The showcase is no entry: no pitch, no Open in Gen
+        # by Surface, no download of the generator's.  Without showcase.json the Library is the one of before.
+        script = self.script
+        self.assertIn(f'const SHOWCASE_FORMAT = "{library_write.SHOWCASE_FORMAT}";', script)
+        self.assertIn('const SHOWCASE_VIEW = "assembled";', script)
+        start = _inner(script, "start")
+        self.assertIn("const [index, showcase] = await Promise.all([json(`${BASE}entries.json`), json(`${BASE}showcase.json`).catch(() => null)]);", start)
+        self.assertIn("state.showcase = Object.hasOwn(index.variants, showcase?.id) || Object.hasOwn(index.parts, showcase?.id) ? null : showcaseOf(showcase);", start)
+        of = _inner(script, "showcaseOf")
+        self.assertIn('if (data?.format !== SHOWCASE_FORMAT || typeof data.id !== "string" || !data.placed || !data.image || !data.tutorial?.href '
+                      '|| !Array.isArray(data.sources)) return null;', of)
+        self.assertIn("build_id: null, view: {scene: data.placed.scene, placed: data.placed}", of)
+        grid = _inner(script, "renderGrid")
+        self.assertIn("      ...(state.showcase ? [showcaseCard()] : []),\n      ...(parts.length ? [grippers(parts)] : []),\n", grid)
+        card = _inner(script, "showcaseCard")
+        self.assertIn('el("a", {className: "lib-card lib-showcase", id: "showcase", href: `#${id}`, "data-showcase": id,', card)
+        self.assertIn('slot(entry, "showcase", SHOWCASE_VIEW),', card)
+        # Its words: the label, the title and one line, each showcase.json's; nothing else is written on the card.
+        self.assertEqual(re.findall(r"data\.(\w+)", card), ["title", "label", "label", "title", "text"])
+        self.assertEqual(re.findall(r'el\("\w+", \{className: "([^"]+)"', card), ["lib-showcased", "lib-card lib-showcase", "lib-card-text", "lib-badge",
+                                                                                     "lib-showcase-title", "lib-showcase-line"])
+        # The routes: its page at its id (before the variants: showcase.json's id is none of them), its card a place.
+        route = _inner(script, "route")
+        self.assertIn("    if (state.showcase?.id === id) { showShowcase(); return; }\n    if (Object.hasOwn(variants, id)) { showDetail(id); return; }", route)
+        self.assertIn('const places = new Set([...(state.showcase ? ["showcase"] : []), "grippers",', route)
+        shown = _inner(script, "showShowcase")
+        self.assertIn("    state.picture = SHOWCASE_VIEW;\n", shown)
+        self.assertIn("    renderShowcase();\n    window.scrollTo(0, 0);\n    $(\"libDetailTitle\").focus({preventScroll: true});", shown)
+        # Its page: the picture's frame with the Exploded | Assembled control (gallery()), the 3D view over it
+        # (present()), the back link to its card, the tutorial (the address is showcase.json's: the script names none)
+        # as a grey pill opened in a new tab, the sources' notices as files of the site.
+        page = _inner(script, "renderShowcase")
+        self.assertIn('el("a", {className: "lib-back", href: "#showcase"}, chevron("left"), el("span", {}, "Library")),', page)
+        self.assertIn('el("div", {className: "lib-detail-body lib-detail-showcase"},\n        gallery(entry),', page)
+        self.assertIn('el("a", {className: "lib-pill", href: data.tutorial.href, target: "_blank", rel: "noopener noreferrer"}, data.tutorial.label)', page)
+        self.assertIn('el("a", {href: BASE + source.notice, target: "_blank", rel: "noopener"}, "notice")', page)
+        self.assertIn('el("h2", {className: "lib-detail-title", id: "libDetailTitle", tabindex: "-1"}, whole(data.title)),', page)
+        # No generator downloads, no Open in Gen by Surface, no pitch, no facts, no prose of its own.
+        for word in ("lib-open", "?part=", "renderDownloads", "lib-downloads", "lib-facts", "segments(", "lib-detail-note", "api/export", "Gerber ZIP"):
+            with self.subTest(absent=word):
+                self.assertNotIn(word, page)
+        self.assertEqual(re.findall(r'"([A-Z][^"]*)"', page), ["Library"], "the page's only word of its own: the back link's")
+        # The 3D view: the one of a sensor's page, drawn from the placed record (docs/LIBRARY_VIEW.md "A placed sensor").
+        self.assertIn("if (variant.view.placed) return live.view.show({base: BASE, id, placed: variant.view.placed, mode: state.picture});", _inner(script, "draw"))
+        self.assertIn("const shown = id => (id && state.showcase?.id === id ? state.showcase.entry : state.index.variants[id]);", script)
+        for name in ("present", "draw", "setLive"):
+            with self.subTest(function=name):
+                self.assertIn("shown(", _inner(script, name))
+                self.assertNotIn("state.index.variants[", _inner(script, name))
+        # Its style: the card as wide as the row, its picture beside its words from 735 px and above them below; the
+        # cards' own look (no rule of its own for a background, a shadow or the blue); its page's box beside its words
+        # from 900 px, never wider than 440 px in one column.
+        rules, _ = parse_css(self.style)
+        styled = {}
+        for rule in rules:
+            for selector in rule.selectors:
+                if "showcase" in selector:
+                    styled.setdefault((selector, rule.conditions), {}).update({name: value for name, value, _ in rule.declarations})
+        self.assertEqual(styled[(".lib .lib-showcase", ())].get("flex-direction"), "row")
+        self.assertEqual(styled[(".lib .lib-showcase", ("@media (max-width:734px)",))].get("flex-direction"), "column")
+        self.assertEqual((styled[(".lib-shot-showcase", ())].get("order"), styled[(".lib-shot-showcase", ("@media (max-width:734px)",))].get("order")), ("1", "0"))
+        self.assertEqual(styled[(".lib-detail-body.lib-detail-showcase", ("@media (min-width:900px)",))], {"grid-template-columns": "minmax(0,5fr) minmax(0,7fr)"})
+        self.assertEqual(styled[(".lib-detail-showcase .lib-frame", ("@media (max-width:899px)",))].get("max-width"), "440px")
+        for (selector, _), declarations in styled.items():
+            with self.subTest(selector=selector):
+                self.assertFalse({"background", "background-color", "box-shadow", "border", "transition", "animation"} & set(declarations))
+        # The committed document: its id an address of its own (the name rule: lower case, digits, hyphens; no part's,
+        # variant's, family's or place's), its pictures the contract's sizes.
+        document = _json(LIBRARY / "showcase.json")
+        entries = _json(LIBRARY / "entries.json")
+        self.assertRegex(document["id"], r"^[a-z0-9]+(-[a-z0-9]+)*$")
+        taken = {*entries["variants"], *entries["parts"], *entries["families"], "showcase", "grippers", "shelf-start",
+                 *(f"gripper-{part}" for part in entries["parts"]), *(f"shelf-{part}" for part in entries["parts"])}
+        self.assertNotIn(document["id"], taken)
+        self.assertEqual({kind: (document["image"][kind]["width"], document["image"][kind]["height"]) for kind in ("exploded", "assembled", "card")},
+                         {"exploded": (1280, 1600), "assembled": (1280, 1600), "card": (800, 1000)})
 
     def test_a_page_opened_at_its_address_paints_no_frame_of_the_grid_s_title(self) -> None:
         # The reviews of 2026-11-06: a sensor's page shared or reloaded had first painted the grid's title and tagline
@@ -2314,6 +3735,28 @@ class SiteBuildTests(unittest.TestCase):
             for path in library_write.VIEW_SOURCES:
                 if (WEB / path).is_file():
                     self.assertTrue((static / path).is_file(), path)
+            # The showcase (2026-11-12): its scene, the holder and the vendor's folder, whole and nothing more, where the
+            # scene's paths find them (static/library/../vendor/ufactory-g1/).
+            scene = _json(static / "library" / SHOWCASE_SCENE)
+            self.assertEqual((static / "library" / SHOWCASE_SCENE).read_bytes(), (LIBRARY / SHOWCASE_SCENE).read_bytes())
+            for body in scene["bodies"]:
+                with self.subTest(showcase=body["mesh"]):
+                    self.assertEqual(hashlib.sha256((static / "library" / body["mesh"]).read_bytes()).hexdigest(), body["sha256"])
+            self.assertEqual({path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in (static / "vendor" / "ufactory-g1").iterdir()
+                              if path.name != "NOTICE.md"}, SHOWCASE_FILES)
+            self.assertEqual((static / "vendor" / "ufactory-g1" / "NOTICE.md").read_bytes(), (SHOWCASE / "NOTICE.md").read_bytes())
+            # Its page's document and pictures, and what the document's paths name, each found from static/library/ as
+            # the page asks for it: the placed record's art and finger, the two notices.
+            document = _json(static / "library" / SHOWCASE_FILE)
+            self.assertEqual((static / "library" / SHOWCASE_FILE).read_bytes(), (LIBRARY / SHOWCASE_FILE).read_bytes())
+            for kind in ("exploded", "assembled", "card"):
+                with self.subTest(picture=kind):
+                    self.assertEqual(hashlib.sha256((static / "library" / document["image"][kind]["src"]).read_bytes()).hexdigest(), document["image"][kind]["sha256"])
+            for path in (document["placed"]["art"], document["placed"]["mesh"]["file"], document["placed"]["scene"],
+                         *(item["notice"] for item in document["sources"])):
+                with self.subTest(named=path):
+                    self.assertTrue((static / "library" / path).is_file())
+            self.assertEqual(hashlib.sha256((static / "library" / document["placed"]["mesh"]["file"]).read_bytes()).hexdigest(), document["placed"]["mesh"]["sha256"])
 
     def test_the_gate_writes_the_exports_and_their_record(self) -> None:
         import app
@@ -2325,7 +3768,8 @@ class SiteBuildTests(unittest.TestCase):
             files = _json(static / "library" / "files.json")
             self.assertEqual(record, {"variants": 2, "files_json_sha256": hashlib.sha256((static / "library" / "files.json").read_bytes()).hexdigest(),
                                       "pictured": sum(1 for identifier in ("umi-finray-2mm", "widowx-250-1mm") if entries["variants"][identifier]["image"]),
-                                      "viewed": sum(1 for identifier in ("umi-finray-2mm", "widowx-250-1mm") if entries["variants"][identifier]["view"])})
+                                      "viewed": sum(1 for identifier in ("umi-finray-2mm", "widowx-250-1mm") if entries["variants"][identifier]["view"]),
+                                      "showcase": "flexitac-g1"})
             self.assertEqual((files["format"], sorted(files["variants"])), ("flexitac-library-files/v1", ["umi-finray-2mm", "widowx-250-1mm"]))
             for identifier, listed in files["variants"].items():
                 variant = entries["variants"][identifier]
@@ -2340,6 +3784,27 @@ class SiteBuildTests(unittest.TestCase):
                         self.assertEqual(listed[kind], {"path": f"files/{identifier}/{name}", "name": name, "bytes": len(data),
                                                         "sha256": hashlib.sha256(data).hexdigest()})
             self.assertEqual(sorted(path.name for path in (static / "library" / "files").iterdir()), ["umi-finray-2mm", "widowx-250-1mm"])
+
+    def test_a_stale_showcase_stops_the_build(self) -> None:
+        # The showcase is no sensor: whichever sensors are built, a problem of its scene, its folder or its page
+        # (library_write.showcase(), carried by scenes() with no part) stops the build and nothing is written; pictures of
+        # older figure or view sources are published with a warning (the build runs no browser).
+        with tempfile.TemporaryDirectory() as folder:
+            static = Path(folder) / "static"
+            with mock.patch.object(library_write, "showcase", return_value=([ShowcaseTests.STALE], set(SHOWCASE_BODIES))):
+                with self.assertRaisesRegex(build_static_site.BuildError, re.escape(
+                        "the library's scenes are stale (showcase.json: its pictures are of another scene or rules than the files now")):
+                    build_static_site.library(static, only=["widowx-250-1mm"])
+            self.assertFalse((static / "library" / "files.json").exists(), "nothing written")
+            said = io.StringIO()
+            with mock.patch.object(library_write, "showcase_page", return_value=([], True)), contextlib.redirect_stderr(said):
+                record = build_static_site.library(static, only=["widowx-250-1mm"])
+            self.assertEqual(record["showcase"], "flexitac-g1")
+            self.assertIn("build_static_site: warning: the showcase's pictures are of older figure or view sources: "
+                          "re-shoot with tools/browser/library_shots.py --showcase\n", said.getvalue())
+        # A library without the showcase's document (the tests' own) has none.
+        self.assertIn('showcase = library_write.SHOWCASE_ID if (source / library_write.SHOWCASE_FILE).is_file() else None',
+                      (ROOT / "tools" / "build_static_site.py").read_text(encoding="utf-8"))
 
     def test_a_stale_fit_stops_the_build(self) -> None:
         # A copy of one sensor's files (not the UMI finger's: its fit and mesh live in web/vendor/umi): its reply changed

@@ -35,6 +35,15 @@ PUBLIC = (
     "tools/mutation_check.py", "tools/golden_values.py", "tools/compare_easyeda_gerbers.py", "tools/browser",
     # The Library's writer (web/library/ is in web; its importer, tools/library_import.py, reads the private recipes).
     "tools/library_write.py",
+    # The looks' tool and its look files (the bodies shared out by material, the user's request of 2026-11-12): standard
+    # library only, and the public CI's proof that the committed bodies and scenes are what the look files give.
+    "tools/library_split.py", "tools/library_looks",
+    # The showcase's builder and its decimator (2026-11-12: standard library only; their meshes are in web/vendor/
+    # and web/library/, the vendor's own file they read is not in the repository): the public copy's tests check the
+    # committed files with them (--check needs no source).
+    "tools/library_showcase.py", "tools/mesh_decimate.py",
+    # The showcase's sensor (2026-11-12): the reader of the original FlexiTac pad's Gerbers (web/vendor/flexitac-v2/).
+    "tools/flexitac_v2.py",
 )
 
 

@@ -104,7 +104,8 @@ carrying the same board, or a mirror-image part carrying the mirror-image
 board, which is not the sensor's Gerbers; the finger nearer the viewer is
 see-through in both views and its sensor stays assembled, the other
 finger's sensor explodes into the gap; the MakerMods Metal Arm's two tips
-stand on a plain rail drawn by this project, not MakerMods hardware), the
+stand on a plain rail drawn by this project, not MakerMods hardware, with
+its steel guide rail, bores and end stops drawn over it by eye), the
 UMI finger and its tapered tips as the fingertip.  Each card shows it
 exploded; a sensor's page shows its picture and, drawn over it, the same
 scene in 3D to turn (drag it, or the arrow keys; 0 or a double click
@@ -123,7 +124,15 @@ cutting tool), the meshes and licence texts with their `NOTICE.md`, the
 grippers' scenes of the 3D view (`scenes/`, with the rules every scene is
 drawn by, and their bodies in `bodies/`: the grippers' open models,
 decimated, each tabled in `NOTICE.md`; written by a private scene
-builder), each sensor's art (`art/`, the generator's art of its two boards,
+builder; since 2026-11-12 every gripper is drawn after photos of the real
+product, each component in its material's look, metal with its lustre:
+`tools/library_split.py` shares its bodies out by material, adds the few
+plain shapes the photos show and the models lack, and writes the looks
+into its scene from `tools/library_looks/<part>.json`, and its `--check`
+proves the committed files are what those look files give; the UMI finger
+and its tapered tips, which have no scene, are drawn in the real finger's
+orange TPU by the rules' `part_looks`, while Gen by Surface keeps its grey
+part), each sensor's art (`art/`, the generator's art of its two boards,
 written by the shots tool), and what
 `tools/library_write.py` writes from them: `fits/<id>.json` (the request the
 page sends for the sensor and the engine's reply) and `entries.json` (the
@@ -155,6 +164,14 @@ the scenes' rules fails `--check` and the site build, and so does a scene
 the writer refuses; a sensor without its picture fails `--check` and the
 tests.  After a refit, a new sensor, a change of the figure or of a scene,
 write, shoot the changed sensors again and write again.
+
+The Library's first card is its showcase: the original FlexiTac sensor,
+hand-designed and not generated, on the xArm gripper's soft fingers.  It is
+no sensor of `entries.json`: `web/library/showcase.json` holds its words,
+its placed record and its pictures (`tools/library_showcase.py` builds its
+scene, `tools/browser/library_shots.py --showcase` shoots it,
+`tools/library_write.py --check` and the site build check it; see
+[docs/LIBRARY_VIEW.md](docs/LIBRARY_VIEW.md)).
 
 ## What it does
 
@@ -512,6 +529,17 @@ Apache License 2.0 ([LICENSE](LICENSE)).  The vendored files under `web/vendor/`
 keep their own licences, each named in its folder's `NOTICE.md`: three.js
 (MIT), the UMI finger (Apache-2.0) and the US Mint photo of the quarter
 (public domain); the static site adds Pyodide (MPL-2.0, `static/py/pyodide/NOTICE.md`).
+One folder there is not open-source: `web/vendor/ufactory-g1/`, the meshes
+of the xArm Gripper G1 that the Library's showcase draws, made from
+UFACTORY's 3D model.  They are the property of UFACTORY, used by the project
+owner's decision of 2026-11-12, and this repository's Apache License 2.0
+does not cover them ([web/vendor/ufactory-g1/NOTICE.md](web/vendor/ufactory-g1/NOTICE.md)).
+Another is not free for commercial use: `web/vendor/flexitac-v2/`,
+the original hand-designed FlexiTac sensor's geometry and art for the
+Library's showcase, is CC BY-NC 4.0 material of Columbia University
+(non-commercial, not Apache-2.0;
+[web/vendor/flexitac-v2/NOTICE.md](web/vendor/flexitac-v2/NOTICE.md)), and
+it is published with `web/` by the static site and the public export.
 The Library's gripper parts, the bodies of its 3D view's grippers and their
 licence texts (Apache-2.0, MIT and BSD-3-Clause, from their pinned upstream
 commits; the Franka pad's hull, the UMI finger's tapered tips and the

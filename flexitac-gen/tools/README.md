@@ -1,9 +1,14 @@
 # Development tools
 
 None of these is part of the unittest suite, and none writes into the
-project but `library_write.py` (the Library's data, `web/library/`) and
+project but `library_write.py` (the Library's data, `web/library/`),
+`library_split.py` (the grippers' bodies by material, their scenes' looks
+and their rows of `web/library/NOTICE.md`),
 `browser/library_shots.py` (the Library's pictures, `web/library/shots/`,
-and each sensor's art, `web/library/art/`).
+each sensor's art, `web/library/art/`, and with `--showcase` the
+showcase's pictures, `web/library/showcase/`, and `showcase.json`'s
+records of them) and `library_showcase.py` (the showcase's meshes, drawn
+shapes and scene, `web/vendor/ufactory-g1/` and `web/library/`).
 
 - `mutation_check.py`: applies known defects to scratch copies of the
   project and runs the suite on each; every mutant must be killed unless the
@@ -165,5 +170,105 @@ and each sensor's art, `web/library/art/`).
   trimesh and manifold3d; the grippers' scenes and bodies from a private
   scene builder, `tools/library_scenes.py`, which needs numpy and trimesh
   and fills `scenes.json`'s `scenes` map, never its rules.)
+- `library_split.py`: gives each Library gripper its looks (the user's
+  request of 2026-11-12: every gripper coloured after photos of the real
+  product; `docs/LIBRARY_VIEW.md`, "The looks").  One look file per part,
+  `library_looks/<part>.json`, names the look of each body of the part's
+  scene, or shares a body out into components by rule (a connected
+  component after welding at 0.01 mm, recognised by its box and triangle
+  count; the triangles inside a box; the rest) or draws a plain shape the
+  model lacks; `library_looks/base.json` holds the base looks every part
+  starts from.  It writes `web/library/bodies/<part>/<component>.stl`, the
+  scene's bodies, `looks`, `part_look` and `smooth_deg`, and the bodies'
+  rows of `NOTICE.md`; the same input gives the same bytes, from the
+  unsplit body (its SHA-256 pinned) or from its components (their facets'
+  hash pinned; an unsplit file of other bytes is refused).  `--check` proves
+  the committed files are what the look files give and that no scene has
+  a look, a crease angle or a drawn body without a look file (the
+  showcase's scene has its looks and its drawn shapes from
+  `library_showcase.py`, each shape pinned in `library_write.py`)
+  (`tests/test_library_split.py` runs it); `--pin` and
+  `--components` help write a look file; `--out` is a dry run.  Standard
+  library only.  A part without a look file is not touched.  After it:
+  `library_write.py`, the shoot of that part, `library_write.py` again.
+- `library_showcase.py`: builds the Library's showcase (the project
+  owner's decision of 2026-11-12: the hand-designed FlexiTac sensor on
+  UFACTORY's xArm Gripper G1 with UMI soft fingers): the vendor's 3D model
+  `Gripper G1 3D File (With).stl` split as the FlexiTac Tactile Demo splits
+  it (the shell, the frame, the flange, the pivot pins, the four links, each
+  finger's coupler, cut where the UMI holder sits, and its pins) and each
+  piece decimated to within 0.1 mm, into `web/vendor/ufactory-g1/` (twelve
+  binary STL in millimetres whose headers say what was changed); HandUMI's
+  finger holder, decimated the same way, into
+  `web/library/bodies/flexitac-g1/`; beside it seven plain shapes the
+  project draws where the owner's photo of the gripper shows them, or the
+  model has their wells (`drawn-<name>.stl`, `library_split.py`'s boxes
+  and cylinders, no vendor's geometry: a shell screw's head, a holder
+  bolt's head and nut, the black block in the shell's top slot, and behind
+  each finger the extender board laid along the pad's tails, its two
+  sockets round the tails' ends and a stub of the flat cable), drawn again
+  on every run; and the showcase's scene,
+  `web/library/scenes/flexitac-g1.json`, the gripper at the Tactile Demo's
+  pose (the sensors' centres 55 mm apart) about the Library's UMI finger as
+  its left finger (the pad's straps toward the shell's face without the
+  logo, as built), each body in a base look or one of the showcase's own
+  (the shell's gloss white, the printed parts' white, the pins' brushed
+  steel, the screws' matte black, the fingers' orange TPU, the UMI rows'
+  own `umi-tpu-orange`, the boards' yellow, the cables' white),
+  chosen after photos of the real gripper and judged from both sides of
+  it, with a camera of its own and no finger see-through.  The sources are read
+  from a folder given on the command line (`--sources DIR`) and never
+  copied; a file that is not the pinned one (by SHA-256) is refused.  Every
+  mesh it writes and every shape it draws is pinned by SHA-256 in
+  `library_write.py`, so `--check` proves the committed files without the
+  sources (and with `--sources`, that the sources build them byte for
+  byte); a build of other bytes writes nothing without `--repin`;
+  `--notice` prints the notices' rows.  After a change of the scene, shoot
+  the showcase's pictures again (`browser/library_shots.py --showcase`):
+  `--check` reports them stale until then.  The
+  guards are `library_write.py`'s `showcase()`: the vendor's folder holds
+  exactly those files at those hashes and its notice, within a byte budget
+  of its own; the notice says whose the model is; only the showcase's scene
+  names the folder (no part, entry, fit, sample or other scene); the
+  vendor's own file, unsplit and undecimated (under any header), its
+  undecimated pieces (the deny-list) and a copy of one of the folder's
+  meshes anywhere else are refused under `web/`; and `showcase_page()`,
+  the showcase's page's document (`web/library/showcase.json`: its words,
+  its placed record, its three pictures in `web/library/showcase/` and
+  what they were shot from, the stage's numbers of that shoot within the
+  rules' checks and the showcase's own bounds; `docs/LIBRARY_VIEW.md`).
+  Standard library only, public.
+- `mesh_decimate.py`: the decimation the showcase's meshes are made with,
+  in the standard library and to the same bytes on every run and Python:
+  quadric error metrics with half-edge collapses (a vertex moves onto a
+  neighbour, so every vertex kept is a vertex of the input), the cheapest
+  first, none past the tolerance, across an open or non-manifold edge, or
+  turning a face more than 15 degrees; then the gate: the two-way deviation
+  is measured (the exact distance from every vertex, edge middle, triangle
+  centre and a grid about 0.5 mm apart on each surface to the other) and,
+  where it exceeds the tolerance, the longest prefix of the collapses
+  within it is kept.  `python3 tools/mesh_decimate.py in.stl out.stl
+  --tolerance 0.1`.  `tests/test_mesh_decimate.py` pins the bytes of small
+  fixtures.
+- `flexitac_v2.py`: the original, hand-designed FlexiTac sensor (FlexiTac
+  V2, 12 x 32 taxels at 2 mm) as data, for the Library's showcase (the
+  user's request of 2026-11-12): it reads the two Gerber ZIPs of the
+  FlexiTac hardware tutorial from a folder given on the command line (never
+  committed; read in memory, run it with `python3 -I`) into
+  `web/vendor/flexitac-v2/geometry.json`: each FPC's outline, the slots
+  between its electrodes and the window of the A-shaped tail, its
+  electrodes, traces, gold fingers, coverlay openings and stiffeners, every
+  length as the Gerber writes it.  The ZIPs' SHA-256s and the JSON's are
+  pinned: `--check` says whether the committed file is the pinned one and,
+  with the folder, whether the ZIPs give it again.  `engine_boards()` gives
+  the two boards in the engine's layout mapping for its SVG writer
+  (`browser/flexitac_v2_art.py` makes the showcase's art from them), with
+  the 0.2 mm stiffeners under the gold ends only: the 0.1 mm ones would be
+  painted as a connector's dark stiffener where the real pad is amber.  The
+  geometry and the art are CC BY-NC 4.0 material of Columbia University
+  (`web/vendor/flexitac-v2/NOTICE.md`), not Apache-2.0.
+  `tests/test_showcase.py` checks the file, the reader, the boards, the art
+  and the placed record ([docs/LIBRARY_VIEW.md](../docs/LIBRARY_VIEW.md),
+  "A placed sensor").
 - `browser/`: Playwright checks of the browser UI (their own virtual
   environment; see `browser/README.md`).
