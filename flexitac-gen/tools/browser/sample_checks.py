@@ -1,4 +1,4 @@
-"""The samples of Gen by Surface (index.html #samplePalette, web/samples/samples.json; the user's request of 2026-11-06:
+"""The samples of Gen by Surface (gen.html #samplePalette, web/samples/samples.json; the user's request of 2026-11-06:
 "在这个索引的下方,放置两列stl,这个stl可以从左边拖到右边的框里面 ... 主要要做出 能从左边把cad 拖到右边框然后开始生成"; and
 the same day's later one: "测试用的sensor,不要托进去之后直接就生成好了,包括新拖进去的cad,不要直接显示哪个面被选择;只有最开始
 default的umi finger需要这样": a sample loads its part alone, no face selected, nothing built, and the visitor clicks the face
@@ -78,7 +78,7 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DARK_CHOICE, SCRATCH, SHOTS, URL, check, summary, wait_until  # noqa: E402
+from rp import DARK_CHOICE, GEN_URL, SCRATCH, SHOTS, check, summary, wait_until  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
@@ -135,7 +135,7 @@ def state(page):
 
 
 def open_page(page, query=""):
-    page.goto(URL + query)
+    page.goto(GEN_URL + query)
     wait_until(page, "() => document.getElementById('cadState')?.textContent.startsWith('{')", 60)
     wait_until(page, SETTLED, 180)
     page.wait_for_timeout(150)
@@ -316,7 +316,7 @@ def part_sizes(browser):
         page = context.new_page()
         if without:
             page.add_init_script(NO_PALETTE)
-        page.goto(URL)
+        page.goto(GEN_URL)
         wait_until(page, "() => document.getElementById('cadState')?.textContent.startsWith('{')", 60)
         wait_until(page, SETTLED, 180)
         page.wait_for_timeout(900)  # the build's scroll into sight (smooth) lands
@@ -852,7 +852,7 @@ def part_static(browser):
         page.on("request", lambda request: outside.append(request.url) if request.url.startswith("http") and not request.url.startswith(base)
                 and not request.url.startswith("https://api.github.com/") else None)
         SiteFiles.seen.clear()
-        page.goto(base + "?debug")
+        page.goto(base + "gen.html?debug")
         wait_until(page, "() => document.getElementById('cadState')?.textContent.startsWith('{')", 120)
         wait_until(page, SETTLED, 600)
         timings = []

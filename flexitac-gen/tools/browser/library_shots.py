@@ -18,7 +18,7 @@ into web/library/art/<id>.json.gz (docs/LIBRARY_VIEW.md).  tools/library_write.p
 Against a running app.py (--port, else FPC_PORT) that serves this project (its entries.json and scenes/scenes.json must
 be this tree's), in headless Chromium on SwiftShader (as cad_checks.py), one sensor at a time (app.py serves one surface
 request at a time):
-1. the art: one page per run, the generator's (index.html#rect).  For each sensor its fit's proposal #1 design is built
+1. the art: one page per run, the generator's (gen.html#rect; index.html#rect until 2026-11-16).  For each sensor its fit's proposal #1 design is built
    by POST api/generate (the build id must be the entry's: else the fit is stale), and that page's app.js answers
    "fpc:board-art" {boards, px_per_mm: ART_PX_PER_MM, max_px: ART_MAX_PX} in its default look (Photo), as it answers
    Gen by Surface's figure: each board's eight keys (its copper and polyimide sides as SVG documents, the look's styles
@@ -26,7 +26,7 @@ request at a time):
    library_write.art_bytes() (canonical JSON, gzip with no name and time 0);
 2. the pictures, from the Library's 3D view (web/cad/library_view.js: Gen by Surface's figure, web/cad/onpart.js, and for a
    gripper of scenes/scenes.json its stage, web/cad/library_stage.js), each sensor in a new browser context at VIEWPORT,
-   DPR 2, the light scheme: library.html?probe=shoot#<id>, its entries.json and the sensor's art served by this tool
+   DPR 2, the light scheme: ?probe=shoot#<id> (the Library, the first page since 2026-11-16; library.html before), its entries.json and the sensor's art served by this tool
    (page.route: every variant's "view" as library_write writes it, the art fresh from step 1), so nothing need be
    written in web/ before the shoot and --check writes nothing; waited for until #libViewState says the view is drawn
    for the entry's build (?probe=shoot: the view leaves the drawing where the figure frames it, and a gripper's stage
@@ -66,7 +66,7 @@ art/...).  A full run removes the pictures and the art of sensors no longer list
 scene (the UMI finger and its tapered tips; every such sensor without ID) is that figure but for the part's look (since
 2026-11-12 scenes.json's rules draw those parts in the real finger's orange TPU, where the Library's pictures had been
 Gen by Surface's figure byte for byte; Gen by Surface keeps its grey part).  For each sensor, writing nothing:
-1. Gen by Surface's figure (./?part=<id>, the figure on its own: generator_shoot(), as the pictures were shot until the
+1. Gen by Surface's figure (gen.html?part=<id>, ./?part=<id> until 2026-11-16, the figure on its own: generator_shoot(), as the pictures were shot until the
    3D view) is the picture pinned for it in tools/browser/generator_figure.json (its three files' bytes and SHA-256, of
    the entry's fit and build: the Library's pictures of before the look, so the figure of today is the figure of then);
 2. the Library's view with the rules' looks served away is that figure, pixel for pixel (the same part, sheets, lights,
@@ -91,7 +91,7 @@ each in the page's light box.  About 6 to 10 s a sensor, the art 0.6 to 1.6 s of
 host, 2026-11-05, with the scenes of the design: 126 files, 3.70 MB; the first screen's cards 0.21 MB; the art 0.41 MB).
 
 --showcase shoots the Library's showcase instead (the hand-designed FlexiTac sensor on the xArm gripper; no sensor of
-entries.json): its own page, library.html?probe=shoot#<its id>, with web/library/showcase.json served by this tool (the
+entries.json): its own page, ?probe=shoot#<its id> (library.html?probe=shoot#<its id> until 2026-11-16), with web/library/showcase.json served by this tool (the
 pad's placed record fresh, with the showcase's scene), the view's pane 640 x 800 CSS px (4:5: a 1280 x 1600 buffer, so
 the upright gripper fills the picture), each mode read, checked whole and centred as a sensor's; written to
 web/library/showcase/ (<id>.exploded.webp, <id>.assembled.webp, and <id>.card.webp, the Assembled drawing at 800 x 1000)
@@ -270,7 +270,7 @@ def generate(url: str, design: dict) -> dict:
 
 
 def art_page(browser):
-    """A page of its own for the generator's (index.html#rect: Rectangular, no surface request), its console errors
+    """A page of its own for the generator's (gen.html#rect: Rectangular, no surface request), its console errors
     kept."""
 
     context = browser.new_context(viewport=VIEWPORT, color_scheme="light")
@@ -286,9 +286,9 @@ def open_art_page(page, url: str) -> None:
     sensor's art is a fresh page's first answer, the same whichever sensors were asked for before it (--only, --check)."""
 
     page.goto("about:blank")  # (a goto of the same address with its #rect would only move to the fragment)
-    page.goto(f"{url}index.html#rect", wait_until="networkidle")
+    page.goto(f"{url}gen.html#rect", wait_until="networkidle")
     if not poll(page, ART_READY, None, 60):
-        raise ShotError("the generator's page (index.html) does not answer \"fpc:board-art\"")
+        raise ShotError("the generator's page (gen.html) does not answer \"fpc:board-art\"")
 
 
 def art_document(page, url: str, identifier: str, variant: dict) -> dict:
@@ -374,7 +374,7 @@ def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> di
         page.route(f"**/static/library/{library_write.SCENES_INDEX}", lambda route: route.fulfill(status=200, content_type="application/json", body=served["scenes"]))
     build = variant["build_id"]
     try:
-        page.goto(f"{url}library.html?probe=shoot#{identifier}")
+        page.goto(f"{url}?probe=shoot#{identifier}")
         drawn = poll(page, VIEW_DRAWN, build, TIMEOUT_S)
         if drawn != "drawn":
             raise ShotError(f"the Library's 3D view is not drawn for build {build}: {drawn or 'timed out'}")
@@ -412,7 +412,7 @@ def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> di
 
 
 def generator_shoot(browser, url: str, identifier: str, variant: dict) -> dict:
-    """{mode: Gen by Surface's figure's PNG at its home} of one sensor (a new context, closed after): ./?part=<id>, the
+    """{mode: Gen by Surface's figure's PNG at its home} of one sensor (a new context, closed after): gen.html?part=<id>, the
     sensor on the part drawn for the entry's build from its shipped fit, the pane set to PANE_CSS, each mode's button and
     0, the canvas read in the frame it is drawn in (the pictures' shoot until the Library's 3D view, kept for
     --check-generator)."""
@@ -422,7 +422,7 @@ def generator_shoot(browser, url: str, identifier: str, variant: dict) -> dict:
     errors = []
     console_errors(page, errors)
     try:
-        page.goto(f"{url}?part={identifier}")
+        page.goto(f"{url}gen.html?part={identifier}")
         drawn = poll(page, GENERATOR_DRAWN, variant["build_id"], TIMEOUT_S)
         if drawn != "drawn":
             raise ShotError(f"the sensor on the part is not drawn for build {variant['build_id']}: {drawn or 'timed out'}")
@@ -456,7 +456,7 @@ PIXEL_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADU
 
 def showcase_shoot(browser, url: str, document: dict) -> dict:
     """{mode: the Library view's PNG at its home, "numbers": the stage's} of the showcase, from its own page as a visitor
-    opens it (library.html?probe=shoot#<its id>: the placed record drawn on the scene's gripper), ``document`` served as
+    opens it (?probe=shoot#<its id>, the Library at ./: the placed record drawn on the scene's gripper), ``document`` served as
     its showcase.json (the placed record fresh, the pictures named as they will be).  The view's host at SHOWCASE_PANE_CSS, 640 x 800 CSS px (4:5): a 1280 x 1600 buffer, the scene framed
     again at that aspect, so the upright gripper fills the picture."""
 
@@ -472,7 +472,7 @@ def showcase_shoot(browser, url: str, document: dict) -> dict:
     page.route("**/static/library/showcase/*.webp", lambda route: route.fulfill(status=200, content_type="image/png", body=PIXEL_PNG))
     size = list(library_write.SHOWCASE_SHOT_SIZE)
     try:
-        page.goto(f"{url}library.html?probe=shoot#{document['id']}")
+        page.goto(f"{url}?probe=shoot#{document['id']}")
         drawn = poll(page, VIEW_DRAWN, None, TIMEOUT_S)
         if drawn != "drawn":
             raise ShotError(f"the Library's 3D view is not drawn for the showcase: {drawn or 'timed out'}")
@@ -706,11 +706,14 @@ def manifest_text(shots: dict) -> str:
 def grid_cards(entries: dict) -> list:
     """The sensors whose card pictures the Library's grid shows, in its order (library.js, the layout of 2026-11-06): one
     card per gripper but the shelved (its 2 mm sensor), then each shelved part's shelf (the UMI finger's, and any part a
-    family closes): its sensors and its families' defaults.  All of them are asked for as the page opens (it is short)."""
+    family's cards follow): its own card (its 2 mm sensor) and its families' cards (each its sensor; since the user's
+    request of 2026-11-16 one card per finger shape, where the UMI finger's four pitches and a Tapered tips card had
+    been).  All of them are asked for as the page opens (it is short)."""
     shelved = {"umi-finray"} | {family["shelf"] for family in entries["families"].values()}
     cards = [entries["parts"][part]["default"] for part in entries["order"] if part not in shelved]
     for part in (part for part in entries["order"] if part in shelved):
-        cards += entries["parts"][part]["variants"] + [family["default"] for family in entries["families"].values() if family["shelf"] == part]
+        cards += [entries["parts"][part]["default"]] + [card["default"] for family in entries["families"].values() if family["shelf"] == part
+                                                         for card in family["cards"]]
     return cards
 
 
@@ -1294,7 +1297,11 @@ def main(argv=None) -> int:
         browser.close()
     total = sum(item["bytes"] for shot in shots.values() for item in shot["files"].values())
     arts = sum(shot["art"]["bytes"] for shot in shots.values() if shot.get("art"))
-    first = sum(shots[identifier]["files"]["card"]["bytes"] for identifier in grid_cards(entries) if identifier in shots)
+    # The grippers' cards their Exploded card file, the UMI shelf's their Assembled picture (library.js SHELF_VIEW, the lead's
+    # review of 2026-11-16).
+    carded = sum(1 for part in entries["order"] if part != "umi-finray" and part not in {family["shelf"] for family in entries["families"].values()})
+    first = sum(shots[identifier]["files"]["assembled" if number >= carded else "card"]["bytes"]
+                for number, identifier in enumerate(grid_cards(entries)) if identifier in shots)
     if timings:
         seconds = sorted(item[1] for item in timings)
         print(f"library_shots: a sensor in {seconds[0]:.1f} to {seconds[-1]:.1f} s (the art {min(item[2] for item in timings):.2f} to "

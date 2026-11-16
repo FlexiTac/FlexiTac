@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Build the static site: the whole app as plain files, for GitHub Pages or any static host.
 
-The page is web/index.html; its API is answered in the visitor's browser, by app.py itself running in Pyodide
+The generator's page is web/gen.html (its first page, the Library, web/index.html since the user's decision of
+2026-11-16); its API is answered in the visitor's browser, by app.py itself running in Pyodide
 (CPython compiled to WebAssembly) in a Web Worker (web/backend.js, web/py/worker.js, web/py/bridge.py), so the
 site needs no server and no design or mesh leaves the visitor's computer.  The answers are app.answer's: the same
 replies, build ids and file bytes as app.py's (tools/browser/static_checks.py compares them).
@@ -11,15 +12,19 @@ replies, build ids and file bytes as app.py's (tools/browser/static_checks.py co
 
 The output:
 
-    index.html                 web/index.html, with a Content-Security-Policy meta and the browser-backend flag, and the
-                               FlexiTac repository's star and fork counts from GitHub's API (none with --no-github or
-                               when it does not answer; the page refreshes them, web/backend.js)
-    library.html               web/library.html (the Library, 2026-11-05), with the same head tags and counts (it loads
-                               no backend.js: its counts are the build's)
+    index.html                 web/index.html, the Library (2026-11-05; the site's first page since 2026-11-16), with a
+                               Content-Security-Policy meta and the browser-backend flag, and the FlexiTac repository's
+                               star and fork counts from GitHub's API (none with --no-github or when it does not answer;
+                               the page refreshes them as it opens, web/counts.js, since the review of 2026-11-16)
+    gen.html                   web/gen.html, the generator (index.html until 2026-11-16), with the same head tags and
+                               counts (refreshed the same way)
+    library.html               web/library.html, the Library's address before 2026-11-16: a forwarding page to ./ (and
+                               web/forward.js sends ./?part=<id>, ./#rect, ... on to gen.html), with the head tags only
+                               (it has no header to count in)
     .nojekyll                  GitHub Pages serves the files as they are
     static/                    web/ (the page's scripts, styles and vendored files), as app.py serves it
     static/library/files/      each Library sensor's Top and Bottom FPC Gerber ZIPs, app.answer's exports of its design
-    static/library/files.json  their names, sizes, SHA-256s and build ids (library.html links them)
+    static/library/files.json  their names, sizes, SHA-256s and build ids (the Library links them)
     static/library/shots/      the sensors' pictures (web/library/shots/, tools/browser/library_shots.py), with web/
     static/library/art/, scenes/, bodies/
                                each sensor's 3D view: its boards' art, the grippers' scenes and their bodies (web/library/,
@@ -37,10 +42,11 @@ existing output folder is replaced only when an earlier build wrote it (it holds
 
 The Library's gate: every sensor of web/library/entries.json is fitted again (surface.api.fit of its fit's request)
 and must give the committed reply with the entry's build id, and that request must still be the one the page sends
-(library_write.compose of parts.json and index.html's defaults: else Gen by Surface would fit it again in place of
+(library_write.compose of parts.json and gen.html's defaults: else Gen by Surface would fit it again in place of
 the shipped fit, while the Library offered the old build's ZIPs), else the build fails ("the library is stale: run
 tools/library_write.py") and nothing is published; then its two Gerber ZIPs are built (the gate with its 84 ZIPs about
-11 s for the 42 sensors with --jobs 8, in parallel processes; about 40 s in one).  The ZIPs are deterministic: an
+11 s for the 42 sensors with --jobs 8, in parallel processes; about 40 s in one; since 2026-11-16 116 ZIPs for the 58
+sensors, the whole build 15 s with --jobs 8 on a busy host).  The ZIPs are deterministic: an
 unchanged library rebuilds the same bytes.  Its pictures (shots/manifest.json, library_write.pictures) are checked
 first: a picture of another fit (the wrong sensor pictured), a broken file or an "image" in entries.json that is not
 its shot's fails the build too; a picture of older figure sources is published with a warning (re-shoot it with
@@ -74,8 +80,11 @@ import app  # noqa: E402
 from engine import GENERATOR_VERSION, BuildCache  # noqa: E402
 
 WEB = ROOT / "web"
-# The two pages: the generator and the Library (2026-11-05); every other file of web/ is copied under static/.
-PAGES = ("index.html", "library.html")
+# The pages: the Library (2026-11-05), the first page since the user's decision of 2026-11-16 ("是的 be first page"), the
+# generator (index.html before) and the Library's address before, a forwarding page (FORWARD, app.py's FORWARD_PAGE: no
+# header, no counts); every other file of web/ is copied under static/.
+PAGES = ("index.html", "gen.html", "library.html")
+FORWARD = app.FORWARD_PAGE
 LIBRARY_FILES_FORMAT = "flexitac-library-files/v1"
 LIBRARY_KINDS = ("top-gerber", "bottom-gerber")
 PYODIDE_VERSION = "0.27.8"
@@ -86,7 +95,8 @@ PYODIDE_FILES = ("pyodide.js", "pyodide.asm.js", "pyodide.asm.wasm", "python_std
 ENGINE_SOURCES = ("app.py", "engine", "exporters", "surface", "profiles")
 BUILD_MARKER = ".flexitac-static-site"
 # The server's policy (app.SECURITY_HEADERS) as a meta tag, with WebAssembly allowed and GitHub's API for the header's
-# star and fork counts (web/backend.js refreshes them here; app.py's page is served with them and asks no other host).
+# star and fork counts (web/counts.js refreshes them on both pages here; app.py's pages are served with them and ask no
+# other host).
 GITHUB_REPO = app.GITHUB_REPO
 GITHUB_API = app.GITHUB_API
 CSP = dict(app.SECURITY_HEADERS)["Content-Security-Policy"].replace(
@@ -158,14 +168,15 @@ def github_counts(timeout: float = 15) -> dict | None:
 
 
 def page(counts: dict | None = None, name: str = "index.html") -> str:
-    """A page of web/ (index.html, or library.html) with the site's head tags and, given, the repository's counts in the
-    header's GitHub card (the two pages share the header)."""
+    """A page of web/ (index.html, the Library, gen.html, the generator, or library.html, the forwarding page) with the
+    site's head tags and, given, the repository's counts in the header's GitHub card (the Library and the generator
+    share the header; FORWARD has none and takes no counts)."""
 
     text = (WEB / name).read_text(encoding="utf-8")
     if text.count(HEAD_ANCHOR) != 1:
         raise BuildError(f"web/{name}: the charset meta tag the site's head tags follow was not found once")
     text = text.replace(HEAD_ANCHOR, HEAD_ANCHOR + HEAD_TAGS, 1)
-    if counts:
+    if counts and name != FORWARD:
         try:
             text = app.fill_github_counts(text, counts)
         except ValueError as error:
@@ -224,7 +235,7 @@ def _library_job(job: tuple) -> tuple:
     return identifier, None, files
 
 
-def library(static: Path, source: Path = WEB / "library", only=None, jobs: int = 1, index: Path = WEB / "index.html") -> dict:
+def library(static: Path, source: Path = WEB / "library", only=None, jobs: int = 1, index: Path = WEB / "gen.html") -> dict:
     """The Library's gate and downloads: every sensor of ``source``/entries.json (or the ids ``only``) fitted again,
     its reply the committed one and its request the one the page (``index``) sends (else BuildError, the library is
     stale), and its Top and Bottom FPC Gerber ZIPs written to ``static``/library/files/<id>/<the exporter's name> with
@@ -236,7 +247,8 @@ def library(static: Path, source: Path = WEB / "library", only=None, jobs: int =
     unknown = [identifier for identifier in chosen if identifier not in entries["variants"]]
     if unknown:
         raise BuildError(f"the library has no sensor named {', '.join(unknown)}")
-    # Each sensor's request as the page sends it now: parts.json's setup and variant over index.html's defaults.
+    # Each sensor's request as the page sends it now: parts.json's setup and variant over gen.html's defaults (the
+    # generator's page; index.html until 2026-11-16).
     options = library_write.page_options(index.read_text(encoding="utf-8"))
     parts = json.loads((source / "parts.json").read_text(encoding="utf-8"))
     try:
@@ -277,7 +289,7 @@ def library(static: Path, source: Path = WEB / "library", only=None, jobs: int =
     unviewed = [identifier for identifier in chosen if images[identifier] is not None and views[identifier] is None]
     if unviewed:
         print(f"build_static_site: warning: {library_write.view_note(unviewed)}", file=sys.stderr, flush=True)
-    # The showcase (library.html's first card and its page, 2026-11-12: showcase.json, its pictures, its scene and the
+    # The showcase (the Library's first card and its page, 2026-11-12: showcase.json, its pictures, its scene and the
     # vendor's folder; copy_web publishes them): its problems stopped the build above (scenes() carries
     # library_write.showcase()'s, with no part); pictures of older figure or view sources are published with a warning.
     showcase = library_write.SHOWCASE_ID if (source / library_write.SHOWCASE_FILE).is_file() else None

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Fit the Library's sensors as the page asks for them: web/library/fits/<id>.json and web/library/entries.json.
 
-The Library (library.html, the user's requests of 2026-11-05) lists sensors already fitted to open-source gripper
-fingers; each opens in Gen by Surface at ./?part=<id> with its sensor built at once from a shipped fit, as the page's
+The Library (the site's first page, index.html, since the user's decision of 2026-11-16; library.html before; the user's
+requests of 2026-11-05) lists sensors already fitted to open-source gripper fingers; each opens in Gen by Surface at
+gen.html?part=<id> (./?part=<id> before 2026-11-16) with its sensor built at once from a shipped fit, as the page's
 default part does (web/cad/main.js takes a shipped reply only when the request it would send is the shipped one, key
 by key).  So each fit here is made from the request the page sends for it, not from one of our own:
 
@@ -10,7 +11,8 @@ by key).  So each fit here is made from the request the page sends for it, not f
   recipes) gives each part's mesh, the face the page selects (the request's selection with seed facets, its base
   and, for the UMI finger, its border) and its variants: a pitch and a fill, the only options a variant sets, beside
   the part's own (rotation none on four recipes);
-- every other option is the page's default, read from web/index.html's Resolution step as main.js readOptions reads
+- every other option is the page's default, read from web/gen.html's Resolution step (the generator's page,
+  web/index.html until 2026-11-16) as main.js readOptions reads
   it (each [data-option] control of #cadConfig, a disabled one sending nothing: under the default objective
   fixed_pitch that is Smallest pitch); numbers are written as the browser writes them (2, not 2.0), no unit is sent
   (the page's Auto) and the name is the mesh's file name, as a dropped file's;
@@ -20,10 +22,11 @@ by key).  So each fit here is made from the request the page sends for it, not f
   warning and the same build id), or the variant is rejected, naming the rule, and nothing is written.
 
 Each variant's fit goes to fits/<id>.json ({about, mesh_sha256, request, reply}, compact), its summary to entries.json,
-the one index library.html and main.js read.  A part of a family (parts.json families: the UMI finger's tapered tips,
+the one index the Library (library.js) and main.js read.  A part of a family (parts.json families: the UMI finger's tapered tips,
 cut by the private tools/library_tips.py) has no card or shelf of its own: entries.json's order and "start" (each
-part's default) are the grippers', and the family is one card closing its shelf's part (family_record(): its axes,
-the grid of their choices to variant ids, complete, and its default).  The UMI finger's 2 mm sensor is the page's default part's: its fit is
+part's default) are the grippers', and the family is its cards on its shelf's part's shelf, one per finger shape since
+2026-11-16 (family_record() and card_record(): each card's axes, the grid of their choices to variant ids, complete,
+its default and its two lines; the family's default, its own address's).  The UMI finger's 2 mm sensor is the page's default part's: its fit is
 web/vendor/umi/default-fit.json (the request the browser recorded, tools/browser/write_default_fit.py), only checked
 here, never written.  Only changed files are written; fits of variants no longer listed are removed.  A variant's id
 is <part>-<pitch>mm with the pitch as the browser writes it (1, 1.5, 2).  tests/test_library.py checks the committed
@@ -86,20 +89,24 @@ if str(ROOT) not in sys.path:
 
 WEB = ROOT / "web"
 LIBRARY = WEB / "library"
-INDEX = WEB / "index.html"
+# The generator's page (its Resolution step's defaults): gen.html since the user's decision of 2026-11-16, which made
+# the Library the first page (index.html).
+INDEX = WEB / "gen.html"
 FORMAT = "flexitac-library/v1"
 PARTS_FORMAT = "flexitac-library-parts/v1"
-# The page's default pitch: each part's default variant (the sensor its card opens on the Library, ./?part=<part>).
+# The page's default pitch: each part's default variant (the sensor its card opens on the Library, gen.html?part=<part>).
 DEFAULT_PITCH = 2
 # 'From the Library: ' + the label is the file note of Gen by Surface's step 1 (web/cad/main.js), one line at 1440 and
-# 390 px when the label has at most this many characters (measured with the widest, 'UMI Fin-Ray Gripper, 1.5 mm').
-LABEL_MAX = 27
+# 390 px when the label has at most this many characters (measured with the widest, 'UMI Fin-Ray Gripper, 1.5 mm';
+# 28 since the UMI shapes of 2026-11-16: 'UMI concave arc tip, 21.8 mm' and 'UMI short trapezoid, 21.8 mm' are 310 and
+# 309 px of the note's 316 px at 390 px, the widest of 27 302 px).
+LABEL_MAX = 28
 COUNT_WORDS = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
 FIT_ABOUT = ("The fit of a Library sensor (web/library/entries.json): the request the page sends for it and the "
              "engine's reply, which the page takes when its request is this one.  Written by tools/library_write.py; "
              "tests/test_library.py and the site build check it against surface.api.fit.")
-ENTRIES_ABOUT = ("The Library's index (library.html; Gen by Surface's ./?part=<id>): each part with its mesh and licence, "
-                 "each variant's sensor (proposal #1 of its fit) and the files of its fit.  Written by "
+ENTRIES_ABOUT = ("The Library's index (the first page, index.html; Gen by Surface's gen.html?part=<id>): each part with its mesh "
+                 "and licence, each variant's sensor (proposal #1 of its fit) and the files of its fit.  Written by "
                  "tools/library_write.py from parts.json and the fits; do not edit by hand.")
 # Vendor models that never go into the Library (no open licence: "vendor models, user-provided, shown for illustration"
 # in the video's recipes), by SHA-256 and by name.  The one list: the private importer (tools/library_import.py) takes
@@ -223,7 +230,7 @@ REBUILD_SHOWCASE = "rebuild the showcase with tools/library_showcase.py"
 # of the folder's meshes outside its place, a stranger in the folder): removing it, not a rebuild (the review of
 # 2026-11-13: a rebuild of the showcase leaves such a file where it is).
 REMOVE_FILE = "remove it"
-# The showcase's page (library.html's first card and its own page at #flexitac-g1; docs/LIBRARY_VIEW.md "The showcase's
+# The showcase's page (the Library's first card and its own page at #flexitac-g1; docs/LIBRARY_VIEW.md "The showcase's
 # page"): showcase.json beside entries.json, a document of its own format.  Its words are written by hand (the title,
 # the label that it is the original FlexiTac, hand-designed, pre-agent, the card's one line, the page's line of detail,
 # the sensor's size, the link to the FlexiTac hardware tutorial for the Gerbers, the sources with their notices); its "placed" is the pad's placed record
@@ -351,7 +358,7 @@ def controls(index_html: str) -> dict:
         attributes = control["attributes"]
         key = attributes["data-option"]
         if key in out:
-            raise LibraryError(f"web/index.html: two controls send {key}")
+            raise LibraryError(f"web/{INDEX.name}: two controls send {key}")
         if control["tag"] == "select":
             choices = [option.get("value") for option in control["options"] if "disabled" not in option]
             chosen = [option.get("value") for option in control["options"] if "selected" in option]
@@ -365,7 +372,7 @@ def controls(index_html: str) -> dict:
     return out
 
 
-# The controls whose disabled state main.js sets itself as the page starts, whatever index.html says: syncObjective
+# The controls whose disabled state main.js sets itself as the page starts, whatever gen.html says: syncObjective
 # (Pitch and Smallest pitch, by the objective) and syncContainment (Row traces, off under Whole board).
 SYNCED = ("pitch_mm", "min_pitch_mm", "row_sides")
 
@@ -373,7 +380,7 @@ SYNCED = ("pitch_mm", "min_pitch_mm", "row_sides")
 def page_options(index_html: str) -> dict:
     """The options the page sends untouched: each control's default, but the one syncObjective disables (Smallest
     pitch under Resolution (pitch), the default objective; Pitch under the others) and any other control disabled in
-    index.html (readOptions skips it; the review of 2026-11-05)."""
+    gen.html (readOptions skips it; the review of 2026-11-05)."""
 
     found = controls(index_html)
     disabled = "min_pitch_mm" if found["objective"]["default"] == "fixed_pitch" else "pitch_mm"
@@ -543,55 +550,81 @@ def label(part: dict, variant: dict) -> str:
 
 
 def shelf(variants: list, families: list = ()) -> str:
-    """A part's shelf heading after its name, in one wording on every shelf: the count and the range of its pitches
-    ('Four pitches, 1 to 3 mm.'), and on a shelf that closes with families those after the range (the UMI finger's:
-    'Four pitches, 1 to 3 mm, and tapered tips.').  The user's decision of 2026-11-05 (最好统一, best unified): the
-    seven other shelves said 'Four pitches, from fine 1 mm to coarse 3 mm.' and the UMI finger's the range alone, as
-    the review of the same day had made it (the long form took two lines at 1440 px there, balanced to half the row).
-    Every gripper's four pitches begin at 1 mm (1 to 2.5, 3 or 4 mm), so the range alone is honest on each; every
-    heading is one line from 1280 px."""
+    """A part's shelf heading after its name: the count and the range of its pitches ('Four pitches, 1 to 3 mm.', one
+    wording on every shelf: the user's decision of 2026-11-05, 最好统一, best unified), or, on a shelf whose part a family's
+    cards follow (the UMI finger's), the shapes it shows: the part's own, straight, and each card's, the last named
+    ('Six finger shapes, straight to pointed.': the user's request of 2026-11-16, the shelf showing that the UMI
+    finger's shapes fit, its pitches chosen on the straight finger's page).  Every gripper's four pitches begin at 1 mm
+    (1 to 2.5, 3 or 4 mm), so the range alone is honest on each; every heading is one line from 1280 px."""
 
+    cards = [card for family in families for card in family["cards"]]
+    if cards:
+        count = 1 + len(cards)
+        words = COUNT_WORDS[count] if count < len(COUNT_WORDS) else str(count)
+        last = cards[-1]["axes"][0]["choices"]
+        return f"{words} finger shapes, straight to {last[-1]['label'].lower()}."
     pitches = sorted(variant["pitch_mm"] for variant in variants)
     count = COUNT_WORDS[len(pitches)] if len(pitches) < len(COUNT_WORDS) else str(len(pitches))
     if len(pitches) == 1:
-        text = f"{count} pitch, {js_string(pitches[0])} mm"
+        return f"{count} pitch, {js_string(pitches[0])} mm."
+    return f"{count} pitches, {js_string(pitches[0])} to {js_string(pitches[-1])} mm."
+
+
+def card_record(family_id: str, card: dict, members: dict) -> dict:
+    """entries.json's record of one card of a family: parts.json's (key, title, h_mm, axes, grid, default) checked,
+    with the card's two lines in the grippers' cards' style ('1 to 3 mm', 'Pick your pitch'): its tip widths' range
+    and 'Pick your tip width' ('Pick shape and width' with a Shape too), or one sensor's '2 mm tip', '2 mm pitch'.
+    Its axes are Shape and Tip width (the page shows those with more than one choice); its grid holds every
+    combination of their choices ('trap|13.8') once, each a variant of a part of this family."""
+
+    record = copy.deepcopy(card)
+    axes = record["axes"]
+    if [axis.get("key") for axis in axes] != ["shape", "tip_mm"]:
+        raise LibraryError(f"parts.json: the family {family_id}'s card {card.get('key')} has not the axes shape and tip_mm")
+    keys = [""]
+    for axis in axes:
+        values = [choice["value"] for choice in axis["choices"]]
+        if not values or len(set(values)) != len(values) or not all(isinstance(value, str) and "|" not in value for value in values):
+            raise LibraryError(f"parts.json: the family {family_id}'s card {card['key']}'s axis {axis.get('key')} has no distinct choices")
+        keys = [f"{key}|{value}" if key else value for key in keys for value in values]
+    if sorted(record["grid"]) != sorted(keys):
+        raise LibraryError(f"parts.json: the family {family_id}'s card {card['key']}'s grid is not every choice of its axes once")
+    if not set(record["grid"].values()) <= set(members):
+        raise LibraryError(f"parts.json: the family {family_id}'s card {card['key']}'s grid names a sensor not of its parts")
+    if record["default"] not in record["grid"].values():
+        raise LibraryError(f"parts.json: the family {family_id}'s card {card['key']}'s default {record['default']} is not one of its sensors")
+    shapes, widths = ([choice["label"] for choice in axis["choices"]] for axis in axes)
+    numbers = sorted(float(width) for width in widths)
+    span = f"{js_string(numbers[0])} to {js_string(numbers[-1])} mm"
+    pitches = sorted({members[identifier][3]["pitch_mm"] for identifier in record["grid"].values()})
+    if len(widths) == 1:
+        record["lines"] = [f"{widths[0]} mm tip", " or ".join(f"{js_string(value)} mm" for value in pitches) + " pitch"]
     else:
-        text = f"{count} pitches, {js_string(pitches[0])} to {js_string(pitches[-1])} mm"
-    for family in families:
-        text += f", and {family['title'].lower()}"
-    return text + "."
+        record["lines"] = [span, "Pick shape and width" if len(shapes) > 1 else "Pick your tip width"]
+    return record
 
 
 def family_record(family_id: str, family: dict, parts: dict, table: list) -> dict:
-    """entries.json's record of a family: parts.json's (title, shelf, h_mm, axes, grid, default) checked, with the card's
-    two lines ('Trapezoid or convex arc', '5 tip widths · 2 mm pitch').  The grid holds every combination of the axes'
-    choices ('trap|13.8') once, each a variant of a part of this family, and every such variant is in it."""
+    """entries.json's record of a family (the UMI finger's tapered tips, since the user's request of 2026-11-16 one card
+    per shape on its shelf): parts.json's (shelf, default, cards) checked, each card by card_record().  The cards'
+    sensors are the family's, each on one card once, and every such sensor is on a card; the default (the family's own
+    address, #<family>) is one of them."""
 
     record = copy.deepcopy(family)
-    axes = record["axes"]
     members = {row[0]: row for row in table if row[2].get("family") == family_id}
     if not members:
         raise LibraryError(f"parts.json: the family {family_id} has no part")
     if record["shelf"] not in parts["parts"] or parts["parts"][record["shelf"]].get("family"):
         raise LibraryError(f"parts.json: the family {family_id}'s shelf {record['shelf']} is not a gripper's part")
-    keys = [""]
-    for axis in axes:
-        values = [choice["value"] for choice in axis["choices"]]
-        if not values or len(set(values)) != len(values) or not all(isinstance(value, str) and "|" not in value for value in values):
-            raise LibraryError(f"parts.json: the family {family_id}'s axis {axis.get('key')} has no distinct choices")
-        keys = [f"{key}|{value}" if key else value for key in keys for value in values]
-    if sorted(record["grid"]) != sorted(keys):
-        raise LibraryError(f"parts.json: the family {family_id}'s grid is not every choice of its axes once")
-    if sorted(record["grid"].values()) != sorted(members):
-        raise LibraryError(f"parts.json: the family {family_id}'s grid and its parts' variants differ")
+    cards = record.get("cards") or []
+    if not cards or len({card.get("key") for card in cards}) != len(cards):
+        raise LibraryError(f"parts.json: the family {family_id} has no cards, or two of one key")
+    record["cards"] = [card_record(family_id, card, members) for card in cards]
+    shown = [identifier for card in record["cards"] for identifier in card["grid"].values()]
+    if sorted(shown) != sorted(members):
+        raise LibraryError(f"parts.json: the family {family_id}'s cards and its parts' variants differ")
     if record["default"] not in members:
         raise LibraryError(f"parts.json: the family {family_id}'s default {record['default']} is not one of its sensors")
-    pitches = sorted({row[3]["pitch_mm"] for row in members.values()})
-    first = [choice["label"] for choice in axes[0]["choices"]]
-    words = " or ".join([first[0]] + [word[:1].lower() + word[1:] for word in first[1:]])
-    rest = " · ".join(f"{len(axis['choices'])} {re.sub(r' [(].*', '', axis['label']).lower()}s" for axis in axes[1:])
-    pitch = " or ".join(f"{js_string(value)} mm" for value in pitches)
-    record["lines"] = [words, " · ".join(item for item in (rest, f"{pitch} pitch") if item)]
     return record
 
 
@@ -660,6 +693,8 @@ def entries(parts: dict, fits: dict, library: Path = LIBRARY) -> dict:
                      "facets": facets, "unit": unit},
             "license": copy.deepcopy(part["license"]), "default": default, "variants": [row[0] for row in own],
             "family": part.get("family"),
+            # The name of a shelved part's own card on its shelf (the UMI finger's 'Straight finger'), else null.
+            "card": part.get("card"),
         }
         for identifier, _, _, variant in own:
             document["variants"][identifier] = summary(part_id, part, variant, fit_path(identifier, variant), fits[identifier])
@@ -678,7 +713,8 @@ def entries_text(document: dict) -> str:
 # The user's request of 2026-11-05 ("卡片上的图为手指+传感器叠加": the cards show the finger with the sensor on it, the
 # generator's on-part figure, once it was approved: "现在这个view可以"; and "lib 点进去具体的每个夹爪的时候, 那个图也做成可以
 # 三维旋转的": the pictures are the Library's own 3D view at its homes): tools/browser/library_shots.py shoots each sensor
-# at library.html?probe=shoot#<id> (web/cad/library_view.js: the generator's on-part figure, web/cad/onpart.js, and a
+# at ./?probe=shoot#<id> (library.html?probe=shoot#<id> before the Library became the first page, index.html, on
+# 2026-11-16; web/cad/library_view.js: the generator's on-part figure, web/cad/onpart.js, and a
 # gripper's whole scene, web/cad/library_stage.js) into shots/, its art into art/, and writes shots/manifest.json; this
 # module reads it, writes each variant's "image" and "view" from it and says where it no longer pictures the sensor.
 # The pictures are WebP with alpha (the figure alone on a transparent background, for the page's light boxes): each

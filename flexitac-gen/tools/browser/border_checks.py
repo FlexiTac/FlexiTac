@@ -81,6 +81,7 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 
 from rp import check, summary, unfold  # noqa: E402
 
+# The server's root; the generator's page is gen.html there since the user's decision of 2026-11-16 (the Library first).
 URL = f"http://127.0.0.1:{PORT}/"
 MODULE = "/static/cad/border.js"
 ASSETS = Path(os.environ.get("FPC_ASSETS", str(ROOT / "asset")))
@@ -707,7 +708,7 @@ def ui_page(browser, width=1440, height=900):
             except Exception as error:  # noqa: BLE001 - diagnostics only
                 page.maps.append({"error": str(error)})
     page.on("response", on_response)
-    page.goto(URL + "#cad")
+    page.goto(URL + "gen.html#cad")
     wait_until(page, "() => document.getElementById('cadState') && JSON.parse(document.getElementById('cadState').textContent).webgl !== 'not loaded'")
     # Without the default part (refused above), then Max rows / columns at 64 as a user sets them (the checks were written
     # before the user's default of 32).
@@ -1243,7 +1244,7 @@ def main(argv=None):
                 page.on("pageerror", lambda e: logs.append(("pageerror", str(e))))
                 # Rectangular mode: CAD mode would load its default part and build its sensor, whose surface requests
                 # take the server's one surface slot while the model checks below send theirs (503).
-                page.goto(URL + "#rect")
+                page.goto(URL + "gen.html#rect")
                 page.evaluate(f"async () => {{ window.__border = await import('{MODULE}'); }}")
                 B = Page(page)
                 module_checks(B, page)

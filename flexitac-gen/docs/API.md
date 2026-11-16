@@ -675,7 +675,7 @@ The core manifest (`tactile-fpc-manifest/v2`) carries `format`, `generator`,
 ## HTTP server
 
 ```bash
-python3 app.py                         # http://127.0.0.1:8008
+python3 app.py                         # http://127.0.0.1:8008 (the Library; the generator at /gen.html)
 python3 app.py --port 8009 --host ::1  # another port or loopback address
 python3 app.py --allow-host abc-8008.usw2.devtunnels.ms  # also serve a tunnel, proxy or LAN name
 python3 app.py --no-github             # the header's GitHub card without its star and fork counts
@@ -715,7 +715,7 @@ browsers rewrite before they send them.
 
 | Method and path | Request | Reply |
 | --- | --- | --- |
-| `GET /`, `GET /index.html`, `GET /library.html`, `GET /static/<file>` | | the browser UI from `web/`: the generator, the Library (2026-11-05; a query such as `./?part=<id>` is the page's own) and their files (paths are contained; anything else is 404) |
+| `GET /`, `GET /index.html`, `GET /gen.html`, `GET /library.html`, `GET /static/<file>` | | the browser UI from `web/`: the Library (2026-11-05; the first page, `/` and `/index.html`, since 2026-11-16), the generator (`/gen.html`; at `/` before) and `/library.html`, the Library's address before, a forwarding page (`web/forward.js` sends the addresses of before on in the browser: `/?part=<id>` and `/#rect` to `/gen.html?part=<id>` and `/gen.html#rect`, `/library.html#<id>` to `/#<id>`), each with the header's counts but the forwarding page; a query such as `gen.html?part=<id>` is the page's own; and their files (paths are contained; anything else is 404) |
 | `GET /api/default` | | `{design, profile}`; `profile` has `id`, `revision`, `name`, `display_rules` (rule text generated from the profile; `Bundle traces` gives the default design's fan-out width and spacing, the other entries the gold-finger width, JLCPCB's trace minimum for the profile's copper and the other locked rules), `limits` (per-field form limits; on the generic template the diagonal Row bus's, with the straight channel's own under each field's `channel`), `issue_codes` and `order_requirements` (the JLCPCB order options and review notes of `ORDER_NOTES.txt`, from `engine.profile.order_requirements`); on the generic template also `row_bus`, the bus's rule set (`id`, `revision`, `name`, `display_rules` of the surface profile, which builds it) |
 | `GET /api/schema` | | the JSON Schema plus `x-http-error-codes` and `x-surface-error-codes` |
 | `POST /api/validate` | design | 200 with the `check_design` result (`ok` true or false) |

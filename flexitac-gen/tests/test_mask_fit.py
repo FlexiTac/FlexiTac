@@ -673,7 +673,7 @@ class WebClientTests(unittest.TestCase):
         self.assertIn('$("clearMask").hidden = !mask;', note)
         self.assertIn('$("clearMask").addEventListener("click", () => { clearMask("you chose the full field"); onFormEdit(null); });', self.app)
         self.assertIn("the masked field from Gen by Surface does not fit the changed form", self.app)
-        html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        html = (ROOT / "web" / "gen.html").read_text(encoding="utf-8")
         for element in ('<div class="hint mask-note" id="maskNote" hidden>', '<ul class="mask-issues" id="maskIssues" hidden></ul>',
                         '<button type="button" id="clearMask" hidden>Use the full field</button>'):
             self.assertIn(element, html)

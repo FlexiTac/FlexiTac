@@ -39,7 +39,7 @@ fit, no entries.json, no engine.  Its state is <pre id="showcaseState">.
   scheme, each the page's stage as a visitor would see it (the view turned with the arrow keys from its home, 5 degrees
   a press, framed again; the picture turned so the fingertip is up and cut to the drawing): <mode>.<view>.<scheme>.png,
   and sheet.<scheme>.png of the ten on the page's background (the stage is a light box in both schemes).
-- part_page: the showcase on the Library (library.html, web/library/showcase.json): at 1440 px the grid's first section
+- part_page: the showcase on the Library (./, the first page since 2026-11-16; web/library/showcase.json): at 1440 px the grid's first section
   is the showcase's one card, as wide as the row, its picture (one image, the card file, 4:5, no canvas and no three.js
   on the grid) beside its label, its title and its line; reached with Tab and opened with Enter it gives the showcase's
   own page in the window over the grid (since 2026-11-15), its title focused: the 3D view drawn over the picture from the
@@ -48,6 +48,13 @@ fit, no entries.json, no engine.  Its state is <pre id="showcaseState">.
   arrow keys, the view turned with them and brought back with 0; the tutorial's link and the two notices (each answered
   by the server); no Open in Gen by Surface, no download; the window's X back to the card, its Details focused.  At 390 px, light and dark: the card stacked within the window, nothing scrolling sideways, the
   page's view drawn in its light box; no console error anywhere.  --out DIR: the pages' screenshots.
+  Design your own (the user's decisions of 2026-11-15 and 2026-11-16: "在flexitac on xarm的details 后面，多一个按钮，generate
+  sensor by yourself with cad file", named "Design your own"): on the card right after Details, on its line, as tall and
+  as round, its type, the page's action blue (light and dark), white words, named "Design your own sensor in Gen by
+  Surface", in this tab (no target); the Tab order the picture out of it, Details, then Design your own, its focus ring
+  the page's; pressed, Gen by Surface (gen.html) in this tab with no other page, the generator's default part loading,
+  and Back the Library; at 390 px (light and dark) and 360 and 320 px side by side within the card where they fit, else
+  under Details on its left, its own width; card.<width>.<scheme>.png, the card at 1440 and 390 px, light and dark.
 """
 from __future__ import annotations
 
@@ -389,11 +396,15 @@ GRID = """() => {
   if (!first || !card) return null;
   const box = element => { const r = element.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
   const image = card.querySelector('img'); const shot = card.querySelector('.lib-shot'); const text = card.querySelector('.lib-card-text');
-  const pic = card.querySelector('a.lib-showcase-pic'); const details = card.querySelector('a.lib-showcase-details');
+  const pic = card.querySelector('a.lib-showcase-pic'); const details = card.querySelector('a.lib-showcase-details'); const design = card.querySelector('a.lib-design');
   return {first: first.className, inFirst: first.contains(card), cards: first.querySelectorAll('.lib-card').length, tag: card.tagName,
     hrefs: [...card.querySelectorAll('a')].map(a => a.getAttribute('href')), href: card.getAttribute('href'),
     pic: pic ? [pic.getAttribute('tabindex'), pic.getAttribute('aria-hidden'), pic.contains(shot)] : null,
     details: details ? [details.textContent, getComputedStyle(details).backgroundColor, box(details)] : null,
+    design: design ? {text: design.textContent, href: design.getAttribute('href'), target: design.target, named: design.getAttribute('aria-label'), box: box(design),
+      fill: getComputedStyle(design).backgroundColor, color: getComputedStyle(design).color, round: getComputedStyle(design).borderRadius,
+      type: [getComputedStyle(design).fontSize, getComputedStyle(design).fontWeight], detailsType: [getComputedStyle(details).fontSize, getComputedStyle(details).fontWeight],
+      detailsRound: getComputedStyle(details).borderRadius, next: details.nextElementSibling === design, last: !design.nextElementSibling} : null,
     label: card.querySelector('.lib-badge')?.textContent, title: card.querySelector('.lib-showcase-title')?.textContent,
     line: card.querySelector('.lib-showcase-line')?.textContent, named: details?.getAttribute('aria-label'),
     images: card.querySelectorAll('img').length, src: image?.getAttribute('src'), natural: image ? [image.naturalWidth, image.naturalHeight] : null,
@@ -430,7 +441,7 @@ PAGE_CANVAS = """() => { const host = document.querySelector('.lib-live'); const
 
 
 def library_page(browser, url: str, width: int, height: int, scheme: str = "light", scale: int = 1):
-    """A page of the Library (library.html?probe=1) at ``url``, its console errors and warnings kept in page.errors."""
+    """A page of the Library (?probe=1, the first page; library.html?probe=1 until 2026-11-16) at ``url``, its console errors and warnings kept in page.errors."""
 
     context = browser.new_context(viewport={"width": width, "height": height}, device_scale_factor=scale, color_scheme="light")
     if scheme == "dark":
@@ -441,7 +452,7 @@ def library_page(browser, url: str, width: int, height: int, scheme: str = "ligh
     page.on("console", lambda message: page.errors.append(f"{message.type}: {message.text}")
             if message.type in ("error", "warning") and "GPU stall due to ReadPixels" not in message.text else None)
     page.on("pageerror", lambda error: page.errors.append(str(error)))
-    page.goto(f"{url}library.html?probe=1", wait_until="networkidle")
+    page.goto(f"{url}?probe=1", wait_until="networkidle")
     return page
 
 
@@ -482,7 +493,7 @@ def part_page(browser, url: str, out: Path) -> None:
         # The user's request of 2026-11-15: the card no link; its picture and its Details open the page, the picture's
         # link out of the Tab order and hidden from assistive technology; Details a grey pill, not the action blue.
         rp.check("1440: the card is no link; its picture and its Details open the page, the picture out of the Tab order",
-                 grid["tag"] == "DIV" and grid["href"] is None and grid["hrefs"] == [f"#{identifier}", f"#{identifier}"]
+                 grid["tag"] == "DIV" and grid["href"] is None and grid["hrefs"] == [f"#{identifier}", f"#{identifier}", "gen.html"]
                  and grid["pic"] == ["-1", "true", True] and grid["details"][0] == "Details"
                  and grid["details"][1] not in ("rgb(0, 113, 227)", "rgb(41, 151, 255)"), (grid["tag"], grid["hrefs"], grid["pic"], grid["details"]))
         rp.check("1440: its words are showcase.json's: the label, the title, one line, and Details named after the title",
@@ -509,8 +520,16 @@ def part_page(browser, url: str, out: Path) -> None:
             presses += 1
             stops.append(page.evaluate("() => document.activeElement?.className"))
         ring = page.evaluate("() => { const s = getComputedStyle(document.activeElement); return [document.activeElement.className, s.outlineStyle, s.outlineWidth, document.activeElement.matches(':focus-visible')]; }")
-        rp.check("1440: Tab reaches the card's Details, the page's first card's one stop, with the page's focus ring, never its picture",
+        rp.check("1440: Tab reaches the card's Details, the page's first card's first stop, with the page's focus ring, never its picture",
                  ring == ["lib-pill lib-showcase-details", "solid", "2px", True] and "lib-showcase-pic" not in stops, (presses, ring))
+        # Design your own (2026-11-16): the next stop after Details, its ring the page's; Shift+Tab back to Details.
+        page.keyboard.press("Tab")
+        after = page.evaluate("() => { const s = getComputedStyle(document.activeElement); return [document.activeElement.className, s.outlineStyle, s.outlineWidth, s.outlineColor, s.outlineOffset, document.activeElement.matches(':focus-visible')]; }")
+        page.keyboard.press("Shift+Tab")
+        rp.check("1440: the card's Tab order: the picture out of it, Details, then Design your own with the page's focus ring (2 px, the focus blue, 2 px out)",
+                 after == ["lib-pill lib-design", "solid", "2px", "rgb(0, 113, 227)", "2px", True]
+                 and page.evaluate("() => document.activeElement?.className") == "lib-pill lib-showcase-details", after)
+        design_ok(grid, "1440 light", document)
         page.keyboard.press("Enter")
         state = view_state(page, drawn("assembled"))
         info = page.evaluate(PAGE)
@@ -571,8 +590,10 @@ def part_page(browser, url: str, out: Path) -> None:
         turned = view_state(page, lambda state: state.get("moved") is True, 20)
         page.keyboard.press("0")
         back = view_state(page, lambda state: state.get("moved") is False, 20)
+        # (Each by its first class: the view's host is "lib-live is-used" once the arrow keys have turned it, its drag hint
+        # hidden since 2026-11-15.)
         order = page.evaluate("""() => [...document.querySelectorAll('#libWindow button, #libWindow a, #libWindow input, #libWindow [tabindex="0"]')]
-          .map(node => node.className || node.name || node.textContent)""")
+          .map(node => node.classList[0] || node.name || node.textContent)""")
         rp.check("1440: the window's Tab order: its X, the view, the control's two views, the tutorial, the two notices",
                  order == ["lib-close", "lib-live", "libView", "libView", "lib-pill", "notice", "notice"], order)
         rp.check("1440: the keyboard reaches the view (a group named by the picture's alt); the arrow keys turn it and 0 brings it back",
@@ -600,6 +621,9 @@ def part_page(browser, url: str, out: Path) -> None:
     finally:
         page.context.close()
 
+    # -- Design your own (2026-11-16): pressed, Gen by Surface in this tab; the card at 1440 px dark too ---------------
+    design_page(browser, url, out)
+
     # -- 390 px, light and dark: the card stacked, the page's view in its light box ----------------------------------------
     for scheme in SCHEMES:
         page = library_page(browser, url, 390, 844, scheme, scale=2)
@@ -615,6 +639,8 @@ def part_page(browser, url: str, out: Path) -> None:
             rp.check(f"390 {scheme}: Details its own size under the words, not the column's width",
                      bool(grid["details"]) and grid["details"][2][2] < 0.5 * grid["card"][2] and grid["details"][2][1] >= grid["text"][1],
                      grid["details"] and grid["details"][2])
+            design_ok(grid, f"390 {scheme}", document, scheme)
+            page.locator("#showcase").screenshot(path=str(out / f"card.390.{scheme}.png"))
             page.click(".lib-showcase-pic")
             state = view_state(page, drawn("assembled"))
             info = page.evaluate(PAGE)
@@ -631,6 +657,70 @@ def part_page(browser, url: str, out: Path) -> None:
             state = view_state(page, drawn("exploded"))
             rp.check(f"390 {scheme}: Exploded is drawn there too", bool(state) and state.get("drawn_mode") == "exploded", state and (state.get("state"), state.get("drawn_mode")))
             rp.check(f"390 {scheme}: no console error or warning", not page.errors, page.errors[:3])
+        finally:
+            page.context.close()
+
+
+# Design your own (the user's decisions of 2026-11-15 and 2026-11-16: "在flexitac on xarm的details 后面，多一个按钮，generate
+# sensor by yourself with cad file", named "Design your own"): the page's action blue in each scheme, white words.
+ACTION_BLUE = {"light": "rgb(0, 113, 227)", "dark": "rgb(0, 113, 227)"}
+
+
+def design_ok(grid, where, document, scheme="light"):
+    """Design your own on the card as GRID reads it: right after Details, the card's last; its words, name and link (gen.html,
+    this tab); the action blue with white words; Details' height, roundness and type; beside Details on its line within the
+    card, or (where the two do not fit) under it on its left, its own width."""
+    design, details, card = grid["design"], grid["details"], grid["card"]
+    rp.check(f"{where}: Design your own right after Details, the card's last: Gen by Surface (gen.html) in this tab, named for where it goes",
+             bool(design) and design["next"] and design["last"] and (design["text"], design["href"], design["target"], design["named"])
+             == ("Design your own", "gen.html", "", "Design your own sensor in Gen by Surface"), design)
+    if not design:
+        return
+    box, other = design["box"], details[2]
+    beside = abs(box[1] - other[1]) < 0.5 and 9.5 <= box[0] - (other[0] + other[2]) <= 10.5
+    under = abs(box[0] - other[0]) < 0.5 and 9.5 <= box[1] - (other[1] + other[3]) <= 10.5
+    rp.check(f"{where}: Design your own the action blue ({design['fill']}) with white words, as tall, as round and in the same type as Details, "
+             f"{'beside it' if beside else 'under it'} within the card",
+             design["fill"] == ACTION_BLUE[scheme] and design["color"] == "rgb(255, 255, 255)" and abs(box[3] - other[3]) < 0.5
+             and design["round"] == design["detailsRound"] and design["type"] == design["detailsType"] and (beside or under)
+             and box[0] + box[2] <= card[0] + card[2] - 12 + 0.5 and box[2] < card[2] * 0.8, (design, other, card))
+
+
+def design_page(browser, url, out):
+    """Design your own pressed: Gen by Surface (gen.html) in this tab, no other page, the generator's default part on its
+    way; Back the Library.  The card at 1440 px in the dark scheme; at 360 and 320 px the two pills within the card."""
+    page = library_page(browser, url, 1440, 900)
+    try:
+        page.locator("#showcase").screenshot(path=str(out / "card.1440.light.png"))
+        pages = []
+        page.context.on("page", lambda opened: pages.append(opened))
+        with page.expect_navigation():
+            page.click(".lib-design")
+        page.wait_for_load_state("domcontentloaded")
+        rp.wait_until(page, "() => Boolean(document.body && document.body.dataset.mode)", 60)
+        there = [page.url, page.title(), page.evaluate("() => document.body.dataset.mode")]
+        page.go_back()
+        rp.wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
+        rp.check("1440: Design your own opens Gen by Surface (gen.html) in this tab, no other page; Back comes back to the Library",
+                 there == [f"{url}gen.html", "FlexiTac-Gen", "cad"] and not pages and page.url.split("?")[0] == url and page.title() == "Library · FlexiTac-Gen",
+                 (there, len(pages), page.url))
+    finally:
+        page.context.close()
+    document = json.loads((LIBRARY / "showcase.json").read_text(encoding="utf-8"))
+    page = library_page(browser, url, 1440, 900, "dark")
+    try:
+        grid = page.evaluate(GRID)
+        design_ok(grid, "1440 dark", document, "dark")
+        page.locator("#showcase").screenshot(path=str(out / "card.1440.dark.png"))
+    finally:
+        page.context.close()
+    for width in (360, 320):
+        page = library_page(browser, url, width, 740)
+        try:
+            grid = page.evaluate(GRID)
+            design_ok(grid, f"{width} light", document)
+            page.locator("#showcase").screenshot(path=str(out / f"card.{width}.light.png"))
+            rp.check(f"{width}: nothing scrolls sideways", grid["wide"] <= width, grid["wide"])
         finally:
             page.context.close()
 

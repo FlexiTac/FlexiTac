@@ -16,7 +16,7 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DONE, RECT_URL, SCRATCH, SHOTS, URL, api, check, figure_controls, pin1_shapes, pin1_strokes, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
+from rp import DONE, GEN_URL, RECT_URL, SCRATCH, SHOTS, URL, api, check, figure_controls, pin1_shapes, pin1_strokes, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
 
 DOWNLOADS = f"{SCRATCH}/downloads"
 ALL_CONTROLS = ["name", "rows", "columns", "pitchX", "pitchY", "rowWidth", "columnWidth", "topTailLength", "bottomTailLength",
@@ -979,7 +979,7 @@ def part_clean_interface(browser):
 
 
 
-# The header's Library link (index.html, library.html; the user's requests of 2026-11-05): the header's height, the link
+# The header's Library link (gen.html and the Library, index.html, since 2026-11-16; the user's requests of 2026-11-05): the header's height, the link
 # beside the mode switch (12 px after it) or on a line of its own, and the boxes of the header (the masthead, the title's
 # text, the switch, the link, the community links, the line under the title) to compare the two pages.
 LIBRARY_HEADER = """() => { const m = document.querySelector('.masthead .mode-picker'), lib = document.querySelector('.masthead-library');
@@ -1015,10 +1015,12 @@ def narrow_header(page, page_overflow=False):
 
 
 def part_library_header(browser):
-    """The header's Library link (the user's requests of 2026-11-05): on index.html right after the mode switch, 12 px after it
+    """The header's Library link (the user's requests of 2026-11-05): on gen.html right after the mode switch, 12 px after it
     and on its line from 480 to 1440 px, on a line of its own below (the user accepted +46 px at 480 px and below); the
     header 104 px at 1440 px and as before everywhere else (1101 to 1130 px included); below 360 px the header within the
-    window and the title clear of the community links; the link opens the Library in a new tab.  library.html's header has
+    window and the title clear of the community links; the link opens the Library in the same tab (the user's request of
+    2026-11-15: no new tab, no other page opened; Back comes back to the generator), at ./ since the Library is the first
+    page (the user's decision of 2026-11-16; library.html before).  The Library's header has
     the same geometry (within 0.5 px at 1440, 900, 600 and 390 px), passes the 360-720 px sweep too, and below 360 px
     the page itself does not scroll sideways."""
     page = new_page(browser, width=1440, folded=True)
@@ -1031,24 +1033,29 @@ def part_library_header(browser):
         beside = width >= 480
         if abs(header["mast"] - mast) > 0.5 or header["beside"] != beside or (beside and header["after"] != 12) or header["overflow"] > 0:
             misfits.append([width, header["mast"], header["beside"], header["after"], header["overflow"]])
-    check("library header: on index.html the Library link 12 px after the mode switch, on its line from 480 to 1440 px and on its own "
+    check("library header: on gen.html the Library link 12 px after the mode switch, on its line from 480 to 1440 px and on its own "
           "below; the header 104 px at 1440 px and as before everywhere but at 479 px and below (+46 px)", misfits == [], misfits[:6])
     narrow = narrow_header(page)
-    check("library header: below 375 px (374 to 360, 359, 340, 320) index.html's header within the window, the title clear of the community links",
+    check("library header: below 375 px (374 to 360, 359, 340, 320) gen.html's header within the window, the title clear of the community links",
           narrow == [], narrow[:3])
     page.set_viewport_size({"width": 1440, "height": 1000}); page.wait_for_timeout(60)
     link = page.evaluate("() => { const a = document.querySelector('.masthead-library'); return [a.textContent, a.getAttribute('href'), a.target, a.rel, a.title, a.classList.contains('masthead-link')]; }")
-    with page.context.expect_page() as opened:
+    # The same tab (the user's request of 2026-11-15, "改成直接跳过去 不重开页面"): the click opens no page, this one goes to
+    # the Library, and Back comes back to the generator.
+    pages = []
+    page.context.on("page", lambda opened: pages.append(opened))
+    with page.expect_navigation():
         page.click(".masthead-library")
-    library = opened.value
-    library.wait_for_load_state()
-    check("library header: the link reads Library and opens library.html in a new tab (rel noopener), the generator left as it was",
-          link == ["Library", "library.html", "_blank", "noopener", "Sensors already fitted to open-source grippers (opens in a new tab)", False]
-          and library.url.endswith("/library.html") and page.url.endswith("#rect"), (link, library.url))
-    library.close()
+    page.wait_for_load_state()
+    there = page.url
+    page.go_back(); page.wait_for_load_state()
+    check("library header: the link reads Library and opens the Library (./, the first page since 2026-11-16) in the same tab (no target, "
+          "no other page), its title without '(opens in a new tab)'; Back comes back to the generator",
+          link == ["Library", "./", "", "", "Sensors already fitted to open-source grippers", False]
+          and there == URL and not pages and page.url == RECT_URL, (link, there, len(pages), page.url))
     page.close()
     page = new_page(browser, width=1440, folded=True)
-    page.goto(URL + "library.html")
+    page.goto(URL)
     wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
     differs = []
     for width in (1440, 900, 600, 390):
@@ -1056,19 +1063,91 @@ def part_library_header(browser):
         boxes = page.evaluate(LIBRARY_HEADER)["boxes"]
         if any(abs(a - b) > 0.5 for one, other in zip(boxes, index_boxes[width]) for a, b in zip(one, other)) or len(boxes) != len(index_boxes[width]):
             differs.append([width, boxes, index_boxes[width]])
-    check("library header: library.html's header has index.html's geometry (within 0.5 px at 1440, 900, 600 and 390 px)", differs == [], differs[:2])
+    check("library header: the Library's header has gen.html's geometry (within 0.5 px at 1440, 900, 600 and 390 px)", differs == [], differs[:2])
     misfits = []
     for width in list(range(360, 411)) + list(range(412, 722, 2)):
         page.set_viewport_size({"width": width, "height": 1000})
         fit = page.evaluate(HEADER_FIT)
         if fit["gap"] < 8 or fit["overflow"] > 0 or fit["named"] != [width > 600, width > 630] or not header_sizes_ok(width, fit["sizes"]):
             misfits.append([width, fit])
-    check("library header: on library.html from 360 to 720 px the title clears the header's right (the look's toggle first), no horizontal "
+    check("library header: on the Library from 360 to 720 px the title clears the header's right (the look's toggle first), no horizontal "
           "overflow, up to 410 px the three circles as on the generator", misfits == [], misfits[:6])
     narrow = narrow_header(page, page_overflow=True)
-    check("library header: below 375 px (374 to 360, 359, 340, 320) library.html's header within the window, the title clear of the links, the page "
+    check("library header: below 375 px (374 to 360, 359, 340, 320) the Library's header within the window, the title clear of the links, the page "
           "not scrolling sideways", narrow == [], narrow[:3])
     check("library header: no console errors", not console_errors(page), console_errors(page))
+    page.close()
+
+# The FlexiTac team's footer on the generator (the user's request of 2026-11-15): its links (text, address, target, rel),
+# its headings, the boxes of <main>, the guide and the footer at the page's end, and the guide's top halfway down.
+FOOTER_LINKS = """() => { const f = document.querySelector('footer.site-footer'); if (!f) return null;
+  const box = n => (r => [r.left, r.top, r.width, r.height].map(v => Math.round(v * 10) / 10))(n.getBoundingClientRect());
+  const guide = document.getElementById('flowGuide');
+  return {links: [...f.querySelectorAll('a')].map(a => [a.textContent, a.getAttribute('href'), a.target, a.rel]),
+          headings: [...f.querySelectorAll('h2')].map(h => h.textContent), shown: f.checkVisibility(), main: box(document.querySelector('main')),
+          footer: box(f), guide: guide.checkVisibility() ? box(guide) : null, guideSticky: getComputedStyle(guide).position}; }"""
+FOOTER_WANT = [["Maintained by the FlexiTac Team", "https://flexitac.github.io/", "_blank", "noopener"],
+               ["GitHub", "https://github.com/FlexiTac/FlexiTac", "_blank", "noopener noreferrer"],
+               ["Discord", "https://discord.gg/6gw887Vxms", "_blank", "noopener noreferrer"],
+               ["YouTube", "https://www.youtube.com/watch?v=HYmMbsrwWFA", "_blank", "noopener noreferrer"],
+               ["binghao.huang@columbia.edu", "mailto:binghao.huang@columbia.edu", "", ""]]
+
+
+# Gen by Surface's default part loaded and its sensor built (or stopped), nothing in flight: cad_checks.DEFAULT_SETTLED.
+GEN_SETTLED = """() => { const s = JSON.parse(document.getElementById('cadState').textContent);
+    return ['loaded', 'skipped', 'failed'].includes(s.default_part) && !['pending', 'running'].includes(s.default_build) && s.busy.length === 0
+      && s.pending_build === null && (s.default_part !== 'loaded' || s.mesh !== null); }"""
+
+
+def part_footer(browser):
+    """The FlexiTac team's footer on the generator (the user's request of 2026-11-15), under both modes at 1440 x 900 and
+    390 x 844: Awesome-FlexiTac's links (the team's site, GitHub, Discord and YouTube each in a new tab, the mail a mailto:
+    link) and headings, right under <main> (its top <main>'s bottom) and the page's end; in Gen by Surface the guide still
+    sticky at 1440 px (its top 0 halfway down the page) and at the page's end its bottom on <main>'s, never over the footer
+    (its layout above the footer as before); a click on GitHub opens a new page, this one staying; no console error."""
+    page = new_page(browser, width=1440, height=900, folded=True)
+    misses = []
+    for width, height in ((1440, 900), (390, 844)):
+        page.set_viewport_size({"width": width, "height": height})
+        for mode, url in (("Gen by Surface", GEN_URL), ("Rectangular", RECT_URL)):
+            page.goto(url)
+            settle(page)
+            # (Gen by Surface's default part and its sensor on the part arrive after the build: its build waited for (the
+            # review of 2026-11-16: under load the build outlasted the scrolls below, the page 1085 px tall at 1440 px and
+            # the guide's "middle" read at -185 px), then scrolled to the end until the page's height holds.)
+            if mode == "Gen by Surface":
+                wait_until(page, GEN_SETTLED, 120)
+            for _ in range(20):
+                height_before = page.evaluate("() => document.documentElement.scrollHeight")
+                page.evaluate("() => window.scrollTo(0, document.documentElement.scrollHeight)"); page.wait_for_timeout(250)
+                if page.evaluate("() => document.documentElement.scrollHeight") == height_before and page.evaluate("() => Math.abs(scrollY + innerHeight - document.documentElement.scrollHeight) < 1"):
+                    break
+            end = page.evaluate(FOOTER_LINKS)
+            middle = None
+            if mode == "Gen by Surface" and width == 1440:
+                page.evaluate("() => window.scrollTo(0, document.documentElement.scrollHeight / 3)"); page.wait_for_timeout(120)
+                middle = page.evaluate(FOOTER_LINKS)
+            ok = (end and end["shown"] and end["links"] == FOOTER_WANT and end["headings"] == ["Maintained by the FlexiTac Team", "Community", "Contact"]
+                  and abs(end["footer"][1] - (end["main"][1] + end["main"][3])) <= 1.5 and abs(end["footer"][1] + end["footer"][3] - height) <= 1.5)
+            if mode == "Gen by Surface" and width == 1440:
+                ok = ok and end["guideSticky"] == "sticky" and end["guide"] and end["guide"][1] + end["guide"][3] <= end["footer"][1] + 0.5 \
+                    and middle and middle["guide"] and abs(middle["guide"][1]) <= 0.5
+            if not ok:
+                misses.append([width, mode, end, middle])
+    check("footer: on the generator under both modes (1440 and 390 px) Awesome-FlexiTac's links, each in a new tab but the mail, and headings, "
+          "right under <main> and at the page's end; Gen by Surface's guide still sticky above it, never over it", misses == [], misses[:2])
+    page.set_viewport_size({"width": 1440, "height": 900})
+    page.goto(GEN_URL); settle(page)
+    page.evaluate("() => window.scrollTo(0, document.documentElement.scrollHeight)")
+    opened = []
+    page.context.on("page", lambda other: opened.append(other))
+    page.context.route("https://github.com/**", lambda route: route.fulfill(status=200, content_type="text/html", body="<!doctype html><title>GitHub</title>"))
+    page.click("footer.site-footer a[href='https://github.com/FlexiTac/FlexiTac']")
+    page.wait_for_timeout(500)
+    check("footer: GitHub opens in a new page, the generator staying where it is", len(opened) == 1 and page.url == GEN_URL, [len(opened), page.url])
+    for other in opened:
+        other.close()
+    check("footer: no console errors", not console_errors(page), console_errors(page))
     page.close()
 
 # The look, its pressed buttons, then the outline's fill and the ENIG's display in the 2D preview, the oblique view and the
@@ -1650,6 +1729,7 @@ def main():
         parts = (part_boot_and_limits, part_clean_interface, part_looks, part_row_traces, part_stacked_pin1, part_stacked_pin1_phone, part_stacked_orbit, part_two_sided, part_coin, part_depth, part_view_light, part_nudges_and_advice, part_stale, part_zoom, part_drc_and_failures,
                  part_aria, part_downloads_and_http, part_figure_controls)
         parts += (part_library_header,)  # the header's Library link (2026-11-05)
+        parts += (part_footer,)  # the FlexiTac team's footer (2026-11-15)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
         for part in chosen:
             print(f"--- {part.__name__}", flush=True)

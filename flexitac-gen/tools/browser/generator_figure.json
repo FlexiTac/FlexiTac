@@ -3,6 +3,96 @@
  "figure_sha256": "e38217818ff99c16f8d898f74079f4297bb51b7613218839c04ae9f2a59ab1c1",
  "format": "flexitac-generator-figure/v1",
  "shots": {
+  "umi-concave-tip13.8-2mm": {
+   "build_id": "surface-32x11-bfb94d585709",
+   "files": {
+    "assembled": {
+     "bytes": 26140,
+     "sha256": "dfd33e2f5ad6b807d45de211fa17dba943ff27de5137ef7e4e2ab43b8c92199b"
+    },
+    "card": {
+     "bytes": 14436,
+     "sha256": "07464be862aaa47fc126634a162c8f84da6e884a01287356e7ed0a0542977552"
+    },
+    "exploded": {
+     "bytes": 29894,
+     "sha256": "581166c9534213697695f5e2b6a50a591f9b93d02f1226b47e07dc866144fc76"
+    }
+   },
+   "fit_sha256": "b72e37a0f4183f6848472af88e9b1a2ee575ca54160c9dd1b78c6d87be53fb3e"
+  },
+  "umi-concave-tip17.8-2mm": {
+   "build_id": "surface-32x11-f20b3f659cff",
+   "files": {
+    "assembled": {
+     "bytes": 26320,
+     "sha256": "170f9bb699760af6b5c2ff5f39db6be6cbf7503e36a74329dfa55a4c86c74c61"
+    },
+    "card": {
+     "bytes": 14834,
+     "sha256": "d7e6aa546fca15e5845e399b18775b18eca74389100412ac09da24d1b58b9a36"
+    },
+    "exploded": {
+     "bytes": 30118,
+     "sha256": "4a6f8e6ab6cfd5d73203af27da0b149dada611e8927a7378fe510595cf1151ff"
+    }
+   },
+   "fit_sha256": "9862f6607827bbcb14264f1e87fa1a57d31dbd5e1e9b02012b4fce52237196b7"
+  },
+  "umi-concave-tip21.8-2mm": {
+   "build_id": "surface-32x11-62d7fb2ed676",
+   "files": {
+    "assembled": {
+     "bytes": 27698,
+     "sha256": "c57a7a985d1c03dd3de2899c4897f44498cf01f93e86f1a4d22b1d5062a13f96"
+    },
+    "card": {
+     "bytes": 14780,
+     "sha256": "9e38bf9107170c476b92d8ee8a2020fe5062d56147c47274bd5c19fa6e79333d"
+    },
+    "exploded": {
+     "bytes": 30880,
+     "sha256": "85e0cba4a5f2b6b007ade5854e3f4c40b4125db86939f8596a22b45e66e1d31b"
+    }
+   },
+   "fit_sha256": "45942a6ab6b3918761599a69be7fc05153bef444960870e573a8db92d3a2bf72"
+  },
+  "umi-concave-tip5.8-2mm": {
+   "build_id": "surface-32x9-30f809793c76",
+   "files": {
+    "assembled": {
+     "bytes": 25884,
+     "sha256": "3ca474039129df84a0aed3099a4228c2420d024785730660a4a6ec1138c60c04"
+    },
+    "card": {
+     "bytes": 13930,
+     "sha256": "b96a3d91253a38179fc9164c51a3f472508e7060c1d4e0042b0a81121cb86d54"
+    },
+    "exploded": {
+     "bytes": 27724,
+     "sha256": "842daab8325adc65c0e07ec22d5bb5896f30256cbee68399589cde9f0a48ba1b"
+    }
+   },
+   "fit_sha256": "4f89ba1f0414cc076582a6c7ee9d5890a90366ea80349649f2d5d5457cea81cf"
+  },
+  "umi-concave-tip9.8-2mm": {
+   "build_id": "surface-32x9-ea37529f0b44",
+   "files": {
+    "assembled": {
+     "bytes": 25756,
+     "sha256": "e146c2b598205899542cc50b67cf0c7bfec0b8db4fbcc7050340332cc9539db2"
+    },
+    "card": {
+     "bytes": 14042,
+     "sha256": "c43286d0661f34ff761014f6d9660bb1b79136fc86ac1baac191a6a0413ad21e"
+    },
+    "exploded": {
+     "bytes": 28048,
+     "sha256": "2dc67c41ebbd1c06e7ffcbaa7f57a71f5cf9712ee853bd368e627980438e484a"
+    }
+   },
+   "fit_sha256": "46be41265f76fc0a5b794903f630e083c64d175d9cd7d980f75a8306d6864b3c"
+  },
   "umi-convex-tip13.8-2mm": {
    "build_id": "surface-32x12-568f1bcff1cc",
    "files": {
@@ -164,6 +254,204 @@
     }
    },
    "fit_sha256": "910d5174be2cbe52052c6d450a6511c4b309e4a8d293ea971b947ec441e5a414"
+  },
+  "umi-pointed-tip2-2mm": {
+   "build_id": "surface-32x12-225658b2334b",
+   "files": {
+    "assembled": {
+     "bytes": 27936,
+     "sha256": "1c1eb2108669ab574b44e8d6ddbf8eeb5f830094420c6b9b0df5b64c24ac5f52"
+    },
+    "card": {
+     "bytes": 14312,
+     "sha256": "78279540d0fa40f4fa69d529ea18df5bc86df9ac9abebf38d9b0b764bf31c319"
+    },
+    "exploded": {
+     "bytes": 29576,
+     "sha256": "6ef315aa19fefda3f8f4d015c90e979faff4fa9052af45db9ce1dc395f31d62e"
+    }
+   },
+   "fit_sha256": "45d6d9bae3bdfbac3e2dc58194e4c0537c1200c9450a4f5e535fb6dc358491d1"
+  },
+  "umi-short-convex-tip13.8-2mm": {
+   "build_id": "surface-32x12-2d739fe25b69",
+   "files": {
+    "assembled": {
+     "bytes": 28088,
+     "sha256": "a8184c91ee4949402a0f28f9e67b0944b92adeb9f1e29178a9b40ca8ac00d952"
+    },
+    "card": {
+     "bytes": 14874,
+     "sha256": "61d342dc2c0f9cd52be0d5e5f6653d9a94a9b3abffac11a09b76b76497e759d8"
+    },
+    "exploded": {
+     "bytes": 30756,
+     "sha256": "c1b36db6728067fa5a98c19a1cbce9c8b4171237af15f1266878d8ab0bb8afb8"
+    }
+   },
+   "fit_sha256": "b154d1327e32935faa0833f46378f31e0434de34ec838512d473f47b6d85a9a9"
+  },
+  "umi-short-convex-tip17.8-2mm": {
+   "build_id": "surface-32x12-94ed1318b98d",
+   "files": {
+    "assembled": {
+     "bytes": 28102,
+     "sha256": "a1a23d31d4fd981054c8219b92ad0c2eea4019abb6c8eb70c3c6bd65be2350bc"
+    },
+    "card": {
+     "bytes": 14862,
+     "sha256": "573ddf08d0b03196b89baf74eb967dcc10e72cadaad93ed91250afd99bd320a5"
+    },
+    "exploded": {
+     "bytes": 30994,
+     "sha256": "81f53da12b02aed1452253d6bc81b45306c719f56db03a1fb9bce177f4ba6efe"
+    }
+   },
+   "fit_sha256": "edb64c3d2781184773c9f4a6f92db7e43b8485603d51a28a80490cbbf8eac233"
+  },
+  "umi-short-convex-tip21.8-2mm": {
+   "build_id": "surface-32x12-342fbab32928",
+   "files": {
+    "assembled": {
+     "bytes": 28162,
+     "sha256": "663b5f436ecbe6e4806bcb68f6d0016fb99e46fa3ee44a2b9e0b48d331947e36"
+    },
+    "card": {
+     "bytes": 14888,
+     "sha256": "c17e991c5be303414792cc6ee0bc26b3f0a8710961f4a9c889ea7334dc0dbb69"
+    },
+    "exploded": {
+     "bytes": 31228,
+     "sha256": "14f52099ebe16fdd997767a8969fecaf1095589d635252c2ec23b79c1eb2c251"
+    }
+   },
+   "fit_sha256": "cf2573ec7f8656174a02e84abcbc6417fdc989d6ecfdb509c2906a506d6f80d1"
+  },
+  "umi-short-convex-tip5.8-2mm": {
+   "build_id": "surface-32x12-c9006c20cab8",
+   "files": {
+    "assembled": {
+     "bytes": 28188,
+     "sha256": "22285d96dc283882f1f11d1dd2120622de925cd39958afc133767554991eb293"
+    },
+    "card": {
+     "bytes": 14650,
+     "sha256": "7752034e550284919ab37f14b56aaefeac04c876ef4d84344f1863e500610a75"
+    },
+    "exploded": {
+     "bytes": 30308,
+     "sha256": "b790af1e8f05409a58fd38d693d0289fc2dc6a3f8022437e2340d6d0f55a8147"
+    }
+   },
+   "fit_sha256": "a79a7ef72db981ac69ef957dfd6d5ac3afea6065aa182a594587ec5c40e612f0"
+  },
+  "umi-short-convex-tip9.8-2mm": {
+   "build_id": "surface-32x12-104ecbf19cc9",
+   "files": {
+    "assembled": {
+     "bytes": 28116,
+     "sha256": "ca349f8d7230c62ca42740b19c9dd4acd81b4c08bf3fc0c7b221a6b4782724a8"
+    },
+    "card": {
+     "bytes": 14560,
+     "sha256": "55e87f111e84a320eb5cc73f31586ac64893355ca9923693d9715520125af676"
+    },
+    "exploded": {
+     "bytes": 30338,
+     "sha256": "a4a68a042a5901abe915e41bb01a59f01ed665e0880c52e8b7915a161851171f"
+    }
+   },
+   "fit_sha256": "7e9fc74833ebe3f6ccc18c142cbb086d6e2c9f44bd81c388a1f3f53d58a4cd6d"
+  },
+  "umi-short-trap-tip13.8-2mm": {
+   "build_id": "surface-32x12-9293aa782072",
+   "files": {
+    "assembled": {
+     "bytes": 27808,
+     "sha256": "55aabdc36b8f495e5d6cb7a7097c821291b21cb28085a141fc522667a40803f2"
+    },
+    "card": {
+     "bytes": 14612,
+     "sha256": "e2d5e2ec0a26ec528ec6e1c58bb0afe6bec5fb7148e418129753bf9a90d2de6c"
+    },
+    "exploded": {
+     "bytes": 30284,
+     "sha256": "8c9666a22725e758aa9607f4902980387a72a82ce645d73a1b8db3d18c54d7f7"
+    }
+   },
+   "fit_sha256": "62d53cba2acae5f8f502c726096ee49421f0bfa54b9adc732b88573598989eaf"
+  },
+  "umi-short-trap-tip17.8-2mm": {
+   "build_id": "surface-32x12-cdebb8ebe8e3",
+   "files": {
+    "assembled": {
+     "bytes": 28258,
+     "sha256": "6131a6700e32a952509b359fbb8a2e7cf29ac83ed868ac2662f5e3b05caa3274"
+    },
+    "card": {
+     "bytes": 14738,
+     "sha256": "d3a7455635d291c6a5b5da26529b4fd789a9684501a90e9f9baf39156bebf0fd"
+    },
+    "exploded": {
+     "bytes": 30850,
+     "sha256": "ee1a3ac52443a5a6ff12231df835b1344864402d6e20bbd6c06bfc72fb684bdf"
+    }
+   },
+   "fit_sha256": "7e66f885e910cf4378513c3eb4059939f23d40859dd8daae85e0f0e75c033fa8"
+  },
+  "umi-short-trap-tip21.8-2mm": {
+   "build_id": "surface-32x12-a813c264bd0f",
+   "files": {
+    "assembled": {
+     "bytes": 28294,
+     "sha256": "ae2c2b4fdc607ac9e03ef7bb5a0d86f5ddd912b9647a551dd4d16ca31b4639c5"
+    },
+    "card": {
+     "bytes": 14952,
+     "sha256": "3cf8f14e1694c5fa53d513c5f998d40c4803b0a406357c31600793f72654298c"
+    },
+    "exploded": {
+     "bytes": 31206,
+     "sha256": "23acf43d69f64401fc590e710b915beeacb76bd1f1351e11dfabc63352768a81"
+    }
+   },
+   "fit_sha256": "b5ac00c094f532b2082847b75bab1bcfcf8352f15bc7b5a5b3f1f5aa2a875a82"
+  },
+  "umi-short-trap-tip5.8-2mm": {
+   "build_id": "surface-32x12-b6c8e235bf0a",
+   "files": {
+    "assembled": {
+     "bytes": 27366,
+     "sha256": "d8cc8f91b7440b9bd95e5b96e83d3bea5de3096d5f6203531e8a5d109b599d4f"
+    },
+    "card": {
+     "bytes": 14246,
+     "sha256": "b4fa52d2cbc7c850e57d5ffae3c47b30315e242d8ef5d67c8ea15d3dee2ff714"
+    },
+    "exploded": {
+     "bytes": 29376,
+     "sha256": "ae28bc9b0d6a48870901f160611a2ac8af003e34377ae55244453664597887b9"
+    }
+   },
+   "fit_sha256": "9744bf8d6ecc9a731b94c40865597533c4f2031acdfafd56f0e787686f089b01"
+  },
+  "umi-short-trap-tip9.8-2mm": {
+   "build_id": "surface-32x12-c31187be42da",
+   "files": {
+    "assembled": {
+     "bytes": 27612,
+     "sha256": "a95136be802fa6be963e69b284883c22058f48711e481ff5958a82a81091bd6a"
+    },
+    "card": {
+     "bytes": 14394,
+     "sha256": "cbbdcf6ce0ae9ab42f084b5130e152a55471065e18bb09a49d45a36b72e9ced0"
+    },
+    "exploded": {
+     "bytes": 30102,
+     "sha256": "e13a6b7cb051dfe9d46cbfd63073e3eb15e6db41b459a676fe734ec56850cada"
+    }
+   },
+   "fit_sha256": "ace88a1b25b97c7074fb6bf28aa6e09053839131f63a255a38e869e4b4ec55d1"
   },
   "umi-trap-tip13.8-2mm": {
    "build_id": "surface-32x11-3b33935dba27",

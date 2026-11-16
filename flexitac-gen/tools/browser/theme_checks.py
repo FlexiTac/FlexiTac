@@ -52,14 +52,20 @@ the page checked opens (so the generator opens dark from the stored choice), the
   Gen by Surface's default part loads once more when it failed (a server busy with another client's fit answers 503);
   its checks start once the sensor on the part is drawn (or settled with nothing to draw).
 - part_reduced_motion (prefers-reduced-motion: reduce): the disclosure arrows' and every button's, summary's and header
-  link's transition 0s; a guide step and its Advanced Customization switch jump (80 ms after the click the target is in its place);
+  link's transition 0s; a guide step and its Advanced Customization switch jump (80 ms after the click the target is in its place,
+  or the work's end, <main>'s bottom, at the window's bottom: the footer of 2026-11-15 below it);
   a button held down is neither scaled nor moved; no animation.
 - part_reduced_transparency (prefers-reduced-transparency: reduce, by CDP), light and dark (the toggle's): the 3D view's
   three pills without backdrop filter, their material opaque (alpha .95 or more) and light.
 - part_contrast_and_forced: prefers-contrast more (the cards edged in the control border, the secondary text darker,
   links underlined) and forced colours (the chosen mode, tab, stacked view mode and look outlined): smoke, no console
   error.
-- part_library (2026-11-05): Generate sensor's bottom at most 857.1 px with the header's Library link; library.html in
+- part_footer (2026-11-15, the FlexiTac team's footer on both pages): on the generator (Gen by Surface, #rect) and the
+  Library, light, dark and with more contrast, 1440 x 900 and 390 x 844: one band after <main>, the page's last box, the
+  header's bar under a hairline, every text on it 4.5:1 or more, the headings 17 px 600; wide the team left and the two
+  columns right, level, a phone one column on the 20 px gutter; nothing past the window; no fade; a link hovered the
+  text colour and underlined; with more contrast every link underlined.
+- part_library (2026-11-05): Generate sensor's bottom at most 857.1 px with the header's Library link; the Library (./) in
   both schemes, the action blue only on Open in Gen by Surface, nothing green, no old palette, no fades; more contrast
   underlines its links and the header's Library link.
 Screenshots go to $FPC_BROWSER_OUT/shots (theme_*.png).
@@ -76,7 +82,10 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DARK_CHOICE, DONE, RECT_URL, SHOTS, THEME_KEY, URL, check, summary, wait_until  # noqa: E402
+from rp import DARK_CHOICE, DONE, GEN_URL, RECT_URL, SHOTS, THEME_KEY, URL, check, summary, wait_until  # noqa: E402
+
+# The Library: the first page since the user's decision of 2026-11-16 (library.html before, which forwards here now).
+LIBRARY_URL = URL
 
 WEBGL_ARGS = ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"]
 WIDTH, HEIGHT = 1440, 900
@@ -253,7 +262,7 @@ def new_page(browser, scheme="light", motion="no-preference", forced="none", con
         session.send("Emulation.setEmulatedMedia", {"features": [{"name": "prefers-color-scheme", "value": system},
                                                                  {"name": "prefers-reduced-motion", "value": motion}] + features})
     if scheme == "dark":
-        page.goto(URL + "library.html")
+        page.goto(LIBRARY_URL)
         page.click("#themeToggle")
         if page.evaluate("() => document.documentElement.dataset.theme") != "dark":
             raise RuntimeError("the header's toggle did not turn the dark look on")
@@ -263,7 +272,7 @@ def new_page(browser, scheme="light", motion="no-preference", forced="none", con
 
 def open_cad(page):
     for attempt in (1, 2):
-        page.goto(URL)
+        page.goto(GEN_URL)
         wait_until(page, DONE, 120)
         wait_until(page, SETTLED, 180)
         part = page.evaluate("() => JSON.parse(document.getElementById('cadState').textContent || '{}').default_part")
@@ -397,7 +406,8 @@ FIRST_PAINT_READ = """() => { const paint = performance.getEntriesByType('paint'
 NO_STORAGE = """Object.defineProperty(window, 'localStorage', {configurable: true, get() { throw new DOMException('The operation is insecure.', 'SecurityError'); }});"""
 # The pages' own scripts, blocked for the first screen (theme.js alone runs).
 PAGE_SCRIPTS = ("**/static/backend.js", "**/static/app.js", "**/static/cad/main.js", "**/static/library.js")
-TOGGLE_PAGES = (("index.html", RECT_URL), ("library.html", URL + "library.html"))
+# The generator (gen.html since 2026-11-16) and the Library (the first page, index.html, since then).
+TOGGLE_PAGES = (("gen.html", RECT_URL), ("index.html", LIBRARY_URL))
 
 
 def looks(state, expected):
@@ -435,7 +445,7 @@ def part_toggle(browser):
           "color-scheme light), the toggle off (its moon, aria-pressed false, 'Turn dark mode on'), nothing stored",
           all(looks(state, LIGHT_LOOK) and state["stored"] is None for state in opened.values()), opened)
     named = page.get_by_role("button", name="Dark mode", exact=True).count()
-    state = opened["library.html"]
+    state = opened["index.html"]
     check("toggle: a button named Dark mode, 44 x 44 and round, right before GitHub (10 px) and centred on its line, the community "
           "links next to it, the same box on both pages (1440 px)",
           named == 1 and state["box"] == [44.0, 44.0] and state["round"] != "0px" and state["gap"] == 10 and state["middle"] <= 0.5 and state["next"]
@@ -458,7 +468,7 @@ def part_toggle(browser):
     page.click("#themeToggle")
     page.wait_for_timeout(150)
     off = page.evaluate(TOGGLE)
-    library = open_toggle_page(page, URL + "library.html")
+    library = open_toggle_page(page, LIBRARY_URL)
     page.reload()
     page.wait_for_timeout(300)
     again = page.evaluate(TOGGLE)
@@ -511,7 +521,7 @@ def part_toggle(browser):
     # document's creation: set before <body> is parsed and before the first paint; DOMContentLoaded sees it.
     context = toggle_context(browser, scripts=(FIRST_PAINT,))
     page = context.new_page()
-    open_toggle_page(page, URL + "library.html")
+    open_toggle_page(page, LIBRARY_URL)
     page.click("#themeToggle")
     early = {}
     for name, url in TOGGLE_PAGES:
@@ -524,7 +534,7 @@ def part_toggle(browser):
     for pattern in PAGE_SCRIPTS:
         page.route(pattern, lambda route: route.abort())
     first = {}
-    for name, url in (("index.html", URL), ("library.html", URL + "library.html")):
+    for name, url in (("gen.html", GEN_URL), ("index.html", LIBRARY_URL)):
         page.goto(url, wait_until="domcontentloaded")
         page.wait_for_timeout(200)
         path = f"{SHOTS}/theme_first_screen_dark_{name.split('.')[0]}.png"
@@ -540,7 +550,7 @@ def part_toggle(browser):
     for pattern in PAGE_SCRIPTS:
         page.route(pattern, lambda route: route.abort())
     plain = {}
-    for name, url in (("index.html", URL), ("library.html", URL + "library.html")):
+    for name, url in (("gen.html", GEN_URL), ("index.html", LIBRARY_URL)):
         page.goto(url, wait_until="domcontentloaded")
         page.wait_for_timeout(200)
         path = f"{SHOTS}/theme_first_screen_light_{name.split('.')[0]}.png"
@@ -720,10 +730,12 @@ def part_reduced_motion(browser):
     page.wait_for_timeout(200)
     page.click('[data-go="downloadsTitle"]')
     page.wait_for_timeout(80)
-    early = page.evaluate("() => [document.getElementById('downloadsTitle').getBoundingClientRect().top, Math.abs(scrollY + innerHeight - document.documentElement.scrollHeight) < 2]")
+    # (The work's end, <main>'s bottom at the window's: the guide's scrolls stop there since the footer of 2026-11-15, as
+    # they stopped at the page's end before it.)
+    early = page.evaluate("() => [document.getElementById('downloadsTitle').getBoundingClientRect().top, Math.abs(document.querySelector('main').getBoundingClientRect().bottom - innerHeight) < 2]")
     page.wait_for_timeout(700)
     late = page.evaluate("() => document.getElementById('downloadsTitle').getBoundingClientRect().top")
-    check("reduced motion: a guide step jumps: 80 ms after the click its target is in its place (0-300 px from the top, or the page's end) and stays",
+    check("reduced motion: a guide step jumps: 80 ms after the click its target is in its place (0-300 px from the top, or the work's end) and stays",
           (0 <= early[0] <= 300 or early[1]) and abs(early[0] - late) < 2, [early, late])
     page.evaluate("() => window.scrollTo(0, 0)")
     page.wait_for_timeout(200)
@@ -793,15 +805,17 @@ def part_contrast_and_forced(browser):
 
 
 
-# The Library (library.html, the user's requests of 2026-11-05): the action blue fills only Open in Gen by Surface.
-LIBRARY_BLUE = [".lib-open"]
+# The Library (the first page since 2026-11-16, library.html before; the user's requests of 2026-11-05): the action blue
+# fills only Open in Gen by Surface, and since the user's decisions of 2026-11-15 and 2026-11-16 the showcase's Design
+# your own, which leads to Gen by Surface too.
+LIBRARY_BLUE = [".lib-open", ".lib-showcase .lib-design"]
 LIBRARY_LINKS = """() => [...document.querySelectorAll('a')].filter(a => a.checkVisibility() && !a.matches('.masthead-link, .lib-card, .lib-open, .lib-pill'))
     .map(a => [a.textContent.trim().slice(0, 30), getComputedStyle(a).textDecorationLine, getComputedStyle(a.querySelector('span') || a).textDecorationLine])"""
 
 
 def part_library(browser):
     """The Library and the header's link in the theme: Generate sensor's bottom still at most 857.1 px on the generator (the
-    link changes no line of its header at 1440 px; 850.1 measured); library.html in the light and the dark scheme, its grid
+    link changes no line of its header at 1440 px; 850.1 measured); the Library in the light and the dark scheme, its grid
     and a sensor's page, the action blue filling only Open in Gen by Surface, nothing green, none of styles.css's old
     palette, no colour fades; under more contrast every text link underlined (the header's Library link too, there and
     on the generator)."""
@@ -814,7 +828,7 @@ def part_library(browser):
         page = new_page(browser, scheme=scheme)
         found = {}
         for fragment in ("", "#i2rt-yam-1mm"):
-            page.goto(URL + "library.html" + fragment)
+            page.goto(LIBRARY_URL + fragment)
             wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
             page.wait_for_timeout(300)
             page.mouse.move(WIDTH - 2, HEIGHT - 2)
@@ -823,13 +837,15 @@ def part_library(browser):
                 found.setdefault(key, []).extend(scan[key])
             found.setdefault("fading", []).extend(page.evaluate(FADING.replace("a.masthead-link", "a")))
         opened = page.evaluate("() => getComputedStyle(document.querySelector('.lib-open')).backgroundColor")
-        check(f"library {scheme}: the action blue fills only Open in Gen by Surface ({opened}), nothing green, none of styles.css's old palette, "
-              "no colour fades", not any(found.values()) and opened == "rgb(0, 113, 227)", {key: value[:4] for key, value in found.items()})
+        design = page.evaluate("() => getComputedStyle(document.querySelector('.lib-design')).backgroundColor")
+        check(f"library {scheme}: the action blue fills only Open in Gen by Surface ({opened}) and the showcase's Design your own ({design}), nothing "
+              "green, none of styles.css's old palette, no colour fades", not any(found.values()) and opened == design == "rgb(0, 113, 227)",
+              {key: value[:4] for key, value in found.items()})
         page.screenshot(path=f"{SHOTS}/theme_library_{scheme}.png")
         check(f"library {scheme}: no console error", not page.errors, page.errors[:5])
         page.context.close()
     page = new_page(browser, contrast="more")
-    page.goto(URL + "library.html#widowx-250-1mm")
+    page.goto(LIBRARY_URL + "#widowx-250-1mm")
     wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
     links = page.evaluate(LIBRARY_LINKS)
     open_rect(page)
@@ -838,11 +854,103 @@ def part_library(browser):
           links and all("underline" in own or "underline" in inner for _, own, inner in links) and "underline" in header, (links, header))
     page.context.close()
 
+# The FlexiTac team's footer (the user's request of 2026-11-15): its band and every text's colour over it (the footer's own
+# background, opaque), its hairline, its boxes (the band, the team, the two columns, every line), the page's width and
+# the footer's place (the last box of the page, after <main>), its links' transitions.
+FOOTER = """() => { const f = document.querySelector('footer.site-footer'); if (!f) return null; const s = getComputedStyle(f);
+  const box = n => (r => [r.left, r.top + scrollY, r.width, r.height].map(v => Math.round(v * 10) / 10))(n.getBoundingClientRect());
+  const texts = [...f.querySelectorAll('h2, p, li, a')].filter(n => n.checkVisibility()).map(n => [n.textContent.trim().slice(0, 24), getComputedStyle(n).color]);
+  const main = document.querySelector('main');
+  return {background: s.backgroundColor, line: [s.borderTopWidth, s.borderTopStyle, s.borderTopColor], texts, box: box(f),
+          team: box(f.querySelector('.site-footer-team')), cols: [...f.querySelectorAll('.site-footer-col')].map(box),
+          lines: [...f.querySelectorAll('h2, p, li')].map(n => box(n)), page: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          after: Boolean(main.compareDocumentPosition(f) & Node.DOCUMENT_POSITION_FOLLOWING), last: document.documentElement.scrollHeight - (box(f)[1] + box(f)[3]),
+          fading: [...f.querySelectorAll('a')].map(a => getComputedStyle(a).transitionDuration).filter(d => d.split(', ').some(x => x !== '0s')),
+          headings: [...f.querySelectorAll('h2')].map(h => [getComputedStyle(h).fontSize, getComputedStyle(h).fontWeight])}; }"""
+
+
+def contrast_of(fg, bg):
+    lighter, darker = sorted((luminance(fg), luminance(bg)), reverse=True)
+    return (lighter + 0.05) / (darker + 0.05)
+
+
+# The footer's team heading's lines, its words grouped by the top of each (a word alone on a line: a widow).
+TEAM_LINES = """() => { const a = document.querySelector('footer.site-footer .site-footer-title a'); const text = a.firstChild; const range = document.createRange();
+  const lines = {}; let at = 0; for (const word of a.textContent.split(' ')) { range.setStart(text, at); range.setEnd(text, at + word.length);
+  const top = Math.round(range.getBoundingClientRect().top); (lines[top] ||= []).push(word); at += word.length + 1; }
+  return Object.keys(lines).sort((x, y) => x - y).map(top => lines[top].join(' ')); }"""
+
+
+def part_footer(browser):
+    """The FlexiTac team's footer (the user's request of 2026-11-15: Awesome-FlexiTac's, in the page's own palette): on the
+    generator (Gen by Surface and #rect) and the Library, light and dark and with more contrast, at 1440 x 900 and 390 x
+    844: one band after <main>, the page's last box, the header's bar (#fbfbfd light, #161617 dark) under a hairline,
+    every text on it 4.5:1 or more (WCAG AA), its headings the guide's title (17 px, 600); at 1440 px the team on the
+    left and the two columns on its right, their tops level; at 390 px one column within the 20 px gutters; nothing
+    past the window; its links without a fade; a hovered link the text colour and underlined; no console error.  Its
+    team heading balanced where it wraps (the review of 2026-11-15: "Team" had been alone on its second line in the
+    team's narrow column from 735 to about 880 px and on a 320 px phone): no word alone on a line at 320, 760, 805 and
+    850 px, on both pages."""
+    for contrast in ("no-preference", "more"):
+        for scheme in ("light", "dark"):
+            page = new_page(browser, scheme=scheme, contrast=contrast)
+            for label, url in (("Gen by Surface", GEN_URL), ("#rect", RECT_URL), ("the Library", LIBRARY_URL)):
+                for width, height in ((WIDTH, HEIGHT), (390, 844)):
+                    page.set_viewport_size({"width": width, "height": height})
+                    page.goto(url)
+                    if url == LIBRARY_URL:
+                        wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
+                    page.wait_for_timeout(400)
+                    f = page.evaluate(FOOTER)
+                    name = f"footer {label}, {scheme}{', more contrast' if contrast == 'more' else ''}, {width} px"
+                    if f is None:
+                        check(f"{name}: the footer is there", False)
+                        continue
+                    low = sorted((round(contrast_of(colour, f["background"]), 2), text) for text, colour in f["texts"])[:1]
+                    bar = {"light": "rgb(251, 251, 253)", "dark": "rgb(22, 22, 23)"}[scheme]
+                    cols, team = f["cols"], f["team"]
+                    if width == WIDTH:
+                        laid = len(cols) == 2 and team[0] < cols[0][0] < cols[1][0] and abs(team[1] - cols[0][1]) < 1 and abs(team[1] - cols[1][1]) < 1
+                    else:
+                        laid = len(cols) == 2 and team[1] < cols[0][1] < cols[1][1] and all(abs(box[0] - 20) < 1 for box in [team] + cols)
+                    inside = all(box[0] >= 19.5 and box[0] + box[2] <= width - 19.5 for box in f["lines"])
+                    check(f"{name}: one band after <main> and the page's last box, the header's bar under a hairline, every text 4.5:1 or more "
+                          "(lowest first), its headings 17 px 600, laid out (wide: the team left, two columns right, level; a phone: one column on "
+                          "the gutter), within the window, no fade",
+                          f["after"] and abs(f["last"]) < 1 and f["background"] == bar and f["line"][:2] == ["1px", "solid"]
+                          and low and low[0][0] >= 4.5 and f["headings"] == [["17px", "600"]] * 3 and laid and inside and f["page"] <= 0 and not f["fading"],
+                          {"low": low, "background": f["background"], "box": f["box"], "team": team, "cols": cols, "page": f["page"], "fading": f["fading"]})
+                    if width == WIDTH and contrast == "no-preference":
+                        page.evaluate("() => window.scrollTo(0, document.documentElement.scrollHeight)")
+                        page.hover("footer.site-footer .site-footer-col a")
+                        hovered = page.evaluate("() => { const a = document.querySelector('footer.site-footer .site-footer-col a'); const s = getComputedStyle(a); "
+                                                "return [s.color, s.textDecorationLine, getComputedStyle(document.querySelector('.site-footer h2')).color]; }")
+                        check(f"{name}: a link hovered the text colour, underlined, at once", hovered[0] == hovered[2] and "underline" in hovered[1], hovered)
+                        page.screenshot(path=f"{SHOTS}/theme_footer_{label.replace(' ', '_').replace('#', '')}_{scheme}.png")
+                        page.mouse.move(2, 2)
+                    if contrast == "more":
+                        underlined = page.evaluate("() => [...document.querySelectorAll('footer.site-footer a')].every(a => getComputedStyle(a).textDecorationLine.includes('underline'))")
+                        check(f"{name}: every link of the footer underlined", underlined)
+            if scheme == "light" and contrast == "no-preference":
+                wraps = {}
+                for label, url in (("Gen by Surface", GEN_URL), ("the Library", LIBRARY_URL)):
+                    for width in (320, 760, 805, 850):
+                        page.set_viewport_size({"width": width, "height": 900})
+                        page.goto(url)
+                        page.wait_for_timeout(300)
+                        wraps[f"{label} {width}"] = page.evaluate(TEAM_LINES)
+                check("footer: the team heading balanced where it wraps (no word alone on a line) at 320, 760, 805 and 850 px on both pages",
+                      all(lines and all(" " in line for line in lines) for lines in wraps.values()) and any(len(lines) > 1 for lines in wraps.values()), wraps)
+            check(f"footer {scheme}{', more contrast' if contrast == 'more' else ''}: no console error", not page.errors, page.errors[:5])
+            page.context.close()
+
+
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(args=WEBGL_ARGS)
         parts = (part_toggle, part_schemes, part_reduced_motion, part_reduced_transparency, part_contrast_and_forced)
         parts += (part_library,)  # the Library and the header's link (2026-11-05)
+        parts += (part_footer,)  # the FlexiTac team's footer (2026-11-15)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
         for part in chosen:
             print(f"--- {part.__name__}", flush=True)

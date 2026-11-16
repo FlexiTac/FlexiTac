@@ -3,7 +3,7 @@
 - The vendored three.js files keep the SHA-256 recorded in web/vendor/three/NOTICE.md
   (only OrbitControls.js is patched, to import ./three.module.js); the coin photo and the
   UMI finger (CAD mode's default part) keep the SHA-256 of their NOTICE.md.
-- index.html loads web/cad/main.js as a module next to the classic app.js; the CAD
+- gen.html (index.html until 2026-11-16) loads web/cad/main.js as a module next to the classic app.js; the CAD
   controls live outside #designForm and carry no name/data-field of the design form;
   the mode switch is a radio group, not a tablist; the CAD SVG has no aria-label; the
   3D view has a role, the live regions are only the status lines.
@@ -59,7 +59,7 @@ CAD_SCRIPTS = ("main.js", "viewer.js", "api.js", "stl.js", "border.js", "drape.j
 
 
 class _Tree(HTMLParser):
-    """index.html as nested nodes: each a dict of its tag, attributes, children and text."""
+    """gen.html as nested nodes: each a dict of its tag, attributes, children and text."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -135,7 +135,7 @@ class _Page(HTMLParser):
 
 def _page() -> _Page:
     parser = _Page()
-    parser.feed((WEB / "index.html").read_text(encoding="utf-8"))
+    parser.feed((WEB / "gen.html").read_text(encoding="utf-8"))
     return parser
 
 
@@ -195,8 +195,9 @@ class PageTests(unittest.TestCase):
 
     def test_scripts(self) -> None:
         scripts = [(attributes.get("src"), attributes.get("type")) for tag, attributes, _ in self.page.elements if tag == "script"]
-        # The look's choice first, in <head> before the style sheets (web/theme.js, 2026-11-06: no flash of the light page).
-        self.assertEqual(scripts, [("static/theme.js", None), ("static/backend.js", None), ("static/app.js", None), ("static/cad/main.js", "module")])
+        # The look's choice first, in <head> before the style sheets (web/theme.js, 2026-11-06: no flash of the light page);
+        # the header's counts refreshed on the static site by web/counts.js, the Library's too (the review of 2026-11-16).
+        self.assertEqual(scripts, [("static/theme.js", None), ("static/counts.js", None), ("static/backend.js", None), ("static/app.js", None), ("static/cad/main.js", "module")])
 
     def test_cad_controls_stay_out_of_the_design_form(self) -> None:
         for tag, attributes, ancestors in self.page.elements:
@@ -280,7 +281,7 @@ class PageTests(unittest.TestCase):
             if tag == "details" and attributes.get("id") == "drcPanel":
                 break
             self.assertNotEqual(tag, "details", attributes)
-        sources = {name: (WEB / name).read_text(encoding="utf-8") for name in ("index.html", "app.js", "cad/main.js", "styles.css", "theme.css")}
+        sources = {name: (WEB / name).read_text(encoding="utf-8") for name in ("gen.html", "app.js", "cad/main.js", "styles.css", "theme.css")}
         for name, text in sources.items():
             for word in ("assemblyLegend", "onPartLegend", "assemblyMore", "assemblyNotes", "assemblyRowBus", "About this view",
                          "assembly-legend", "assembly-key", "assembly-note", "assembly-more", "on-part-key", "renderOnPartLegend",
@@ -297,7 +298,7 @@ class PageTests(unittest.TestCase):
         self.assertFalse({"rowLegend", "columnLegend"} & ids)
         self.assertEqual([attributes for _, attributes, _ in self.page.elements if "layer-legend" in attributes.get("class", "").split()], [])
         tree = _Tree()
-        tree.feed((WEB / "index.html").read_text(encoding="utf-8"))
+        tree.feed((WEB / "gen.html").read_text(encoding="utf-8"))
         for key in ("row", "column"):
             card = _one(tree.root, lambda node: node["attrs"].get("id") == f"{key}Card")
             self.assertEqual([child["tag"] if child["tag"] == "header" else child["attrs"].get("class") for child in _elements(card)], ["header", "canvas-wrap"])
@@ -322,7 +323,7 @@ class PageTests(unittest.TestCase):
         # both, the registration above it none; side by side (styles.css's stack-card container from 720 px) the left's
         # bottom left and the right's bottom right.  The card ends with its figures (no legend under them).
         tree = _Tree()
-        tree.feed((WEB / "index.html").read_text(encoding="utf-8"))
+        tree.feed((WEB / "gen.html").read_text(encoding="utf-8"))
         card = _one(tree.root, lambda node: "stacked-review" in node["attrs"].get("class", "").split())
         self.assertIn("board-card", card["attrs"]["class"].split())
         figures = _elements(card)[-1]
@@ -353,7 +354,7 @@ class PageTests(unittest.TestCase):
         # theme.css's rules, the split's room for it (test_web_theme) and separatePin1Rings' rule keeping the pin-1 rings
         # off it.  The rings keep every other rule (apart, off the other triangle, each round its own, in the view); the
         # board cards' oblique view keeps its own caption (it says the thickness is drawn at least 2 px).
-        sources = {name: (WEB / name).read_text(encoding="utf-8") for name in ("index.html", "app.js", "cad/main.js", "styles.css", "theme.css")}
+        sources = {name: (WEB / name).read_text(encoding="utf-8") for name in ("gen.html", "app.js", "cad/main.js", "styles.css", "theme.css")}
         for name, text in sources.items():
             for word in ("assembly-caption", "registration review", "visual spacing only", "Plan view ·", "as seen through from above ·"):
                 with self.subTest(file=name, word=word):
@@ -381,7 +382,7 @@ class FigureControlsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         tree = _Tree()
-        tree.feed((WEB / "index.html").read_text(encoding="utf-8"))
+        tree.feed((WEB / "gen.html").read_text(encoding="utf-8"))
         cls.root = tree.root
         cls.app = (WEB / "app.js").read_text(encoding="utf-8")
         cls.styles = (WEB / "styles.css").read_text(encoding="utf-8")
@@ -435,7 +436,7 @@ class FigureControlsTests(unittest.TestCase):
         self.assertEqual((reset["attrs"].get("class"), "disabled" in reset["attrs"], "hidden" in reset["attrs"], reset["text"]), ("figure-reset", True, True, "Reset view"))
         self.assertEqual((pane["attrs"].get("aria-label"), pane["attrs"].get("aria-describedby"), "hidden" in hint["attrs"]), ("Sensor on the part", "onPartHint", True))
         # The old labels, the bars' title and hints gone.
-        page = (WEB / "index.html").read_text(encoding="utf-8")
+        page = (WEB / "gen.html").read_text(encoding="utf-8")
         for gone in ("2D top view", "Oblique view (rigid tilt)", ">Exploded 3D<", "Plan view (registration)", "on-part-title", "orbit-hint",
                      "on-part-reset", "preview-bar"):
             with self.subTest(gone=gone):
@@ -516,6 +517,18 @@ class ScriptTests(unittest.TestCase):
         self.assertIn('"fpc:result"', show)
         clear = source[source.index("function clearBoards"): source.index("// -- zoom and pan")]
         self.assertIn('"fpc:cleared"', clear)
+
+    def test_the_guide_stops_at_the_work_s_end_above_the_footer(self) -> None:
+        # The FlexiTac team's footer (the user's request of 2026-11-15) goes under <main>: the guide's scrolls (its steps,
+        # its Advanced Customization) stop at <main>'s end as they stopped at the page's end before it (scrollIntoView's
+        # start would push the sticky guide up under the footer's room), and its last step is lit there.
+        main = (CAD / "main.js").read_text(encoding="utf-8")
+        self.assertIn('const workEnd = () => document.querySelector("main").getBoundingClientRect().bottom;', main)
+        self.assertIn("  const by = Math.min(target.getBoundingClientRect().top - margin, workEnd() - window.innerHeight);\n", main)
+        self.assertIn("  const atEnd = workEnd() <= window.innerHeight + 2;\n", main)
+        self.assertIn('document.querySelectorAll("[data-go]").forEach(button => button.addEventListener("click", () => goTo($(button.dataset.go))));', main)
+        self.assertIn("    if (fold.open) goTo(fold);\n", main)
+        self.assertNotIn("documentElement.scrollHeight", main)
 
     def test_three_is_loaded_lazily_by_the_viewer_only(self) -> None:
         main = (CAD / "main.js").read_text(encoding="utf-8")
@@ -1191,7 +1204,7 @@ class ServerCopyTests(unittest.TestCase):
     def test_cad_mode_has_no_rectangle_controls(self) -> None:
         # The user's decision of 2026-10-26 (P5-diagonal-bus.md section 26.16): no Field shape, no Board rules, no Largest
         # rectangle border tool; what CAD mode generates depends on the selected area only.
-        html = (CAD.parent / "index.html").read_text(encoding="utf-8")
+        html = (CAD.parent / "gen.html").read_text(encoding="utf-8")
         border = (CAD / "border.js").read_text(encoding="utf-8")
         for control in ("cadShape", "cadTemplate", "cadBorderRect"):
             self.assertNotIn(f'id="{control}"', html)
@@ -1254,7 +1267,7 @@ class FoldNameTests(unittest.TestCase):
         # The user's request of 2026-11-04: the guide's switch and the two folds "Advanced Customization" ("Customize the
         # sensor" before), the form's fold inside it "More options" ("Advanced" before), as the fit's.
         parser = _Names()
-        parser.feed((WEB / "index.html").read_text(encoding="utf-8"))
+        parser.feed((WEB / "gen.html").read_text(encoding="utf-8"))
         names = parser.names
         self.assertEqual([names.get(key) for key in ("guideCustomize", "cadCustomize", "formCustomize")],
                          ["Advanced Customization"] * 3)
@@ -1262,7 +1275,7 @@ class FoldNameTests(unittest.TestCase):
         main = (CAD / "main.js").read_text(encoding="utf-8")
         self.assertIn('"The sensor fails a check on the part: see Advanced Customization, On the part."', main)
         self.assertIn('"No sensor fits here: choose another face, or open Advanced Customization."', main)
-        for name in ("index.html", "app.js", "cad/main.js", "theme.css", "styles.css"):
+        for name in ("gen.html", "app.js", "cad/main.js", "theme.css", "styles.css"):
             with self.subTest(file=name):
                 self.assertNotIn("Customize the sensor", (WEB / name).read_text(encoding="utf-8"))
 

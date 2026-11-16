@@ -8,13 +8,20 @@ GitHub Pages serves a project site, and checks it against a running app.py (FPC_
   fit of the UMI finger and the error replies (400, 404, 405, 413-free malformed bodies, 415, 422);
 * the page opens under the subpath without a console error, a failed request or a request outside its folder, and
   no request reaches the file server's /api/ (the API never leaves the browser);
-* the Library (part_library_site, 2026-11-05): library.html and a sensor's page without a 4xx or a request for the
-  engine, files.json listing every sensor, four sensors' prebuilt ZIPs app.py's exports (a tapered tip's among them),
-  ./?part=<id> built from its shipped fit in the browser's engine with its own downloads the prebuilt files (three
-  sensors, a tapered tip's among them, timed);
+* the Library (part_library_site, 2026-11-05): the Library (./, the first page since 2026-11-16) and a sensor's page
+  without a 4xx or a request for the engine, files.json listing every sensor, four sensors' prebuilt ZIPs app.py's
+  exports (a tapered tip's among them), gen.html?part=<id> built from its shipped fit in the browser's engine with its
+  own downloads the prebuilt files (three sensors, a tapered tip's among them, timed);
 * the default part's sensor is built (Gen by Surface, the shipped fit) and its downloads equal app.py's exports of
   the same design, under the same names; the sensor on the part beside the stacked view (2026-11-05) is drawn there
-  too, its art through data: URLs under the site's CSP.
+  too, its art through data: URLs under the site's CSP;
+* the FlexiTac team's footer (2026-11-15) closes both built pages with Awesome-FlexiTac's links;
+* the first page (part_first_page, the user's decision of 2026-11-16, "是的 be first page"): the site's folder shows
+  the Library, the generator is gen.html, and every address of before (rp.FORWARDS: ./?part=<id>, ./#rect, ...,
+  library.html#<id>) is forwarded with its query and hash, no history entry of its own and nothing of its page painted,
+  the Library's own addresses staying; the Library refreshes the header's counts from GitHub's API as the generator
+  does (web/counts.js, the review of 2026-11-16: the first page had kept the build's counts), every context of the run
+  answering GitHub's API here (rp.answer_github; part_page's own answer counts its page's asks).
 
     FPC_PORT=18801 python3 tools/browser/static_checks.py [--site DIR | --pyodide-archive pyodide-core-0.27.8.tar.bz2]
 """
@@ -39,7 +46,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
-from rp import PORT, SCRATCH, check, summary, wait_until  # noqa: E402
+from rp import CARD, FORWARDS, GITHUB_ASKED, GITHUB_CARD, PORT, SCRATCH, answer_github, check, forwarding, summary, wait_until  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -162,13 +169,15 @@ def part_page(browser, timings):
     page.on("requestfailed", lambda request: problems.append(f"failed: {request.url}"))
     page.on("response", lambda response: problems.append(f"HTTP {response.status}: {response.url}") if response.status >= 400 else None)
     page.on("request", lambda request: outside.append(request.url) if request.url.startswith("http") and not request.url.startswith(SITE_URL) else None)
-    # The header's GitHub counts (web/backend.js): answered here, as GitHub's API would (its hourly limit stays out of the check).
+    # The header's GitHub counts (web/counts.js since 2026-11-16, web/backend.js before): answered here, as GitHub's API
+    # would (its hourly limit stays out of the check).
     asked = []
     page.route(build_static_site.GITHUB_API, lambda route: (asked.append(route.request.url), route.fulfill(
         status=200, content_type="application/json", body=json.dumps({"stargazers_count": 1234, "forks_count": 56})))[-1])
     started = time.monotonic()
-    # ?probe: the sensor on the part compared with the map (main.js ON_PART_PROBE; a visitor's page skips it).
-    page.goto(SITE_URL + "?probe")
+    # ?probe: the sensor on the part compared with the map (main.js ON_PART_PROBE; a visitor's page skips it).  The
+    # generator's page is gen.html since the user's decision of 2026-11-16 (the Library the first page).
+    page.goto(SITE_URL + "gen.html?probe")
     wait_until(page, "() => window.apiBackend !== undefined", 20)
     check("the page runs its API in the browser (the build's flexitac-backend meta)", page.evaluate("() => window.apiBackend.mode") == "browser")
     ready = page.evaluate("() => window.apiBackend.ready")
@@ -203,6 +212,8 @@ def part_page(browser, timings):
               reply["status"] == 200 and data == reply["body"] and f'filename="{name}"' in reply["headers"].get("content-disposition", ""),
               [name, reply["status"], reply["headers"].get("content-disposition"), hashlib.sha256(data).hexdigest()[:12], hashlib.sha256(reply["body"]).hexdigest()[:12]])
     part_api(page)
+    footer = page.evaluate(FOOTER)
+    check("the FlexiTac team's footer (2026-11-15) closes the built page: Awesome-FlexiTac's links, in a new tab but the mail", footer == FOOTER_LINKS, footer)
     check("no console error, failed request or HTTP error", not problems, problems[:8])
     card = page.evaluate("() => [document.querySelector('[data-gh-stars]').textContent, document.querySelector('[data-gh-forks]').textContent, document.querySelector('[data-gh-stats]').hidden, document.querySelector('[data-gh-badge]').getAttribute('aria-label')]")
     check("the header's GitHub card shows the repository's stars and forks from GitHub's API (1.2k, 56), as flexitac.github.io",
@@ -214,12 +225,17 @@ def part_page(browser, timings):
 
 
 LIBRARY = ROOT / "web" / "library"
+# The FlexiTac team's footer (the user's request of 2026-11-15) on both built pages: its links (text, address, target).
+FOOTER = "() => [...document.querySelectorAll('footer.site-footer .site-footer-main a')].map(a => [a.textContent, a.getAttribute('href'), a.target])"
+FOOTER_LINKS = [["Maintained by the FlexiTac Team", "https://flexitac.github.io/", "_blank"], ["GitHub", "https://github.com/FlexiTac/FlexiTac", "_blank"],
+                ["Discord", "https://discord.gg/6gw887Vxms", "_blank"], ["YouTube", "https://www.youtube.com/watch?v=HYmMbsrwWFA", "_blank"],
+                ["binghao.huang@columbia.edu", "mailto:binghao.huang@columbia.edu", ""]]
 
 
 def part_library_site(browser, site, timings):
-    """The Library on the static site (the user's requests of 2026-11-05): library.html and a sensor's page load with no
+    """The Library on the static site (the user's requests of 2026-11-05): the Library (./) and a sensor's page load with no
     4xx and no request for the engine (py/); files.json lists every sensor; the prebuilt Gerber ZIPs of four sensors are
-    app.py's exports of their designs, under the same names (one a tapered tip, the narrowest convex arc); ./?part=<id> in
+    app.py's exports of their designs, under the same names (one a tapered tip, the narrowest convex arc); gen.html?part=<id> in
     Pyodide builds its sensor from the shipped fit and its own two Gerber downloads are the prebuilt files (the WidowX 250
     at 1 mm, the Trossen sock of 75,400 facets, and the tapered tips' default, the 13.8 mm trapezoid, timed)."""
     entries = json.loads((LIBRARY / "entries.json").read_text(encoding="utf-8"))
@@ -242,22 +258,24 @@ def part_library_site(browser, site, timings):
     page.on("response", lambda response: problems.append(f"HTTP {response.status}: {response.url}") if response.status >= 400 else None)
     page.on("request", lambda request: engine.append(request.url) if "/py/" in request.url or "backend.js" in request.url else None)
     for fragment in ("", "#umi-tapers", "#widowx-250-1mm"):
-        page.goto(SITE_URL + "library.html" + fragment)
+        page.goto(SITE_URL + fragment)
         wait_until(page, "() => document.querySelectorAll('.lib-card').length > 0", 30)
     wait_until(page, "() => document.querySelectorAll('a.lib-pill[data-export]').length === 2", 30)
     links = page.evaluate("() => [...document.querySelectorAll('a.lib-pill[data-export]')].map(a => [a.getAttribute('href'), a.getAttribute('download')])")
     record = files["variants"]["widowx-250-1mm"]
-    check("library: library.html and a sensor's page load with no 4xx and no request for the engine; its ZIPs are plain links to the prebuilt files",
+    footer = page.evaluate(FOOTER)
+    check("library: the FlexiTac team's footer (2026-11-15) closes the Library too, the generator's links", footer == FOOTER_LINKS, footer)
+    check("library: the Library (./) and a sensor's page load with no 4xx and no request for the engine; its ZIPs are plain links to the prebuilt files",
           not problems and not engine and links == [[f"static/library/{record[kind]['path']}", record[kind]["name"]] for kind in ("top-gerber", "bottom-gerber")],
           (problems[:4], engine[:4], links))
     for identifier in ("widowx-250-1mm", "trossen-widowx-ai-2mm", "umi-trap-tip13.8-2mm"):
         started = time.monotonic()
-        page.goto(SITE_URL + f"?part={identifier}")
+        page.goto(SITE_URL + f"gen.html?part={identifier}")
         wait_until(page, SETTLED, 300)
         seconds = time.monotonic() - started
         timings[f"?part={identifier} built"] = seconds
         state = json.loads(page.evaluate("() => document.getElementById('cadState').textContent"))
-        check(f"library: ./?part={identifier} in the browser's engine builds its sensor from the shipped fit, its build id [{seconds:.1f} s, at most 240 s]",
+        check(f"library: gen.html?part={identifier} in the browser's engine builds its sensor from the shipped fit, its build id [{seconds:.1f} s, at most 240 s]",
               state.get("default_build") == "done" and state.get("fit_source") == "shipped" and seconds <= 240
               and (state.get("proposal") or {}).get("build_id") == entries["variants"][identifier]["build_id"],
               {key: state.get(key) for key in ("default_part", "default_build", "fit_source")})
@@ -272,8 +290,40 @@ def part_library_site(browser, site, timings):
             check(f"library: the generator's own {kind} download of {identifier} is the prebuilt file, under its name",
                   path.read_bytes() == (site / "static" / "library" / record[kind]["path"]).read_bytes() and download.suggested_filename == record[kind]["name"],
                   download.suggested_filename)
-    check("library: no console error or HTTP error on the site's Library and ./?part", not problems, problems[:6])
+    check("library: no console error or HTTP error on the site's Library and gen.html?part", not problems, problems[:6])
     context.close()
+
+def part_first_page(browser):
+    """The first page on the built site (the user's decisions of 2026-11-15 and 2026-11-16: "是的 be first page"): the
+    site's folder (index.html) is the Library, gen.html the generator, library.html a forwarding page; every address of
+    rp.FORWARDS opened after an earlier page ends where it should, its query and hash kept, with no history entry of
+    its own (Back the earlier page) and nothing of its own page painted; the Library's own addresses stay."""
+    seen = forwarding(browser, SITE_URL)
+    wrong = {address: seen[address] for address, target in FORWARDS
+             if not (seen[address]["url"] == seen[address]["final"] and seen[address]["added"] == 1 and seen[address]["back"]
+                     and (bool(seen[address]["shown"]) if target is None else not seen[address]["shown"]))}
+    check(f"first page: each of the {len(FORWARDS)} addresses of rp.FORWARDS on the built site: the generator's of before (./?part=<id>, ./#rect, "
+          "./#cad, ?sample, ?debug, its anchors, ./index.html's) at gen.html and library.html's at ./, their query and hash kept, no history "
+          "entry of their own and nothing of their page painted; the Library's own (its sensors, places, the showcase, ?probe) staying, painted",
+          wrong == {}, wrong)
+    check("first page: the site's folder is the Library and gen.html the generator",
+          seen[""]["title"] == "Library · FlexiTac-Gen" and seen["#rect"]["title"] == "FlexiTac-Gen", (seen[""]["title"], seen["#rect"]["title"]))
+    # The header's counts on the first page (the review of 2026-11-16): refreshed from GitHub's API (answered here) as on
+    # the generator, asked once by the Library's page, kept for the tab (gen.html in it asks no more).
+    context = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = context.new_page()
+    asked = len(GITHUB_ASKED)
+    page.goto(SITE_URL)
+    wait_until(page, "() => !document.querySelector('[data-gh-stats]').hidden", 15)
+    library = page.evaluate(CARD)
+    page.goto(SITE_URL + "gen.html#rect")
+    wait_until(page, "() => !document.querySelector('[data-gh-stats]').hidden", 15)
+    generator = page.evaluate(CARD)
+    check("first page: the Library at the site's folder refreshes the header's counts from GitHub's API (1.2k, 56), asked once; gen.html in "
+          "the same tab shows them without asking again", library == GITHUB_CARD and generator == GITHUB_CARD and GITHUB_ASKED[asked:] == [SITE_URL],
+          (library, generator, GITHUB_ASKED[asked:]))
+    context.close()
+
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
@@ -292,8 +342,10 @@ def main(argv=None):
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(args=["--enable-unsafe-swiftshader", "--use-angle=swiftshader"])
+                answer_github(browser)  # both built pages ask GitHub's API for the header's counts (web/counts.js)
                 part_page(browser, timings)
                 part_library_site(browser, site, timings)  # the Library (2026-11-05)
+                part_first_page(browser)  # the Library the first page (2026-11-16)
                 browser.close()
         finally:
             files.shutdown()

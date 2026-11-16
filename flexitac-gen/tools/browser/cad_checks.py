@@ -69,8 +69,8 @@ Against a running app.py (FPC_PORT) with the example meshes in asset/ (skipped w
   their own colours over the view's grey; at Fit its grey faces toward the key lighter than those turned from it, a faint
   soft reflection; the look again after a drag; light in dark mode; no texture left by three models; a lost context back
   with its studio; without half-float render targets one warning and the lights alone.
-- The Library (part_library, 2026-11-05): every sensor of web/library/entries.json opens at ./?part=<id> from its
-  shipped fit with its build id, the file note naming it; ./?part=<part>, an unknown id, the mode switch, the user's
+- The Library (part_library, 2026-11-05): every sensor of web/library/entries.json opens at gen.html?part=<id> from its
+  shipped fit with its build id, the file note naming it; gen.html?part=<part>, an unknown id, the mode switch, the user's
   own file and Remove model (?part and the options it set dropped, the user's own edits kept), a click and Undo.
 - A browser without Element.checkVisibility (part_older_browser, the review of 2026-11-06: iOS and iPadOS before 17.4):
   Rectangular's Generate and Gen by Surface's default build shown as with it, at 1440 and 390 px.
@@ -97,7 +97,7 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DARK_CHOICE, DONE, RECT_URL, SCRATCH, SHOTS, URL, check, figure_controls, pin1_shapes, pin1_strokes, set_look, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
+from rp import DARK_CHOICE, DONE, GEN_URL, RECT_URL, SCRATCH, SHOTS, URL, check, figure_controls, pin1_shapes, pin1_strokes, set_look, stacked_bare, stacked_pin1, summary, unfold, wait_until  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SOFT = ROOT / "asset" / "soft_gripper_finger.stl"
@@ -209,7 +209,7 @@ def open_cad(page, caps=64, default_part=False):
     its comparison with the map, its pixels read; a visitor's page does neither, the review of 2026-11-05)."""
     if not default_part:
         page.route(DEFAULT_PART, lambda route: route.fulfill(status=404, content_type="text/plain", body="not in this check"))
-    page.goto(URL + "?probe#cad")
+    page.goto(GEN_URL + "?probe#cad")
     wait_until(page, DONE, 60)
     wait_until(page, "() => JSON.parse(document.getElementById('cadState').textContent).webgl !== 'not loaded'", 30)
     wait_until(page, DEFAULT_SETTLED, 120)
@@ -217,14 +217,14 @@ def open_cad(page, caps=64, default_part=False):
         set_caps(page, caps)
 
 
-# One step (index.html #cadQuick, #cadCustomize): what the row under the view holds (Generate sensor alone since the
+# One step (gen.html #cadQuick, #cadCustomize): what the row under the view holds (Generate sensor alone since the
 # user's request of 2026-11-02), whether the button is in sight and enabled and its title, whether Advanced Customization is open and
 # whether its controls are in sight.
 QUICK = """() => { const button = document.getElementById('cadQuickGenerate');
     return {row: [...document.getElementById('cadQuick').querySelectorAll('button, p, a')].map(node => node.textContent.trim()),
             shown: button.checkVisibility(), generate: !button.disabled, title: button.title, customize: document.getElementById('cadCustomize').open,
             hidden: Object.fromEntries(['cadSides', 'cadPitch', 'cadFit', 'cadProposalWrap', 'cadGenerate'].map(id => [id, document.getElementById(id).checkVisibility()]))}; }"""
-# The 3D view's status and loading veil (index.html #cadStatus, #cadLoading): the status's text (None when hidden),
+# The 3D view's status and loading veil (gen.html #cadStatus, #cadLoading): the status's text (None when hidden),
 # whether it lies in the view's bottom-right corner (within 20 px of its right and bottom edges), the veil and its text,
 # and whether the workspace's header holds a status.
 STATUS_PLACE = """() => { const status = document.getElementById('cadStatus'); const veil = document.getElementById('cadLoading');
@@ -242,7 +242,7 @@ def part_remove_model(browser):
     either); a file chosen then loads as before.  Pressed while the default part is still on its way, the load stops and
     the part is dropped when it arrives."""
     page = new_page(browser, folded=True)
-    page.goto(URL)
+    page.goto(GEN_URL)
     wait_until(page, DONE, 60)
     wait_until(page, DEFAULT_SETTLED, 120)
     page.wait_for_timeout(300)
@@ -280,7 +280,7 @@ def part_remove_model(browser):
     page = new_page(browser, folded=True)
     page.held = []
     page.route(DEFAULT_PART, lambda route: page.held.append(route))
-    page.goto(URL)
+    page.goto(GEN_URL)
     wait_until(page, DONE, 60)
     end = time.monotonic() + 30
     while not page.held and time.monotonic() < end:
@@ -328,7 +328,7 @@ def part_one_step(browser):
     model loaded has no face selected (the user's request of 2026-11-06), a click on its largest flat face selects it and
     Generate sensor builds it."""
     page = new_page(browser, folded=True)
-    page.goto(URL)
+    page.goto(GEN_URL)
     wait_until(page, DONE, 60)
     wait_until(page, DEFAULT_SETTLED, 120)
     at_rest(page)
@@ -521,7 +521,7 @@ def part_default_cad(browser):
     never says "CAD"; Rectangular at #rect, kept across a reload; a file chosen before the default part arrives is kept
     (the default part and its sensor dropped)."""
     page = new_page(browser, folded=True)  # the page as it opens (no fold opened, no form shown beside it)
-    page.goto(URL)
+    page.goto(GEN_URL)
     wait_until(page, DONE, 60)
     wait_until(page, DEFAULT_SETTLED, 120)
     page.wait_for_timeout(300)
@@ -690,7 +690,7 @@ def part_default_cad(browser):
         page = new_page(browser)
         page.held = []
         page.route(DEFAULT_PART, lambda route: page.held.append(route))
-        page.goto(URL)
+        page.goto(GEN_URL)
         wait_until(page, DONE, 60)
         end = time.monotonic() + 30
         while not page.held and time.monotonic() < end:
@@ -2528,7 +2528,7 @@ def part_older_browser(browser):
     the controls: the finger's tall boards start under them), the registration's two boards and both DRC tables; no
     console error."""
     for width in (1440, 390):
-        for label, url in (("Rectangular", RECT_URL), ("Gen by Surface", URL)):
+        for label, url in (("Rectangular", RECT_URL), ("Gen by Surface", GEN_URL)):
             seen = {}
             for older in (False, True):
                 page = new_page(browser, width=width, height=900, folded=True)
@@ -2536,13 +2536,13 @@ def part_older_browser(browser):
                     page.add_init_script(OLDER_BROWSER)
                 page.goto(url)
                 wait_until(page, DONE, 60)
-                if url == URL:
+                if url == GEN_URL:
                     wait_until(page, DEFAULT_SETTLED, 120)
                 else:
                     page.fill("#rows", "13"); page.click("#generate"); page.wait_for_timeout(60)
                     wait_until(page, DONE, 60)
                 page.wait_for_timeout(400)
-                seen[older] = dict(page.evaluate(BUILT), build=state(page)["default_build"] if url == URL else None, errors=errors_of(page))
+                seen[older] = dict(page.evaluate(BUILT), build=state(page)["default_build"] if url == GEN_URL else None, errors=errors_of(page))
                 page.close()
             new, old = seen[False], seen[True]
             same = {key: value for key, value in old.items() if key != "api"} == {key: value for key, value in new.items() if key != "api"}
@@ -2550,7 +2550,7 @@ def part_older_browser(browser):
                   "the registration's boards, both DRC tables, no console error)",
                   old["api"] == "undefined" and new["api"] == "function" and same and old["status"].startswith("Valid build")
                   and all(old["boards"]) and old["stacked"] == 2 and all(old["drc"]) and not old["errors"]
-                  and old["build"] == ("done" if url == URL else None), (old, new))
+                  and old["build"] == ("done" if url == GEN_URL else None), (old, new))
 
 
 # The stacked card's figures: each shown one's corners (top left, top right, bottom right, bottom left), how far its
@@ -2573,13 +2573,13 @@ def part_stack_feet(browser):
     seen = {}
     for scheme in ("light", "dark"):
         for width in (1440, 390):
-            for label, url in (("Rectangular", RECT_URL), ("Gen by Surface", URL)):
+            for label, url in (("Rectangular", RECT_URL), ("Gen by Surface", GEN_URL)):
                 page = new_page(browser, width=width, height=900, folded=True)
                 if scheme == "dark":
                     page.add_init_script(DARK_CHOICE)
                 page.goto(url)
                 wait_until(page, DONE, 60)
-                if url == URL:
+                if url == GEN_URL:
                     wait_until(page, DEFAULT_SETTLED, 120)
                 page.wait_for_timeout(300)
                 seen[(scheme, width, label)] = dict(page.evaluate(STACK_FEET), errors=errors_of(page))
@@ -3046,7 +3046,7 @@ def part_no_webgl(playwright):
     browser.close()
 
 
-# -- the Library's sensors (library.html; the user's requests of 2026-11-05) ------------------------------------------
+# -- the Library's sensors (./, the first page since 2026-11-16; the user's requests of 2026-11-05) ----------------------
 LIBRARY_ENTRIES = json.loads((ROOT / "web" / "library" / "entries.json").read_text(encoding="utf-8"))
 # Step 1's file note: its text (its no-break space before 'mm' read as a space), its link, and its lines (the distinct
 # tops of its text's boxes).
@@ -3064,7 +3064,7 @@ def open_part(page, query):
     """Gen by Surface at ./<query> (?part=<id>...), its Library sensor (or the default part) loaded and built."""
     page.surface.clear()
     page.goto("about:blank")  # a new document each time (the same address with a hash would only scroll)
-    page.goto(URL + query)
+    page.goto(GEN_URL + query)
     wait_until(page, DONE, 60)
     wait_until(page, DEFAULT_SETTLED, 180)
     page.wait_for_timeout(200)
@@ -3072,10 +3072,11 @@ def open_part(page, query):
 
 
 def part_library(browser):
-    """./?part=<id> (web/cad/main.js; the Library's Open in Gen by Surface): every sensor of web/library/entries.json loads its
-    part and builds its sensor from its shipped fit (fit_source shipped, no fit request; the entry's build id and mesh
+    """gen.html?part=<id> (./?part=<id> until 2026-11-16; web/cad/main.js; the Library's Open in Gen by Surface): every
+    sensor of web/library/entries.json loads its part and builds its sensor from its shipped fit (fit_source shipped, no fit request; the entry's build id and mesh
     name), drawn on its part beside the stacked view (the two lines' integration of 2026-11-05), step 1's file note
-    "From the Library: <label>" on one line with the Library in a new tab; ?part=<part> its
+    "From the Library: <label>" on one line with the Library in the same tab (no target: the user's request of
+    2026-11-15; a new tab before); ?part=<part> its
     2 mm sensor, ?part=<family> (umi-tapers) its default tip's (the review of 2026-11-05); an unknown id the UMI finger
     with a warning and ?part dropped; ?part kept across Rectangular and back (and ?part=<id>#rect loads on the first
     switch); the user's own file and Remove model drop ?part and put back the options the sensor set (pitch, fill,
@@ -3108,13 +3109,13 @@ def part_library(browser):
         got = (s["default_part"], s["default_build"], s["fit_source"], (s["proposal"] or {}).get("build_id"), s["generated_build_id"], (s["mesh"] or {}).get("name"),
                note["text"], note["href"], note["target"], note["lines"], any(url.endswith("/api/surface/fit") for url in page.surface), (s["verification"] or {}).get("ok"))
         want = ("loaded", "done", "shipped", variant["build_id"], variant["build_id"], mesh["name"], f"From the Library: {variant['label']}",
-                f"library.html#{identifier}", "_blank", 1, False, True)
+                f"./#{identifier}", None, 1, False, True)
         if got != want:
             misses.append([identifier, [pair for pair in zip(got, want) if pair[0] != pair[1]]])
     print("    timings:", ", ".join(f"{name} {seconds} s" for name, seconds in timings), flush=True)
-    check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors opens at ./?part=<id> from its shipped fit (no fit request), "
+    check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors opens at gen.html?part=<id> from its shipped fit (no fit request), "
           "its build id and mesh the entry's, built and mapped (every check passes), the note 'From the Library: <label>' on one line, "
-          "the Library in a new tab at it", misses == [], misses[:6])
+          "the Library at it in the same tab", misses == [], misses[:6])
     check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors drawn on its part beside the stacked view (on_part drawn for its build)",
           figures == [], figures[:6])
     check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors framed whole on its part at the Exploded home, 1440 px "
@@ -3137,14 +3138,14 @@ def part_library(browser):
     s = open_part(page, "?part=widowx-250")
     check("library: ?part=widowx-250 opens its 2 mm sensor", s["proposal"] and s["proposal"]["build_id"] == LIBRARY_ENTRIES["variants"]["widowx-250-2mm"]["build_id"]
           and page.evaluate(FILE_NOTE)["text"] == "From the Library: WidowX 250, 2 mm", s["proposal"])
-    # A family's id, as library.html#<family> takes it: its default sensor (the tapered tips' 13.8 mm trapezoid).
+    # A family's id, as the Library's #<family> takes it: its default sensor (the tapered tips' 13.8 mm trapezoid).
     family = LIBRARY_ENTRIES["families"]["umi-tapers"]["default"]
     s = open_part(page, "?part=umi-tapers")
     note = page.evaluate(FILE_NOTE)
     check(f"library: ?part=umi-tapers opens the tapered tips' default ({family}) from its shipped fit, no warning",
           (s["proposal"] or {}).get("build_id") == LIBRARY_ENTRIES["variants"][family]["build_id"] and s["fit_source"] == "shipped"
           and s["status"]["kind"] != "warning" and note["text"] == f"From the Library: {LIBRARY_ENTRIES['variants'][family]['label']}"
-          and note["href"] == f"library.html#{family}" and note["search"] == "?part=umi-tapers", (s["proposal"], s["fit_source"], s["status"], note))
+          and note["href"] == f"./#{family}" and note["search"] == "?part=umi-tapers", (s["proposal"], s["fit_source"], s["status"], note))
     s = open_part(page, "?part=bogus&debug")
     # The warning comes once the build is mapped (main.js loadDefaultPart waits for the map on a 40 ms timer, after the
     # map's own status): settled, the page may still be drawing (with the sensor on the part, three.js in SwiftShader
@@ -3170,7 +3171,7 @@ def part_library(browser):
           and page.evaluate(FILE_NOTE)["search"] == "?part=widowx-250-1mm" and s["fit_source"] == "shipped" and page.evaluate(OPTIONS) == ["1", "0.5", "none"], (rect, s["fit_source"]))
     page.surface.clear()
     page.goto("about:blank")
-    page.goto(URL + "?part=widowx-250-1mm#rect")
+    page.goto(GEN_URL + "?part=widowx-250-1mm#rect")
     wait_until(page, DONE, 60)
     page.wait_for_timeout(300)
     idle = state(page)["default_part"]
@@ -3240,7 +3241,7 @@ def main():
         parts = (part_rect_unchanged, part_default_cad, part_on_part, part_on_part_studio, part_on_part_patches, part_on_part_contact, part_view_look, part_one_step, part_remove_model, part_clean_cad, part_soft, part_crank, part_crank_fill, part_no_rectangle_controls, part_field_soft, part_row_sides, part_review_fixes, part_tail_card, part_wrap_flexitac,
                  part_ascii_and_narrow, part_drop, part_template_roundtrip, part_columns, part_presets, part_tail_edit, part_rounded_base,
                  part_rounded_corners, part_files)
-        parts += (part_library,)  # the Library's ./?part=<id> (2026-11-05)
+        parts += (part_library,)  # the Library's gen.html?part=<id> (2026-11-05)
         parts += (part_figure_controls,)  # the figures' controls in their frames (2026-11-06)
         parts += (part_older_browser,)  # a browser without Element.checkVisibility (the review of 2026-11-06)
         parts += (part_stack_feet,)  # the stacked card's figures rounded at its foot (the verification of 2026-11-06)

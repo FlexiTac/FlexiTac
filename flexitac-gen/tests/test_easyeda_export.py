@@ -713,7 +713,7 @@ class WebTests(unittest.TestCase):
     def test_the_download_button_sits_with_the_other_downloads(self) -> None:
         # In the downloads section: the two Gerber ZIPs in sight, the other files (the EasyEDA Pro projects first) under
         # "More files" since 2026-11-02.
-        html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        html = (ROOT / "web" / "gen.html").read_text(encoding="utf-8")
         downloads = re.search(r'<section class="downloads".*?</section>', html, re.S).group(0)
         actions = re.search(r'<div class="download-actions">(.*?)</div>', downloads, re.S).group(1)
         self.assertIn('data-export="bottom-gerber"', actions)

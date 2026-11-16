@@ -9,7 +9,7 @@ covers what the app does, what the client sends, and how it is checked.
 | --- | --- |
 | The border model: the polygon in uv, the edits, the automatic shapes, snapping, uv to 3D | `web/cad/border.js` |
 | The 3D view: occlusion-aware picking, the hover highlight, the border, its handles and their drags | `web/cad/viewer.js` |
-| The wiring: the panel, the toolbar, the fit request, staleness | `web/cad/main.js`, `web/index.html`, `web/styles.css` |
+| The wiring: the panel, the toolbar, the fit request, staleness | `web/cad/main.js`, `web/gen.html` (`web/index.html` until 2026-11-16), `web/styles.css` |
 | The server: validation, the fit inside the border, its edges as exits, the map record | `surface/border.py`, `surface/fit.py`, `surface/fill.py`, `surface/fieldfit.py`, `surface/place.py` |
 | The checks | `tests/test_border.py`, `tools/browser/border_checks.py` |
 

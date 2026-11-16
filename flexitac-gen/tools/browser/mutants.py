@@ -16,7 +16,8 @@ web/cad/library_view.js, web/cad/library_stage.js or (its second round) web/libr
 (part_view, part_view_race, part_routes, part_layout) in the same WebGL browser, after a control run of each part with
 the unmutated files through the same routes that must pass every check: a later show not winning, the lens shift the
 other way, the see-through finger's depth pass writing no depth, the see-through finger opaque; the first route not
-clearing an address's mark (the footer hidden), a card Tabbed to left cut by its row; and since the reviews of 2026-11-12
+clearing an address's mark (the footer hidden; a card Tabbed to left cut by its row too, retired with the UMI shelf's row
+on 2026-11-16); and since the reviews of 2026-11-12
 five of the looks (library_stage.js, served to part_looks): the bodies drawn without their looks, the part left in a
 gripper's look when its scene goes, the part's corners welded in its file's unit, the gripper studio not made again for a
 context that comes back, the looks without their share of the studio's diffuse light; and since the user's decision of
@@ -203,12 +204,12 @@ MUTANTS += [
      "const ghostDepth = new THREE.MeshBasicMaterial({colorWrite: false, depthWrite: false,", "part_view"),
     ("the see-through finger opaque: the rules' ghost_opacity not taken (library_stage.js)", "lib",
      "      ghostLook.opacity = rules.ghost_opacity;", "      ghostLook.opacity = 1;", "part_view"),
-    # The page itself (library.js; the reviews of 2026-11-06): the first route no longer clearing the mark theme.js set,
-    # and a card Tabbed to left cut by its row.
+    # The page itself (library.js; the reviews of 2026-11-06): the first route no longer clearing the mark theme.js set
+    # (re-anchored on 2026-11-16 on the route's guard of a page being forwarded, which the first page's had left it
+    # without); a card Tabbed to left cut by its row retired with the UMI shelf's row on 2026-11-16 (its review: a grid).
     ("the Library's first route not clearing the mark of an address of its own: the footer hidden on every page opened so (library.js)", "lib",
-     "    if (!state.index) return;\n    opened();\n", "    if (!state.index) return;\n", "part_routes"),
-    ("a UMI card Tabbed to that its row shows in part left cut: the row not moved to it (library.js)", "lib",
-     "      if (shift) track.scrollBy({left: shift});\n", "", "part_layout"),
+     '    if (!state.index || document.documentElement.hasAttribute("data-forward")) return;\n    opened();\n',
+     '    if (!state.index || document.documentElement.hasAttribute("data-forward")) return;\n', "part_routes"),
     # The looks (docs/LIBRARY_VIEW.md "The looks"; the reviews of 2026-11-12: no mutant had reached the stage's look code).
     ("a scene's looks not drawn: every body in the part's own material (library_stage.js)", "lib",
      "new THREE.Mesh(geometryOf(body.positions, smooth), looks.get(body.look) || partLook);", "new THREE.Mesh(geometryOf(body.positions, smooth), partLook);",

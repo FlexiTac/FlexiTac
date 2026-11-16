@@ -1080,7 +1080,10 @@ header's right, the look's toggle (light by default, dark once turned on:
 2026-11-06), then FlexiTac's GitHub, with the repository's stars and forks,
 and Discord, as on flexitac.github.io:
 2026-11-02), or `#rect` in the address, shows the
-rectangular form, and `#cad` still names CAD mode.  CAD mode shows the
+rectangular form, and `#cad` still names CAD mode (the page is `gen.html`
+since the user's decision of 2026-11-16, which made the Library the first
+page; `./#rect` and `./#cad`, the addresses of before, are forwarded to
+`gen.html#rect` and `gen.html#cad`, docs/LIBRARY_VIEW.md "The first page").  CAD mode shows the
 CAD workspace in place of the rectangular form (Generate still writes the
 chosen design into it, out of sight); the results below (status, previews,
 design checks, downloads) appear once CAD mode has generated a build, and
@@ -1104,7 +1107,7 @@ the right (main.js `syncGuideCustomize`): either one opens both, the
 guide then listing step 2's own steps, Fit and Generate, each done or next
 and scrolling to its part.  Under
 980 px the guide stands above the workspace.  Under its steps, "Try a
-sample" (the user's request of 2026-11-06; `index.html` `#samplePalette`,
+sample" (the user's request of 2026-11-06; `gen.html` `#samplePalette`,
 `web/samples/samples.json`) holds eight tiles in two columns: two of the UMI
 finger's tapered tips, four other Library fingers and two whole grippers.
 The palette moves nothing else (the review of 2026-11-06): on a desktop
@@ -1149,8 +1152,9 @@ build hides that build below as the user's own file does (the review of
 2026-11-06: its status, boards, checks and Gerber ZIPs had stayed under the
 new part, ready to download): the results come back with the new part's
 own Generate.  The address becomes
-`./?sample=<id>` (`?part` goes; a reload, or the page opened at it, shows
-the sample's part alone again; an unknown id the UMI finger with a
+`gen.html?sample=<id>` (`./?sample=<id>` until the Library became the
+first page on 2026-11-16; it forwards there now; `?part` goes; a reload,
+or the page opened at it, shows the sample's part alone again; an unknown id the UMI finger with a
 warning); the user's own file and Remove model drop it, as they drop
 `?part` with the options a Library sensor set.  The newest press wins:
 another sample, a file or Remove model on the way stops it, but the part

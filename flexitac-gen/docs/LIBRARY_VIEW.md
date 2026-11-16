@@ -3,8 +3,9 @@
 The user's requests of 2026-11-05: for the seven grippers that are not UMI
 fingers, the Library shows the **whole gripper** with a sensor on both
 fingers, the jaws fully open; and on each sensor's page in the Library
-(`library.html#<id>`; since 2026-11-15 a window over the grid, "The details
-window" below) the picture becomes a 3D view the visitor can
+(`./#<id>`, the site's first page since 2026-11-16, "The first page"
+below; `library.html#<id>` before; since 2026-11-15 a window over the grid,
+"The details window" below) the picture becomes a 3D view the visitor can
 **turn**, for every sensor (the grippers' whole-gripper scenes, the UMI
 finger's and its tapered tips' fingertip scene).  The grid's cards stay
 static WebP pictures.  Gen by Surface stays as visitors know it: its sensor
@@ -61,6 +62,95 @@ or `tests/`.
   tool's views are as they were.  Gen by Surface's figure keeps its lens.
   `library_checks.py` `part_view` turns the view 120, 180 and 240 degrees
   in both modes and finds no drawn pixel on the canvas's edge.
+- The drag hint (2026-11-15, the user's request: "箭头能不能做成像schetchfab一样
+  的动画", after the turn's mark of that day, a still chip in the corner,
+  which it replaces): Sketchfab's "click & hold to rotate" made for this
+  page.  In the view's host (`.lib-live`, so on every sensor's page and the
+  showcase's; `library.js` `dragHint`, none on the shots tool's `?probe=shoot`
+  page), a pointing hand between two block arrows over "Drag to rotate",
+  drawn in `library.js` (Sketchfab's picture is theirs), at the bottom
+  centre of the view, inside it.  Three treatments were tried on the real
+  views at 1440 and 390 px: Sketchfab's own (a white hand on a soft dark
+  halo, the label white with a dark glow), a frosted chip with the label
+  inside, and the one kept: Sketchfab's is for a dark viewer, and on this
+  page's light box (`#f5f5f7` in either scheme) its halo was a grey smudge
+  and its white label faint, the chip a box sliding to and fro; the mirror
+  of Sketchfab's for a light box, the hand and both arrows one white cursor
+  edged in the page's ink (`#1d1d1f`), a hairline of white glow and a soft
+  shadow, the label the ink at 85 % with a white glow, reads on the box and
+  on white, orange and black parts alike, with no box of its own.  Its
+  colours are fixed, not the palette's tokens: the box is light in the dark
+  scheme too.  (Built with the ink's arrows at 72 %; the review of
+  2026-11-15 found them grey on black over the black bases the hint mostly
+  lies on, legible only through the glow, a smudge on a phone: of three
+  arrows tried over WidowX AI, I2RT YAM, Dex1, ARX X5, UMI and Franka at
+  1440 and 390 px (white block arrows edged in ink, slimmer ones, an ink
+  shaft over a white under-stroke with white heads), the block arrows in
+  the hand's material read best, as Sketchfab's do.)
+  - Its size is the view's, not the window's (the review of 2026-11-15: by
+    the window's width, below 900 px, a tablet's 3:1 view 685 x 228 px and
+    the showcase's 338 x 423 px view on a phone had the small hint without
+    its label, a 900 px window's 355 x 222 px view the full one over its
+    whole base).  The host is a size container (`container:lib-live /
+    size`), the drawing 13.4 % of its height (`--lib-hint`, `clamp(28px,
+    13.4cqh, 44px)`, its width the viewBox's 84:44): 84 x 44 px from a view
+    328 px tall (98 x 62 px with its label; a 1440 x 900 window's view is
+    330 px tall, the showcase's 335 to 548 px at every width), never under
+    54 x 28 px (from a view 209 px tall down: the 3:1 view is 113 px tall on
+    a 390 px phone, 89 px on a 320 px one).  Its distance from the bottom (14 px at most) and its
+    sway (30 px either way at most) are in proportion to the drawing; its
+    label shows on a view 270 px tall or more (`@container lib-live
+    (max-height:269px)` hides it: a 1024 x 768 window's 255 px view, every
+    3:1 view), so a short view keeps its gripper in sight.  The hint then
+    takes 18 to 24 % of the view's height from its bottom, but for a phone's
+    3:1 view, 29 to 42 %, where the drawing's 28 px floor keeps it legible.
+  - It shows once the view is drawn (`.lib-stage.is-live`; never over the
+    picture or its placeholder), fading in (opacity, 0.2 s), and while shown
+    it sways either way as a drag would, Sketchfab's motion (5 s,
+    ease-in-out, for ever).
+  - At the visitor's first use of the drawn view on its page (`used()`) it
+    fades out (0.5 s after 0.5 s, still swaying: `.lib-live.is-used`), then
+    its sway stops (`is-gone`, set on the fade's `transitionend`), so nothing
+    moves unseen.  A use is a press of a mouse's or a pen's main button on
+    the view, a key that turns it (the arrows), a double click (a mouse's
+    first press, a touch screen's double tap), and a touch once it has
+    turned the view (`viewNews`, at the turn's end).  A right or a middle
+    click turns nothing and leaves it, and so does a touch that scrolls the
+    window (the review of 2026-11-15: on a phone the view is the first thing
+    in the window, and a vertical swipe over it, which scrolls the window's
+    page, had hidden the hint for the page, the view never turned).
+  - It stays hidden on that page: 0, Exploded | Assembled, and another
+    pitch, shape or tip of the same gripper (a new variant is a new drawing,
+    but the same page the visitor has just turned: showing the sway again on
+    each pitch would be motion they did not ask for) keep it hidden.  The
+    page is the gripper's (`pageOf`: the showcase's id, a part's, the
+    tapered tips' family's).  Another gripper's page, or the window opened
+    again (`rest()` forgets the page; Back then Forward too), shows it again.
+    A lost WebGL context hides it with the view (the picture shown); once
+    the context is back, the view drawn again, it shows if the view was not
+    used yet.
+  - The pointer passes through it (`pointer-events:none`: a drag begun on it
+    turns the view); it is for the eye alone (`aria-hidden`; the host's hint
+    says it in words).
+  - Under `prefers-reduced-motion` it neither sways nor fades: shown still,
+    hidden at once.  It is the page's one motion of its own, the dated
+    exception to `library.css`'s rule that nothing moves on its own
+    (`tests/test_library.py` allows exactly its transitions and its one
+    `@keyframes`, each off under reduced motion, and nothing else).
+  - The shots tool reads the canvas alone (and its page has no hint), so no
+    picture changes.  `library_checks.py` `part_view` checks it at 1440 and
+    390 px for a gripper and the UMI finger: never shown while the view
+    loads, shown once drawn, its box and its sway in proportion to the view,
+    its sway running and its reach (paused at its start, a quarter and a
+    half), a right click leaving it, a drag begun on it turning the view and
+    hiding it (its sway stopped), hidden through 0, the keys and a double
+    click, on the phone a vertical swipe leaving it and a sideways one
+    hiding it, hidden through a lost and restored context, after Back and
+    Forward shown again, hidden for another pitch, shown again on another
+    gripper's page and hidden by a turning key, and under reduced motion
+    (`emulate_media`) shown still and hidden at once; `part_view_hint_sizes`
+    measures it at nine windows from 1440 x 900 to 320 x 640, a gripper's
+    view and the showcase's.
 
 ## The details window
 
@@ -69,10 +159,12 @@ we may not jump to a new page. lets bump our to a large window, and if you
 click the "x" of right top conrner, it will close and back show lib".
 Since then a sensor's page and the showcase's page are no page of their own
 that replaces the grid: every card's details (a gripper's card, a UMI
-shelf's card, the Tapered tips card, the showcase's picture and Details)
-open in a large window over the Library.
+shelf's card (a pitch's and the Tapered tips card until 2026-11-16, a
+finger shape's since: "The UMI shelf's shapes" below), the showcase's
+picture and Details) open in a large window over the Library.
 
-- The window is `library.html`'s `dialog#libWindow` (named by the page's
+- The window is the Library page's (`index.html`, `library.html` until
+  2026-11-16) `dialog#libWindow` (named by the page's
   title), which `library.js` opens with `showModal()` (`raise()`): the top
   layer, the page behind it inert, the focus kept inside it, Escape its
   cancel.  Its X (`button#libClose`, named "Close": the header's toggle's
@@ -115,7 +207,7 @@ open in a large window over the Library.
   bar's width, so the grid moved.)
 - The address is the page's, as before: a card's link goes to `#<id>`, and
   that route opens the window, so Back closes it, Forward opens it again
-  and `library.html#<id>` opened anew (a shared link, a reload) shows the
+  and `./#<id>` opened anew (a shared link, a reload) shows the
   Library with the window over it.  The Pitch, Shape and Tip width replace
   the address (no history entry) with the window open.  The tab names the
   sensor while the window is open and the Library when it closes.
@@ -147,7 +239,7 @@ open in a large window over the Library.
   where it went before the window opened, and Forward opens it again.
 - One 3D view for the page (one WebGL context), its host moved into the
   window; three.js loads only when a window with a view opens, never on
-  the grid.  The shots tool's `library.html?probe=shoot#<id>` is a window
+  the grid.  The shots tool's `?probe=shoot#<id>` is a window
   too; its pane (the view's host fixed at 640 x 400, or 640 x 800 for the
   showcase, CSS px) and so the pictures are as before: on 2026-11-15
   `library_shots.py --check` found 0 of the 42 sensors differing,
@@ -643,7 +735,8 @@ held the two together.  They differ now by design, so the check holds what
 still holds (for each sensor of a part without a scene, in a browser,
 writing nothing):
 
-1. Gen by Surface's figure (`./?part=<id>`) is the picture pinned for it:
+1. Gen by Surface's figure (`gen.html?part=<id>`; `./?part=<id>` until
+   2026-11-16) is the picture pinned for it:
    `tools/browser/generator_figure.json`
    (`"format": "flexitac-generator-figure/v1"`; per sensor the fit and the
    build it is of, and the bytes and SHA-256 of its three pictures as the
@@ -870,8 +963,8 @@ entry's) is the Library of before.
 
 | Key | What it is |
 | --- | --- |
-| `id` | `"flexitac-g1"`: the page's address (`library.html#flexitac-g1`); no part's, variant's or family's |
-| `title`, `label`, `text` | the card's and the page's words, one line each: "FlexiTac on xArm"; "Original FlexiTac · Hand-designed, pre-agent" (the label must say original, hand-designed and pre-agent; it said "Hand-designed, not auto-generated" until 2026-11-15); "FlexiTac PCBs make tactile sensors accessible, reliable and standardized." |
+| `id` | `"flexitac-g1"`: the page's address (`./#flexitac-g1`; `library.html#flexitac-g1` until 2026-11-16, which forwards there); no part's, variant's or family's |
+| `title`, `label`, `text` | the card's and the page's words, one line each: "FlexiTac on xArm"; "Original FlexiTac · Hand-designed, pre-agent" (the label must say original, hand-designed and pre-agent; it said "Hand-designed, not auto-generated" until 2026-11-15); "Using flexible PCB to make tactile sensors accessible, reliable and standardized." (the flexible PCB technology FlexiTac is built on; the user's choice of 2026-11-15, after "FlexiTac PCBs make ..." said FlexiTac twice) |
 | `detail` | the page's line of detail under its line, one line: the sensor's size and fingers ("The original FlexiTac sensor, 12 × 32 taxels at 2 mm, on the xArm gripper's soft fingers."), which the card no longer says (2026-11-15) |
 | `sensor` | `{rows, columns, pitch_mm, field_mm}`: the pad (32 x 12 at 2 mm, the art's 23 x 63 mm field), for the picture's placeholder |
 | `placed` | the pad's placed record (`vendor/flexitac-v2/umi-finray.placed.json`, "A placed sensor") with `"scene": "scenes/flexitac-g1.json"`: what the 3D view draws |
@@ -885,7 +978,7 @@ entry's) is the Library of before.
   drawing downscaled): the gripper stands upright, and in a 16:10 picture
   four fifths were empty.  `tools/browser/library_shots.py --showcase`
   shoots them from the showcase's own page
-  (`library.html?probe=shoot#flexitac-g1`, the view's pane 640 x 800 CSS px
+  (`?probe=shoot#flexitac-g1`, the view's pane 640 x 800 CSS px
   at a pixel ratio of 2), each drawing checked whole and moved to the
   middle as a sensor's, and writes the files with `placed`, `image` and
   `shot` (nothing when the stage's numbers are not sound, below);
@@ -902,9 +995,25 @@ entry's) is the Library of before.
   fifth of the row within 220 to 300 px, 60 % of a phone's card) and its
   Details (`a.lib-pill.lib-showcase-details`, a grey pill) open the page.
   The picture's link repeats Details', so it is out of the Tab order and
-  hidden from assistive technology; Details is the card's one stop, and
+  hidden from assistive technology; Details is the card's first stop, and
   the page's back link came back to it (since 2026-11-15 the window's X,
   Escape and the backdrop focus it).
+- Design your own (the user's decisions of 2026-11-15 and 2026-11-16: "在
+  flexitac on xarm的details 后面，多一个按钮，generate sensor by yourself with
+  cad file", its name chosen: "Design your own"): right after Details on the
+  card, `a.lib-pill.lib-design`, a link to Gen by Surface (`gen.html`) in
+  the same tab, where the visitor loads their own 3D model; named "Design
+  your own sensor in Gen by Surface" for a screen reader.  Details' pill,
+  size (36 px, 15 px type), roundness and focus ring in the page's action
+  blue with white words, hovered and pressed as Open in Gen by Surface: the
+  blue's one other use on the Library (both lead to Gen by Surface; the
+  rule "the action blue only on Open in Gen by Surface" has this dated
+  exception, held by `test_library`, `library_checks.py`'s `blues()` and
+  `theme_checks.py`'s `LIBRARY_BLUE`).  The pills wrap: beside Details at
+  1440, 390 and 360 px, under it on the left at 320 px, each its own width.
+  The card's Tab order: the picture out of it, Details, then Design your
+  own.  It is the card's only: no Design your own on the showcase's page
+  or a sensor's.
 - The page (in the window over the grid since 2026-11-15, "The details
   window"): the picture in its frame with the Exploded | Assembled control,
   the 3D view drawn over it from `placed`
@@ -942,6 +1051,219 @@ entry's) is the Library of before.
   showcase's own fixes (`SHOWCASE_STALE`), not the scene builder's.
 - Order after a change of the scene: `tools/library_showcase.py`,
   `tools/browser/library_shots.py --showcase`, then the three `--check`s.
+
+## The first page
+
+The user's decisions of 2026-11-15 and 2026-11-16 ("我觉得之后可以让lib作为
+第一次点击进入时候使用的界面", then "是的 be first page"): the Library is the
+site's first page.  `web/index.html` is the Library's page (`library.html`
+before) and `web/gen.html` the generator's (`index.html` before): Gen by
+Surface at `gen.html`, Rectangular at `gen.html#rect`, a Library sensor at
+`gen.html?part=<id>`.  `app.py` serves `/` and `/index.html` the Library and
+`/gen.html` the generator, each with its security headers and the header's
+counts, and `/library.html` the forwarding page (no header, no counts);
+`tools/build_static_site.py` writes the three pages (`PAGES`; the
+forwarding page, `FORWARD`, with the site's head tags only) and reads the
+request a sensor's fit must be of from `gen.html` (`library_write.INDEX`).
+
+The addresses of before keep working.  `web/forward.js`, the first script
+of the Library's `<head>` and of the forwarding page's (the pages' CSP
+allows no inline script, hence a file), runs only on those two pages (their
+`<meta name="flexitac-page">`, `library` or `forward`) and sends:
+
+- on the Library, a generator's address of before to `gen.html` with the
+  same query and hash: a query naming one of `GEN_KEYS` (`part`, `sample`,
+  `debug`: `./?part=<id>`, `./?sample=<id>`, `?debug`) or a hash of
+  `GEN_HASHES` (`#rect`; `#cad`, CAD mode's name before 2026-10-30, still
+  Gen by Surface; the generator's own anchors, its design checks' links
+  `#drc-row`, `#drc-column` and `#maskNote`);
+- on the forwarding page, everything to `./` with the same query and hash
+  (`library.html#<id>` to `./#<id>`, the Library with that window over the
+  grid), or a generator's address straight to `gen.html`.
+
+It forwards with `location.replace` (no history entry: Back goes where it
+went before), marks `<html data-forward>` and hides the page by
+`visibility` (the canvas keeps the body's background, the page's grey or
+the dark look's black; Chromium paints nothing of a page that forwards
+from `<head>` at all), and `library.js` does nothing on a page so marked.
+The Library's own addresses stay: its sensors, parts and families, its
+places (`#gripper-<part>`, `#shelf-<part>`, `#shelf-start`, `#grippers`,
+`#showcase`) and the showcase's id are none of `GEN_HASHES`, and `?probe`,
+the checks' reads on both pages, is the Library's at `./` (the generator's
+at `gen.html?probe`), so it alone forwards nothing.  `test_library`'s
+`FirstPageTests` run `forward.js` under node on every kind of address and
+hold `GEN_KEYS` and `GEN_HASHES` to what the generator reads and the
+Library's ids apart from them; `library_checks.py`'s `part_first_page`
+(app.py or `--site`) and `static_checks.py`'s `part_first_page` open each
+address of `rp.FORWARDS` after an earlier page with its target held 0.6 s:
+where it ends, one history entry, Back the earlier page, nothing of the
+old address's page painted.
+
+Since the review of 2026-11-16: with the Library already open, an address of
+before reached by its hash alone (`./#rect` typed over `./`, an old bookmark
+of it or a link to it followed from the Library: a navigation within the
+page, which runs no script again) had stayed on the Library, saying "No
+sensor in the library is named rect.", where Rectangular had opened before.
+`forward.js` listens to the Library's `hashchange` too (registered in
+`<head>`, before `library.js`'s, whose `route()` does nothing on a page
+marked `data-forward`) and sends it on as at a load, its entry replaced (the
+hash's own: Back is the Library where it was).  A Library kept by the
+browser's back-forward cache while it was being sent on is shown again at
+its `pageshow` and sent on only if its address asks (Chromium keeps no page
+it left by `location.replace`; another browser might).  `app.py` sends the
+forwarding page as it is by its name (`FORWARD_PAGE`, the site build's
+`FORWARD`), not because `fill_github_counts` finds no card in it.  On the
+static site the header's star and fork counts are refreshed on both pages by
+`web/counts.js` (`backend.js` before, which the Library does not load: the
+site's first page had kept the build's counts).  The checks:
+`FirstPageTests`' hash and `pageshow` cases, `test_static_site`'s
+`CountsTests`, `library_checks.py part_first_page` (a hash over the open
+Library, three cases; with `--site` the Library's counts) and
+`static_checks.py part_first_page` (the counts at the site's folder).
+
+Every link follows: the Library's header (Rectangular `gen.html#rect`, Gen
+by Surface `gen.html`, Library `./`, the current page), the generator's
+Library link `./` and step 1's file note `./#<id>`, Open in Gen by Surface
+`gen.html?part=<id>`, the showcase's Design your own `gen.html`; the browser
+checks open the generator at `rp.GEN_URL` and the Library at the server's
+root.  The data files that record where a picture was shot keep the
+addresses of their shoots (`shots/manifest.json`'s and
+`tools/browser/generator_figure.json`'s `about`), which still forward.
+
+## The UMI shelf's shapes
+
+The user's request of 2026-11-16, of the UMI shelf's 1, 1.5, 2 and 3 mm
+cards: "后面这三种不是重复了吗，在第一个umi 1mm点进去，config就可以选择毫米数量；
+我在这里更多想要体现umi不同shape我们都可以fit,你现在只有一个shape变体" (the pitch is
+chosen on the page; the shelf should show that the UMI finger's shapes
+fit), and the shapes then chosen: a concave arc tip, a pointed tip and a
+short taper.  The shelf ("UMI Fin-Ray Gripper. Six finger shapes, straight
+to pointed.") is one card per finger shape, from blunt to sharp (not by how
+much of the face the taper takes, which the point's is less than the
+trapezoid's: its review, below):
+
+| Card | Its lines | Its sensors (2 mm pitch) | Its picture and page |
+| --- | --- | --- | --- |
+| Straight finger | 1 to 3 mm · Pick your pitch | `umi-finray-<p>mm`, 1, 1.5, 2, 3 mm | 2 mm; Pitch |
+| Short taper | 5.8 to 21.8 mm · Pick shape and width | `umi-short-{trap,convex}-tip<w>-2mm`: the last 40 mm a trapezoid or a convex arc | the 9.8 mm trapezoid; Shape, Tip width |
+| Convex arc tip | 5.8 to 21.8 mm · Pick your tip width | `umi-convex-tip<w>-2mm`: the last 75 mm | 9.8 mm; Tip width |
+| Trapezoid tip | 5.8 to 21.8 mm · Pick your tip width | `umi-trap-tip<w>-2mm`: the last 75 mm | 9.8 mm; Tip width |
+| Concave arc tip | 5.8 to 21.8 mm · Pick your tip width | `umi-concave-tip<w>-2mm`: the last 75 mm, arcs tangent to the axis at the tip | 9.8 mm; Tip width |
+| Pointed tip | 2 mm tip · 2 mm pitch | `umi-pointed-tip2-2mm`: two arcs over the last 50 mm meeting at a 2 mm point | no control |
+
+`<w>` is 21.8, 17.8, 13.8, 9.8 or 5.8 mm: 58 sensors in all (16 new).  The
+straight finger's card is a gripper's card (`gripperCard(part, true)`: its
+name the part's `card`, its range and "Pick your pitch", its 2 mm page,
+no grid id: its place is the shelf); each shape's card (`shapeCard()`) the
+picture of its sensor, its title and its two lines, a link to that
+sensor's page.  A shape's page shows its card's axes of more than one
+choice, and its Tip fact ("Concave arc, 9.8 mm at the tip, over the last
+75 mm") is over its card's height.  The pictures show each taper at one
+tip width, 9.8 mm, where the profiles differ most on a card's picture (at
+13.8 mm the three long ones were hard to tell apart there); the point is a
+tangent ogive over 50 mm, the convex profile carried on to a 2 mm point, of
+four drawn and shot (ogives over 30, 50 and 75 mm, a 75 mm wedge: the
+wedge read as the 5.8 mm trapezoid, the 75 mm ogive as the 5.8 mm convex
+arc, the 30 mm one as a rounded nose).
+
+The shelf's cards show their sensor **Assembled** (`library.js`
+`SHELF_VIEW`; the lead's review of the same day): from the Exploded home the
+fingertip's tapered end is foreshortened at the top of the picture and
+partly covered by the exploded layers, so the six shapes looked alike on
+their cards; assembled, the contact face's outline is the shape.  Of the
+options compared on a sheet (the Exploded card file, the Assembled home, the
+Assembled view tilted 20 degrees toward the face) the tilted one read a
+little better but is no home of the 3D view, so its picture would not be
+the view's (`part_view`) nor held to Gen by Surface's figure
+(`--check-generator`); the Assembled home is.  A shelf's card loads the
+Assembled picture itself (`shots/<id>.assembled.webp`, 1280 x 800, about
+26 KB; there is no Assembled card file), lazily as every card; the grid's
+13 pictures come to 315 KB as the page opens (the first screen's budget
+1 MB).  No picture changed for it.  The grippers' cards keep their
+Exploded card file.  (A shape's page opened Exploded until the review
+below, where the tapered end lies under the exploded layers.)
+
+The review of the same day (sound with fixes; each finding reproduced
+first) found the shapes still hard to compare, and the shelf now shows
+them so:
+
+- **A grid, not a row.**  In the row that scrolled sideways four cards
+  were in view at 1440 px (the fifth cut at the window's edge, the sixth
+  behind the arrows), three from 768 to 1100 px and one on a phone, so two
+  of the three shapes the user asked for were off the screen at every
+  width.  The shelf is now the grippers' grid (`.lib-cards`), three to a
+  row from 735 px (two rows of three: four to a row would leave the second
+  two thirds empty), two below: its cards a third of the row (418 px at
+  1440 px, the grippers' 309 px), half on a phone.  The row's scroller,
+  its arrows, their scroll listener and resize handler, the rows' snapping
+  and the cards' widths for it are gone: nothing on the page scrolls
+  sideways.  On a phone a card's name or line may take two balanced lines
+  ("Concave / arc tip", "Pick shape / and width"), as a gripper's name
+  does; from 735 px each is one line.
+- **Framed on the fingertip.**  At the Assembled home the whole finger
+  stands at an angle and the taper is a region of about 40 x 60 px of a
+  card's picture, foreshortened at its top edge: the convex arc and the
+  point, the trapezoid and the concave arc, looked alike.  A shelf's card's
+  picture (`tipShot()`, `.lib-shot-tip`) is the same Assembled file scaled
+  2.2 times about 41 % across and 3 % down its box, which clips it: the
+  tapered end and the sensor on it fill the card, the tip clear of its
+  top.  No picture is new and none changed: the card is still the 3D
+  view's home, and the first screen's bytes are the same.  At 1440 px the
+  picture is drawn 893 px wide from its 1280 (a little soft on a 2x
+  screen).  A face-on picture of each card's tip would read more plainly
+  still, but is no home of the 3D view (the objection to the tilted view
+  above).
+- **The heading** keeps its count of shapes whole (`keep()`: at 390 px it
+  had broken as "Six / finger shapes,"): "UMI Fin-Ray Gripper. / Six finger
+  shapes, / straight to pointed."
+- **A shape's page** is titled by its card ("UMI Fin-Ray Gripper, concave
+  arc tip"; every tip's part is "UMI Fin-Ray Gripper, tapered tip"), and
+  every page of the UMI shelf (the straight finger's pitches too) opens in
+  its card's view, Assembled (`showDetail()`: `SHELF_VIEW` where the
+  sensor's gripper is shelved), a gripper's Exploded as before.  The
+  shots tool sets each view itself, so no picture changed with it.
+- **The meshes' outlines** are pinned by the stdlib suite:
+  `test_library`'s `test_each_tip_is_cut_by_its_profile` measures each of
+  the 26 tips (its binary STL, where a plane at a height cuts it) 1, 5 and
+  20 mm above the tip, halfway up the taper and just above it against
+  the profile of its kind (`tools/library_tips.py`'s three, copied into
+  the test; where the private tool is, its `half_width()`, read from its
+  source and run on floats, must equal the copy: the tool needs numpy and
+  trimesh and is never imported), within 0.05 mm and centred; the hashes
+  alone had let a concave file cut as the convex arc, or two tips' files
+  swapped, pass.
+- **The point kept.**  Its 50 mm ogive is close to the short convex arc at
+  5.8 mm (a sensor of the Short taper's page: 4 mm wider at 5 to 10 mm from
+  the tip, 296 against 322 taxels), but the shelf shows the Short taper's
+  9.8 mm trapezoid, and framed on its tip the point reads beside the
+  convex arc's round nose; a longer point was not cut.
+
+The addresses stay: every sensor's (`#umi-finray-1mm` and the other
+pitches whose cards went open their pages), each part's, and the family's
+own, `#umi-tapers` (and `gen.html?part=umi-tapers`): its default, the
+13.8 mm trapezoid, as before.  All tips stay one family, `umi-tapers`,
+whose look the rules' `part_looks` give (so `scenes.json` is unchanged,
+and no gripper's stage or picture with it).  `entries.json` stays
+`flexitac-library/v1`; its family record is now `{shelf, default, cards}`,
+each card `{key, title, h_mm, axes, grid, default, lines}` (its `axes`
+Shape and Tip width, its complete grid of their choices to sensor ids;
+`library_write.card_record()` checks it and writes `lines`), every sensor
+of the family on one card once (`family_record()`); a part's record gains
+`card` (the name of a shelved part's own card, else null).  Until
+2026-11-16 a family was one card, its `title` ("Tapered tips"), `h_mm`,
+`axes`, `grid` and `lines` its own.  The meshes are `tools/library_tips.py`'s
+kinds (a profile over a height; `NOTICE.md` names each), its `--check`
+cutting the ten of 2026-11-05 again byte for byte; `web/library/` without
+its pictures grew from 11.66 to 16.41 MB (`test_library`'s budget 17 MB),
+the pictures to 4.74 MB.  The checks: `test_library`'s `FamilyTests` and
+`test_the_umi_shelf_is_one_card_per_shape` (`SHELF_VIEW`, `shelf_cards()`, since
+its review the grid, the frame, the heading and the page's title),
+`test_each_tip_is_cut_by_its_profile`, the `UMI_SHAPES` and
+`UMI_SHAPES_REVIEW` mutants, `library_checks.py` `part_layout` (since the
+review: three to a row and two, every card inside the content's edges,
+nothing scrolling, each Tabbed to whole in the window), `part_grid`,
+`part_family` (the pages' titles and first view), `part_pictures` (the
+frame, its box clipping it), `part_first_screen` and `part_window`.
 
 ## The pictures' manifest
 

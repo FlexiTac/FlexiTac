@@ -1,6 +1,7 @@
 """The page's Apple-style theme (web/theme.css, over web/styles.css): static checks that need no browser.
 
-- index.html links theme.css once, right after styles.css, by a relative URL (the static site copies web/ as it is).
+- gen.html (the generator; index.html until 2026-11-16) links theme.css once, right after styles.css, by a relative URL
+  (the static site copies web/ as it is).
 - theme.css loads nothing: no @import, @font-face or @layer (a layer would lose to styles.css), no URL but data:
   ones (the SVG namespace inside them aside), the system font stack.
 - Motion is interaction feedback only: no animation, no scroll- or view-driven timeline, no @starting-style, no
@@ -356,7 +357,7 @@ class ThemeFileTests(unittest.TestCase):
 
     def test_index_links_the_theme_once_after_styles_by_a_relative_url(self):
         page = _Links()
-        page.feed((WEB / "index.html").read_text(encoding="utf-8"))
+        page.feed((WEB / "gen.html").read_text(encoding="utf-8"))
         self.assertEqual(page.stylesheets.count("static/theme.css"), 1, page.stylesheets)
         self.assertEqual(page.stylesheets.index("static/theme.css"), page.stylesheets.index("static/styles.css") + 1, page.stylesheets)
         for href in page.stylesheets:
@@ -522,6 +523,36 @@ class ThemeFileTests(unittest.TestCase):
         self.assertEqual(failures, [])
         self.assertGreater(measured, 600)
 
+    def test_the_footer_takes_the_page_s_palette_and_type(self):
+        # The FlexiTac team's footer (the user's request of 2026-11-15: like Awesome-FlexiTac's, "但色系和颜色要更consistent to
+        # 当前页面"), section 15, on both pages: the header's bar under the page's hairline, its colours the palette's
+        # tokens only (so the contrast pairs above measure them: --text and --text-2 on --nav, light and dark, with more
+        # contrast too), its headings the guide's title, links changed at once (no transition) with the page's ring and
+        # underlined with more contrast.
+        footer = [(selector, name, value, rule.conditions) for rule in self.rules for selector in rule.selectors if "site-footer" in selector
+                  for name, value, _ in rule.declarations]
+        self.assertTrue(footer)
+        colours = {value for _, name, value, _ in footer if name in ("color", "background", "background-color", "border-top", "border-bottom", "outline")}
+        self.assertEqual(colours, {"var(--nav)", "1px solid var(--hairline)", "var(--text-2)", "var(--text)", "2px solid var(--focus)"})
+        self.assertFalse([item for item in footer if item[1].startswith(("transition", "animation"))])
+        for fg in ("--text", "--text-2"):
+            self.assertIn((fg, "--nav"), TEXT_PAIRS)
+        styled = {selector: {name: value for s, name, value, c in footer if s == selector and not c} for selector, _, _, _ in footer}
+        self.assertEqual((styled[".site-footer"]["background"], styled[".site-footer"]["border-top"]), ("var(--nav)", "1px solid var(--hairline)"))
+        self.assertEqual(styled[".site-footer"]["padding"], "36px clamp(24px,5vw,76px) 40px", "the header's side padding")
+        title = {name: value for rule in self.rules if ".flow-guide-title" in rule.selectors for name, value, _ in rule.declarations}
+        self.assertEqual({name: styled[".site-footer h2"][name] for name in ("font-size", "line-height", "font-weight", "letter-spacing")},
+                         {name: title[name] for name in ("font-size", "line-height", "font-weight", "letter-spacing")})
+        # Balanced where they wrap (the review of 2026-11-15: "Team" alone on the team's second line from 735 to about 880 px
+        # and on a 320 px phone).
+        self.assertEqual(styled[".site-footer h2"].get("text-wrap"), "balance")
+        self.assertEqual(styled[".site-footer a:hover"], {"color": "var(--text)", "text-decoration": "underline"})
+        self.assertIn((".site-footer a", "text-decoration", "underline", ("@media (prefers-contrast: more)",)),
+                      [(s, n, v, c) for s, n, v, c in footer])
+        # After the header's rules and the guide's (section 15), before the breakpoints' last section.
+        self.assertLess(self.text.index("/* 14. The rectangular form"), self.text.index("/* 15. The footer"))
+        self.assertLess(self.text.index(".site-footer {"), self.text.index("/* Motion, the breakpoints and the media"))
+
     def test_the_lightboxes_take_the_light_palette_in_every_scheme(self):
         light = palette(self.rules, MEDIA["light"])
         dark = palette(self.rules, MEDIA["dark"])
@@ -666,7 +697,9 @@ class ThemeToggleTests(unittest.TestCase):
     """Light by default, dark on the header's toggle (the user's request of 2026-11-06); in the browser:
     tools/browser/theme_checks.py's part_toggle."""
 
-    PAGES = ("index.html", "library.html")
+    # The generator and the Library (gen.html and index.html since the user's decision of 2026-11-16, which made the
+    # Library the first page; index.html and library.html before).
+    PAGES = ("gen.html", "index.html")
 
     @classmethod
     def setUpClass(cls):
@@ -716,13 +749,17 @@ class ThemeToggleTests(unittest.TestCase):
             self.assertEqual(set(re.findall(r'data-theme="?([\w-]*)', _strip_comments(text))) - {"dark"}, set(), name)
 
     def test_both_pages_load_theme_js_in_the_head_before_their_style_sheets(self):
-        for name in self.PAGES:
+        # The Library, the first page since 2026-11-16, and library.html, its address before (a forwarding page), load
+        # web/forward.js first (the generator's addresses of before sent on to gen.html before anything paints).
+        forwarding = {"index.html": [{"src": "static/forward.js"}], "library.html": [{"src": "static/forward.js"}]}
+        pages = {**self.html, "library.html": (WEB / "library.html").read_text(encoding="utf-8")}
+        for name, html in pages.items():
             with self.subTest(page=name):
                 page = _Head()
-                page.feed(self.html[name])
+                page.feed(html)
                 head = [(tag, attributes) for tag, attributes, in_head, _ in page.elements if in_head]
                 scripts = [attributes for tag, attributes in head if tag == "script"]
-                self.assertEqual(scripts, [{"src": "static/theme.js"}], "once, in <head>, no defer, async or module")
+                self.assertEqual(scripts, forwarding.get(name, []) + [{"src": "static/theme.js"}], "once, in <head>, no defer, async or module")
                 tags = [tag if tag != "link" else attributes.get("rel") for tag, attributes in head]
                 self.assertLess(tags.index("script"), tags.index("stylesheet"), "before the style sheets")
                 self.assertEqual(sum(1 for tag, attributes, _, _ in page.elements if tag == "script" and attributes.get("src") == "static/theme.js"), 1)

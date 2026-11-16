@@ -95,8 +95,9 @@ class AnswerTests(HttpTestCase):
                     self.assertEqual(data["code"], code)
 
     def test_only_api_routes_and_the_body_limits(self) -> None:
-        # The page and its files are the static site's own.
-        for target in ("/", "/index.html", "/static/app.js"):
+        # The pages and their files are the static site's own (the Library, the generator and the forwarding page since
+        # the user's decision of 2026-11-16).
+        for target in ("/", "/index.html", "/gen.html", "/library.html", "/static/app.js"):
             self.assertEqual(json.loads(app.answer("GET", target).body)["code"], "E_HTTP_NOT_FOUND")
         too_large = app.answer("POST", "/api/validate", "application/json", b" " * (app.MAX_REQUEST_BYTES + 1))
         self.assertEqual((too_large.status, json.loads(too_large.body)["code"]), (413, "E_HTTP_BODY_TOO_LARGE"))
@@ -134,7 +135,8 @@ class BridgeTests(unittest.TestCase):
 
 class SiteBuildTests(unittest.TestCase):
     def test_the_page_runs_its_api_in_the_browser_under_the_servers_policy(self) -> None:
-        page = build_static_site.page()
+        # The generator (gen.html since the user's decision of 2026-11-16; the build's first page is the Library).
+        page = build_static_site.page(name="gen.html")
         head = page.split("</head>", 1)[0]
         self.assertEqual(head.count('<meta name="flexitac-backend" content="browser" />'), 1)
         policy = re.search(r'<meta http-equiv="Content-Security-Policy" content="([^"]+)" />', head)
@@ -148,21 +150,21 @@ class SiteBuildTests(unittest.TestCase):
         self.assertTrue(head.startswith('<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta http-equiv="Content-Security-Policy"'))
 
     def test_the_header_carries_the_repositorys_counts_when_built_with_them(self) -> None:
-        # web/index.html: the GitHub card's name alone (its counts hidden, nothing asked of GitHub); app.py and the build fill it.
-        page = (WEB / "index.html").read_text(encoding="utf-8")
+        # web/gen.html: the GitHub card's name alone (its counts hidden, nothing asked of GitHub); app.py and the build fill it.
+        page = (WEB / "gen.html").read_text(encoding="utf-8")
         self.assertIn('data-gh-stats hidden>', page)
         self.assertNotIn("api.github.com", page)
-        built = build_static_site.page({"stars": 159, "forks": 17})
+        built = build_static_site.page({"stars": 159, "forks": 17}, "gen.html")
         self.assertIn('<span data-gh-stars>159</span>', built)
         self.assertIn('<span data-gh-forks>17</span>', built)
         self.assertIn('aria-label="FlexiTac on GitHub: 159 stars, 17 forks" data-gh-badge>', built)
         self.assertNotIn("data-gh-stats hidden>", built)
-        self.assertEqual(build_static_site.page(None).count("data-gh-stats hidden>"), 1)
+        self.assertEqual(build_static_site.page(None, "gen.html").count("data-gh-stats hidden>"), 1)
         self.assertEqual([build_static_site.count_text(n) for n in (0, 999, 1000, 1049, 1250, 9999, 10000, 12600)],
                          ["0", "999", "1k", "1k", "1.2k", "10k", "10k", "13k"])
-        # web/backend.js writes them the same way.
+        # web/counts.js writes them the same way (web/backend.js until the review of 2026-11-16).
         self.assertIn('const fmt = n => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\\.0$/, "")}k` : String(n));',
-                      (WEB / "backend.js").read_text(encoding="utf-8"))
+                      (WEB / "counts.js").read_text(encoding="utf-8"))
 
     def test_the_counts_are_optional(self) -> None:
         # GitHub's API unreachable or refusing (rate limit): no counts, no failure; with GITHUB_TOKEN the request carries it.
@@ -187,9 +189,13 @@ class SiteBuildTests(unittest.TestCase):
             self.assertIsNone(build_static_site.github_counts())
 
     def test_every_url_of_the_page_is_relative(self) -> None:
-        # The site is served under a path (https://<org>.github.io/<repo>/).
-        page = (WEB / "index.html").read_text(encoding="utf-8")
-        self.assertEqual(re.findall(r'(?:src|href)="/[^"]*"', page), [])
+        # The site is served under a path (https://<org>.github.io/<repo>/): the generator's page, and since 2026-11-16
+        # the Library's (the first page) and the forwarding page's, and the forwarding script's own targets.
+        for name in build_static_site.PAGES:
+            with self.subTest(page=name):
+                page = (WEB / name).read_text(encoding="utf-8")
+                self.assertEqual(re.findall(r'(?:src|href)="/[^"]*"', page), [])
+        self.assertEqual(re.findall(r'"(?:\./|gen\.html)"', (WEB / "forward.js").read_text(encoding="utf-8")), ['"gen.html"', '"./"'])
         for path in (WEB / "app.js", *sorted((WEB / "cad").glob("*.js"))):
             with self.subTest(path=path.name):
                 source = path.read_text(encoding="utf-8")
@@ -251,6 +257,89 @@ class SiteBuildTests(unittest.TestCase):
                 with self.assertRaisesRegex(build_static_site.BuildError, "scenes are stale"):
                     build_static_site.build(earlier, github=False)
             self.assertEqual(list(earlier.iterdir()), [])
+
+
+# web/counts.js run under node on a page (the static site's mark, web/forward.js's, a count kept in this tab, GitHub's
+# reply): the requests it made, and the GitHub card as it left it (the stars' and forks' text, hidden, its name).
+COUNTS_DRIVER = r"""
+const vm = require("vm");
+const fs = require("fs");
+const source = fs.readFileSync(process.argv[2], "utf8");
+const runs = [];
+(async () => {
+  for (const {backend, forwarding, kept, reply} of JSON.parse(process.argv[3])) {
+    const asked = [];
+    const node = () => ({textContent: "", hidden: true, label: "FlexiTac on GitHub", setAttribute(name, value) { this.label = value; }});
+    const card = {stars: node(), forks: node(), stats: node(), badge: node()};
+    const nodes = {"[data-gh-stars]": card.stars, "[data-gh-forks]": card.forks, "[data-gh-stats]": card.stats, "[data-gh-badge]": card.badge};
+    const storage = new Map(kept ? [["gh-stats:FlexiTac/FlexiTac", JSON.stringify({...kept, at: Date.now() - kept.age})]] : []);
+    const document = {
+      documentElement: {hasAttribute: name => name === "data-forward" && forwarding},
+      querySelector: selector => (selector === 'meta[name="flexitac-backend"]' && backend ? {content: backend} : null),
+      querySelectorAll: selector => (nodes[selector] ? [nodes[selector]] : []),
+      readyState: "interactive",
+    };
+    const fetch = (url, init) => {
+      asked.push([url, init?.headers?.Accept ?? null]);
+      return Promise.resolve({ok: reply !== null, json: () => Promise.resolve(reply)});
+    };
+    const sessionStorage = {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value)};
+    vm.runInNewContext(source, {document, fetch, sessionStorage, JSON, Date, Promise});
+    await new Promise(resolve => setTimeout(resolve, 20));
+    runs.push({asked, card: [card.stars.textContent, card.forks.textContent, card.stats.hidden, card.badge.label],
+               kept: storage.has("gh-stats:FlexiTac/FlexiTac")});
+  }
+  process.stdout.write(JSON.stringify(runs));
+})();
+"""
+
+
+class CountsTests(unittest.TestCase):
+    """The header's star and fork counts refreshed on the static site's pages by web/counts.js: the Library's (the first
+    page since 2026-11-16) and the generator's (the review of 2026-11-16: the refresh was web/backend.js's, which the
+    Library does not load, so the site's landing page had kept the build's counts)."""
+
+    def test_both_pages_load_it_and_backend_js_asks_github_no_more(self) -> None:
+        for name, count in (("index.html", 1), ("gen.html", 1), ("library.html", 0)):
+            with self.subTest(page=name):
+                page = (WEB / name).read_text(encoding="utf-8")
+                self.assertEqual(page.count('<script src="static/counts.js" defer></script>'), count)
+                self.assertEqual(page.count("counts.js"), count + (name != "library.html"))  # and the header's comment
+        backend = (WEB / "backend.js").read_text(encoding="utf-8")
+        self.assertNotIn("api.github.com", backend)
+        self.assertNotIn("gh-stats", backend)
+        source = (WEB / "counts.js").read_text(encoding="utf-8")
+        self.assertIn('  if (document.querySelector(\'meta[name="flexitac-backend"]\')?.content !== "browser") return;\n', source)
+        self.assertIn('  if (document.documentElement.hasAttribute("data-forward")) return;\n', source)
+        # The one host it asks, the one the site's policy allows.
+        self.assertEqual(re.findall(r"https://[^/`\"']+", source), ["https://api.github.com"])
+        self.assertIn("connect-src 'self' https://api.github.com;", build_static_site.CSP)
+
+    @unittest.skipUnless(__import__("shutil").which("node"), "node is not installed")
+    def test_it_refreshes_the_card_on_the_static_site_alone(self) -> None:
+        github = {"stargazers_count": 1234, "forks_count": 56}
+        cases = [
+            {"backend": "browser", "forwarding": False, "kept": None, "reply": github},  # the static site: asked, shown
+            {"backend": None, "forwarding": False, "kept": None, "reply": github},  # app.py's page: nothing asked
+            {"backend": "browser", "forwarding": True, "kept": None, "reply": github},  # a Library being sent on
+            {"backend": "browser", "forwarding": False, "kept": {"stars": 1500, "forks": 60, "age": 60000}, "reply": github},  # kept: not asked
+            {"backend": "browser", "forwarding": False, "kept": {"stars": 1500, "forks": 60, "age": 4000000}, "reply": github},  # an hour old: asked
+            {"backend": "browser", "forwarding": False, "kept": None, "reply": None},  # GitHub refusing: the card as built
+        ]
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "driver.js").write_text(COUNTS_DRIVER, encoding="utf-8")
+            run = subprocess.run(["node", "driver.js", str(WEB / "counts.js"), json.dumps(cases)], cwd=folder, capture_output=True, text=True, timeout=60)
+        self.assertEqual(run.returncode, 0, run.stderr[-2000:])
+        site, server, forwarding, kept, stale, refused = json.loads(run.stdout)
+        asked = [[build_static_site.GITHUB_API, "application/vnd.github+json"]]
+        shown = ["1.2k", "56", False, "FlexiTac on GitHub: 1234 stars, 56 forks"]
+        unchanged = ["", "", True, "FlexiTac on GitHub"]
+        self.assertEqual((site["asked"], site["card"], site["kept"]), (asked, shown, True))
+        self.assertEqual((server["asked"], server["card"]), ([], unchanged))
+        self.assertEqual((forwarding["asked"], forwarding["card"]), ([], unchanged))
+        self.assertEqual((kept["asked"], kept["card"]), ([], ["1.5k", "60", False, "FlexiTac on GitHub: 1500 stars, 60 forks"]))
+        self.assertEqual((stale["asked"], stale["card"]), (asked, shown))
+        self.assertEqual((refused["asked"], refused["card"], refused["kept"]), (asked, unchanged, False))
 
 
 class PublicExportTests(unittest.TestCase):

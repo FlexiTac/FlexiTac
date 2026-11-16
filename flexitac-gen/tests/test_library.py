@@ -5,7 +5,8 @@
   shots/<id>.assembled.webp, shots/<id>.exploded.card.webp and shots/manifest.json); every tabled file
   exists; no file anywhere under web/ is one of the deny-list's vendor models (Robotiq 2F-85 and 3F, the video's
   split of the xArm gripper, the MakerMods body), and no id, title or file name names them; web/library/ stays within
-  its 12 MB budget, its pictures within theirs (8 MB, the grid's first screen about 1 MB).
+  its 17 MB budget (12 MB until the UMI finger's shapes of 2026-11-16), its pictures within theirs (8 MB, the grid's
+  first screen about 1 MB).
 - The showcase (the project owner's decision of 2026-11-12: the hand-designed FlexiTac sensor on UFACTORY's xArm
   Gripper G1, the one vendor model shown): an explicit category (library_write.showcase): web/vendor/ufactory-g1/
   holds exactly its twelve meshes at their pinned SHA-256 (this module's list, equal to the writer's) and its notice,
@@ -33,11 +34,12 @@
   a commit (the NOTICE row's), its change stated (Franka's the convex hull).
 - entries.json is tools/library_write.py's entries() of parts.json and the committed fits (recomputed, no fitting),
   with each mesh's bytes, SHA-256 and facets; the labels fit the file note of Gen by Surface ('From the Library: ' +
-  label, at most 45 characters), the shelf headings name the pitches in one wording ('Four pitches, 1 to 3 mm.', the
-  user's decision of 2026-11-05), 'start' holds each part's 2 mm sensor (the page's layout of 2026-11-06: one card per
+  label, at most 46 characters), the shelf headings name the pitches in one wording ('Four pitches, 1 to 3 mm.', the
+  user's decision of 2026-11-05) but the UMI finger's, which names its shapes ('Six finger shapes, straight to
+  pointed.', 2026-11-16), 'start' holds each part's 2 mm sensor (the page's layout of 2026-11-06: one card per
   gripper but the UMI finger, opening its 2 mm sensor, then the UMI finger's shelf).
 - The page's request: every fit's request is the one the page sends (library_write.compose of the part, the variant
-  and index.html's options; the mesh's file name, no unit, 32 rows and columns at most, numbers as the browser writes
+  and gen.html's options (index.html's until 2026-11-16); the mesh's file name, no unit, 32 rows and columns at most, numbers as the browser writes
   them), the UMI finger's 2 mm one the page's shipped default fit itself; the options are exactly the Resolution
   step's enabled controls (a parser of this module's own) at their defaults, but the pitch, the fill and the part's
   own, each one the control takes (min, max, step, in decimal).
@@ -46,26 +48,32 @@
   warning and the same build id; rules() names each broken rule on tampered replies.
 - Staleness: each part's 2 mm sensor fitted again gives the committed reply, and one tapered tip's (the site build
   re-fits them all).
-- The tapered tips (the family umi-tapers, cut by the private tools/library_tips.py): the family complete (two shapes
-  by five tip widths, each once, its default one of them) and closing the UMI finger's shelf, no shelf or card of its
-  own; each tip's change a tip cut tabled as a modified file; its setup the video's (the contact face grown
-  flat from a facet of it under the face point, the base at the mount end, no border, the page's options).
+- The tapered tips (the family umi-tapers, cut by the private tools/library_tips.py): since the user's request of
+  2026-11-16 the family's cards on the UMI finger's shelf, one per shape (Short taper: trapezoid and convex arc over
+  40 mm; Convex arc, Trapezoid and Concave arc tips over 75 mm; the Pointed tip, a 50 mm ogive to 2 mm), each complete
+  (its shapes by its tip widths, each once, its picture's sensor one of them, its lines), every tip on one card, the
+  family's default its own address's (the 13.8 mm trapezoid), no shelf or card of a tip's own; each tip's change a tip
+  cut tabled as a modified file; its setup the video's (the contact face grown flat from a facet of it under the face
+  point, the base at the mount end, no border, the page's options); since the review of 2026-11-16 each tip's mesh
+  measured against its kind's profile (the tool's three, copied here and pinned to the tool's own where it is).
 - tools/library_write.py is public (export_public.PUBLIC) and tools/library_import.py and tools/library_tips.py are
   not (the tips' tool needs trimesh and manifold3d: never imported here); the deny-list is the writer's, equal to this
   module's, and the importer keeps no copy of its own but takes the writer's; the new files parse as Python 3.9.
 
-- The page (library.html, library.js, library.css): its one script and three style sheets by relative URLs, nothing
-  inline, unique ids; its header the generator's (the title block and the community links byte for byte, the mode
-  switch as two links); the header's Library link on both pages (index.html: a new tab; library.html: the current
-  page), its style in dated blocks beside the header's rules; never "CAD"; no IntersectionObserver, scroll timeline,
+- The page (index.html since 2026-11-16, library.html before; library.js, library.css): its scripts (forward.js, then
+  theme.js, then its own) and three style sheets by relative URLs, nothing inline, unique ids; its header the
+  generator's (the title block and the community links byte for byte, the mode switch as two links to gen.html); the
+  header's Library link on both pages (gen.html: the same tab since 2026-11-15; index.html: the current page), at ./, its style in dated blocks beside the header's rules; never "CAD"; no IntersectionObserver, scroll timeline,
   smooth scrolling, window scroll listener or absolute URL in the script, no transition, animation, fixed or sticky box
   in the style sheet, the action blue only on Open in Gen by Surface, a sensor's picture 3:1 below 900 px (the
   user's decision of 2026-11-05: Open in a phone's first screen) and 16:10 elsewhere; node --check when node is there.
-- main.js's ./?part=<id>: DEFAULT_PART and runFit's shipped test as they were, the index and the parameter read, the
+- main.js's gen.html?part=<id> (./?part=<id> until 2026-11-16): DEFAULT_PART and runFit's shipped test as they were, the index and the parameter read, the
   sensor built from its fit's own request, the user's own file and Remove model leaving it, the file note's prefix.
-- app.py serves /library.html (any query) with its security headers and the header's counts; POST is a 405; its
-  pictures as image/webp (the merge of 2026-11-05).
-- tools/build_static_site.py: library.html with the site's head tags and counts, neither page copied under static/, the
+- app.py serves the Library at / and /index.html (any query) and the generator at /gen.html with its security headers
+  and the header's counts, library.html (a forwarding page) with the headers alone; POST is a 405; its pictures as
+  image/webp (the merge of 2026-11-05).
+- tools/build_static_site.py: index.html (the Library) and gen.html with the site's head tags and counts, library.html
+  with the head tags alone, none of the pages copied under static/, the
   Library's gate (ZIPs byte for byte app.answer's exports, files.json's record of them) and a stale fit stopping it.
 
 - The 3D view (the user's requests of 2026-11-05, docs/LIBRARY_VIEW.md: each sensor's page turns in 3D, the grippers
@@ -95,6 +103,7 @@ import copy
 import gzip
 import hashlib
 import importlib.util
+import inspect
 import io
 import json
 import math
@@ -126,7 +135,10 @@ except ImportError:  # run as a package
     from tests.test_api_http import HttpTestCase
     from tests.test_web_theme import parse_css, subject
 
-BUDGET_BYTES = 12_000_000
+# All of web/library/ but its pictures (shots/, showcase/: their own budgets below): 12 MB until the UMI finger's shapes
+# of 2026-11-16 (the user's request: one card per shape), whose sixteen tips (their meshes, 3.8 MB, their fits and art)
+# took it from 11.66 to 16.41 MB.
+BUDGET_BYTES = 17_000_000
 SPDX = {"Apache-2.0", "MIT", "BSD-3-Clause"}
 # Vendor models that may not be redistributed (the video's recipes: user-provided, shown for illustration).
 DENIED_SHA256 = {
@@ -217,9 +229,10 @@ OWN_FILE = re.compile(r"^(NOTICE\.md|parts\.json|entries\.json|fits/[a-z0-9.-]+\
                       r"|bodies/[a-z0-9-]+/drawn-[a-z0-9-]+\.stl"
                       # The showcase's page (2026-11-12): its document and its three pictures.
                       r"|showcase\.json|showcase/flexitac-g1\.(exploded|assembled|card)\.webp)$")
-# The pictures' budgets (2026-11-05): the whole set (126 files of 42 sensors), and the grid's first screen: since the
-# layout of 2026-11-06 every card of the grid (the grippers' seven, then the UMI shelf's four pitches and its Tapered
-# tips card), all asked for as the page opens (it is short; library_checks part_pictures measures the bytes).
+# The pictures' budgets (2026-11-05): the whole set (126 files of 42 sensors; 174 of 58 since 2026-11-16), and the grid's
+# first screen: since the layout of 2026-11-06 every card of the grid (the grippers' seven, then the UMI shelf's cards:
+# since 2026-11-16 its six shapes, before its four pitches and its Tapered tips card), all asked for as the page opens
+# (it is short; library_checks part_pictures measures the bytes).
 SHOTS_BUDGET_BYTES = 8_000_000
 FIRST_SCREEN_BYTES = 1_000_000
 FIXTURES = ROOT / "tests" / "fixtures"
@@ -229,29 +242,119 @@ IMAGE_OF_WIDOWX = {"exploded": {"src": "shots/widowx-250-2mm.exploded.webp", "ca
                    "assembled": {"src": "shots/widowx-250-2mm.assembled.webp", "width": 1280, "height": 800},
                    "alt": "WidowX 250, 2 mm on the part"}
 NOTE_PREFIX = "From the Library: "
-NOTE_MAX = 45
+NOTE_MAX = 46
 # main.js reads the index here (LIBRARY_INDEX, static/ being web/).
 LIBRARY_INDEX_PATH = "library/entries.json"
-# The tapered tips (tools/library_tips.py): the family, its shapes and tip widths, and the video's face and base.
+# The tapered tips (tools/library_tips.py): the family, its kinds and its cards, and the video's face and base.  A
+# kind (the key of its parts' ids, umi-<key>-tip<w>): its words in the label ('UMI trapezoid tip, 13.8 mm'), its
+# profile's words in the licence's change, its taper's height and its tip widths (the user's of 2026-11-05; the
+# shapes of 2026-11-16: the concave arc, the short taper and the point).
 TAPERS = "umi-tapers"
-TAPER_SHAPES = {"trap": "trapezoid", "convex": "convex arc"}
 TAPER_TIPS = ("21.8", "17.8", "13.8", "9.8", "5.8")
+TAPER_KINDS = {"short-trap": ("short trapezoid", "trapezoid", 40, TAPER_TIPS), "short-convex": ("short convex", "convex arc", 40, TAPER_TIPS),
+               "convex": ("convex arc tip", "convex arc", 75, TAPER_TIPS), "trap": ("trapezoid tip", "trapezoid", 75, TAPER_TIPS),
+               "concave": ("concave arc tip", "concave arc", 75, TAPER_TIPS), "pointed": ("pointed tip", "convex arc", 50, ("2",))}
+# The UMI shelf's cards after the straight finger, in its order (the user's request of 2026-11-16: one card per
+# shape): key, title, its kinds with their Shape labels, the sensor its picture shows.
+TAPER_CARDS = (("short", "Short taper", (("short-trap", "trap", "Trapezoid"), ("short-convex", "convex", "Convex arc")), "umi-short-trap-tip9.8-2mm"),
+               ("convex", "Convex arc tip", (("convex", "convex", "Convex arc"),), "umi-convex-tip9.8-2mm"),
+               ("trap", "Trapezoid tip", (("trap", "trap", "Trapezoid"),), "umi-trap-tip9.8-2mm"),
+               ("concave", "Concave arc tip", (("concave", "concave", "Concave arc"),), "umi-concave-tip9.8-2mm"),
+               ("pointed", "Pointed tip", (("pointed", "pointed", "Pointed"),), "umi-pointed-tip2-2mm"))
 FACE_POINT = (0.0, -12.9, -62.7)
 MOUNT_BASE = {"point_xyz": [0, -12.9, -3]}
+# A kind's profile, as its words in the licence's change name it (tools/library_tips.py PROFILES).
+TAPER_PROFILES = {"trapezoid": "trap", "convex arc": "convex", "concave arc": "concave"}
+
+
+TAPER_FACE_MM, TAPER_TIP_Z = 25.8, -123.36   # the contact face's width and the tip's end (z), mm
+
+
+def _half_width(s: float, profile: str, h: float, tip: float) -> float:
+    """Half the face's width ``s`` mm below the start of a taper ``h`` mm high to a tip ``tip`` mm wide: tools/library_tips.py's
+    half_width(), its three profiles (d = (25.8 - tip) / 2, R = (h² + d²) / 2d): ``trap`` straight sides, ``convex``
+    circular arcs tangent to the full-width edge where the taper starts, ``concave`` arcs tangent to the axis at the tip."""
+
+    a, b = TAPER_FACE_MM / 2, tip / 2
+    d = a - b
+    if d <= 0:
+        return a
+    if profile == "trap":
+        return a - d * s / h
+    r = (h * h + d * d) / (2 * d)
+    if profile == "convex":
+        return a - r + math.sqrt(max(r * r - s * s, 0))
+    if profile == "concave":
+        return b + r - math.sqrt(max(r * r - (h - s) ** 2, 0))
+    raise ValueError(profile)
+
+
+def _tool_profile():
+    """(half_width, W, Z_TIP) of the private tools/library_tips.py, read from its source and run on floats (the tool needs
+    numpy and trimesh, so it is never imported here; the three numpy calls its half_width() makes are math's on one
+    number), or None in a copy without it (the public one)."""
+
+    path = ROOT / "tools" / "library_tips.py"
+    if not path.exists():
+        return None
+
+    class Numbers:
+        ndarray = float
+        sqrt = staticmethod(math.sqrt)
+        maximum = staticmethod(max)
+        full_like = staticmethod(lambda s, value: value)
+
+    namespace = {"np": Numbers}
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    wanted = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "half_width"
+              or isinstance(node, ast.Assign) and [getattr(target, "id", None) for target in node.targets] in (["W"], ["Z_TIP"])]
+    exec(compile(ast.Module(wanted, type_ignores=[]), "tools/library_tips.py", "exec"), namespace)
+    return namespace["half_width"], namespace["W"], namespace["Z_TIP"]
+
+
+def _stl_triangles(data: bytes) -> list:
+    """A binary STL's triangles, each its nine coordinates (x, y, z of its three corners)."""
+
+    (count,) = struct.unpack_from("<I", data, 80)
+    if len(data) != 84 + 50 * count:
+        raise ValueError("not a binary STL")
+    return [struct.unpack_from("<9f", data, 84 + 50 * k + 12) for k in range(count)]
+
+
+def _span_at(triangles: list, z: float) -> tuple:
+    """(min, max) of y where the plane at height z cuts the part: its width at z (the finger is as wide as its face)."""
+
+    found = []
+    for corners in triangles:
+        for i, j in ((0, 1), (1, 2), (2, 0)):
+            za, zb = corners[3 * i + 2], corners[3 * j + 2]
+            if za != zb and (za - z) * (zb - z) <= 0:
+                ya, yb = corners[3 * i + 1], corners[3 * j + 1]
+                found.append(ya + (z - za) / (zb - za) * (yb - ya))
+    return min(found), max(found)
 
 
 def _json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def shelf_cards(entries: dict) -> list:
+    """The sensors of grid_cards() on a shelf (the UMI finger's: its own card's and its families' cards'), whose cards show
+    their Assembled picture (library.js SHELF_VIEW, the lead's review of the UMI shelf's shapes, 2026-11-16)."""
+    shelved = {"umi-finray"} | {family["shelf"] for family in entries["families"].values()}
+    return grid_cards(entries)[sum(1 for part in entries["order"] if part not in shelved):]
+
+
 def grid_cards(entries: dict) -> list:
     """The sensors whose card pictures the grid shows (library.js, the layout of 2026-11-06), in the page's order: one
     card per gripper but the shelved (its default, the 2 mm sensor), then each shelved part's (the UMI finger's, and any
-    a family closes) variants and its families' defaults."""
+    a family's cards follow) own card (its default) and its families' cards (each its default; the user's request of
+    2026-11-16: one card per shape, where the UMI finger's four pitches had been four cards)."""
     shelved = {"umi-finray"} | {family["shelf"] for family in entries["families"].values()}
     cards = [entries["parts"][part]["default"] for part in entries["order"] if part not in shelved]
     for part in (part for part in entries["order"] if part in shelved):
-        cards += entries["parts"][part]["variants"] + [family["default"] for family in entries["families"].values() if family["shelf"] == part]
+        cards += [entries["parts"][part]["default"]] + [card["default"] for family in entries["families"].values() if family["shelf"] == part
+                                                         for card in family["cards"]]
     return cards
 
 
@@ -520,7 +623,7 @@ class _Controls(HTMLParser):
 
 def _controls() -> dict:
     parser = _Controls()
-    parser.feed((WEB / "index.html").read_text(encoding="utf-8"))
+    parser.feed((WEB / "gen.html").read_text(encoding="utf-8"))
     return parser.controls
 
 
@@ -634,9 +737,11 @@ class FileTests(LibraryTestCase):
         shots = [path for folder in ("shots", "showcase") for path in sorted((LIBRARY / folder).glob("*"))]
         size = sum(path.stat().st_size for path in shots)
         self.assertLessEqual(size, SHOTS_BUDGET_BYTES, f"web/library/shots/ and showcase/ are {size} bytes")
-        # The grid's first screen: every card's picture, the showcase's large card's with them (it is the first).
-        first = sum((LIBRARY / self.entries["variants"][identifier]["image"]["exploded"]["card"]).stat().st_size
-                    for identifier in grid_cards(self.entries) if self.entries["variants"][identifier]["image"])
+        # The grid's first screen: every card's picture, the showcase's large card's with them (it is the first); the UMI
+        # shelf's cards their Assembled picture's full file since 2026-11-16 (shelf_cards()).
+        shelf = set(shelf_cards(self.entries))
+        first = sum((LIBRARY / (image["assembled"]["src"] if identifier in shelf else image["exploded"]["card"])).stat().st_size
+                    for identifier in grid_cards(self.entries) for image in [self.entries["variants"][identifier]["image"]] if image)
         first += (LIBRARY / _json(LIBRARY / SHOWCASE_FILE)["image"]["card"]["src"]).stat().st_size
         self.assertLessEqual(first, FIRST_SCREEN_BYTES, f"the grid's first screen's pictures are {first} bytes")
         self.assertLess(sum(path.stat().st_size for path in (LIBRARY / "showcase").glob("*")), 300_000, "the showcase's three pictures")
@@ -681,7 +786,9 @@ class LicenceTests(LibraryTestCase):
                     self.assertIn("modified: convex hull", row[3])
                 elif part.get("family") == TAPERS:
                     # Cut from the page's own UMI finger (its source, its licence), a modified file (Apache 4(b)).
-                    self.assertRegex(licence["change"], r"^tip cut \((trapezoid|convex arc), h 75 mm, tip [\d.]+ mm\) from UMI-Soft-Gripper-Finger\.stl$")
+                    kind, tip = re.fullmatch(r"umi-([a-z-]+)-tip([\d.]+)", part_id).groups()
+                    _, profile, height, _ = TAPER_KINDS[kind]
+                    self.assertEqual(licence["change"], f"tip cut ({profile}, h {height} mm, tip {tip} mm) from UMI-Soft-Gripper-Finger.stl")
                     self.assertEqual(row[3].strip(), f"modified: {licence['change']}")
                     self.assertEqual(licence["source"], self.parts["parts"]["umi-finray"]["license"]["source"])
                 else:
@@ -755,9 +862,9 @@ class EntriesTests(LibraryTestCase):
                 self.assertLessEqual(len(variant["label"]), library_write.LABEL_MAX)
                 self.assertLessEqual(len(NOTE_PREFIX + variant["label"]), NOTE_MAX)
                 if part["family"] == TAPERS:
-                    # A tip's own label (its one pitch is the family's): 'UMI trapezoid tip, 13.8 mm'.
-                    tip = re.fullmatch(r"umi-(trap|convex)-tip([\d.]+)", variant["part"])
-                    self.assertEqual(variant["label"], f"UMI {TAPER_SHAPES[tip.group(1)]} tip, {tip.group(2)} mm")
+                    # A tip's own label (its one pitch is the family's): 'UMI trapezoid tip, 13.8 mm', 'UMI short convex, 9.8 mm'.
+                    tip = re.fullmatch(r"umi-([a-z-]+)-tip([\d.]+)", variant["part"])
+                    self.assertEqual(variant["label"], f"UMI {TAPER_KINDS[tip.group(1)][0]}, {tip.group(2)} mm")
                 else:
                     self.assertEqual(variant["label"], f"{part['title']}, {written} mm")
                 self.assertEqual(variant["badge"], "Fine" if pitch == 1 else None)
@@ -773,30 +880,36 @@ class EntriesTests(LibraryTestCase):
                 if part["family"]:
                     self.assertIsNone(part["shelf"], "a family's part has no shelf of its own")
                     continue
-                hosted = "".join(f", and {family['title'].lower()}" for family in self.entries["families"].values() if family["shelf"] == part_id)
-                # One wording on every shelf (the user's decision of 2026-11-05, 最好统一): the count and the range, a
-                # shelf closing with families naming them after it; every gripper's pitches begin at 1 mm.
-                shelf = re.fullmatch(r"(\w+) pitches, ([\d.]+) to ([\d.]+) mm%s\." % re.escape(hosted), part["shelf"])
+                if any(family["shelf"] == part_id for family in self.entries["families"].values()):
+                    continue  # the UMI finger's shelf names its shapes (below)
+                # One wording on every shelf (the user's decision of 2026-11-05, 最好统一): the count and the range;
+                # every gripper's pitches begin at 1 mm.
+                shelf = re.fullmatch(r"(\w+) pitches, ([\d.]+) to ([\d.]+) mm\.", part["shelf"])
                 self.assertIsNotNone(shelf, part["shelf"])
                 self.assertEqual((words[shelf.group(1)], float(shelf.group(2)), float(shelf.group(3))),
                                  (len(pitches), min(pitches), max(pitches)))
                 self.assertEqual(min(pitches), 1)
         self.assertEqual({part_id: part["shelf"] for part_id, part in self.entries["parts"].items() if part_id in self.entries["order"]},
-                         {"umi-finray": "Four pitches, 1 to 3 mm, and tapered tips.", "franka-hand": "Four pitches, 1 to 2.5 mm.",
+                         {"umi-finray": "Six finger shapes, straight to pointed.", "franka-hand": "Four pitches, 1 to 2.5 mm.",
                           "widowx-250": "Four pitches, 1 to 3 mm.", "trossen-widowx-ai": "Four pitches, 1 to 3 mm.", "arx-x5": "Four pitches, 1 to 4 mm.",
                           "i2rt-yam": "Four pitches, 1 to 4 mm.", "unitree-dex1": "Four pitches, 1 to 3 mm.", "makermods-metal": "Four pitches, 1 to 3 mm."})
-        # The writer's wording itself, on shelves the Library does not have: one pitch, two with no family, one family.
-        family = {"title": "Tapered tips"}
+        # The writer's wording itself, on shelves the Library does not have: one pitch, two with no family, a family of
+        # two cards (the part's own shape and its cards': the last card's shape named).
+        family = {"cards": [{"axes": [{"choices": [{"label": "Trapezoid"}, {"label": "Convex arc"}]}]},
+                            {"axes": [{"choices": [{"label": "Concave arc"}]}]}]}
         self.assertEqual([library_write.shelf([{"pitch_mm": 2}]), library_write.shelf([{"pitch_mm": 2.5}, {"pitch_mm": 1.5}]),
                           library_write.shelf([{"pitch_mm": 2}, {"pitch_mm": 1}, {"pitch_mm": 4}], [family])],
-                         ["One pitch, 2 mm.", "Two pitches, 1.5 to 2.5 mm.", "Three pitches, 1 to 4 mm, and tapered tips."])
+                         ["One pitch, 2 mm.", "Two pitches, 1.5 to 2.5 mm.", "Three finger shapes, straight to concave arc."])
+        # The shelf's own card is named by its shape (a shelved part's card, the UMI finger's 'Straight finger'); no
+        # other part has one.
+        self.assertEqual({part_id: part["card"] for part_id, part in self.entries["parts"].items() if part["card"]}, {"umi-finray": "Straight finger"})
         # The grid's cards and shelves are the grippers' (the family's parts are one card on the UMI shelf); "start" is
         # each one's 2 mm sensor, the sensor its card opens (the page's layout of 2026-11-06).
         self.assertEqual(self.entries["order"], [part for part in self.parts["order"] if not self.parts["parts"][part].get("family")])
         self.assertEqual(self.entries["order"], ["umi-finray", "franka-hand", "widowx-250", "trossen-widowx-ai", "arx-x5", "i2rt-yam",
                                                  "unitree-dex1", "makermods-metal"])
         self.assertEqual(self.entries["start"], [self.entries["parts"][part]["default"] for part in self.entries["order"]])
-        self.assertEqual(len(self.entries["variants"]), 42, "8 grippers by 4 pitches and 10 tapered tips")
+        self.assertEqual(len(self.entries["variants"]), 58, "8 grippers by 4 pitches and 26 tapered tips")
 
 
 class PictureTests(LibraryTestCase):
@@ -879,7 +992,7 @@ class PictureTests(LibraryTestCase):
             # The sensors in the Library's order (the plan's: parts.json's, each part's by pitch), as the warning names them.
             ordered = [row[0] for row in self.plan]
             unviewed = f"library_write: warning: {library_write.view_note(ordered)}"
-            self.assertEqual(run(self.entries["variants"]), (0, [unviewed, "library_write: 42 sensors, all current, each with its picture, 0 with a 3D view"]))
+            self.assertEqual(run(self.entries["variants"]), (0, [unviewed, "library_write: 58 sensors, all current, each with its picture, 0 with a 3D view"]))
             others = [identifier for identifier in ordered if identifier != dropped]
             self.assertEqual(run(others), (1, [
                 f"stale: picture {dropped}: no picture: re-shoot with tools/browser/library_shots.py --only {dropped}",
@@ -922,7 +1035,7 @@ class PictureTests(LibraryTestCase):
         pin = tool.read_pin()
         fingertips = tool.fingertip_sensors(self.entries, index["scenes"])
         self.assertEqual(sorted(fingertips), sorted(identifier for identifier, variant in self.entries["variants"].items() if variant["part"].startswith("umi-")))
-        self.assertEqual(len(fingertips), 14)
+        self.assertEqual(len(fingertips), 30, "the UMI finger's four pitches and its 26 tips")
         self.assertEqual(tool.pin_problems(pin, self.entries, index["scenes"]), [])
         self.assertEqual(tool.GENERATOR_PIN.read_text(encoding="utf-8"), tool.pin_text(pin["shots"], pin["figure_sha256"]), "as --pin-generator writes it")
         self.assertRegex(pin["figure_sha256"], r"^[0-9a-f]{64}$")
@@ -2330,9 +2443,10 @@ class ShowcasePageTests(LibraryTestCase):
         # The user's request of 2026-11-12 (labelled as hand-designed, not auto-generated), worded again on 2026-11-15
         # ("pre-agent hand design version, original flexitac ... using flexitac PCB to making the tactile sensor
         # accessible, reliable, and standarlized"): the label, the card's one line; the page's line of detail keeps the
-        # sensor's size and fingers.
+        # sensor's size and fingers. The line was chosen again the same day ("Using flexible PCB to make tactile sensors
+        # accessible, reliable and standardized."): it names the flexible PCB technology FlexiTac is built on, not FlexiTac.
         self.assertEqual(document["label"], "Original FlexiTac \u00b7 Hand-designed, pre-agent")
-        self.assertEqual(document["text"], "FlexiTac PCBs make tactile sensors accessible, reliable and standardized.")
+        self.assertEqual(document["text"], "Using flexible PCB to make tactile sensors accessible, reliable and standardized.")
         self.assertEqual(document["detail"], "The original FlexiTac sensor, 12 \u00d7 32 taxels at 2 mm, on the xArm gripper's soft fingers.")
         self.assertNotRegex(json.dumps(document), r"\bCAD\b")
         # It is no entry: no fit, no build, no download of the generator's; its id is no part's, variant's or family's.
@@ -2574,7 +2688,7 @@ class ShowcasePageTests(LibraryTestCase):
             for relative in ("library", "vendor", "samples"):
                 shutil.copytree(WEB / relative, web / relative)
             library = web / "library"
-            done = "library_write: 42 sensors, all current, each with its picture, 42 with a 3D view"
+            done = "library_write: 58 sensors, all current, each with its picture, 58 with a 3D view"
 
             def run(check: bool = True):
                 said = []
@@ -2594,7 +2708,7 @@ class ShowcasePageTests(LibraryTestCase):
             self.assertEqual(run(), (1, [f"stale: scene {SHOWCASE_PICTURES[2]} is not the file {SHOWCASE_FILE} names: {reshoot}",
                                          f"library_write: {library_write.SHOWCASE_STALE}"]))
             self.assertEqual(run(check=False)[1], [f"library_write: scene {SHOWCASE_PICTURES[2]} is not the file {SHOWCASE_FILE} names: {reshoot}",
-                                                   "library_write: 0 fitted, 0 written, 42 sensors, 42 with a 3D view"])
+                                                   "library_write: 0 fitted, 0 written, 58 sensors, 58 with a 3D view"])
             card.write_bytes(picture)
             # A file no tool writes (here a copy of a vendor mesh in the samples) says its own fix, its removal, and no
             # closing line of a rebuild or a shoot (the review of 2026-11-13: it said to rebuild the showcase).
@@ -2897,7 +3011,7 @@ class ViewTests(LibraryTestCase):
 
 class RequestTests(LibraryTestCase):
     def test_every_fit_is_of_the_request_the_page_sends(self) -> None:
-        options = library_write.page_options((WEB / "index.html").read_text(encoding="utf-8"))
+        options = library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8"))
         rows = {identifier: (part, variant) for identifier, _, part, variant in self.plan}
         for identifier, data in self.fits.items():
             part, variant = rows[identifier]
@@ -2931,7 +3045,7 @@ class RequestTests(LibraryTestCase):
         (variant,) = [variant for variant in part["variants"] if variant["pitch_mm"] == 2]
         self.assertEqual(variant["fit"], "../vendor/umi/default-fit.json")
         self.assertEqual(self.entries["variants"]["umi-finray-2mm"]["fit"], "../vendor/umi/default-fit.json")
-        options = library_write.page_options((WEB / "index.html").read_text(encoding="utf-8"))
+        options = library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8"))
         # The request the browser recorded (tools/browser/write_default_fit.py) is the one composed here.
         self.assertEqual(_canonical(library_write.compose(part, variant, options)), _canonical(shipped["request"]))
         self.assertEqual(part["mesh"]["file"], "../vendor/umi/UMI-Soft-Gripper-Finger.stl")
@@ -2975,7 +3089,7 @@ class RequestTests(LibraryTestCase):
                     self.assertTrue(library_write.valid({"min": attributes["min"], "max": attributes["max"], "step": attributes["step"]}, value))
 
     def test_the_writer_reads_the_controls_as_the_browser_does(self) -> None:
-        found = library_write.controls((WEB / "index.html").read_text(encoding="utf-8"))
+        found = library_write.controls((WEB / "gen.html").read_text(encoding="utf-8"))
         self.assertEqual(set(found), set(_controls()))
         self.assertEqual(found["row_sides"]["choices"], ["both", "left", "right"], "the disabled 'channel' is never sent")
         self.assertEqual((found["pitch_mm"]["default"], found["max_rows"]["default"], found["strain_limit"]["default"]), (2, 32, 0.003))
@@ -2987,8 +3101,8 @@ class RequestTests(LibraryTestCase):
 
     def test_a_control_disabled_in_the_page_is_not_sent(self) -> None:
         # readOptions skips a disabled control; Pitch, Smallest pitch and Row traces are main.js's own to turn on and
-        # off (syncObjective, syncContainment), whatever index.html says (the review of 2026-11-05).
-        html = (WEB / "index.html").read_text(encoding="utf-8")
+        # off (syncObjective, syncContainment), whatever gen.html says (the review of 2026-11-05).
+        html = (WEB / "gen.html").read_text(encoding="utf-8")
         self.assertFalse(any(control["disabled"] for control in library_write.controls(html).values()))
         for key, element in (("edge_margin_mm", 'id="cadEdgeMargin"'), ("pitch_mm", 'id="cadPitch"'), ("row_sides", 'id="cadRowSides"')):
             with self.subTest(option=key):
@@ -2999,7 +3113,7 @@ class RequestTests(LibraryTestCase):
     def test_compose_refuses_what_the_page_would_send_otherwise(self) -> None:
         # parts.json is edited by hand: a setup main.js buildDefaultSensor would send another way is refused, not
         # composed (only the browser checks would see it: the writer, the tests and the site build would agree).
-        options = library_write.page_options((WEB / "index.html").read_text(encoding="utf-8"))
+        options = library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8"))
         part = self.parts["parts"]["widowx-250"]
         variant = part["variants"][0]
         for identifier, _, each, _ in self.plan:
@@ -3109,24 +3223,39 @@ class StalenessTests(LibraryTestCase):
 
 
 class FamilyTests(LibraryTestCase):
-    """The tapered tips (the user's requests of 2026-11-05): one family card closing the UMI finger's shelf."""
+    """The tapered tips (the user's requests of 2026-11-05): since the user's request of 2026-11-16 ("我在这里更多想要体现
+    umi不同shape我们都可以fit") the family's cards, one per shape, after the straight finger on the UMI finger's shelf."""
 
-    def test_the_family_is_complete_with_its_default(self) -> None:
+    def test_the_family_is_its_cards_each_complete(self) -> None:
         family = self.entries["families"][TAPERS]
         self.assertEqual(list(self.entries["families"]), [TAPERS])
-        self.assertEqual((family["title"], family["shelf"], family["h_mm"], family["default"]),
-                         ("Tapered tips", "umi-finray", 75, "umi-trap-tip13.8-2mm"))
-        shape, tip = family["axes"]
-        self.assertEqual((shape["key"], [(choice["value"], choice["label"]) for choice in shape["choices"]]),
-                         ("shape", [("trap", "Trapezoid"), ("convex", "Convex arc")]))
-        self.assertEqual((tip["key"], [choice["value"] for choice in tip["choices"]]), ("tip_mm", list(TAPER_TIPS)))
-        grid = {f"{a}|{b}": f"umi-{a}-tip{b}-2mm" for a in TAPER_SHAPES for b in TAPER_TIPS}
-        self.assertEqual(family["grid"], grid, "two shapes by five tip widths, each once")
+        # The family's own address (#umi-tapers, ?part=umi-tapers) opens the 13.8 mm trapezoid, as before its cards.
+        self.assertEqual((sorted(family), family["shelf"], family["default"]), (["cards", "default", "shelf"], "umi-finray", "umi-trap-tip13.8-2mm"))
+        self.assertEqual([(card["key"], card["title"], card["default"]) for card in family["cards"]],
+                         [(key, title, default) for key, title, _, default in TAPER_CARDS])
+        shown = []
+        for card, (key, title, kinds, default) in zip(family["cards"], TAPER_CARDS):
+            with self.subTest(card=key):
+                shape, tip = card["axes"]
+                widths = TAPER_KINDS[kinds[0][0]][3]
+                self.assertEqual((shape["key"], shape["label"], [(choice["value"], choice["label"]) for choice in shape["choices"]]),
+                                 ("shape", "Shape", [(value, label) for _, value, label in kinds]))
+                self.assertEqual((tip["key"], tip["label"], [choice["value"] for choice in tip["choices"]]), ("tip_mm", "Tip width (mm)", list(widths)))
+                grid = {f"{value}|{width}": f"umi-{kind}-tip{width}-2mm" for kind, value, _ in kinds for width in widths}
+                self.assertEqual(card["grid"], grid, "its shapes by its tip widths, each once")
+                self.assertEqual(card["h_mm"], TAPER_KINDS[kinds[0][0]][2])
+                self.assertIn(default, grid.values())
+                shown += grid.values()
+        # The cards' lines in the grippers' style: a range and what is picked on the card's page; one sensor its tip
+        # and pitch.
+        self.assertEqual([card["lines"] for card in family["cards"]],
+                         [["5.8 to 21.8 mm", "Pick shape and width"]] + [["5.8 to 21.8 mm", "Pick your tip width"]] * 3 + [["2 mm tip", "2 mm pitch"]])
+        # Every tip on one card once; every card's sensor a tip's.
         members = sorted(part_id for part_id, part in self.entries["parts"].items() if part["family"] == TAPERS)
-        self.assertEqual(members, sorted(identifier[:-4] for identifier in grid.values()))
-        self.assertEqual(sorted(identifier for part in members for identifier in self.entries["parts"][part]["variants"]), sorted(grid.values()))
-        self.assertIn(family["default"], self.entries["variants"])
-        self.assertEqual(family["lines"], ["Trapezoid or convex arc", "5 tip widths · 2 mm pitch"])
+        self.assertEqual(sorted(shown), sorted(f"{part_id}-2mm" for part_id in members))
+        self.assertEqual(len(shown), 26)
+        self.assertEqual(sorted(identifier for part in members for identifier in self.entries["parts"][part]["variants"]), sorted(shown))
+        self.assertIn(family["default"], shown)
         self.assertEqual(family, library_write.family_record(TAPERS, self.parts["families"][TAPERS], self.parts, self.plan))
         for part_id in members:
             with self.subTest(part=part_id):
@@ -3136,10 +3265,18 @@ class FamilyTests(LibraryTestCase):
                 self.assertEqual(self.entries["variants"][f"{part_id}-2mm"]["pitch_mm"], 2)
 
     def test_an_incomplete_family_is_refused(self) -> None:
-        for edit, message in ((lambda family: family["grid"].pop("convex|5.8"), "every choice"),
+        def card(key):
+            return lambda family: next(item for item in family["cards"] if item["key"] == key)
+        for edit, message in ((lambda family: card("convex")(family)["grid"].pop("convex|5.8"), "every choice"),
+                              (lambda family: card("short")(family)["grid"].update({"convex|13.8": "umi-trap-tip13.8-2mm"}), "cards and its parts"),
+                              (lambda family: card("trap")(family).update(default="umi-convex-tip9.8-2mm"), "default"),
                               (lambda family: family.update(default="umi-finray-2mm"), "default"),
                               (lambda family: family.update(shelf="umi-trap-tip5.8"), "shelf"),
-                              (lambda family: family["axes"][1]["choices"].append({"value": "1.8", "label": "1.8"}), "every choice")):
+                              (lambda family: family["cards"].pop(), "cards and its parts"),
+                              (lambda family: family["cards"].append(copy.deepcopy(family["cards"][0])), "two of one key"),
+                              (lambda family: card("trap")(family)["axes"].reverse(), "axes shape and tip_mm"),
+                              (lambda family: card("pointed")(family)["grid"].update({"pointed|2": "umi-finray-2mm"}), "not of its parts"),
+                              (lambda family: card("concave")(family)["axes"][1]["choices"].append({"value": "1.8", "label": "1.8"}), "every choice")):
             with self.subTest(message=message):
                 parts = copy.deepcopy(self.parts)
                 edit(parts["families"][TAPERS])
@@ -3167,6 +3304,44 @@ class FamilyTests(LibraryTestCase):
                 self.assertLess(mesh.normals[facet][0], -0.999999)
                 self.assertLessEqual(max(abs(point[0]) for point in points), 1e-6)
                 self.assertLessEqual(select.point_triangle_distance(FACE_POINT, *points), 1e-6)
+
+    def test_each_tip_is_cut_by_its_profile(self) -> None:
+        # The review of 2026-11-16: the meshes were checked only by their hashes, so a concave file cut with the convex
+        # profile, or two kinds' files swapped, would have passed.  Each tip's mesh measured as tools/library_tips.py's
+        # check measures it: its width (where a plane at that height cuts it) 1, 5 and 20 mm above the tip and halfway
+        # up the taper the width of the tool's profile for its kind (its profile, height and tip width; _half_width(),
+        # the tool's own read from its source where the private tool is: the two one), within 0.05 mm, centred on the
+        # face's middle (y = -12.9), and the full 25.8 mm just above the taper; halfway up the profiles differ by more
+        # than the tolerance, so the measures tell them apart.
+        half_width, width, z_tip = _half_width, TAPER_FACE_MM, TAPER_TIP_Z
+        tool = _tool_profile()
+        if tool is not None:
+            self.assertEqual(tool[1:], (width, z_tip))
+            for _, words, height, tips in TAPER_KINDS.values():
+                for tip in tips:
+                    for k in range(11):
+                        at = height * k / 10
+                        self.assertAlmostEqual(tool[0](at, TAPER_PROFILES[words], height, float(tip)), half_width(at, TAPER_PROFILES[words], height, float(tip)),
+                                               places=9, msg=f"{words}, h {height}, tip {tip}, s {at}: the tool's profile is this one")
+        for part_id, part in self.parts["parts"].items():
+            if part.get("family") != TAPERS:
+                continue
+            match = re.fullmatch(r"umi-([a-z-]+)-tip([\d.]+)", part_id)
+            _, words, height, tips = TAPER_KINDS[match.group(1)]
+            self.assertIn(match.group(2), tips)
+            profile, tip = TAPER_PROFILES[words], float(match.group(2))
+            triangles = [corners for corners in _stl_triangles((LIBRARY / part["mesh"]["file"]).read_bytes()) if min(corners[2::3]) < z_tip + height + 1]
+            with self.subTest(part=part_id):
+                for above in (1.0, 5.0, 20.0, height / 2):
+                    low, high = _span_at(triangles, z_tip + above)
+                    expected = 2 * half_width(height - above, profile, height, tip)
+                    self.assertAlmostEqual(high - low, expected, delta=0.05, msg=f"{above} mm above the tip")
+                    self.assertAlmostEqual((high + low) / 2, -width / 2, delta=0.05, msg=f"centred {above} mm above the tip")
+                    others = [2 * half_width(height - above, other, height, tip) for other in TAPER_PROFILES.values() if other != profile]
+                    if above == height / 2:
+                        self.assertGreater(min(abs(value - expected) for value in others), 0.1, "the profiles told apart halfway up")
+                low, high = _span_at(triangles, z_tip + height + 0.05)
+                self.assertAlmostEqual(high - low, width, delta=0.05, msg="full width above the taper")
 
 
 class PublicTests(unittest.TestCase):
@@ -3231,7 +3406,8 @@ class PublicTests(unittest.TestCase):
 
 
 
-# -- the page stage: library.html, the header's link, main.js's ./?part=<id>, app.py's route, the site build -----------
+# -- the page stage: the Library's page (index.html since 2026-11-16, library.html before), the header's link, main.js's
+# gen.html?part=<id> (./?part=<id> before), app.py's route, the site build ------------------------------------------
 
 class _Page(HTMLParser):
     """A page's elements: (tag, attributes) in order, with the text between them, and its scripts and style sheets."""
@@ -3282,21 +3458,27 @@ def _inner(source: str, name: str) -> str:
 
 
 class PageTests(unittest.TestCase):
-    """library.html, library.js and library.css as the spec of 2026-11-05 has them (the browser checks: library_checks)."""
+    """The Library's page, library.js and library.css as the spec of 2026-11-05 has them (the browser checks:
+    library_checks).  Since the user's decision of 2026-11-16 ("是的 be first page") the Library is index.html and the
+    generator gen.html: ``html``/``page`` are the Library's, ``index_html``/``index`` the generator's (named for its
+    file of before)."""
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.html = (WEB / "library.html").read_text(encoding="utf-8")
-        cls.index_html = (WEB / "index.html").read_text(encoding="utf-8")
+        cls.html = (WEB / "index.html").read_text(encoding="utf-8")
+        cls.index_html = (WEB / "gen.html").read_text(encoding="utf-8")
         cls.script = (WEB / "library.js").read_text(encoding="utf-8")
         cls.style = (WEB / "library.css").read_text(encoding="utf-8")
-        cls.page = _page("library.html")
-        cls.index = _page("index.html")
+        cls.page = _page("index.html")
+        cls.index = _page("gen.html")
 
     def test_its_one_script_and_three_style_sheets_by_relative_urls(self) -> None:
         scripts = [(attributes.get("src"), attributes.get("type")) for tag, attributes in self.page.elements if tag == "script"]
-        # The look's choice first, in <head> (web/theme.js, 2026-11-06), then the page's own.
-        self.assertEqual(scripts, [("static/theme.js", None), ("static/library.js", None)], "no backend.js, Pyodide or three.js on the Library")
+        # The generator's addresses of before sent on first (web/forward.js, 2026-11-16: the Library is the first page),
+        # the look's choice, in <head> (web/theme.js, 2026-11-06), the header's counts refreshed on the static site
+        # (web/counts.js, the review of 2026-11-16: the first page's counts had stayed the build's), then the page's own.
+        self.assertEqual(scripts, [("static/forward.js", None), ("static/theme.js", None), ("static/counts.js", None), ("static/library.js", None)],
+                         "no backend.js, Pyodide or three.js on the Library")
         sheets = [attributes.get("href") for tag, attributes in self.page.elements if tag == "link" and attributes.get("rel") == "stylesheet"]
         self.assertEqual(sheets, ["static/styles.css", "static/theme.css", "static/library.css"])
         self.assertEqual(self.page.inline, [], "no inline script or style (the page's CSP)")
@@ -3313,6 +3495,14 @@ class PageTests(unittest.TestCase):
         for identifier in ("libHero", "libNote", "libGrid", "libShelves", "libWindow", "libClose", "libWindowBody", "libDetail", "libStatus"):
             self.assertIn(identifier, ids)
         self.assertNotIn("libTiles", ids, "no tiles since the layout of 2026-11-06")
+        # The title's line since the user's request of 2026-11-15 ("Pre-generated examples · Download Gerbers · Send to
+        # fab", a small heading with arrows): the three steps as a list, a grey arrow after each but the last, hidden from
+        # screen readers, a step never broken inside.
+        self.assertIn('<ol class="lib-tagline lib-steps"><li>Pre&#8209;generated examples</li><li>Download Gerbers</li><li>Send to fab</li></ol>', self.html)
+        self.assertNotIn("Sensors already fitted to open&#8209;source gripper fingers.", self.html)
+        css = (WEB / "library.css").read_text(encoding="utf-8")
+        self.assertIn('.lib-steps li:not(:last-child)::after { content:"\\2192"; content:"\\2192" / ""; margin:0 .5em; color:var(--text-3); font-weight:400; }', css)
+        self.assertIn(".lib-steps li { white-space:nowrap; }", css)
 
     def test_its_header_is_the_generators(self) -> None:
         # The title block and the header's right (the look's toggle and the community links, 2026-11-06) byte for byte (so
@@ -3325,26 +3515,66 @@ class PageTests(unittest.TestCase):
         modes = [(tag, attributes) for tag, attributes in self.page.elements if "mode-links" in (attributes.get("class") or "").split()]
         self.assertEqual(modes, [("nav", {"class": "mode-picker mode-links", "aria-label": "Mode"})])
         links = re.search(r'<nav class="mode-picker mode-links" aria-label="Mode">(.*?)</nav>', self.html).group(1)
-        self.assertEqual(re.findall(r'<a href="([^"]+)"[^>]*><span>([^<]+)</span></a>', links), [("./#rect", "Rectangular"), ("./", "Gen by Surface")])
+        # The generator's two modes at gen.html since 2026-11-16 (./#rect and ./ before).
+        self.assertEqual(re.findall(r'<a href="([^"]+)"[^>]*><span>([^<]+)</span></a>', links), [("gen.html#rect", "Rectangular"), ("gen.html", "Gen by Surface")])
+
+    def test_the_team_footer_is_the_same_on_both_pages(self) -> None:
+        # The user's request of 2026-11-15 ("在我们这个flexitac gen的三个页面底部（lib,gen by surface,regtangular）下面都加上
+        # flexitac team的标注，类似于awesome flexitac最下面"): Awesome-FlexiTac's footer word for word, one <footer> on each page
+        # (index.html's under both modes, after <main>), its main block byte for byte the same, as the header's blocks are;
+        # the Library's fine print (the makers' trademarks, its sources and licences) its first row there.  Every link
+        # in a new tab (the community's rel noopener noreferrer, as the header's; the team's site noopener), the mail a
+        # mailto: link.
+        start, end = '      <div class="site-footer-main">', "\n    </footer>\n"
+        self.assertEqual(_block(self.html, start, end), _block(self.index_html, start, end))
+        for name, text in (("gen.html", self.index_html), ("index.html", self.html)):
+            with self.subTest(page=name):
+                self.assertEqual(text.count("<footer"), 1)
+                self.assertEqual(text.count('<footer class="site-footer">'), 1)
+                self.assertLess(text.index("</main>"), text.index('<footer class="site-footer">'))
+        block = _block(self.index_html, start, end)
+        words = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", block)).strip()
+        self.assertEqual(words, "Maintained by the FlexiTac Team An open-source, scalable tactile solution for robotic systems. "
+                         "© 2026 FlexiTac Research Community. Community GitHub Discord YouTube Contact binghao.huang@columbia.edu "
+                         "Email for any questions.")
+        links = re.findall(r'<a href="([^"]+)"([^>]*)>([^<]+)</a>', block)
+        self.assertEqual(links, [
+            ("https://flexitac.github.io/", ' target="_blank" rel="noopener"', "Maintained by the FlexiTac Team"),
+            ("https://github.com/FlexiTac/FlexiTac", ' target="_blank" rel="noopener noreferrer"', "GitHub"),
+            ("https://discord.gg/6gw887Vxms", ' target="_blank" rel="noopener noreferrer"', "Discord"),
+            ("https://www.youtube.com/watch?v=HYmMbsrwWFA", ' target="_blank" rel="noopener noreferrer"', "YouTube"),
+            ("mailto:binghao.huang@columbia.edu", "", "binghao.huang@columbia.edu")])
+        self.assertEqual(re.findall(r"<h2[^>]*>(?:<a[^>]*>)?([^<]+)", block), ["Maintained by the FlexiTac Team", "Community", "Contact"])
+        self.assertIn("    <footer class=\"site-footer\">\n      <p class=\"lib-footer\">Part names are their makers' trademarks; FlexiTac is not affiliated with them. "
+                      '<a href="static/library/NOTICE.md">Sources and licences</a></p>\n' + start, self.html)
+        self.assertNotIn("lib-footer", self.index_html)
+        # Its look is the theme's (theme.css section 15, both pages); the fine print's a footnote over a hairline.
+        rules, _ = parse_css(self.style)
+        fine = {name: value for rule in rules if ".site-footer .lib-footer" in rule.selectors and not rule.conditions for name, value, _ in rule.declarations}
+        self.assertEqual((fine.get("border-bottom"), fine.get("font-size"), fine.get("color")), ("1px solid var(--hairline)", "12px", "var(--text-2)"))
 
     def test_the_library_link_on_both_pages(self) -> None:
-        for name, page, expected in (("index.html", self.index, {"href": "library.html", "target": "_blank", "rel": "noopener"}),
-                                     ("library.html", self.page, {"href": "library.html", "aria-current": "page"})):
+        # In the same tab from the generator since the user's request of 2026-11-15 ("从gen by surface跳到lib,会重开一个页面，
+        # 这个改掉，改成直接跳过去 不重开页面"): no target, no rel, its title without "(opens in a new tab)"; the Library's own
+        # the current page.  At ./ since the user's decision of 2026-11-16 (the Library the first page; library.html before).
+        for name, page, expected in (("gen.html", self.index, {"href": "./", "target": None, "rel": None, "aria-current": None,
+                                                               "title": "Sensors already fitted to open-source grippers"}),
+                                     ("index.html", self.page, {"href": "./", "target": None, "aria-current": "page"})):
             with self.subTest(page=name):
                 found = [(index, attributes) for index, (tag, attributes) in enumerate(page.elements)
                          if tag == "a" and attributes.get("class") == "masthead-library"]
                 self.assertEqual(len(found), 1)
                 index, attributes = found[0]
                 self.assertEqual({key: attributes.get(key) for key in expected}, expected)
-                # Not a masthead-link (the community's pills keep their checks); after the mode switch (index.html: the
+                # Not a masthead-link (the community's pills keep their checks); after the mode switch (gen.html: the
                 # switch stays the title block's next sibling).
                 self.assertNotIn("masthead-link", attributes["class"].split())
                 before = [attributes for _, attributes in page.elements[:index] if "mode-picker" in (attributes.get("class") or "").split()]
                 self.assertEqual(len(before), 1)
-        text = (WEB / "index.html").read_text(encoding="utf-8")
+        text = (WEB / "gen.html").read_text(encoding="utf-8")
         self.assertLess(text.index('id="modePicker"'), text.index('class="masthead-library"'))
-        self.assertIn("</fieldset>\n      <!-- The Library (library.html;", text)
-        self.assertIn('title="Sensors already fitted to open-source grippers (opens in a new tab)"', text)
+        self.assertIn("</fieldset>\n      <!-- The Library (the user's requests of 2026-11-05;", text)
+        self.assertIn('<a class="masthead-library" href="./" title="Sensors already fitted to open-source grippers"><svg', text)
 
     def test_the_header_links_style_is_in_dated_blocks_beside_the_header_rules(self) -> None:
         # Not at the files' ends (where the on-part figure's rules go): styles.css's right after the mode switch's,
@@ -3366,7 +3596,7 @@ class PageTests(unittest.TestCase):
         self.assertIn("@media (prefers-contrast: more) { .masthead-library { text-decoration:underline; } }", theme)
 
     def test_the_page_never_says_cad_in_its_own_files(self) -> None:
-        for name, text in (("library.html", self.html), ("library.js", self.script), ("library.css", self.style)):
+        for name, text in (("index.html", self.html), ("library.js", self.script), ("library.css", self.style)):
             with self.subTest(file=name):
                 self.assertNotRegex(text, r"\bCAD\b")
 
@@ -3376,7 +3606,8 @@ class PageTests(unittest.TestCase):
                      "backend.js", "apiFetch", "pyodide"):
             self.assertNotIn(word, source, word)
         self.assertIsNone(re.search(r"(window|document)\.addEventListener\(\s*[\"']scroll", source), "no window or document scroll listener")
-        self.assertEqual(len(re.findall(r"addEventListener\(\s*[\"']scroll", source)), 1, "the one scroll listener: each track's arrows")
+        # No scroll listener at all since the review of 2026-11-16 (the UMI shelf a grid: its row's arrows had the one).
+        self.assertEqual(len(re.findall(r"addEventListener\(\s*[\"']scroll", source)), 0, "no scroll listener")
         self.assertEqual([url for url in re.findall(r"https?://[^\s\"'`]+", source) if url != "http://www.w3.org/2000/svg"], [])
         self.assertIn('const BASE = "static/library/";', source)
         self.assertIn("fetch(`api/export/${kind}`", source)
@@ -3385,22 +3616,46 @@ class PageTests(unittest.TestCase):
         self.assertIn('"use strict";', source)
 
     def test_its_style_sheet_moves_nothing_and_blue_fills_only_open(self) -> None:
+        # Nothing moves on its own, with one exception, the user's request of 2026-11-15 ("箭头能不能做成像schetchfab一样的
+        # 动画"): the 3D view's drag hint (.lib-drag) sways (its one @keyframes, on the drawn view only) and fades in and
+        # out (opacity alone), and under reduced motion neither (its every transition and animation off there).  No other
+        # transition or animation, no scroll behaviour or will-change.  Its one container query (its label by the view's
+        # height, the review of 2026-11-15) the sheet's only one.
         rules, at_rules = parse_css(self.style)
-        self.assertEqual({at.split()[0] for at in at_rules} - {"@media"}, set(), "no @import, @font-face, @supports or @layer")
-        declarations = [(selector, name, value) for rule in rules for name, value, _ in rule.declarations for selector in rule.selectors]
+        self.assertEqual({at.split()[0] for at in at_rules} - {"@media", "@keyframes", "@container"}, set(), "no @import, @font-face, @supports or @layer")
+        self.assertEqual([at for at in at_rules if at.startswith("@keyframes")], ["@keyframes lib-drag-sway"])
+        self.assertEqual([at for at in at_rules if at.startswith("@container")], ["@container lib-live (max-height:269px)"])
+        declarations = [(selector, name, value, rule.conditions) for rule in rules for name, value, _ in rule.declarations for selector in rule.selectors]
         self.assertTrue(declarations)
-        for selector, name, value in declarations:
+        moving = [(selector, name, value, conditions) for selector, name, value, conditions in declarations
+                  if name.startswith(("transition", "animation")) or name in ("scroll-behavior", "will-change")]
+        reduced = ("@media (prefers-reduced-motion: reduce)",)
+        self.assertEqual(sorted((selector, name, value) for selector, name, value, conditions in moving if conditions != reduced), [
+            (".lib-drag", "transition", "opacity .2s ease"),
+            (".lib-live.is-used .lib-drag", "transition", "opacity .5s ease .5s"),
+            (".lib-stage.is-live .lib-drag", "animation", "lib-drag-sway 5s ease-in-out infinite"),
+            (".lib-stage.is-live .lib-drag.is-gone", "animation", "none")])
+        self.assertEqual(sorted((selector, name, value) for selector, name, value, conditions in moving if conditions == reduced), [
+            (".lib-drag", "transition", "none"), (".lib-live.is-used .lib-drag", "transition", "none"), (".lib-stage.is-live .lib-drag", "animation", "none")])
+        # The sway as Sketchfab's: side to side and back, 30 px at most (in proportion to the hint, the view's: library.css).
+        self.assertIn("@keyframes lib-drag-sway { 0%, 100% { transform:translateX(calc(-1 * var(--lib-sway))); } 50% { transform:translateX(var(--lib-sway)); } }",
+                      self.style)
+        for selector, name, value, conditions in declarations:
             with self.subTest(selector=selector, property=name):
-                self.assertFalse(name.startswith(("transition", "animation")) or name in ("scroll-behavior", "will-change"))
                 if name == "position":
                     self.assertIn(value, ("relative", "absolute"))
                 for url in re.findall(r"url\(\s*[\"']?([^\"')]*)", value):
                     self.assertTrue(url.startswith("data:"), url)
                 if "var(--accent" in value:
-                    self.assertRegex(subject(selector), r"\.lib-open\b", "the action blue only on Open in Gen by Surface")
-        self.assertTrue([selector for selector, name, value in declarations if "var(--accent)" in value and ".lib-open" in selector])
-        self.assertNotIn("@keyframes", self.style)
-        self.assertIn("scroll-snap-type:x mandatory", self.style)
+                    # Since the user's decision of 2026-11-16 the showcase's Design your own too (both lead to Gen by Surface).
+                    self.assertTrue(re.search(r"\.lib-open\b", subject(selector)) or re.match(r"\.lib \.lib-showcase \.lib-design(:hover|:active)?$", selector),
+                                    f"the action blue only on Open in Gen by Surface and Design your own: {selector}")
+        self.assertTrue([selector for selector, name, value, _ in declarations if "var(--accent)" in value and ".lib-open" in selector])
+        self.assertTrue([selector for selector, name, value, _ in declarations if "var(--accent)" in value and ".lib-design" in selector])
+        self.assertEqual(self.style.count("@keyframes"), 1)
+        # Nothing scrolls sideways since the review of 2026-11-16 (the UMI shelf a grid, as the grippers').
+        self.assertNotIn("scroll-snap", self.style)
+        self.assertNotIn("overflow-x:auto", self.style)
 
     def test_a_sensors_picture_is_3_to_1_in_one_column(self) -> None:
         # The user's decision of 2026-11-05 (可压扁: the picture may be squashed): below 900 px, where a sensor's page is
@@ -3409,7 +3664,8 @@ class PageTests(unittest.TestCase):
         # 900 px, 16:10.  Its drawing or image contained and centred, never hidden.
         rules, _ = parse_css(self.style)
         aspects = [(selector, value, rule.conditions) for rule in rules for selector in rule.selectors
-                   for name, value, _ in rule.declarations if name == "aspect-ratio"]
+                   for name, value, _ in rule.declarations if name == "aspect-ratio" and selector != ".lib-drag svg"]
+        # (The drag hint's drawing keeps its viewBox's 84:44: test_the_3d_view_is_a_named_group_over_the_picture.)
         # Since 2026-11-12 the showcase's two boxes are 4:5 (its large card's, and its own page's at every width): the
         # gripper stands upright, and at 16:10 four fifths of its picture were empty; its page has no Open to keep in a
         # phone's first screen, so its box is not squashed there.
@@ -3440,20 +3696,25 @@ class PageTests(unittest.TestCase):
         self.assertIn('const VIEWS = [["exploded", "Exploded"], ["assembled", "Assembled"]];', self.script)
         slot = _inner(self.script, "slot")
         # (Since 2026-11-12 a third kind, the showcase's large card: its own card file at its own size, loaded at once,
-        # being the grid's first picture; a card's and a sensor's page's as they were.)
-        self.assertIn('const src = kind === "detail" ? image?.[view]?.src : kind === "showcase" ? image?.card?.src : image?.exploded?.card;', slot)
+        # being the grid's first picture; a card's and a sensor's page's as they were.  Since the lead's review of the UMI
+        # shelf's shapes, 2026-11-16, a shelf's card asks for its Assembled picture, its full file at its size: SHELF_VIEW.)
+        self.assertIn('const assembledCard = kind === "card" && view === "assembled";', slot)
+        self.assertIn('const src = kind === "detail" ? image?.[view]?.src : kind === "showcase" ? image?.card?.src\n'
+                      '      : assembledCard ? image?.assembled?.src : image?.exploded?.card;', slot)
         self.assertIn("if (!src) {\n      box.append(field(variant));\n      return box;\n    }", slot)
         self.assertIn('const [width, height] = kind === "detail" ? [image[view].width, image[view].height] '
-                      ': kind === "showcase" ? [image.card.width, image.card.height] : CARD;', slot)
+                      ': kind === "showcase" ? [image.card.width, image.card.height]\n'
+                      '      : assembledCard ? [image.assembled.width, image.assembled.height] : CARD;', slot)
         self.assertIn('el("img", {src: BASE + src, width, height, alt: image.alt || "", decoding: "async",\n'
                       '      loading: kind === "card" ? "lazy" : null});', slot)
         self.assertIn('shown.addEventListener("error", () => {\n      shown.replaceWith(field(variant));\n      missed?.(view);\n    }, {once: true});', slot)
         self.assertIn("return drawing;", _inner(self.script, "field"))
-        # Every picture is slot()'s: the shelf's cards, the family card (its default sensor's), a gripper's card (its
-        # part's default).
-        self.assertIn('slot(variant, "card")', _inner(self.script, "card"))
-        self.assertIn('slot(state.index.variants[family.default], "card")', _inner(self.script, "familyCard"))
-        self.assertIn('slot(state.index.variants[part.default], "card")', _inner(self.script, "gripperCard"))
+        # Every picture is slot()'s: a family's cards (each its sensor's: the UMI shelf's shapes since 2026-11-16), a
+        # gripper's card and a shelved part's own (its part's default); the shelf's in its view (SHELF_VIEW, Assembled)
+        # framed on the fingertip (tipShot(), the review of 2026-11-16), a gripper's Exploded.
+        self.assertIn("      tipShot(state.index.variants[shape.default]),\n", _inner(self.script, "shapeCard"))
+        self.assertIn('shelved ? tipShot(state.index.variants[part.default]) : slot(state.index.variants[part.default], "card"),', _inner(self.script, "gripperCard"))
+        self.assertIn('const box = slot(variant, "card", SHELF_VIEW);\n    box.classList.add("lib-shot-tip");\n    return box;', _inner(self.script, "tipShot"))
         self.assertIn('slot(entry, "showcase", SHOWCASE_VIEW)', _inner(self.script, "showcaseCard"))
         self.assertNotIn('"tile"', self.script)
         self.assertEqual(len(re.findall(r'el\("img"', self.script)), 1, "one image: slot()'s")
@@ -3462,7 +3723,8 @@ class PageTests(unittest.TestCase):
         # A sensor's page (2026-11-05): the Exploded picture and, with both views, a small grey "Exploded | Assembled"
         # control under it in its frame: radios in a fieldset with a legend (a group named View: the arrow keys and a
         # screen reader), swapping the picture in place (no address or history change), the view kept across the
-        # pitch, Shape and Tip width, Exploded again on each page opened, the control gone once both views failed.
+        # pitch, Shape and Tip width, its card's view again on each page opened (Exploded; a UMI shelf's sensor's
+        # Assembled since the review of 2026-11-16, SHELF_VIEW), the control gone once both views failed.
         gallery = _inner(self.script, "gallery")
         self.assertIn('control = el("fieldset", {className: "lib-view"}, el("legend", {}, "View"),', gallery)
         self.assertIn('el("input", {type: "radio", name: "libView", value, checked: value === state.picture}),', gallery)
@@ -3472,7 +3734,7 @@ class PageTests(unittest.TestCase):
         self.assertIn("if (control && failed.size === views.length) control.remove();", gallery)
         self.assertNotIn("history", gallery)
         self.assertNotIn("renderDetail", gallery)
-        self.assertIn("    state.picture = VIEWS[0][0];\n    setNote(\"\");", _inner(self.script, "showDetail"))
+        self.assertIn("    state.picture = isShelved(homeOf(id)) ? SHELF_VIEW : VIEWS[0][0];\n    setNote(\"\");", _inner(self.script, "showDetail"))
         self.assertNotIn("state.picture", _inner(self.script, "segments"))
         # Its style: the pitch's control made small, its legend for a screen reader only, its thumb grey (theme_checks
         # and library_checks see it never blue), and below 900 px the page tighter with it only, so Open stays in a
@@ -3507,7 +3769,7 @@ class PageTests(unittest.TestCase):
         self.assertIn("    present(id);\n", _inner(script, "renderDetail"))
         self.assertIn("    present(id);\n", _inner(script, "renderShowcase"))
         self.assertIn("rest();", _inner(script, "showGrid"))
-        for name in ("renderGrid", "card", "gripperCard", "grippers", "familyCard", "showcaseCard", "slot", "gallery"):
+        for name in ("renderGrid", "shelf", "gripperCard", "grippers", "shapeCard", "showcaseCard", "slot", "gallery"):
             with self.subTest(function=name):
                 self.assertNotRegex(_inner(script, name), r"\b(present|draw|import)\(")
         # Drawn, the stage shows the view and hides the picture under it (is-live): only once it is drawn.
@@ -3546,6 +3808,69 @@ class PageTests(unittest.TestCase):
         self.assertLess(state.index("if (PROBE === null) return;"), state.index('el("pre", {id: "libViewState", hidden: true})'))
         self.assertIn('const PROBE = new URLSearchParams(location.search).get("probe");', self.script)
         self.assertIn('shoot: PROBE === "shoot"', _inner(self.script, "draw"))
+        # The drag hint (the user's request of 2026-11-15: "箭头能不能做成像schetchfab一样的动画", in place of the turn's mark
+        # of that day): in the host, so on every sensor's page and the showcase's (none on the shots tool's page); for the
+        # eye alone; the page's own drawing (a hand between two arrows) over "Drag to rotate"; shown once the view is drawn
+        # (is-live), at the bottom centre of the view, inside it; hidden at the visitor's first use of the view (used(): a
+        # drawn view's): a mouse's or a pen's press of the main button (never a right or middle click, which turns
+        # nothing), a turning key, a double click, a touch once it has turned the view (never a vertical swipe that
+        # scrolls the window: the review of 2026-11-15); its sway stopped once faded out (is-gone); the pointer passing
+        # through it; shown again on another gripper's page or with the window opened again (rest() forgets the page),
+        # never for a pitch, a shape or a tip of the same page.
+        self.assertNotIn("lib-turn", self.style + self.script)
+        self.assertNotIn("is-turned", self.style + self.script)
+        self.assertIn('      live.hint = PROBE === "shoot" ? null : dragHint();\n', host)
+        self.assertIn('        live.hint);\n      live.host.addEventListener("pointerdown", event => {\n'
+                      '        if (event.pointerType !== "touch" && event.button === 0) used();\n      });\n'
+                      '      live.host.addEventListener("dblclick", used);\n', host)
+        self.assertIn('      if (!live.used && live.view?.info().moved) used();\n      setLive();\n', _inner(self.script, "viewNews"))
+        self.assertIn("        if (TURN_KEYS.includes(event.key) && !event.altKey && !event.ctrlKey && !event.metaKey) used();\n", host)
+        self.assertIn('    live.host.classList.toggle("is-used", live.used);\n    live.hint?.classList.toggle("is-gone", live.used);\n', host)
+        self.assertIn('const TURN_KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];', self.script)
+        hint = _inner(self.script, "dragHint")
+        self.assertIn('const hint = el("span", {className: "lib-drag", "aria-hidden": "true"}, drawing, el("span", {className: "lib-drag-label"}, "Drag to rotate"));', hint)
+        self.assertIn('svg("svg", {viewBox: "0 0 84 44", "aria-hidden": "true", focusable: "false"})', hint)
+        self.assertEqual(re.findall(r'class: "(lib-drag-[a-z]+)"', hint), ["lib-drag-arrow", "lib-drag-hand", "lib-drag-crease"])
+        self.assertIn('if (event.propertyName === "opacity" && live.used) hint.classList.add("is-gone");', hint)
+        self.assertEqual(_inner(self.script, "used").split("\n")[-4:], [
+            '    if (live.used || !live.stage?.classList.contains("is-live")) return;', "    live.used = true;", '    live.host.classList.add("is-used");', "  }"])
+        present = _inner(self.script, "present")
+        self.assertIn("    const page = pageOf(id);\n    if (page !== live.page) {\n      live.page = page;\n      live.used = false;\n    }\n", present)
+        self.assertLess(present.index("pageOf(id)"), present.index("liveHost(variant)"))
+        self.assertIn("    live.page = null;\n", _inner(self.script, "rest"))
+        self.assertIn("const pageOf = id => (state.showcase?.id === id ? id : state.index.parts[state.index.variants[id].part].family || state.index.variants[id].part);",
+                      self.script)
+        self.assertNotIn("live.used", _inner(self.script, "segments") + _inner(self.script, "renderDetail"))
+        drag = styled[".lib-drag"]
+        self.assertEqual((drag.get("position"), drag.get("left"), drag.get("right"), drag.get("margin"), drag.get("pointer-events"), drag.get("opacity")),
+                         ("absolute", "0", "0", "0 auto", "none", "0"))
+        self.assertEqual(styled[".lib-stage.is-live .lib-drag"].get("opacity"), "1")
+        self.assertEqual(styled[".lib-live.is-used .lib-drag"].get("opacity"), "0")
+        self.assertEqual(styled[".lib-stage.is-live .lib-drag svg"], {"visibility": "inherit"})
+        self.assertLess(self.style.index(".lib-stage.is-live .lib-drag {"), self.style.index(".lib-live.is-used .lib-drag {"), "used wins over drawn")
+        # Light in either scheme over the view's light box: no token (the dark scheme's would be light ink).  The arrows the
+        # hand's material, one white cursor edged in ink (the review of 2026-11-15: the ink's arrows had been grey on the
+        # black bases), in the same rule.
+        for selector in (".lib-drag-hand", ".lib-drag-crease", ".lib-drag-arrow", ".lib-drag-label"):
+            self.assertFalse([value for value in styled[selector].values() if "var(" in value], selector)
+        self.assertEqual(styled[".lib-drag-arrow"], {"fill": "rgba(255,255,255,.94)", "stroke": "#1d1d1f", "stroke-width": "1.5", "stroke-linejoin": "round"})
+        self.assertEqual(styled[".lib-drag-hand"], styled[".lib-drag-arrow"])
+        self.assertIn(".lib-drag-hand,.lib-drag-arrow {", self.style)
+        # Its size the view's, never the window's (the review of 2026-11-15): the host a size container, the drawing 13.4 %
+        # of its height between 28 and 44 px (84 x 44 at most), its distance from the bottom and its sway in proportion,
+        # its label only on a view 270 px tall or more; no rule of the hint's by the window's width.
+        self.assertEqual(styled[".lib-live"].get("container"), "lib-live / size")
+        self.assertEqual((drag.get("--lib-hint"), drag.get("bottom"), drag.get("--lib-sway")),
+                         ("clamp(28px,13.4cqh,44px)", "calc(var(--lib-hint) * 14 / 44)", "calc(var(--lib-hint) * 30 / 44)"))
+        drawing = styled[".lib-drag svg"]
+        self.assertEqual((drawing.get("width"), drawing.get("height"), drawing.get("aspect-ratio")), ("auto", "var(--lib-hint)", "84 / 44"))
+        self.assertIn('viewBox: "0 0 84 44"', hint)
+        short = {selector: {name: value for name, value, _ in rule.declarations} for rule in rules
+                 if rule.conditions == ("@container lib-live (max-height:269px)",) for selector in rule.selectors}
+        self.assertEqual(short, {".lib-drag-label": {"display": "none"}})
+        by_window = [(selector, rule.conditions) for rule in rules for selector in rule.selectors if ".lib-drag" in selector
+                     and any("width" in condition or "height" in condition for condition in rule.conditions if condition.startswith("@media"))]
+        self.assertEqual(by_window, [])
 
     def test_the_grid_is_the_grippers_cards_then_the_umi_shelf(self) -> None:
         # The user's requests of 2026-11-06 ("其他夹爪的话,不需要每个夹爪一row,你就每个row放4个夹爪就好了"; "只有umi finger在首页
@@ -3559,8 +3884,11 @@ class PageTests(unittest.TestCase):
         self.assertIn("const carded = () => state.index.order.filter(part => !isShelved(part));", script)
         card = _inner(script, "gripperCard")
         self.assertIn('const lines = [pitchRange(part), "Pick your pitch"];', card)
-        self.assertIn('id: `gripper-${partId}`, href: `#${part.default}`', card)
+        self.assertIn('id: shelved ? null : `gripper-${partId}`, href: `#${part.default}`', card)
         self.assertIn('heading("grippers", "Grippers.", `${word(parts.length)}${each}.`)', _inner(script, "grippers"))
+        # Each gripper's card made with its part alone (map()'s index as gripperCard's ``shelved`` had dropped every id
+        # but the first's: the card a shelved part's own, its place lost).
+        self.assertIn('el("div", {className: "lib-cards"}, parts.map(part => gripperCard(part))));', _inner(script, "grippers"))
         grid = _inner(script, "renderGrid")
         self.assertLess(grid.index("grippers(parts)"), grid.index("...shelvedParts().map("), "the grippers' section first, the UMI shelf after it")
         for word in ("lib-tile", "libTiles", "index.start"):
@@ -3595,7 +3923,74 @@ class PageTests(unittest.TestCase):
                 record = entries["parts"][part]
                 self.assertEqual(entries["variants"][record["default"]]["pitch_mm"], 2)
                 self.assertEqual(min(entries["variants"][key]["pitch_mm"] for key in record["variants"]), 1)
-        self.assertEqual(len(grid_cards(entries)), 12, "the grippers' seven cards, the UMI shelf's four and its Tapered tips card")
+        self.assertEqual(len(grid_cards(entries)), 13, "the grippers' seven cards and the UMI shelf's six shapes (its four pitches and "
+                         "its Tapered tips card until 2026-11-16)")
+
+    def test_the_umi_shelf_is_one_card_per_shape(self) -> None:
+        # The user's request of 2026-11-16, of the UMI shelf's 1, 1.5, 2 and 3 mm cards: "后面这三种不是重复了吗，在第一个umi
+        # 1mm点进去，config就可以选择毫米数量；我在这里更多想要体现umi不同shape我们都可以fit,你现在只有一个shape变体" (the pitch is
+        # chosen on the page; the shelf shows the finger's shapes), and the shapes chosen (concave arc, pointed, short
+        # taper).  A shelved part's shelf: its own card, a gripper's card named by its shape ('Straight finger', its range,
+        # 'Pick your pitch', its 2 mm page with no grid id of its own), then its families' cards in their order, each the
+        # picture of its sensor, its title and two lines, opening that sensor's page.
+        script = self.script
+        shelf = _inner(script, "shelf")
+        # Since its review the same day a grid as the grippers' section, three to a row from 735 px (two rows: 4 + 2
+        # would leave a row half empty) and two below: the shapes side by side (a row that scrolled sideways showed four
+        # at 1440 px, one on a phone).
+        self.assertIn("el(\"div\", {className: \"lib-cards\"}, gripperCard(partId, true),\n"
+                      "        families.flatMap(familyId => state.index.families[familyId].cards.map(shape => shapeCard(familyId, shape)))));", shelf)
+        self.assertIn("heading(id, `${part.title}.`, part.shelf)", shelf)
+        rules, _ = parse_css(self.style)
+        shelved = sorted((rule.conditions, value) for rule in rules if ".lib-shelf > .lib-cards" in rule.selectors
+                         for name, value, _ in rule.declarations if name == "grid-template-columns")
+        self.assertEqual(shelved, [(("@media (min-width:735px)",), "repeat(3,minmax(0,1fr))")])
+        # Each card's picture framed on the fingertip (the review of 2026-11-16: at the Assembled home the taper was a
+        # third of the picture's width, the shapes alike at a card's size): the same Assembled file scaled about the
+        # tip's corner inside its clipping box, the placeholder unframed.
+        framed = {name: value for rule in rules if rule.selectors == (".lib-shot-tip > img",) and not rule.conditions for name, value, _ in rule.declarations}
+        self.assertEqual(framed, {"transform": "scale(2.2)", "transform-origin": "41% 3%"})
+        clipped = {name: value for rule in rules if rule.selectors == (".lib-shot",) and not rule.conditions for name, value, _ in rule.declarations}
+        self.assertEqual(clipped.get("overflow"), "hidden")
+        self.assertEqual(script.count("tipShot("), 3, "tipShot() and the shelf's two kinds of card")
+        # Its heading's count of shapes one unit too (the review of 2026-11-16: 'Six / finger shapes,' at 390 px).
+        self.assertIn('const keep = text => String(text).replace(/\\b(\\w+) finger shapes\\b/g, "$1\\u00a0finger\\u00a0shapes")', script)
+        # A shape's page titled by its card (every tip's part is 'UMI Fin-Ray Gripper, tapered tip'), and opened in the
+        # view its card shows (Assembled: from Exploded the tapered end lay under the exploded layers).
+        self.assertIn("const title = shape ? `${index.parts[home].title}, ${shape.title.toLowerCase()}` : part.title;", _inner(script, "renderDetail"))
+        self.assertIn('el("h2", {className: "lib-detail-title", id: "libDetailTitle", tabindex: "-1"}, whole(title)),', _inner(script, "renderDetail"))
+        card = _inner(script, "gripperCard")
+        self.assertIn("const name = shelved ? part.card || part.title : part.title;", card)
+        shape = _inner(script, "shapeCard")
+        self.assertIn('return el("a", {className: "lib-card", href: `#${shape.default}`, "data-variant": shape.default, "data-family": familyId, "data-card": shape.key,', shape)
+        self.assertIn('el("span", {className: "lib-card-name"}, shape.title),\n        shape.lines.map(line => el("span", {className: "lib-card-line"}, keep(line)))', shape)
+        # The shelf's cards in the Assembled view (the lead's review of 2026-11-16: from the Exploded home the tapered end was
+        # foreshortened under the exploded layers, the six shapes alike); the grippers' cards Exploded.
+        self.assertIn('const SHELF_VIEW = "assembled";', script)
+        self.assertEqual(shelf_cards(_json(LIBRARY / "entries.json")), ["umi-finray-2mm"] + [default for *_, default in TAPER_CARDS])
+        # The heading's range of shapes one unit, as a range of pitches ('straight to pointed' broke from 735 to 900 px).
+        self.assertIn('.replace(/(\\d|\\bstraight) to (\\w)/g, "$1\\u00a0to\\u00a0$2");', script)
+        # The pitch cards and their badge line are gone (no card of the grid has a badge; the showcase's label is its own).
+        self.assertNotIn("function card(", script)
+        self.assertNotIn("function familyCard(", script)
+        self.assertEqual(script.count('className: "lib-badge"'), 2, "the showcase's card and page only")
+        # A family's sensor: its card's axes of more than one choice (Tip width; the Short taper's Shape too), its Tip
+        # fact over the card's taper height.
+        self.assertIn("const cardOf = (family, id) => family.cards.find(shape => Object.values(shape.grid).includes(id));", script)
+        controls = _inner(script, "familyControls")
+        self.assertIn("axis.choices.length < 2 ? null : segments(axis.label, `libAxis-${axis.key}`,", controls)
+        detail = _inner(script, "renderDetail")
+        self.assertIn("const shape = family ? cardOf(family, id) : null;", detail)
+        self.assertIn("mm at the tip, over the last ${shape.h_mm} mm`]] : [];", detail)
+        # The family's own address opens its default (#umi-tapers, as before its cards).
+        self.assertIn("if (Object.hasOwn(state.index.families || {}, id)) { showDetail(state.index.families[id].default); return; }", _inner(script, "route"))
+        # The writer's data the shelf reads: the UMI finger's heading and card name, its cards in the shelf's order.
+        entries = _json(LIBRARY / "entries.json")
+        umi = entries["parts"]["umi-finray"]
+        self.assertEqual((umi["shelf"], umi["card"], umi["default"]), ("Six finger shapes, straight to pointed.", "Straight finger", "umi-finray-2mm"))
+        self.assertEqual([(card["title"], card["default"]) for card in entries["families"][TAPERS]["cards"]],
+                         [(title, default) for _, title, _, default in TAPER_CARDS])
+        self.assertEqual(grid_cards(entries)[7:], ["umi-finray-2mm"] + [default for *_, default in TAPER_CARDS])
 
     def test_the_showcase_is_the_grid_s_first_card_and_a_page_of_its_own(self) -> None:
         # The user's request of 2026-11-12 ("在lib最上面一栏放置flexitac+xarm gripper的原始版本的visualization; 这个版本是人手
@@ -3622,13 +4017,16 @@ class PageTests(unittest.TestCase):
         self.assertIn('el("div", {className: "lib-card lib-showcase", id: "showcase"},', card)
         self.assertIn('el("a", {className: "lib-showcase-pic", href: `#${id}`, tabindex: "-1", "aria-hidden": "true"}, slot(entry, "showcase", SHOWCASE_VIEW)),', card)
         self.assertIn('el("a", {className: "lib-pill lib-showcase-details", href: `#${id}`, "data-showcase": id, "aria-label": `Details: ${data.title}`}, "Details")', card)
-        self.assertEqual(re.findall(r"href: ([^,]+),", card), ["`#${id}`", "`#${id}`"])
-        # Its words: the label, the title and one line, each showcase.json's, and Details, the card's one word of its own.
-        self.assertEqual(re.findall(r"data\.(\w+)", card), ["label", "title", "text", "title"])
-        self.assertEqual(re.findall(r'"([A-Z][^"]*)"', card), ["Details"])
+        # Design your own after Details (the user's decisions of 2026-11-15 and 2026-11-16) opens Gen by Surface.
+        self.assertEqual(re.findall(r"href: ([^,]+),", card), ["`#${id}`", "`#${id}`", '"gen.html"'])
+        # Its words: the label, the title and one line, each showcase.json's, and Details, the card's one word of its own
+        # (with Design your own and its name for a screen reader since 2026-11-16).
+        code = re.sub(r"^\s*//.*\n", "", card, flags=re.M)
+        self.assertEqual(re.findall(r"data\.(\w+)", code), ["label", "title", "text", "title"])
+        self.assertEqual(re.findall(r'"([A-Z][^"]*)"', code), ["Details", "Design your own sensor in Gen by Surface", "Design your own"])
         self.assertEqual(re.findall(r'el\("\w+", \{className: "([^"]+)"', card), ["lib-showcased", "lib-card lib-showcase", "lib-showcase-pic", "lib-card-text",
                                                                                      "lib-badge", "lib-showcase-title", "lib-showcase-line", "lib-pills",
-                                                                                     "lib-pill lib-showcase-details"])
+                                                                                     "lib-pill lib-showcase-details", "lib-pill lib-design"])
         # Back to the grid focuses the link that opened the page; the showcase's card, no link, gives its Details.
         grid_code = _inner(script, "renderGrid")
         self.assertIn('const opener = event.target.closest("a.lib-card, .lib-showcase");\n      if (opener) state.opener = opener.querySelector(".lib-showcase-details") || opener;', grid_code)
@@ -3690,6 +4088,8 @@ class PageTests(unittest.TestCase):
         self.assertEqual(styled[(".lib-detail-body.lib-detail-showcase", ("@media (min-width:900px)",))], {"grid-template-columns": "minmax(0,5fr) minmax(0,7fr)"})
         self.assertEqual(styled[(".lib-detail-showcase .lib-frame", ("@media (max-width:899px)",))].get("max-width"), "440px")
         for (selector, _), declarations in styled.items():
+            if ".lib-design" in selector:
+                continue  # Design your own's action blue (2026-11-16: DesignYourOwnTests), not the card's
             with self.subTest(selector=selector):
                 self.assertFalse({"background", "background-color", "box-shadow", "border", "transition", "animation"} & set(declarations))
         # The committed document: its id an address of its own (the name rule: lower case, digits, hyphens; no part's,
@@ -3727,7 +4127,7 @@ class PageTests(unittest.TestCase):
         self.assertEqual(elements[ids.index("libWindowBody") + 1], ("div", {"class": "lib-detail", "id": "libDetail"}), "shown by the window, never hidden itself")
         self.assertLess(ids.index("libGrid"), at)
         self.assertLess(at, ids.index("libStatus"), "in main.lib: the page's .lib rules")
-        for name, text in (("library.html", self.html), ("library.js", self.script), ("library.css", self.style)):
+        for name, text in (("index.html", self.html), ("library.js", self.script), ("library.css", self.style)):
             with self.subTest(file=name):
                 self.assertNotIn("lib-back", text)
         script = self.script
@@ -3750,9 +4150,8 @@ class PageTests(unittest.TestCase):
         self.assertIn('    if (state.view === "grid") {\n      state.gridY = window.scrollY;\n      state.fromGrid = true;\n    }\n    state.view = "detail";\n', opening)
         grid = _inner(script, "showGrid")
         self.assertIn("    rest();\n    if (WINDOW.open) WINDOW.close();\n", grid)
-        # The rows' arrows set as the grid is laid out (they were set as the grid was shown, which it no longer is: a
-        # window opened at its address has it under it; library_checks part_layout and part_window).
-        self.assertTrue(_inner(script, "renderGrid").endswith("    state.syncs.forEach(sync => sync());\n  }"))
+        # (The rows' arrows were set as the grid was laid out until the review of 2026-11-16: no row scrolls now.)
+        self.assertNotIn("syncs", script)
         self.assertNotRegex(grid, r"\.hidden|libHero|libGrid|libDetail")
         close = _inner(script, "closeWindow")
         self.assertIn('    if (state.view !== "detail" || state.closing) return;\n    if (state.depth > 0) {\n      state.closing = state.place;\n'
@@ -3843,38 +4242,39 @@ class PageTests(unittest.TestCase):
         theme = (WEB / "theme.js").read_text(encoding="utf-8")
         self.assertIn("""  if (location.hash.length > 1 && document.querySelector('meta[name="flexitac-page"][content="library"]')) root.dataset.libPlace = "";\n""", theme)
         rules, _ = parse_css(self.style)
-        hidden = [(rule.conditions, rule.declarations) for rule in rules if rule.selectors == (":root[data-lib-place] #libHero", ":root[data-lib-place] .lib-footer")]
+        # (The footer the FlexiTac team's since 2026-11-15, the fine print in it.)
+        hidden = [(rule.conditions, rule.declarations) for rule in rules if rule.selectors == (":root[data-lib-place] #libHero", ":root[data-lib-place] .site-footer")]
         self.assertEqual(hidden, [((), [("display", "none", False)])])
         script = self.script
         self.assertIn('  const ROOT = document.documentElement;\n  if (location.hash.length > 1) ROOT.dataset.libPlace = "";\n', script)
         self.assertEqual(_inner(script, "opened"), "  function opened() {\n    delete ROOT.dataset.libPlace;\n  }")
-        self.assertTrue(_inner(script, "route").startswith("  function route() {\n    if (!state.index) return;\n    opened();\n"))
+        # (route() idle, too, at a hash web/forward.js sends on to gen.html: the review of 2026-11-16.)
+        route = [line for line in _inner(script, "route").splitlines() if not line.strip().startswith("//")]
+        self.assertEqual(route[:3], ["  function route() {", '    if (!state.index || document.documentElement.hasAttribute("data-forward")) return;', "    opened();"])
         self.assertIn('      $("libHero").hidden = false;\n      opened();\n      $("libStatus").textContent', _inner(script, "start"))
         self.assertEqual(script.count("opened();"), 2)
 
     def test_a_card_tabbed_to_is_shown_whole_in_its_row(self) -> None:
         # The review of 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so at 390 px
-        # a UMI card Tabbed to that its row showed in part stayed cut.  The row moves the least that shows it whole inside
-        # its gutters, for the keyboard's focus alone and sideways alone (library_checks part_layout).
-        rows = _inner(self.script, "scroller")
-        self.assertIn('    track.addEventListener("focusin", event => {\n'
-                      '      const card = [...track.children].find(child => child.contains(event.target));\n'
-                      '      if (!card || !event.target.matches(":focus-visible")) return;\n', rows)
-        self.assertIn("      if (shift) track.scrollBy({left: shift});\n", rows)
-        self.assertNotIn("scrollIntoView", rows, "the row only: the page stays put")
+        # a UMI card Tabbed to that its row showed in part stayed cut; its row then moved the least that showed it whole.
+        # Since the review of 2026-11-16 the UMI shelf is a grid as the grippers' section (its six shapes side by side):
+        # no row, no arrows, every card as wide as its column (library_checks part_layout).
+        self.assertNotIn("function scroller(", self.script)
+        self.assertNotIn("lib-track", self.script + self.style)
+        self.assertNotIn("lib-arrow", self.script + self.style)
+        self.assertNotIn("scrollBy", self.script)
+        shelf = _inner(self.script, "shelf")
+        self.assertIn('el("div", {className: "lib-cards"}, gripperCard(partId, true),', shelf)
 
     def test_a_card_tabbed_to_comes_into_the_window_with_room_round_it(self) -> None:
         # The verification of 2026-11-06: at 390 and 360 px the UMI shelf's card Tabbed to stopped flush with the window's
-        # bottom, its focus ring (2 px, 2 px off) cut.  The shelves' cards have the grippers' cards' room above and below
-        # (scroll-margin 16 px, none sideways: they snap at the gutter as before), at every width (library_checks
-        # part_layout).
+        # bottom, its focus ring (2 px, 2 px off) cut.  Every card of the grid has room above and below (scroll-margin
+        # 16 px), the UMI shelf's too since it is a grid (2026-11-16; its row's own rule before), at every width
+        # (library_checks part_layout).
         rules, _ = parse_css(self.style)
         margins = {rule.selectors: [(rule.conditions, value) for name, value, _ in rule.declarations if name == "scroll-margin"]
                    for rule in rules if any(name == "scroll-margin" for name, _, _ in rule.declarations)}
-        self.assertEqual(margins.get((".lib-track > .lib-card",)), [((), "16px 0")])
         self.assertEqual(margins.get((".lib .lib-cards > .lib-card",)), [((), "16px 0")])
-        snapping = [rule.declarations for rule in rules if rule.selectors == (".lib-track > *",)]
-        self.assertEqual(snapping, [[("flex", "none", False), ("scroll-snap-align", "start", False)]])
 
     @unittest.skipUnless(shutil.which("node"), "node is not installed")
     def test_node_check(self) -> None:
@@ -3905,7 +4305,7 @@ class GeneratorTests(unittest.TestCase):
         self.assertIn("`static/library/${part.mesh.file}`", part)
         self.assertIn("`static/library/${variant.fit}`", part)
         self.assertIn("dropPartParameter();", part)
-        # A variant, a part (its default) or a family (its default), as library.html's route takes them (the review of
+        # A variant, a part (its default) or a family (its default), as the Library's route takes them (the review of
         # 2026-11-05: ./?part=umi-tapers fell back to the UMI finger with a warning).
         self.assertIn("Object.hasOwn(index.variants || {}, id) ? id : Object.hasOwn(index.parts || {}, id) ? index.parts[id].default\n"
                       "      : Object.hasOwn(index.families || {}, id) ? index.families[id].default : \"\";", part)
@@ -3936,34 +4336,340 @@ class GeneratorTests(unittest.TestCase):
             self.assertIn(needle, build)
         # The file note's prefix is the one test_library's labels are measured with.
         note = _function(self.main, "libraryNote")
-        self.assertIn('note.replaceChildren("From the ", el("a", {href: `library.html#${cad.entry.id}`, target: "_blank", rel: "noopener"}, "Library"), '
+        # Its link to the Library in the same tab, as the header's (the user's request of 2026-11-15), at ./#<id> since
+        # the Library is the first page (the user's decision of 2026-11-16; library.html#<id> before).
+        self.assertIn('note.replaceChildren("From the ", el("a", {href: `./#${cad.entry.id}`}, "Library"), '
                       '`: ${cad.entry.label.replace(/ mm$/, "\\u00a0mm")}`);', note)
         self.assertEqual("From the " + "Library" + ": ", NOTE_PREFIX)
 
 
-class RouteTests(HttpTestCase):
-    """app.py serves library.html as it serves the page: SECURITY_HEADERS, the header's counts, its query ignored."""
+# -- the first page (the user's decisions of 2026-11-15 and 2026-11-16: "我觉得之后可以让lib作为第一次点击进入时候使用的界面",
+# "是的 be first page"): the Library is index.html at ./, the generator gen.html, and the addresses of before forwarded by
+# web/forward.js (the browser checks: library_checks part_first_page, static_checks part_first_page) ------------------
 
-    def test_the_library_page_with_the_counts(self) -> None:
+# forward.js run under node on a page of each kind (the Library: <meta name="flexitac-page" content="library">; the
+# forwarding page library.html: "forward"; the generator's page: none) at an address: the address location.replace was
+# given (null: none), the mark on <html>, its visibility, and any other way it left (location.assign, location.href).
+FORWARD_DRIVER = r"""
+const vm = require("vm");
+const fs = require("fs");
+const source = fs.readFileSync(process.argv[2], "utf8");
+const out = [];
+for (const [page, href, steps = []] of JSON.parse(process.argv[3])) {
+  const url = new URL(href);
+  const left = {replaced: [], other: []};
+  const listeners = [];
+  const style = {setProperty: (name, value) => { style[name] = value; }};
+  const root = {dataset: {}, style, hasAttribute: name => name === "data-forward" && Object.hasOwn(root.dataset, "forward"),
+    setAttribute: (name, value) => { root.dataset[name] = value; }};
+  const location = {get search() { return url.search; }, get hash() { return url.hash; }, get pathname() { return url.pathname; },
+    origin: url.origin, toString: () => url.href,
+    replace: target => left.replaced.push(String(target)), assign: target => left.other.push(String(target)), reload: () => left.other.push("reload")};
+  Object.defineProperty(location, "href", {get: () => url.href, set: target => left.other.push(String(target))});
+  const document = {documentElement: root, querySelector: selector => (page && selector.includes('name="flexitac-page"') ? {content: page} : null)};
+  const context = {URLSearchParams, URL, location, document, window: null, history: {replaceState: () => left.other.push("replaceState"), pushState: () => left.other.push("pushState")},
+    addEventListener: (type, listener) => listeners.push([type, listener])};
+  context.window = context;
+  vm.runInNewContext(source, context);
+  // Then, in order: ["hash", "#x"], the address's hash changed within the page (its hashchange); ["pageshow", persisted],
+  // the page shown again (by the back-forward cache: true) at its address then.
+  for (const [kind, value] of steps) {
+    if (kind === "hash") url.hash = value;
+    const event = kind === "hash" ? {type: "hashchange"} : {type: "pageshow", persisted: value};
+    for (const [type, listener] of listeners) if (type === event.type) listener(event);
+  }
+  out.push({replaced: left.replaced.length === 1 ? left.replaced[0] : left.replaced.length ? left.replaced : null, other: left.other,
+            forward: root.dataset.forward ?? null, visibility: style.visibility ?? null, listening: listeners.map(([type]) => type)});
+}
+process.stdout.write(JSON.stringify(out));
+"""
+# (page, address after the site's folder, where it goes: None stays).  The generator's addresses of before on the
+# Library, their query and hash kept; the Library's own (its sensors, parts, families, places, the showcase, ?probe)
+# staying; library.html's to ./, or straight to gen.html for a generator's; the generator's own page never forwarded.
+FORWARD_CASES = (
+    ("library", "", None), ("library", "index.html", None), ("library", "?part=widowx-250-1mm", "gen.html?part=widowx-250-1mm"),
+    ("library", "index.html?part=umi-tapers#rect", "gen.html?part=umi-tapers#rect"), ("library", "#rect", "gen.html#rect"),
+    ("library", "#cad", "gen.html#cad"), ("library", "?probe#cad", "gen.html?probe#cad"), ("library", "?sample=franka-hand", "gen.html?sample=franka-hand"),
+    ("library", "?debug", "gen.html?debug"), ("library", "?part=widowx-250-1mm&debug#cad", "gen.html?part=widowx-250-1mm&debug#cad"),
+    ("library", "?part=", "gen.html?part="), ("library", "#drc-row", "gen.html#drc-row"), ("library", "#drc-column", "gen.html#drc-column"),
+    ("library", "#maskNote", "gen.html#maskNote"), ("library", "#widowx-250-2mm", None), ("library", "#widowx-250", None),
+    ("library", "#umi-tapers", None), ("library", "#gripper-arx-x5", None), ("library", "#shelf-umi-finray", None), ("library", "#shelf-start", None),
+    ("library", "#showcase", None), ("library", "#grippers", None), ("library", "#flexitac-g1", None), ("library", "?probe", None),
+    ("library", "?probe=shoot#widowx-250-2mm", None), ("library", "#rectangle", None), ("library", "#bogus", None),
+    ("forward", "library.html", "./"), ("forward", "library.html#widowx-250-2mm", "./#widowx-250-2mm"),
+    ("forward", "library.html?probe=shoot#flexitac-g1", "./?probe=shoot#flexitac-g1"), ("forward", "library.html#gripper-arx-x5", "./#gripper-arx-x5"),
+    ("forward", "library.html#rect", "gen.html#rect"), ("forward", "library.html?part=widowx-250-1mm", "gen.html?part=widowx-250-1mm"),
+    (None, "gen.html", None), (None, "gen.html?part=widowx-250-1mm#rect", None), (None, "gen.html#rect", None),
+)
+# The Library already open (the review of 2026-11-16): (address, its hash then changed within the page, where it goes:
+# None stays).  A generator's hash of before sent on at its hashchange as at a load, the query kept; the Library's own
+# hashes left to library.js.
+FORWARD_HASH_CASES = (
+    ("", "#rect", "gen.html#rect"), ("", "#cad", "gen.html#cad"), ("#widowx-250-2mm", "#rect", "gen.html#rect"),
+    ("?probe", "#drc-row", "gen.html?probe#drc-row"), ("index.html", "#maskNote", "gen.html#maskNote"),
+    ("", "#widowx-250-2mm", None), ("#widowx-250-2mm", "#gripper-arx-x5", None), ("", "#showcase", None), ("", "#rectangle", None),
+    ("#rect", "#widowx-250-2mm", "gen.html#rect"),
+)
+
+
+def _forward_constants() -> tuple:
+    source = (WEB / "forward.js").read_text(encoding="utf-8")
+    keys = re.search(r"const GEN_KEYS = \[([^\]]*)\];", source).group(1)
+    hashes = re.search(r"const GEN_HASHES = \[([^\]]*)\];", source).group(1)
+    return re.findall(r'"([^"]+)"', keys), re.findall(r'"([^"]+)"', hashes)
+
+
+class FirstPageTests(unittest.TestCase):
+    """The Library is the first page and the generator's addresses of before keep working (the user's decisions of
+    2026-11-15 and 2026-11-16): index.html the Library, gen.html the generator, library.html a forwarding page; web/
+    forward.js sends the old addresses on with location.replace, their query and hash kept, before anything paints."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.forward = (WEB / "forward.js").read_text(encoding="utf-8")
+        cls.library = (WEB / "index.html").read_text(encoding="utf-8")
+        cls.forwarding = (WEB / "library.html").read_text(encoding="utf-8")
+        cls.generator = (WEB / "gen.html").read_text(encoding="utf-8")
+
+    @unittest.skipUnless(shutil.which("node"), "node is not installed")
+    def test_each_address_goes_where_it_should(self) -> None:
+        base = "http://127.0.0.1:8008/flexitac-gen/"
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "driver.js").write_text(FORWARD_DRIVER, encoding="utf-8")
+            cases = [[page, base + address] for page, address, _ in FORWARD_CASES]
+            run = subprocess.run(["node", "driver.js", str(WEB / "forward.js"), json.dumps(cases)], cwd=folder, capture_output=True, text=True, timeout=60)
+        self.assertEqual(run.returncode, 0, run.stderr[-2000:])
+        for (page, address, target), seen in zip(FORWARD_CASES, json.loads(run.stdout)):
+            with self.subTest(page=page, address=address):
+                # Once, by location.replace (no history entry), and by nothing else; hidden from the first paint by
+                # visibility (the page's background still painted) and marked for library.js.
+                self.assertEqual(seen["replaced"], target)
+                self.assertEqual(seen["other"], [])
+                self.assertEqual((seen["forward"], seen["visibility"]), (None, None) if target is None else (target.split("?")[0].split("#")[0], "hidden"))
+
+    @unittest.skipUnless(shutil.which("node"), "node is not installed")
+    def test_a_hash_of_before_on_the_open_library_goes_too(self) -> None:
+        # The review of 2026-11-16: ./#rect typed over the open Library (or an old bookmark, a link) is a navigation
+        # within the page, which runs forward.js no more; its hashchange listener sends it on as a load does (once, by
+        # location.replace), and the Library alone listens (not the forwarding page, which has left, nor the generator).
+        base = "http://127.0.0.1:8008/flexitac-gen/"
+        cases = [["library", base + address, [["hash", then]]] for address, then, _ in FORWARD_HASH_CASES]
+        cases += [["forward", base + "library.html", [["hash", "#rect"]]], [None, base + "gen.html", [["hash", "#rect"]]],
+                  # Shown again by the back-forward cache (Back from gen.html#rect to the Library's entry before it): shown,
+                  # and sent on again only at an address that asks; a page shown again by a load is left as it is.
+                  ["library", base, [["hash", "#rect"], ["hash", ""], ["pageshow", True]]],
+                  ["library", base, [["hash", "#rect"], ["pageshow", True]]],
+                  ["library", base, [["hash", "#rect"], ["hash", ""], ["pageshow", False]]],
+                  ["library", base, [["pageshow", True]]]]
+        with tempfile.TemporaryDirectory() as folder:
+            (Path(folder) / "driver.js").write_text(FORWARD_DRIVER, encoding="utf-8")
+            run = subprocess.run(["node", "driver.js", str(WEB / "forward.js"), json.dumps(cases)], cwd=folder, capture_output=True, text=True, timeout=60)
+        self.assertEqual(run.returncode, 0, run.stderr[-2000:])
+        seen = json.loads(run.stdout)
+        for (address, then, target), result in zip(FORWARD_HASH_CASES, seen):
+            with self.subTest(address=address, then=then):
+                self.assertEqual(result["replaced"], target)
+                self.assertEqual(result["other"], [])
+                self.assertEqual((result["forward"], result["visibility"]), (None, None) if target is None else ("gen.html", "hidden"))
+                self.assertEqual(result["listening"], ["hashchange", "pageshow"])
+        forwarding, generator, restored, again, loaded, fresh = seen[len(FORWARD_HASH_CASES):]
+        self.assertEqual((forwarding["replaced"], forwarding["listening"]), ("./", []))
+        self.assertEqual((generator["replaced"], generator["listening"], generator["forward"]), (None, [], None))
+        self.assertEqual((restored["replaced"], restored["forward"], restored["visibility"]), ("gen.html#rect", None, ""))
+        self.assertEqual((again["replaced"], again["forward"], again["visibility"]), (["gen.html#rect"] * 2, "gen.html", "hidden"))
+        self.assertEqual((loaded["replaced"], loaded["forward"], loaded["visibility"]), ("gen.html#rect", "gen.html", "hidden"))
+        self.assertEqual((fresh["replaced"], fresh["forward"], fresh["visibility"]), (None, None, None))
+
+    def test_the_text_of_its_one_way_out(self) -> None:
+        # Where node is not installed the test above is skipped: its essentials by their text.
+        self.assertEqual(self.forward.count("location.replace("), 1)
+        self.assertIn("  location.replace(target + location.search + location.hash);\n", self.forward)
+        self.assertIn('  root.style.visibility = "hidden";\n', self.forward)
+        self.assertNotRegex(self.forward, r"location\.(assign|href\s*=)|history\.|window\.stop|document\.write")
+        self.assertIn('  const target = generator ? "gen.html" : page === "forward" ? "./" : null;\n', self.forward)
+        self.assertIn("  const generator = GEN_KEYS.some(key => query.has(key)) || GEN_HASHES.includes(location.hash);\n", self.forward)
+        # At a load, then on the Library at each hashchange (the review of 2026-11-16) and at a page shown again by the
+        # back-forward cache while it was being sent on.
+        self.assertIn('  forward();\n  if (page !== "library") return;\n  window.addEventListener("hashchange", forward);\n', self.forward)
+        self.assertIn('    if (!event.persisted || !root.hasAttribute("data-forward")) return;\n    delete root.dataset.forward;\n'
+                      '    root.style.visibility = "";\n    forward();\n', self.forward)
+        run = subprocess.run(["node", "--check", str(WEB / "forward.js")], capture_output=True, text=True) if shutil.which("node") else None
+        self.assertTrue(run is None or run.returncode == 0, run and run.stderr)
+
+    def test_its_keys_and_hashes_are_the_generators(self) -> None:
+        # GEN_KEYS: the query keys the generator reads (main.js and app.js) but ?probe, the checks' reads on both pages,
+        # the Library's at ./; GEN_HASHES: Rectangular's #rect, #cad (CAD mode's name before 2026-10-30, docs/CAD_MODE.md:
+        # still Gen by Surface) and the generator's own anchors, its design checks' links (app.js issueItem).
+        keys, hashes = _forward_constants()
+        scripts = "\n".join((WEB / name).read_text(encoding="utf-8") for name in ("app.js", "backend.js", "cad/main.js"))
+        read = set(re.findall(r'URLSearchParams\(location\.search\)\.(?:get|has)\("(\w+)"\)', scripts))
+        read |= {key for pairs in re.findall(r'\[((?:"\w+", )*"\w+")\]\.includes\(pair\.split\("="\)\[0\]\)', scripts) for key in re.findall(r'"(\w+)"', pairs)}
+        self.assertEqual(sorted(read - {"probe"}), sorted(keys))
+        self.assertIn('location.hash === "#rect"', scripts)
+        anchors = {"#" + target for target in re.findall(r'el\("a", \{href: "#(\w+)"', scripts)}
+        anchors |= {f"#drc-{board}" for board in ("row", "column")} if 'href: `#drc-${board[1]}`' in scripts and "/^boards\\.(row|column)\\b/" in scripts else set()
+        self.assertEqual(sorted(hashes), sorted({"#rect", "#cad"} | anchors))
+        self.assertIn("`#cad` still names CAD mode", (ROOT / "docs" / "CAD_MODE.md").read_text(encoding="utf-8"))
+
+    def test_the_librarys_own_addresses_are_none_of_the_generators(self) -> None:
+        # Every id the Library's route takes (its sensors, parts, families, the showcase) and every place of its grid.
+        _, hashes = _forward_constants()
+        entries = _json(LIBRARY / "entries.json")
+        ids = {*entries["variants"], *entries["parts"], *entries.get("families", {}), library_write.SHOWCASE_ID}
+        places = {"showcase", "grippers", "shelf-start", *(f"gripper-{part}" for part in entries["parts"]), *(f"shelf-{part}" for part in entries["parts"])}
+        self.assertEqual(sorted(f"#{name}" for name in ids | places if f"#{name}" in hashes), [])
+
+    def test_the_pages_load_it_first_and_the_forwarding_page_is_small(self) -> None:
+        # The Library: its page's mark, then forward.js, the first script (before theme.js, which it may leave the
+        # page before), no defer; the forwarding page: its mark, the same script, the look's (its background in the
+        # visitor's look meanwhile) and a plain link to ./ for a browser without scripts, no header; the generator none.
+        for name, text, mark, scripts in (("index.html", self.library, "library", ["static/forward.js", "static/theme.js", "static/counts.js", "static/library.js"]),
+                                          ("library.html", self.forwarding, "forward", ["static/forward.js", "static/theme.js"]),
+                                          ("gen.html", self.generator, None, None)):
+            with self.subTest(page=name):
+                page = _page(name)
+                head = text.split("</head>", 1)[0]
+                if mark is None:
+                    self.assertNotIn("forward.js", text)
+                    self.assertNotIn('name="flexitac-page"', head)
+                    continue
+                self.assertEqual([attributes["src"] for tag, attributes in page.elements if tag == "script"], scripts)
+                self.assertLess(head.index(f'<meta name="flexitac-page" content="{mark}" />'), head.index('<script src="static/forward.js"></script>'))
+                self.assertLess(head.index('<script src="static/forward.js"></script>'), head.index('<script src="static/theme.js"></script>'))
+                self.assertLess(head.index('<script src="static/forward.js"></script>'), head.index("<link"))
+                self.assertEqual(page.inline, [])
+        self.assertNotIn("masthead", self.forwarding)
+        self.assertEqual(re.findall(r'<a href="([^"]+)">([^<]+)</a>', self.forwarding), [("./", "open the Library")])
+        self.assertIn("<title>Library · FlexiTac-Gen</title>", self.forwarding)
+        self.assertLess(len(self.forwarding), 2000)
+
+    def test_library_js_does_nothing_on_a_page_being_forwarded(self) -> None:
+        # Its first statement: no route, no replaceState over the address forward.js is sending on.
+        script = (WEB / "library.js").read_text(encoding="utf-8")
+        body = script[script.index("(() => {\n") + len("(() => {\n"):]
+        code = [line for line in body.splitlines() if line.strip() and not line.strip().startswith("//")]
+        self.assertEqual(code[0], '  if (document.documentElement.hasAttribute("data-forward")) return;')
+        # Nor its route() at a hash forward.js sends on over the open Library (its hashchange listener the page's first;
+        # the review of 2026-11-16): no note of an unknown sensor, no replaceState over that address.
+        route = _inner(script, "route")
+        lines = [line for line in route.splitlines()[1:] if line.strip() and not line.strip().startswith("//")]
+        self.assertEqual(lines[0], '    if (!state.index || document.documentElement.hasAttribute("data-forward")) return;')
+
+    def test_every_link_follows(self) -> None:
+        # The Library's header to the generator's modes and to itself (./), the generator's header and step 1's note to
+        # the Library (./, ./#<id>), Open in Gen by Surface to gen.html?part=<id>; nothing links library.html or the
+        # generator at ./ any more.
+        library_js = (WEB / "library.js").read_text(encoding="utf-8")
+        main = (WEB / "cad" / "main.js").read_text(encoding="utf-8")
+        self.assertIn('el("a", {className: "lib-open", href: `gen.html?part=${encodeURIComponent(id)}`}, "Open in Gen by Surface")', library_js)
+        self.assertIn('el("a", {href: `./#${cad.entry.id}`}, "Library")', main)
+        for name, text in (("index.html", self.library), ("gen.html", self.generator), ("library.js", library_js), ("main.js", main),
+                           ("app.js", (WEB / "app.js").read_text(encoding="utf-8"))):
+            with self.subTest(file=name):
+                code = re.sub(r"<!--.*?-->", "", re.sub(r"^\s*//.*$", "", text, flags=re.M), flags=re.S)
+                self.assertNotRegex(code, r'href(?:=|: )["`](?:library\.html|index\.html|\./\?|\./#rect)')
+        header = self.library.split("<main", 1)[0].split("<header", 1)[1]
+        self.assertEqual([href for href in re.findall(r'href="([^"]*)"', header) if not href.startswith("https:")], ["gen.html#rect", "gen.html", "./"])
+
+
+class DesignYourOwnTests(unittest.TestCase):
+    """The showcase's Design your own (the user's decisions of 2026-11-15 and 2026-11-16: "在flexitac on xarm的details 后面，
+    多一个按钮，generate sensor by yourself with cad file", its name chosen: "Design your own"): after Details on the card,
+    Gen by Surface (gen.html) in this tab, where the visitor loads their own 3D model; the page's action blue (its second
+    use: Open in Gen by Surface leads there too) in Details' pill and size, named for where it goes (the browser checks:
+    showcase_checks part_page, library_checks part_window, theme_checks part_library)."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.script = (WEB / "library.js").read_text(encoding="utf-8")
+        cls.style = (WEB / "library.css").read_text(encoding="utf-8")
+
+    def test_it_follows_details_on_the_card_alone(self) -> None:
+        card = _inner(self.script, "showcaseCard")
+        details = 'el("a", {className: "lib-pill lib-showcase-details", href: `#${id}`, "data-showcase": id, "aria-label": `Details: ${data.title}`}, "Details")'
+        pill = 'el("a", {className: "lib-pill lib-design", href: "gen.html", "aria-label": "Design your own sensor in Gen by Surface"}, "Design your own")'
+        # In Details' pills, right after it, the card's last element; a link (no button), in this tab (no target).
+        self.assertIn(f'el("div", {{className: "lib-pills"}},\n            {details},\n            {pill}))));\n  }}', card)
+        # The card's only: not on the showcase's own page, nor a sensor's.
+        code = re.sub(r"^\s*//.*\n", "", self.script, flags=re.M)
+        self.assertEqual(code.count("lib-design"), 1)
+        self.assertEqual(code.count('"Design your own"'), 1)
+
+    def test_its_look_is_details_pill_in_the_action_blue(self) -> None:
+        rules, _ = parse_css(self.style)
+        own = {selector: dict((name, value) for name, value, _ in rule.declarations) for rule in rules for selector in rule.selectors
+               if "lib-design" in selector}
+        self.assertEqual(own, {".lib .lib-showcase .lib-design": {"background": "var(--accent)", "color": "#fff"},
+                               ".lib .lib-showcase .lib-design:hover": {"background": "var(--accent-hover)"},
+                               ".lib .lib-showcase .lib-design:active": {"background": "var(--accent-press)"}},
+                         "its size, shape, type and focus ring Details' (.lib-pill), nothing of its own but the colour")
+        pill = {name: value for rule in rules if ".lib .lib-pill" in rule.selectors and not rule.conditions for name, value, _ in rule.declarations}
+        self.assertEqual((pill["min-height"], pill["padding"], pill["font-size"], pill["border-radius"]), ("36px", "0 18px", "15px", "var(--r-pill)"))
+        self.assertIn(".lib-pill:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }", self.style)
+        # Beside Details where they fit, else wrapped under it, each its own width: the showcase's pills a row that wraps
+        # at every width (not the column of a sensor's page below 900 px).
+        self.assertIn(".lib-pills { display:flex; flex-wrap:wrap; gap:10px; }", self.style)
+        self.assertIn(".lib-showcase .lib-pills { flex-direction:row; margin-top:8px; }", self.style)
+        self.assertIn(".lib .lib-showcase .lib-pill { align-self:flex-start; width:auto; }", self.style)
+
+
+class RouteTests(HttpTestCase):
+    """app.py serves the pages: SECURITY_HEADERS, the header's counts, the query ignored.  Since the user's decision of
+    2026-11-16 ("是的 be first page") the Library at / and /index.html, the generator at /gen.html, and at /library.html
+    (the Library's address before) the forwarding page, which has no header to count in."""
+
+    def test_the_pages_with_the_counts(self) -> None:
         import app
 
-        page = (app.WEB_ROOT / "library.html").read_bytes()
-        for path in ("/library.html", "/library.html?x=1"):
-            with self.subTest(path=path):
-                reply = self.request("GET", path)
-                self.assertEqual((reply.status, reply.headers["content-type"], reply.body), (200, "text/html; charset=utf-8", page))
-                for name, value in app.SECURITY_HEADERS:
-                    self.assertEqual(reply.headers[name.lower()], value)
-        self.server.httpd.github_counts = {"stars": 1234, "forks": 56}
-        reply = self.request("GET", "/library.html")
-        self.assertEqual(reply.body.decode("utf-8"), app.fill_github_counts(page.decode("utf-8"), {"stars": 1234, "forks": 56}))
-        self.assertIn("<span data-gh-stars>1.2k</span>", reply.body.decode("utf-8"))
-        head = self.request("HEAD", "/library.html")
-        self.assertEqual((head.status, head.body, int(head.headers["content-length"])), (200, b"", len(reply.body)))
-        wrong = self.request("POST", "/library.html", {})
-        self.assertEqual((wrong.status, wrong.headers.get("allow"), wrong.json()["code"]), (405, "GET, HEAD", "E_HTTP_METHOD_NOT_ALLOWED"))
-        # The in-browser API answers /api/ only: the pages are the site's files.
-        self.assertEqual(app.answer("GET", "/library.html").status, 404)
+        counts = {"stars": 1234, "forks": 56}
+        for name, paths in (("index.html", ("/", "/index.html", "/?x=1", "/index.html?part=widowx-250-1mm")),
+                            ("gen.html", ("/gen.html", "/gen.html?part=widowx-250-1mm")), ("library.html", ("/library.html", "/library.html?x=1"))):
+            page = (app.WEB_ROOT / name).read_bytes()
+            for path in paths:
+                with self.subTest(path=path):
+                    self.server.httpd.github_counts = None
+                    reply = self.request("GET", path)
+                    self.assertEqual((reply.status, reply.headers["content-type"], reply.body), (200, "text/html; charset=utf-8", page))
+                    for header, value in app.SECURITY_HEADERS:
+                        self.assertEqual(reply.headers[header.lower()], value)
+                    self.server.httpd.github_counts = counts
+                    reply = self.request("GET", path)
+                    if name == "library.html":
+                        # No header: the page as it is.
+                        self.assertEqual(reply.body, page)
+                        self.assertNotIn(b"data-gh-badge", page)
+                    else:
+                        self.assertEqual(reply.body.decode("utf-8"), app.fill_github_counts(page.decode("utf-8"), counts))
+                        self.assertIn("<span data-gh-stars>1.2k</span>", reply.body.decode("utf-8"))
+                    for header, value in app.SECURITY_HEADERS:
+                        self.assertEqual(reply.headers[header.lower()], value)
+                    head = self.request("HEAD", path)
+                    self.assertEqual((head.status, head.body, int(head.headers["content-length"])), (200, b"", len(reply.body)))
+                    wrong = self.request("POST", path.split("?")[0], {})
+                    self.assertEqual((wrong.status, wrong.headers.get("allow"), wrong.json()["code"]), (405, "GET, HEAD", "E_HTTP_METHOD_NOT_ALLOWED"))
+                    # The in-browser API answers /api/ only: the pages are the site's files.
+                    self.assertEqual(app.answer("GET", path.split("?")[0]).status, 404)
+        self.assertEqual(app.PAGES, {"/": "index.html", "/index.html": "index.html", "/gen.html": "gen.html", "/library.html": "library.html"})
+
+    def test_the_forwarding_page_is_never_counted(self) -> None:
+        # The review of 2026-11-16: library.html (FORWARD_PAGE) is sent as it is because it is the forwarding page, not
+        # because fill_github_counts finds no card in it: one with the header's card still goes out unfilled, while the
+        # Library's page in the same folder is counted.
+        import app
+
+        self.assertEqual(app.FORWARD_PAGE, "library.html")
+        self.assertEqual(build_static_site.FORWARD, app.FORWARD_PAGE)
+        card = (app.WEB_ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<span data-gh-stars></span>', card)
+        with tempfile.TemporaryDirectory() as folder:
+            for name in ("index.html", "library.html"):
+                (Path(folder) / name).write_text(card, encoding="utf-8")
+            self.server.httpd.github_counts = {"stars": 1234, "forks": 56}
+            with mock.patch.object(app, "WEB_ROOT", Path(folder)):
+                forwarding = self.request("GET", "/library.html")
+                library = self.request("GET", "/")
+        self.assertEqual((forwarding.status, forwarding.body), (200, card.encode("utf-8")))
+        self.assertIn("<span data-gh-stars>1.2k</span>", library.body.decode("utf-8"))
 
     def test_the_pictures_are_served_as_webp(self) -> None:
         # The Library's pictures (web/library/shots/, the merge of 2026-11-05) as image/webp under nosniff, whatever the
@@ -3997,30 +4703,44 @@ class RouteTests(HttpTestCase):
         self.assertEqual(reply.headers["x-content-type-options"], "nosniff")
 
 class SiteBuildTests(unittest.TestCase):
-    """tools/build_static_site.py: library.html with the site's head tags, the Library's gate and its prebuilt ZIPs."""
+    """tools/build_static_site.py: the Library's page (index.html, the first page since 2026-11-16) with the site's head
+    tags, the Library's gate and its prebuilt ZIPs."""
 
     def test_the_library_page_has_the_sites_head_tags_and_counts(self) -> None:
-        built = build_static_site.page(name="library.html")
-        head = built.split("</head>", 1)[0]
-        self.assertTrue(head.startswith('<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta http-equiv="Content-Security-Policy"'))
-        self.assertEqual(head.count("Content-Security-Policy"), 1)
-        self.assertEqual(head.count('<meta name="flexitac-backend" content="browser" />'), 1)
-        self.assertIn("<title>Library · FlexiTac-Gen</title>", head)
-        counted = build_static_site.page({"stars": 159, "forks": 17}, "library.html")
-        self.assertIn('<span data-gh-stars>159</span>', counted)
-        self.assertNotIn("data-gh-stats hidden>", counted)
+        # The first page since the user's decision of 2026-11-16, its default; the generator (gen.html) the same tags and
+        # counts; library.html, the forwarding page, the tags alone (no header, no counts, even when the build has them).
+        self.assertEqual(build_static_site.PAGES, ("index.html", "gen.html", "library.html"))
+        self.assertEqual(build_static_site.FORWARD, "library.html")
+        for name, title in (("index.html", "Library · FlexiTac-Gen"), ("gen.html", "FlexiTac-Gen"), ("library.html", "Library · FlexiTac-Gen")):
+            with self.subTest(page=name):
+                built = build_static_site.page(name=name)
+                head = built.split("</head>", 1)[0]
+                self.assertTrue(head.startswith('<!doctype html>\n<html lang="en">\n  <head>\n    <meta charset="utf-8" />\n    <meta http-equiv="Content-Security-Policy"'))
+                self.assertEqual(head.count("Content-Security-Policy"), 1)
+                self.assertEqual(head.count('<meta name="flexitac-backend" content="browser" />'), 1)
+                self.assertIn(f"<title>{title}</title>", head)
+                counted = build_static_site.page({"stars": 159, "forks": 17}, name)
+                if name == "library.html":
+                    self.assertEqual(counted, built)
+                    continue
+                self.assertIn('<span data-gh-stars>159</span>', counted)
+                self.assertNotIn("data-gh-stats hidden>", counted)
         self.assertEqual(build_static_site.page(), build_static_site.page(name="index.html"))
+        self.assertIn("Library · FlexiTac-Gen", build_static_site.page())
+        # The Library's gate reads the generator's defaults from its page.
+        self.assertEqual(inspect.signature(build_static_site.library).parameters["index"].default, WEB / "gen.html")
+        self.assertEqual(library_write.INDEX, WEB / "gen.html")
 
     def test_the_pages_are_not_copied_under_static(self) -> None:
         with mock.patch.object(build_static_site.shutil, "copytree") as copy:
             build_static_site.copy_web(Path("static"))
         ignore = copy.call_args.kwargs["ignore"]
-        # The Library's pictures are published with web/ (static/library/shots/).
-        names = ["index.html", "library.html", "library.js", "library.css", "theme.js", "app.py", "__pycache__", "entries.json", "manifest.json",
+        # The Library's pictures are published with web/ (static/library/shots/); the forwarding script is (static/).
+        names = ["index.html", "gen.html", "library.html", "forward.js", "library.js", "library.css", "theme.js", "app.py", "__pycache__", "entries.json", "manifest.json",
                  "widowx-250-2mm.exploded.webp", "widowx-250-2mm.exploded.card.webp",
                  # The 3D view's files (2026-11-05): the art, the scenes and their bodies, the view's modules.
                  "widowx-250-2mm.json.gz", "scenes.json", "widowx-250.json", "rail.stl", "library_view.js", "library_stage.js"]
-        self.assertEqual(sorted(ignore(str(WEB), names)), ["__pycache__", "app.py", "index.html", "library.html"])
+        self.assertEqual(sorted(ignore(str(WEB), names)), ["__pycache__", "app.py", "gen.html", "index.html", "library.html"])
 
     def test_the_site_holds_the_3d_views_files(self) -> None:
         # The Library's 3D view draws from the site's own files (no engine, no API): web/library/'s art, scenes and
@@ -4238,11 +4958,11 @@ class SiteBuildTests(unittest.TestCase):
     def test_a_fit_of_a_request_the_page_no_longer_sends_stops_the_build(self) -> None:
         # The review of 2026-11-05: with a page default changed (Proposals 4, not 5) the committed fit still re-fits to
         # its own reply, but Gen by Surface would send another request and fit again in place of the shipped fit.
-        index = (WEB / "index.html").read_text(encoding="utf-8")
+        index = (WEB / "gen.html").read_text(encoding="utf-8")
         control = 'data-option="proposals" value="5"'
         self.assertEqual(index.count(control), 1)
         with tempfile.TemporaryDirectory() as folder:
-            changed = Path(folder) / "index.html"
+            changed = Path(folder) / "gen.html"
             changed.write_text(index.replace(control, 'data-option="proposals" value="4"'), encoding="utf-8")
             with self.assertRaisesRegex(build_static_site.BuildError,
                                         r"the library is stale \(widowx-250-2mm\): run tools/library_write.py \(its request is not the one the page sends\)"):

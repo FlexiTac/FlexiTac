@@ -23,7 +23,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
-from rp import URL, wait_until  # noqa: E402
+from rp import GEN_URL, wait_until  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 UMI = ROOT / "web" / "vendor" / "umi"
@@ -54,7 +54,7 @@ def main() -> int:
         page.route("**/static/vendor/umi/default-fit.json", lambda route: route.fulfill(status=404, content_type="text/plain", body="being written"))
         page.on("request", on_request)
         page.on("response", on_response)
-        page.goto(URL)
+        page.goto(GEN_URL)
         wait_until(page, SETTLED, 120)
         state = json.loads(page.evaluate("() => document.getElementById('cadState').textContent"))
         browser.close()

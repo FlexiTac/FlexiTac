@@ -5,7 +5,8 @@ This server intentionally uses only Python's standard library.  It binds to
 localhost by default, serves no telemetry, and has no chatbot or cloud API
 dependency.  The only design-generation boundary is ``engine.generate_design``.
 
-Routes: ``GET /``, ``/library.html`` (the Library), ``/static/*``, ``/api/default``, ``/api/schema``;
+Routes: ``GET /`` (the Library, the first page since 2026-11-16), ``/gen.html`` (the generator), ``/library.html``
+(forwarding to ``/``), ``/static/*``, ``/api/default``, ``/api/schema``;
 ``POST /api/validate``, ``/api/generate[?view=compact]``,
 ``/api/export/{project,top-gerber,bottom-gerber,easyeda-pro}`` and the CAD-mode routes
 ``/api/surface/{inspect,select,fit,map}`` (a framed body: JSON header plus
@@ -127,8 +128,15 @@ SURFACE_ROUTES = {
     "/api/surface/map": surface_api.map_placement,
 }
 POST_ROUTES = frozenset({"/api/validate", "/api/generate", *EXPORT_ROUTES, *EASYEDA_ROUTES, *SURFACE_ROUTES})
-# The two pages (index.html, and the Library of 2026-11-05: library.html), served with the header's counts.
-PAGES = {"/": "index.html", "/index.html": "index.html", "/library.html": "library.html"}
+# The pages, served with the header's counts.  Since the user's decision of 2026-11-16 ("是的 be first page") the Library
+# (2026-11-05) is the first page, index.html at / and /index.html, and the generator gen.html (index.html before);
+# library.html, the Library's address before, forwards to / (web/forward.js, as on the static site: the old generator
+# addresses, /?part=<id> and /#rect, are forwarded to gen.html in the browser, which alone sees a hash).  The
+# forwarding page (FORWARD_PAGE, tools/build_static_site.py's FORWARD too) has no header: it is sent as it is, never
+# asked for counts (the review of 2026-11-16: it had been sent as it is only because fill_github_counts found no card in
+# it, so a header added to it would have taken counts, and any other trouble with a card fell through the same way).
+PAGES = {"/": "index.html", "/index.html": "index.html", "/gen.html": "gen.html", "/library.html": "library.html"}
+FORWARD_PAGE = "library.html"
 GET_ROUTES = frozenset({*PAGES, "/api/default", "/api/schema"})
 QUERY_PARAMETERS = {
     "/api/generate": {"view": ("full", "compact")},
@@ -518,8 +526,9 @@ def count_text(number: int) -> str:
 
 
 def fill_github_counts(page: str, counts: Mapping[str, int]) -> str:
-    """A page (web/index.html, or library.html: the same header) with the counts in the header's GitHub card; ValueError
-    when the card is not found once."""
+    """A page (web/index.html, the Library, or gen.html, the generator: the same header) with the counts in the header's
+    GitHub card; ValueError when the card is not found once (library.html, the forwarding page, has none and is never
+    given to it: FORWARD_PAGE)."""
 
     fills = (
         ("<span data-gh-stars></span>", f"<span data-gh-stars>{count_text(counts['stars'])}</span>"),
@@ -876,9 +885,10 @@ class AppHandler(BaseHTTPRequestHandler):
         self._send_file(candidate)
 
     def _send_page(self, name: str = "index.html") -> None:
-        # index.html or library.html: the same header, so the same counts (its query, ./?part=<id>, is the page's own).
+        # index.html (the Library) or gen.html (the generator): the same header, so the same counts (its query,
+        # gen.html?part=<id>, is the page's own); library.html (FORWARD_PAGE, a forwarding page, no header) as it is.
         counts = getattr(self.server, "github_counts", None)
-        if not counts:
+        if not counts or name == FORWARD_PAGE:
             self._send_file(WEB_ROOT / name)
             return
         try:

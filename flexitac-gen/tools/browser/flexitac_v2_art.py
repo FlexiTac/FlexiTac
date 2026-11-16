@@ -13,7 +13,7 @@ tools/browser/library_shots.py makes each generated sensor's art:
    SHA-256 is checked first) gives the two boards in the engine's layout mapping (flexitac_v2.engine_boards), and the
    engine's own SVG writer (engine/core.py _svg_for_board) draws each: the copper-side top view a generated board has,
    with the slots between the electrodes and the window of the A-shaped tail as its cut-outs;
-2. the generator's page (index.html#rect, loaded anew) answers "fpc:board-art" {boards, px_per_mm, max_px} for them in
+2. the generator's page (gen.html#rect, index.html#rect until 2026-11-16, loaded anew) answers "fpc:board-art" {boards, px_per_mm, max_px} for them in
    its default look (Photo), as it answers for a build: each board's eight keys (its copper and polyimide sides as SVG
    documents, the look's styles inlined), to which the board's outline is added;
 3. the document {format, id "flexitac-v2", build_id null (no build of the generator), look, px_per_mm, max_px, boards}

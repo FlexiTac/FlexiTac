@@ -525,7 +525,7 @@ class SurfacedEverywhereTests(unittest.TestCase):
 
     def test_the_browser_renders_the_note_from_the_profile(self) -> None:
         script = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
-        page = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        page = (ROOT / "web" / "gen.html").read_text(encoding="utf-8")
         self.assertIn("renderOrderRequirements(data.profile.order_requirements);", script)
         body = script[script.index("function renderOrderRequirements"):]
         body = body[: body.index("\n  }\n")]

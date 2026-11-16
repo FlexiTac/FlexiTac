@@ -1,7 +1,7 @@
 """Gen by Surface's samples (web/samples/, the step guide's "Try a sample"; the user's request of 2026-11-06): static
 checks that need no browser.
 
-- The palette (index.html #samplePalette): inside the step guide, after its three steps, a heading, a hint and eight
+- The palette (gen.html #samplePalette): inside the step guide, after its three steps, a heading, a hint and eight
   tiles in samples.json's order, each a button of its own (draggable, described by the hint, titled, its name shown,
   its kind for a screen reader) with its thumbnail (alt empty, not draggable itself, the file's size), the hint saying
   click or tap by the pointer; two columns, of compact tiles on a laptop's window (the guide's column a flex column
@@ -132,8 +132,8 @@ def assemble(name: str, scene: dict, part: bytes, bodies: dict) -> bytes:
 
 
 class _Palette(HTMLParser):
-    """The elements of index.html: each start tag's (tag, attributes, the ids of its open ancestors), and the text of
-    each tile's spans."""
+    """The elements of gen.html (the generator's page; index.html until 2026-11-16): each start tag's (tag, attributes,
+    the ids of its open ancestors), and the text of each tile's spans."""
 
     VOID = {"input", "meta", "link", "br", "img", "hr", "source", "area", "base", "col", "embed", "param", "track", "wbr"}
 
@@ -432,7 +432,7 @@ class WholeGripperTests(unittest.TestCase):
 class PaletteMarkupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.html = (WEB / "index.html").read_text(encoding="utf-8")
+        cls.html = (WEB / "gen.html").read_text(encoding="utf-8")
         cls.page = _Palette()
         cls.page.feed(cls.html)
         cls.samples = json.loads((SAMPLES / "samples.json").read_text(encoding="utf-8"))["samples"]

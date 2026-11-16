@@ -414,7 +414,7 @@ class RoutingInputTests(unittest.TestCase):
         self.assertIn("routing.trace_width_mm", defaulted["validation"]["normalization"]["defaults_applied"])
 
     def test_the_browser_form_sends_both_fields_with_the_profile_limits(self) -> None:
-        page = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        page = (ROOT / "web" / "gen.html").read_text(encoding="utf-8")
         script = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
         for label, control, name, field in (("Trace width", "traceWidth", "trace_width_mm", "routing.trace_width_mm"), ("Trace spacing", "traceSpace", "trace_space_mm", "routing.trace_space_mm")):
             with self.subTest(field=field):

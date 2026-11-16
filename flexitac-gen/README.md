@@ -23,7 +23,7 @@ Python 3.9 or newer (see `pyproject.toml`; there are no dependencies).  From
 this directory:
 
 ```bash
-python3 app.py                 # browser UI on http://127.0.0.1:8008
+python3 app.py                 # browser UI on http://127.0.0.1:8008 (the Library; the generator at /gen.html)
 python3 app.py --port 8009     # another port; --host binds another address (with a warning if not loopback)
 ```
 
@@ -67,9 +67,9 @@ takes about twice as long as under `app.py`.  The site carries the
 generator's Python source (`static/py/engine.zip`); its URLs are relative,
 so it works under any path.  Its one request elsewhere is GitHub's API for
 the FlexiTac repository's star and fork counts in the header (written into
-the page when it is built, refreshed as it opens, as on
-flexitac.github.io).  `app.py` writes them into the page it serves: it reads
-them from GitHub's API itself, hourly, so its page asks no other host
+both pages when it is built, refreshed as each opens by `web/counts.js`, as
+on flexitac.github.io).  `app.py` writes them into the pages it serves: it
+reads them from GitHub's API itself, hourly, so its pages ask no other host
 (`--no-github`: the card shows the name alone).
 
 ```bash
@@ -79,22 +79,38 @@ python3 -m http.server -d site 8010              # a local look on port 8010
 
 ### The Library
 
-`library.html` (the header's Library link, in a new tab) lists sensors
+The Library is the first page (since the user's decision of 2026-11-16: the
+site's address and `app.py`'s `/` show it; `library.html` before, which now
+forwards there) and the generator is `gen.html` (Gen by Surface; Rectangular
+at `gen.html#rect`).  The addresses of before keep working: `./?part=<id>`,
+`./#rect`, `./#cad` and the generator's other ones go on to `gen.html` with
+the same query and hash, and `library.html#<id>` to `./#<id>`, by
+`web/forward.js` before the page paints and with no history entry.  The
+Library (the header's Library link, in the same tab since 2026-11-15:
+leaving the generator leaves its page, a loaded model and a sensor generated
+with it) lists sensors
 already fitted to open-source gripper fingers, grouped by gripper: seven
 gripper parts (Franka Hand, WidowX 250, Trossen WidowX AI, ARX X5, I2RT YAM,
 Unitree Dex1-1, MakerMods Metal Arm), each at four pitches from a fine 1 mm,
-and the UMI fin-ray finger at four pitches with its tapered tips (its last
-75 mm narrowed to a trapezoid or a convex arc, five tip widths from 21.8 to
-5.8 mm, 2 mm pitch; Shape and Tip width on their page).  The seven grippers
+and the UMI fin-ray finger in six shapes: straight, at four pitches, and
+five tapered tips at 2 mm pitch, each a card of its own (since 2026-11-16):
+a short taper (the last 40 mm narrowed as a trapezoid or a convex arc), a
+convex arc, a trapezoid and a concave arc tip (the last 75 mm), each to a
+tip of 21.8 to 5.8 mm, and a pointed tip (two arcs over the last 50 mm
+meeting at a 2 mm point).  The seven grippers
 come first, one card each, four to a row (two on a phone), each with its
 pitch range ("1 to 3 mm") and "Pick your pitch": it opens the gripper's
 2 mm sensor, whose Pitch switch offers the others.  The UMI finger's shelf
-follows, a card per pitch and one for the tapered tips, its heading naming
-its pitches ("Four pitches, 1 to 3 mm, and tapered tips.").
+follows ("Six finger shapes, straight to pointed."), its six cards side by
+side, three to a row (two on a phone), each showing its fingertip
+assembled and framed on the tip so its outline reads: the straight finger's
+card, like a gripper's, then a card per tip shape with its tip widths
+("5.8 to 21.8 mm", "Pick your tip width"), whose page's Tip width switch
+(and the short taper's Shape) offers the others; 58 sensors in all.
 Each sensor has its own address,
-`library.html#<id>` (for example `library.html#widowx-250-1mm`; `#<part>`
+`./#<id>` (for example `./#widowx-250-1mm`; `#<part>`
 shows its 2 mm sensor), with its Top and Bottom FPC Gerber ZIPs, the part's
-STL and its licence, and opens in Gen by Surface at `./?part=<id>`, built at
+STL and its licence, and opens in Gen by Surface at `gen.html?part=<id>`, built at
 once from its shipped fit and editable from there (on a phone the sensor's
 page shows its picture as a 3:1 band, so Open in Gen by Surface is in a
 390 x 844 phone's first screen).  The pictures are the generator's figure
@@ -107,8 +123,9 @@ finger's sensor explodes into the gap; the MakerMods Metal Arm's two tips
 stand on a plain rail drawn by this project, not MakerMods hardware, and
 the rest of its body, the guide rail, housing and camera, is drawn by eye
 after the maker's photos too), the
-UMI finger and its tapered tips as the fingertip.  Each card shows it
-exploded; a sensor's page shows its picture and, drawn over it, the same
+UMI finger and its tapered tips as the fingertip.  A gripper's card shows
+it exploded, a UMI shelf's card assembled (its page opens so too); a
+sensor's page shows its picture and, drawn over it, the same
 scene in 3D to turn (drag it, or the arrow keys; 0 or a double click
 brings it back; the Exploded | Assembled switch under it drives both)
 where its entry names its 3D view (`view`); without one, without WebGL or
@@ -172,14 +189,18 @@ no sensor of `entries.json`: `web/library/showcase.json` holds its words,
 its placed record and its pictures (`tools/library_showcase.py` builds its
 scene, `tools/browser/library_shots.py --showcase` shoots it,
 `tools/library_write.py --check` and the site build check it; see
-[docs/LIBRARY_VIEW.md](docs/LIBRARY_VIEW.md)).
+[docs/LIBRARY_VIEW.md](docs/LIBRARY_VIEW.md)).  Its card has two pills
+(since the user's decision of 2026-11-16): the grey Details opens its page,
+and the blue Design your own opens Gen by Surface (`gen.html`) in the same
+tab, to fit a sensor to one's own 3D model.
 
 ## What it does
 
 - **CAD mode** (browser: the page's default, the "Gen by Surface" switch
   beside the title, "FlexiTac-Gen" (the page itself never says "CAD": its
-  workspace is "Pick a surface on a 3D model"); the "Rectangular" switch or
-  `#rect` for the rectangular mode; CLI: `cli.py surface`; HTTP:
+  workspace is "Pick a surface on a 3D model"; at `gen.html` since the
+  Library became the first page on 2026-11-16); the "Rectangular" switch or
+  `gen.html#rect` for the rectangular mode; CLI: `cli.py surface`; HTTP:
   `/api/surface/*`).  The header holds the title, the mode switch, the
   look's toggle and FlexiTac's GitHub (with the repository's stars and
   forks) and Discord on one line, centred on the title, with the line on
@@ -205,7 +226,7 @@ scene, `tools/browser/library_shots.py --showcase` shoots it,
     page opens), so you click the face the sensor goes on and press
     Generate sensor, as for your own file; on a whole gripper's finger the
     face is then seen from past the other finger.  The address becomes
-    `./?sample=<id>`, so a reload shows it again.  A tile or a file may be
+    `gen.html?sample=<id>`, so a reload shows it again.  A tile or a file may be
     dropped anywhere on the 3D view's window, its tools included.  The
     sample shown, pressed again, is only framed again; one that cannot be
     loaded leaves the part shown and its sensor as they were, with a
@@ -407,7 +428,8 @@ scene, `tools/browser/library_shots.py --showcase` shoots it,
   The stacked view has no caption since 2026-11-06 (it had read
   "Exploded 3D registration review · ..."); the board cards' oblique
   view keeps its own.
-- **Look**: the page is `web/index.html` with `web/app.js` and `web/cad/`,
+- **Look**: the page is `web/gen.html` (`web/index.html` until 2026-11-16,
+  the Library's page since) with `web/app.js` and `web/cad/`,
   styled by `web/styles.css` and, linked right after it, `web/theme.css`
   (2026-11-04): an Apple-style look in the system's fonts, light for
   every visitor whatever the system's setting, dark once the visitor turns

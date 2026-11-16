@@ -55,13 +55,15 @@ shapes and scene, `web/vendor/ufactory-g1/` and `web/library/`).
   (or `--pyodide-archive FILE`) and checked by their SHA-256, and the
   FlexiTac repository's star and fork counts from GitHub's API written into
   the header (`GITHUB_TOKEN` when set; none with `--no-github` or when the
-  API does not answer: the page refreshes them); it replaces an output
-  folder only when an earlier build wrote it.  It writes `library.html`
-  (the Library, 2026-11-05) with the same head tags and is the Library's
+  API does not answer: both pages refresh them, `web/counts.js`); it replaces an output
+  folder only when an earlier build wrote it.  It writes the three pages
+  (since the user's decision of 2026-11-16: `index.html`, the Library, the
+  first page; `gen.html`, the generator; `library.html`, a forwarding page,
+  with the head tags alone) and is the Library's
   gate: every sensor of `web/library/entries.json` is fitted again and must
   give its committed reply and build id, and its fit's request must still be
   the one the page sends (`library_write.compose` of `parts.json` and
-  `index.html`'s defaults), else the build fails ("the library is stale: run
+  `gen.html`'s defaults), else the build fails ("the library is stale: run
   tools/library_write.py"); each sensor's Top and Bottom FPC Gerber ZIPs
   (`app.answer`'s exports of its design) go to `static/library/files/<id>/`
   with `static/library/files.json`: the gate with its 84 ZIPs takes about
@@ -105,11 +107,11 @@ shapes and scene, `web/vendor/ufactory-g1/` and `web/library/`).
   `tests/test_samples.py` checks the files, their notice and budget, and
   that each whole gripper's Library selection is its finger's face and fits
   to the Library's sensor.
-- `library_write.py`: fits the Library's sensors (`library.html`, and Gen
-  by Surface at `./?part=<id>`; the user's requests of 2026-11-05) as the
+- `library_write.py`: fits the Library's sensors (the Library, `./`, and Gen
+  by Surface at `gen.html?part=<id>`; the user's requests of 2026-11-05) as the
   page asks for them: for each variant of `web/library/parts.json` the
   request the page sends (its selection, base and border, the Resolution
-  step's defaults read from `web/index.html` with the variant's pitch and
+  step's defaults read from `web/gen.html` with the variant's pitch and
   fill, the mesh's file name, no unit), `surface.api.fit`'s reply, and the
   product rules on its proposal #1 (one tail pin per line, field-only
   containment, the tails centred and ending together, a symmetric face's
@@ -118,7 +120,8 @@ shapes and scene, `web/vendor/ufactory-g1/` and `web/library/`).
   and `web/library/entries.json` (only what changed; the UMI finger's 2 mm
   sensor is `web/vendor/umi/default-fit.json`, checked only); `--only
   ID,...` fits some, `--check` writes nothing and exits 1 listing the stale
-  ids.  About 10 s for the 42 sensors with `--jobs 8`; re-run it after any
+  ids.  About 10 s for the 42 sensors with `--jobs 8` (15 s for the 58 of
+  2026-11-16); re-run it after any
   change that moves a build id.  `tests/test_library.py` checks its files.
   It writes each sensor's `image` (the cards' and the sensor page's
   picture: the generator's sensor on the part, the user's request of
@@ -159,10 +162,13 @@ shapes and scene, `web/vendor/ufactory-g1/` and `web/library/`).
   deny-list over the bodies and the hashes `NOTICE.md` names, and no
   private input named; `--check` refuses its problems and reports how many
   sensors have a 3D view.  Each shelf's heading is written here in one wording, the
-  count and the range of its pitches and its families after it ("Four
-  pitches, 1 to 3 mm, and tapered tips."; the user's decision of
-  2026-11-05); since 2026-11-06 the page shows the UMI finger's alone,
-  after the other grippers' cards, one each.  It also holds the deny-list (vendor models that never go into
+  count and the range of its pitches ("Four pitches, 1 to 3 mm."; the
+  user's decision of 2026-11-05); since 2026-11-06 the page shows the UMI
+  finger's alone, after the other grippers' cards, one each, and since the
+  user's request of 2026-11-16 its heading names its shapes ("Six finger
+  shapes, straight to pointed."): the straight finger's card, then each card
+  of the tapered tips' family (`card_record()`: one per finger shape, its
+  axes, grid, picture's sensor and two lines).  It also holds the deny-list (vendor models that never go into
   the Library, by SHA-256 and name), the one the private importer takes.
   (`parts.json` was written once by a private importer from the
   multi-gripper video's recipes, and is edited by hand since; the tapered

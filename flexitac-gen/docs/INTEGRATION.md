@@ -695,22 +695,25 @@ not *k*.
 
 ## A sensor from the Library
 
-The Library (`library.html`, 2026-11-05) holds sensors already fitted to
+The Library (2026-11-05; the site's first page, `./`, since 2026-11-16,
+`library.html` before) holds sensors already fitted to
 open-source gripper fingers, each with an address that does not change:
-`library.html#<id>` shows it (its picture on the part, exploded or
+`./#<id>` shows it (its picture on the part, exploded or
 assembled, and over it the same scene in 3D to turn; its facts, Gerber
 ZIPs, part STL and licence)
-and `./?part=<id>` opens it in Gen by Surface, its part loaded and its sensor
+and `gen.html?part=<id>` opens it in Gen by Surface (the generator's page
+since 2026-11-16; the addresses of before, `library.html#<id>` and
+`./?part=<id>`, are forwarded to these, their query and hash kept), its part loaded and its sensor
 built from its shipped fit (`web/library/fits/<id>.json`, the request the
 page sends for it and the engine's reply), as the default part is.  `<id>` is
 `<part>-<pitch>mm` (for example `widowx-250-1mm`, `umi-finray-1.5mm`, and
 for the UMI finger's tapered tips `umi-trap-tip13.8-2mm` or
 `umi-convex-tip5.8-2mm`: the shape, the tip width in mm, the pitch); a
-part's id alone (`./?part=widowx-250`) opens its 2 mm sensor and a family's
-(`./?part=umi-tapers`, the tapered tips) its default tip, as
-`library.html#<id>` does, `?debug` may follow, and an unknown id opens the
+part's id alone (`gen.html?part=widowx-250`) opens its 2 mm sensor and a family's
+(`gen.html?part=umi-tapers`, the tapered tips) its default tip, as
+`./#<id>` does, `?debug` may follow, and an unknown id opens the
 UMI finger with a warning.  The tapered tips' card is
-`library.html#umi-tapers`.  Generating
+`./#umi-tapers`.  Generating
 from there is the usual flow: every setting stays editable, and the user's
 own file or Remove model leaves the Library sensor (`?part` goes from the
 address, the pitch, fill and rotation it set go back to the page's

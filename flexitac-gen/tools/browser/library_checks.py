@@ -1,4 +1,5 @@
-"""The Library (library.html, web/library.js; the user's requests of 2026-11-05) in the browser.
+"""The Library (the first page, index.html, since the user's decision of 2026-11-16; library.html before; web/library.js;
+the user's requests of 2026-11-05) in the browser.
 
 Against a running app.py (FPC_PORT, as the other checks), or with --site a built static site (tools/build_static_site.py;
 served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as GitHub Pages serves a project site):
@@ -11,20 +12,24 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   (gripper-<part>, opening #<part>-2mm, named by the gripper, its two grey lines its range, '1 to 3 mm', and 'Pick your
   pitch', no badge line), four to a row from 735 px (4 + 3) and two below (2 + 2 + 2 + 1), never wider than the UMI
   shelf's cards from 735 px and as wide from 1100 px, every grey line on one line and no text past its card's box down
-  to 320 px; then the UMI finger's shelf, its pitches by pitch ('1 mm pitch', 'Fine' on the 1 mm one) closed by the
-  tapered tips' family card, four cards in view from 1100 px, three from 735 px, 78 % of the row below, its five
+  to 320 px; then the UMI finger's shelf, since the user's request of 2026-11-16 one card per finger shape (its pitches
+  by pitch, closed by the tapered tips' family card, before): 'Straight finger' (its 2 mm sensor, '1 to 3 mm', 'Pick
+  your pitch', no grid id), then the family's cards in their order ('Short taper', 'Convex arc tip', 'Trapezoid tip',
+  'Concave arc tip', 'Pointed tip', each its sensor and its two lines), no badge line, each name and line on one line
+  from 1440 to 320 px, four cards in view from 1100 px, three from 735 px, 78 % of the row below, its six
   overflowing with their arrows at 1440 px, 56 px below the grid's last row; at 390 px its row overflows (never the
   page), '<' is off at its start and '>' moves it by one card, and an arrow Tabbed to shows its focus ring inside the
   window at 390 and 360 px, each of its cards Tabbed to whole inside the row's gutters (the review of 2026-11-06) and its
   focus ring inside the window with room under it (the verification of 2026-11-06);
-  both headings in the shelves' one wording ('UMI Fin-Ray Gripper. Four pitches, 1 to 3 mm, and tapered tips.'; the
-  user's decision of 2026-11-05), one line at 1440 and 1280 px, never splitting a range or a family's clause, at most
-  two lines at 900 px broken between phrases.
+  both headings ('Grippers. Seven, each fitted at four pitches.'; 'UMI Fin-Ray Gripper. Six finger shapes, straight to
+  pointed.'), one line at 1440 and 1280 px, never splitting a range or 'straight to pointed', at most two lines at
+  900 px broken between phrases.
 - part_first_screen (the user's decision of 2026-11-05: the picture may be squashed): below 900 px a sensor's picture
   is 3:1 above Open (16:10 beside it from 900 px), shown, its drawing contained and centred; Open's bottom in the
-  window at 390 x 844 on every sensor's page and the Tapered tips page, at 360 x 740 on every gripper's sensor page,
+  window at 390 x 844 on every sensor's page and the Tapered tips page (#umi-tapers), at 360 x 740 on every gripper's sensor page,
   since the window of 2026-11-15 (a sheet, no header above the page) at 375 x 667, 360 x 740 and 320 x 640 on every
-  page too, and reported at every phone size (at 320 x 568 the tapered tips' below the first screen); since the pictures of
+  page too, and reported at every phone size (at 320 x 568 the tapered tips' below the first screen; the Short taper's the
+  sample of two controls since 2026-11-16); since the pictures of
   2026-11-05 in both cases (CASES): with pictures (the picture and its Exploded | Assembled control inside the frame
   above Open, the picture contained and centred) and with none (the placeholder's drawing, as before); since the 3D
   view of 2026-11-05 the pictures' case with every sensor's view set and with none (VIEW_CASES), with views each
@@ -34,7 +39,7 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   contract: entries.json's "image", shots/<id>.exploded.webp, .assembled.webp and .exploded.card.webp): the tree's own
   pictures when entries.json names them, else stand-ins drawn here in the browser and served for the contract's
   "image" (nothing committed).  Every card of the grid (the grippers' seven, each its 2 mm sensor's, the UMI shelf's
-  and its Tapered tips card with its default tip's: 12) shows its sensor's Exploded card picture, contained and
+  six shapes, each its sensor's: 13; 12 before the shapes of 2026-11-16) shows its sensor's Exploded card picture, contained and
   centred in its light box, lazy, decoded async, its width and height set (no card moves as they arrive), its alt the
   entry's, the bytes asked for as the page opens within the first screen's 1 MB; a sensor's page shows the Exploded
   picture (eager) with a
@@ -62,6 +67,13 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   the same page (one view, the stage's scene taken down) as on a page of its own; without WebGL, without
   DecompressionStream, its art a 404 or with Save-Data (no three.js then) the picture stays, no uncaught error; in the
   dark scheme the view drawn in the picture's light box.
+  Its drag hint (2026-11-15): never shown while the view loads, shown once drawn, its size the view's, its sway, a right
+  click leaving it, a drag begun on it turning the view and hiding it, hidden through 0, the keys, a double click and
+  another pitch, shown again on another gripper's page; on Trossen WidowX AI's page from its card (hint_paths, the
+  review of 2026-11-15): a lost and restored context before and after a use, a phone's vertical swipe leaving it and a
+  sideways one hiding it, Back then Forward showing it again.
+- part_view_hint_sizes (the review of 2026-11-15): the drag hint the view's size at nine windows from 1440 x 900 to
+  320 x 640, Unitree Dex1's view and the showcase's.
 - part_view_race (the review of 2026-11-06): the view asked for again and again while its files load, on a 400 kbit/s,
   150 ms network (five pitch and part changes with four mode toggles during each load; Back and Forward between the grid
   and two grippers' pages; Unitree Dex1's sensor left for Franka Hand's, which is drawn first): each time the sensor
@@ -84,23 +96,27 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   median's hue 30 to 55 degrees, its value 0.55 at most, 0.7 or more without the tint).
 - part_placeholders (no picture: every "image" null): every slot the drawing of its field (its rows and columns), no
   image, no view control and no request for a picture, as before the pictures.
-- part_family (the tapered tips, 2026-11-05): the family card ends the UMI shelf ('Tapered tips', its two lines), no
-  tip has a shelf or another card; it opens #umi-tapers, the default tip's page (the 13.8 mm trapezoid) with Shape
-  and Tip width in place of the pitch; a change of either replaces the address (no history entry) with the grid's
-  sensor, that control focused; Back returns to the grid, the family card focused; a tip's id or part id opens its
-  page directly, its window's X (its back link until 2026-11-15) going to the UMI shelf; the action blue only on Open
-  in Gen by Surface.
-- part_grid (2026-11-06): each gripper's card opens its 2 mm sensor's page, whose Pitch reaches its four pitches, and
-  every one of the 42 sensors' pages is reached by clicks alone (the cards, the Pitch, the tapered tips' Shape and Tip
-  width); the window's X (a page's back link to #gripper-<part> until 2026-11-15) leaves the grid where it was with its
-  card focused; the older
+- part_family (the tapered tips, 2026-11-05; since the user's request of 2026-11-16 one card per shape): the UMI
+  shelf's cards (Straight finger, then Short taper, Convex arc tip, Trapezoid tip, Concave arc tip and Pointed tip,
+  their lines and pages), no tip with a shelf or a card but its shape's; the Short taper's card opens its 9.8 mm
+  trapezoid's page with Shape and Tip width in place of the pitch, its Tip fact over the last 40 mm; a change of either
+  replaces the address (no history entry) with the card's sensor, that control focused; Back returns to the grid, the
+  card focused; the Concave arc tip's page its Tip width alone, the Pointed tip's no control; a tip's id or part id
+  opens its page directly, its window's X (its back link until 2026-11-15) going to the UMI shelf; the action blue only
+  on Open in Gen by Surface.
+- part_grid (2026-11-06): each gripper's card opens its 2 mm sensor's page, whose Pitch reaches its four pitches, the
+  UMI shelf's Straight finger its 2 mm page with its four pitches, each shape's card its sensor's page with the card's
+  axes of more than one choice, and every one of the 58 sensors' pages is reached by clicks alone (the cards, the
+  Pitch, Shape and Tip width); the window's X (a page's back link to #gripper-<part> until 2026-11-15) leaves the grid
+  where it was with its card focused; the older
   addresses land sensibly: #shelf-<gripper> on its card (the address #gripper-<part>, no history entry), #shelf-start
   at the top with no hash (opened anew, and typed with the grid scrolled down), #shelf-umi-finray and #grippers on
-  their sections.
+  their sections, the UMI finger's removed cards' (#umi-finray-1mm, -1.5mm, -3mm) and #umi-tapers their pages with
+  their X to the UMI shelf.
 - part_window (the user's request of 2026-11-15: "after we click for all cards to details, we may not jump to a new
   page. lets bump our to a large window, and if you click the "x" of right top conrner, it will close and back show
-  lib"): at 1440 x 900, 900 x 900 and 390 x 844, light and dark, each opener (a gripper's card, a UMI shelf's card, the
-  Tapered tips card, the showcase's Details and picture) opens its page in the modal window over the grid, which
+  lib"): at 1440 x 900, 900 x 900 and 390 x 844, light and dark, each opener (a gripper's card, the UMI shelf's
+  Straight finger and a shape's card, the showcase's Details and picture) opens its page in the modal window over the grid, which
   neither moves (its cards' boxes) nor scrolls, the window's page at its top, its title focused, the tab named after
   it; the window's box (min(1200 px, the screen less two gutters) wide, centred, a gutter from the top; a sheet with no
   shadow below 735 px), the cards' look, the dim backdrop; the X round, grey, named Close, in the Tab order and in sight
@@ -121,7 +137,7 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   and no hairline frame.
 - part_routes: a gripper's card opens its sensor's page in the window at its top, the grid where it was under it, with
   its title focused and the tab named after it,
-  Open in Gen by Surface at ./?part=<id>, at least as wide as each download pill; another pitch replaces the address
+  Open in Gen by Surface at gen.html?part=<id>, at least as wide as each download pill; another pitch replaces the address
   (no history entry); Back returns to the grid where it was, the card that opened it focused, the tab the Library's
   again; Back and Forward against the back links (the review of 2026-11-06, since 2026-11-15 the window's X: the
   WidowX 250 card, its X, the MakerMods card, Back to the grid where it was with MakerMods focused, Forward to the
@@ -133,7 +149,7 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   goes to its card; opened at an address of its own with library.js 0.8 s and entries.json 0.4 s late (the reviews of
   2026-11-06), every frame from the first paint read: a sensor's page never paints the grid's title nor the footer
   before its window opens, then shows the Library (its title and footer) under the window; #gripper-<part> and #shelf-umi-finray the title and the footer;
-  library.html alone its title at once, as before; entries.json at 500 the title, the footer and the status.
+  the Library alone (./) its title at once, as before; entries.json at 500 the title, the footer and the status.
 - part_downloads: under app.py the two Gerber ZIPs are app.py's exports of the sensor's design (the fit's proposal #1),
   byte for byte under its names; on the site they are the prebuilt files (files.json, which lists every sensor);
   the part's STL is the mesh, the licence is served (a tapered tip's ZIPs too).
@@ -143,10 +159,16 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   only Open in Gen by Surface, nothing green, and scrolling changes nothing.
 - part_errors: entries.json missing: the page says so and the header still works; on the site, files.json missing:
   the downloads give way to the note.
+- part_first_page (the user's decisions of 2026-11-15 and 2026-11-16, "是的 be first page"): the Library at ./, the
+  generator at gen.html; every address of rp.FORWARDS (the generator's of before, library.html's, the Library's own)
+  where it should end, its query and hash kept, one history entry, Back the earlier page, nothing of a forwarding
+  page painted; the first page's header, Gen by Surface, Rectangular and Open in Gen by Surface going to gen.html in
+  this tab and Back to the Library.  Since the same decisions the action blue's second use, the showcase's Design
+  your own, is allowed beside Open (blues()).
 "Dark" is the page's dark look as the header's toggle leaves it (its stored choice, rp.DARK_CHOICE; 2026-11-06: the page
 opens light whatever the system's scheme, which stays light here).
 Screenshots go to $FPC_BROWSER_OUT/shots (library_*.png; the pictures' library_pictures_* and library_placeholders_*:
-the grid at 1440 and 900 px light and dark, a sensor's page Exploded and Assembled and the Tapered tips page at 1440 px
+the grid at 1440 and 900 px light and dark, a sensor's page Exploded and Assembled and the Short taper's page at 1440 px
 and 390 x 844, library_pictures_view_* with the 3D view; the 3D view's library_view_*: each sensor at its home, dragged,
 Assembled, focused and, at 390 px, swiped, without WebGL and dark).  Chromium runs on SwiftShader (WebGL, as
 cad_checks.py) for every part.
@@ -175,7 +197,8 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 
-from rp import DARK_CHOICE, PORT, SCRATCH, SHOTS, URL, check, summary, wait_until  # noqa: E402
+from rp import (CARD, DARK_CHOICE, FORWARDS, GITHUB_API, GITHUB_ASKED, GITHUB_CARD, PORT, SCRATCH, SHOTS, URL, answer_github, check,  # noqa: E402
+                forwarding, summary, wait_until)
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -195,14 +218,19 @@ WIDTHS = (1440, 1100, 900, 768, 744, 735, 734, 600, 390, 360, 320)
 COUNTS = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
 # The grid (the user's requests of 2026-11-06; library.js SHELVED): the grippers' section, one card per part but the
 # shelved (the UMI finger, and any part a family closes), each opening its 2 mm sensor, then each shelved part's shelf;
-# GRID_CARDS: the sensors whose card pictures the grid shows, in its order (12), all asked for as the page opens (it is
-# short), within FIRST_SCREEN_BYTES (test_library's).
+# GRID_CARDS: the sensors whose card pictures the grid shows, in its order (13 since the UMI shelf's shapes of
+# 2026-11-16), all asked for as the page opens (it is short), within FIRST_SCREEN_BYTES (test_library's).
 SHELVED = ["umi-finray"] + [family["shelf"] for family in ENTRIES["families"].values() if family["shelf"] != "umi-finray"]
 CARDED = [part for part in ENTRIES["order"] if part not in SHELVED]
 SHELVES = [part for part in ENTRIES["order"] if part in SHELVED]
 FAMILIES_OF = {part: [name for name, family in ENTRIES["families"].items() if family["shelf"] == part] for part in ENTRIES["order"]}
 GRID_CARDS = library_shots.grid_cards(ENTRIES)
 FIRST_SCREEN_BYTES = 1_000_000
+# The tallest sensor's page (a three-line title and two controls: Shape and Tip width): the Short taper's card's sensor
+# since the UMI finger's shapes of 2026-11-16 (the Tapered tips page, #umi-tapers, before, whose sensor is the
+# Trapezoid tip's card's now, with Tip width alone).
+SHORT_TAPER = next(card["default"] for family in ENTRIES["families"].values() for card in family["cards"]
+                   if sum(len(axis["choices"]) > 1 for axis in card["axes"]) > 1)
 
 
 def pitch_range(part):
@@ -356,14 +384,28 @@ def library_case(page, case, missing=(), view=False):
 LAYOUT = """() => { const de = document.documentElement;
   const rowsOf = node => { const range = document.createRange(); range.selectNodeContents(node);
     return new Set([...range.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top))).size; };
-  const rows = [...document.querySelectorAll('#libShelves .lib-shelf')].map(shelf => { const track = shelf.querySelector('.lib-track');
-    const cards = [...track.querySelectorAll('.lib-card')]; const style = getComputedStyle(track);
-    const inner = track.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-    return {id: shelf.id, cards: cards.map(card => card.dataset.variant || `family:${card.dataset.family}`), over: track.scrollWidth > track.clientWidth + 1,
-            arrows: !shelf.querySelector('.lib-arrows').hidden, inner, gap: parseFloat(style.columnGap), card: cards[0].getBoundingClientRect().width,
-            names: cards.map(card => card.querySelector('.lib-card-name').textContent),
+  const textPast = card => { const text = card.querySelector('.lib-card-text'); const box = text.getBoundingClientRect(); const style = getComputedStyle(text);
+    const [left, right] = [box.left + parseFloat(style.paddingLeft), box.right - parseFloat(style.paddingRight)];
+    return Math.round(Math.max(0, ...[...text.children].flatMap(span => { const range = document.createRange(); range.selectNodeContents(span);
+      return [...range.getClientRects()].filter(r => r.width > 0).map(r => Math.max(left - r.left, r.right - right)); })) * 10) / 10; };
+  const content = (m => { const r = m.getBoundingClientRect(); const style = getComputedStyle(m);
+    return [r.left + parseFloat(style.paddingLeft), r.right - parseFloat(style.paddingRight)]; })(document.querySelector('main.lib'));
+  // A shelf (since the review of 2026-11-16 a grid as the grippers' section, no row that scrolls): its cards, their
+  // boxes (left and right against the content's edges, top on the page), the grid's width and gap, its rows of cards.
+  const rows = [...document.querySelectorAll('#libShelves .lib-shelf')].map(shelf => { const grid = shelf.querySelector('.lib-cards');
+    const cards = [...grid.querySelectorAll('.lib-card')]; const style = getComputedStyle(grid); const boxes = cards.map(card => card.getBoundingClientRect());
+    const tops = [...new Set(boxes.map(r => Math.round(r.top + scrollY)))].sort((a, b) => a - b);
+    return {id: shelf.id, cards: cards.map(card => card.dataset.variant || `family:${card.dataset.family}`), grid: grid.tagName && grid.className,
+            scrolls: [...shelf.querySelectorAll('*')].some(n => ['auto', 'scroll'].includes(getComputedStyle(n).overflowX) && n.scrollWidth > n.clientWidth + 1),
+            arrows: shelf.querySelectorAll('button').length, inner: grid.clientWidth, gap: parseFloat(style.columnGap), card: boxes[0].width,
+            widths: boxes.map(r => Math.round(r.width * 10) / 10), perRow: tops.map(top => boxes.filter(r => Math.round(r.top + scrollY) === top).length),
+            inside: boxes.every(r => r.left >= content[0] - 0.5 && r.right <= content[1] + 0.5), past: cards.map(textPast),
+            names: cards.map(card => card.querySelector('.lib-card-name').textContent.replace(/\u2011/g, '-')),
+            hrefs: cards.map(card => card.getAttribute('href')), shapes: cards.map(card => card.dataset.card || null),
+            lines: cards.map(card => [...card.querySelectorAll('.lib-card-line')].map(n => n.textContent.replace(/\u00a0/g, ' '))),
+            lineRows: cards.map(card => [card.querySelector('.lib-card-name'), ...card.querySelectorAll('.lib-card-line')].map(rowsOf)),
             badges: cards.filter(card => card.dataset.variant).map(card => card.querySelector('.lib-badge')?.textContent ?? null),
-            heading: shelf.querySelector('h3').textContent.replace(/\u00a0/g, ' ')}; });
+            ids: cards.map(card => card.id || null), heading: shelf.querySelector('h3').textContent.replace(/\u00a0/g, ' ')}; });
   const section = document.getElementById('grippers');
   const grid = section && {heading: section.querySelector('h3').textContent.replace(/\u00a0/g, ' '), badges: section.querySelectorAll('.lib-badge').length,
     cards: [...section.querySelectorAll('.lib-cards > .lib-card')].map(card => { const text = card.querySelector('.lib-card-text');
@@ -378,31 +420,28 @@ LAYOUT = """() => { const de = document.documentElement;
   const main = document.querySelector('main.lib');
   return {overflow: de.scrollWidth - de.clientWidth, main: main.scrollWidth - main.clientWidth, rows, grid,
           order: [...document.getElementById('libShelves').children].map(n => n.id || n.className), tiles: document.querySelectorAll('.lib-tile, #libTiles').length}; }"""
-# The title's line (the review of 2026-11-05): each of its lines' right end against the content's right edge (the gutter),
-# its lines, and whether "open-source" (its no-break hyphen) or the mode's name "Gen by Surface" (with spaces or its
-# no-break spaces; the integration's review of 2026-11-05: "Gen by" / "Surface" from 860 to 1024 px and at 600 px) is
-# split over two lines (null: one of them missing).
+# The title's line (the review of 2026-11-05; since the user's request of 2026-11-15 its three steps with arrows): each of
+# its rows' right end (a step's box, its arrow included) against the content's right edge (the gutter), its rows, its
+# steps' words, the arrow after each, and whether a step is split over two lines (null: not three steps).
 HERO = """() => { const tag = document.querySelector('.lib-tagline'); const main = document.querySelector('main.lib');
   const edge = main.getBoundingClientRect().right - parseFloat(getComputedStyle(main).paddingRight);
-  const rows = {}; const walker = document.createTreeWalker(tag, NodeFilter.SHOW_TEXT); const splits = {};
-  while (walker.nextNode()) { const node = walker.currentNode; const range = document.createRange(); range.selectNodeContents(node);
-    for (const r of range.getClientRects()) { if (r.width <= 0) continue; const k = Math.round(r.top); rows[k] = Math.max(rows[k] ?? -1e9, r.right); }
-    for (const [word, pattern] of [['open-source', /open\u2011source/], ['Gen by Surface', /Gen[ \u00a0]by[ \u00a0]Surface/]]) {
-      const found = pattern.exec(node.data); if (!found) continue;
-      const one = document.createRange(); one.setStart(node, found.index); one.setEnd(node, found.index + found[0].length);
-      splits[word] = new Set([...one.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top))).size > 1; } }
-  const split = Object.keys(splits).length === 2 ? Object.values(splits).some(Boolean) : null;
-  return {lines: Object.keys(rows).length, ends: Object.values(rows).map(right => Math.round(edge - right)), split}; }"""
-# Each section's room below its cards (to the next heading), its heading's lines and whether its arrows show (the review
-# of 2026-11-05; since 2026-11-06 the grippers' section, then the UMI shelf).
+  const steps = [...tag.querySelectorAll('li')]; const rows = {};
+  for (const li of steps) { const r = li.getBoundingClientRect(); const k = Math.round(r.top); rows[k] = Math.max(rows[k] ?? -1e9, r.right); }
+  const split = steps.length === 3 ? steps.some(li => { const range = document.createRange(); range.selectNodeContents(li);
+    return new Set([...range.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top))).size > 1; }) : null;
+  return {lines: Object.keys(rows).length, ends: Object.values(rows).map(right => Math.round(edge - right)), split, tag: tag.tagName,
+          words: steps.map(li => li.textContent), arrows: steps.map(li => getComputedStyle(li, '::after').content),
+          arrow: steps[0] ? getComputedStyle(steps[0], '::after').color : null, size: getComputedStyle(tag).fontSize}; }"""
+# Each section's room below its cards (to the next heading) and its heading's lines (the review of 2026-11-05; since
+# 2026-11-06 the grippers' section, then the UMI shelf; whether its arrows showed too until the UMI shelf was a grid,
+# 2026-11-16).
 SPACING = """() => [...document.querySelectorAll('#libShelves > .lib-shelf, #libShelves > .lib-section')].map((shelf, i, all) => {
   const bottom = Math.max(...[...shelf.querySelectorAll('.lib-card')].map(card => card.getBoundingClientRect().bottom));
   const heading = shelf.querySelector('h3'); const range = document.createRange(); range.selectNodeContents(heading);
   const lines = new Set([...range.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top))).size;
-  return [shelf.id, all[i + 1] ? Math.round(all[i + 1].querySelector('h3').getBoundingClientRect().top - bottom) : null, lines,
-          Boolean(shelf.querySelector('.lib-arrows')) && !shelf.querySelector('.lib-arrows').hidden]; })"""
-# Each shelf heading's lines, as text (the user's decision of 2026-11-05 on its one wording: the range '1 to 3 mm' and a
-# family's clause 'and tapered tips' each on one line, a two-line heading broken between its phrases).
+  return [shelf.id, all[i + 1] ? Math.round(all[i + 1].querySelector('h3').getBoundingClientRect().top - bottom) : null, lines]; })"""
+# Each shelf heading's lines, as text (the user's decision of 2026-11-05 on its one wording: the range '1 to 3 mm' on one
+# line, and since 2026-11-16 the UMI shelf's 'straight to pointed'; a two-line heading broken between its phrases).
 HEADING_LINES = """() => [...document.querySelectorAll('#libShelves .lib-shelf h3, #libShelves .lib-section h3')].map(heading => { const lines = []; let top = null;
   const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) { const text = walker.currentNode;
@@ -435,12 +474,11 @@ PICTURE_SETTLED = """() => { const shot = document.querySelector('#libDetail .li
   return Boolean(shot) && (!img || (img.complete && img.naturalWidth > 0)); }"""
 FOCUS = """() => { const node = document.activeElement; return {id: node.id, variant: node.dataset?.variant || null,
   shelf: node.closest('.lib-shelf, .lib-section')?.id || null}; }"""
-# The card focused in its row: how far inside the row's gutters (its padding) it lies on either side, and its focus ring
-# (4 px round it) inside the window above and below (px; negative: cut).
-CARD_IN_ROW = """() => { const card = document.activeElement; const track = card.closest('.lib-track'); if (!track) return null;
-  const style = getComputedStyle(track); const row = track.getBoundingClientRect().left + track.clientLeft; const box = card.getBoundingClientRect();
-  return {card: card.dataset.variant || card.getAttribute('href'), left: Math.round(box.left - row - parseFloat(style.paddingLeft)),
-          right: Math.round(row + track.clientWidth - parseFloat(style.paddingRight) - box.right), scroll: Math.round(track.scrollLeft),
+# The card focused on its shelf: how far inside the window it lies on either side, and its focus ring (4 px round it)
+# inside the window above and below (px; negative: cut).  (Inside its row's gutters while the UMI shelf was a row that
+# scrolled sideways, until 2026-11-16.)
+CARD_IN_WINDOW = """() => { const card = document.activeElement; if (!card.closest('.lib-shelf .lib-cards')) return null; const box = card.getBoundingClientRect();
+  return {card: card.dataset.variant || card.getAttribute('href'), left: Math.round(box.left), right: Math.round(document.documentElement.clientWidth - box.right),
           top: Math.round(box.top - 4), bottom: Math.round(innerHeight - box.bottom - 4)}; }"""
 # A card of the grid in the window (its box and its focus ring's 4 px inside it) and the window's scroll.
 IN_VIEW = """(id) => { const r = document.getElementById(id).getBoundingClientRect();
@@ -468,6 +506,16 @@ FILLS = r"""() => { const parse = s => { const m = s && s.match(/rgba?\(([^)]+)\
     const c = parse(getComputedStyle(el).backgroundColor); const name = el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.split(' ').join('.') : '');
     if (blue(c)) found.blue.push(name); if (green(c)) found.green.push(name); }
   return found; }"""
+# Since the user's decisions of 2026-11-15 and 2026-11-16 the showcase card's Design your own (on the grid, and under a
+# window over it) is the action blue's second use, beside Open in Gen by Surface (both lead to Gen by Surface).
+DESIGN_BLUE = "a.lib-pill.lib-design"
+
+
+def blues(page, *rest):
+    """The blue fills FILLS should find: the showcase card's Design your own where the grid shows it, then ``rest``."""
+    return ([DESIGN_BLUE] if page.evaluate("() => Boolean(document.querySelector('.lib-design')?.checkVisibility())") else []) + list(rest)
+
+
 SNAPSHOT = """() => ({nodes: [...document.querySelectorAll('body, body *')].filter(n => !n.closest('svg') || n.tagName.toLowerCase() === 'svg').map(n => { const s = getComputedStyle(n);
   return [s.opacity, s.transform, s.visibility, s.filter, n.className && typeof n.className === 'string' ? n.className : ''].join('|'); }),
   animations: document.getAnimations().length})"""
@@ -498,7 +546,7 @@ def errors_of(page, allowed=()):
 
 
 def open_library(page, fragment=""):
-    page.goto(SITE["base"] + "library.html" + fragment)
+    page.goto(SITE["base"] + fragment)
     wait_until(page, READY, 30)
     page.wait_for_timeout(150)
 
@@ -506,40 +554,53 @@ def open_library(page, fragment=""):
 def part_layout(browser):
     page = new_page(browser)
     open_library(page)
-    # The UMI finger's shelf, closed by the tapered tips' family card; the grippers' cards before it (2026-11-06).
-    expected_rows = [(f"shelf-{part}", ENTRIES["parts"][part]["variants"] + [f"family:{name}" for name in FAMILIES_OF[part]]) for part in SHELVES]
+    # The UMI finger's shelf (since the user's request of 2026-11-16 one card per finger shape: the straight finger's,
+    # its 2 mm sensor, then each card of the tapered tips' family, its sensor); the grippers' cards before it (2026-11-06).
+    expected_rows = [(f"shelf-{part}", [ENTRIES["parts"][part]["default"]] + [card["default"] for name in FAMILIES_OF[part] for card in ENTRIES["families"][name]["cards"]])
+                     for part in SHELVES]
+    shapes_of = {part: [card for name in FAMILIES_OF[part] for card in ENTRIES["families"][name]["cards"]] for part in SHELVES}
     expected_cards = [{"id": f"gripper-{part}", "href": f"#{ENTRIES['parts'][part]['default']}", "variant": ENTRIES["parts"][part]["default"],
                        "name": ENTRIES["parts"][part]["title"], "lines": [pitch_range(part), "Pick your pitch"]} for part in CARDED]
-    rows_of, sizes_of, text_of = {}, {}, {}
+    rows_of, sizes_of, text_of, shelf_text_of, shelf_rows_of = {}, {}, {}, {}, {}
     for width in WIDTHS:
         page.set_viewport_size({"width": width, "height": 900}); page.wait_for_timeout(120)
         layout = page.evaluate(LAYOUT)
         check(f"layout {width}: no horizontal page overflow", layout["overflow"] <= 0, layout["overflow"])
-        per_view = 4 if width >= 1100 else 3 if width >= 735 else None
+        # The UMI shelf a grid since the review of 2026-11-16 (its shapes side by side; a row that scrolled sideways
+        # before): three to a row from 735 px, two below, each card its column's width, all inside the content's edges,
+        # no row scrolling and no arrows.
+        per_row = 3 if width >= 735 else 2
         sizes = []
         for row in layout["rows"]:
-            expected = (row["inner"] - (per_view - 1) * row["gap"]) / per_view if per_view else 0.78 * row["inner"]
-            sizes.append(abs(row["card"] - expected) <= 1)
-        check(f"layout {width}: {per_view or '78 % of the row:'} {'cards in view' if per_view else 'a card'} on the UMI shelf", all(sizes) and layout["rows"],
-              [(row["id"], round(row["card"], 1), round(row["inner"], 1)) for row in layout["rows"]][:3])
+            expected = (row["inner"] - (per_row - 1) * row["gap"]) / per_row
+            sizes.append(all(abs(card - expected) <= 1 for card in row["widths"]) and row["inside"] and not row["scrolls"] and row["arrows"] == 0)
+        check(f"layout {width}: the UMI shelf's cards {per_row} to a row, each its column's width, inside the content's edges, nothing scrolling sideways",
+              all(sizes) and layout["rows"], [(row["id"], row["widths"][:2], round(row["inner"], 1), row["inside"], row["scrolls"], row["arrows"]) for row in layout["rows"]])
+        shelf_rows_of[width] = {row["id"]: row["perRow"] for row in layout["rows"]}
         cards = layout["grid"]["cards"] if layout["grid"] else []
         tops = sorted({card["top"] for card in cards})
         rows_of[width] = [sum(1 for card in cards if card["top"] == top) for top in tops]
         umi = layout["rows"][0]["card"] if layout["rows"] else 0
         sizes_of[width] = (round(max(card["width"] for card in cards), 1) if cards else None, round(umi, 1))
         text_of[width] = [(card["name"], card["lineRows"], card["past"]) for card in cards if any(rows != 1 for rows in card["lineRows"]) or card["past"] > 0.5]
-        # The review of 2026-11-05: a shelf with its arrows hidden keeps their room; the grippers' section (no arrows)
-        # as far from the UMI shelf's heading (its cards' 28 px and the shelf's) as the hero is from its own heading.
+        # The UMI shelf's cards (2026-11-16): each one's name and grey lines on one line each from 735 px; on a phone, two
+        # to a row (since its review that day), at most two lines each (balanced: 'Concave / arc tip', 'Pick shape /
+        # and width', as the grippers' 'Franka / Hand'), never past the card's box.
+        most = 1 if width >= 735 else 2
+        shelf_text_of[width] = [(row["id"], name, rows, past) for row in layout["rows"] for name, rows, past in zip(row["names"], row["lineRows"], row["past"])
+                                if any(n > most for n in rows) or past > 0.5]
+        # The review of 2026-11-05: the grippers' section as far from the UMI shelf's heading (its cards' 28 px and the
+        # shelf's) as the hero is from its own heading.
         spacing = page.evaluate(SPACING)
-        check(f"layout {width}: the UMI shelf's heading 56 px below the grippers' last row", [(name, gap) for name, gap, _, _ in spacing if gap is not None] == [("grippers", 56)],
-              [(name, gap, arrows) for name, gap, _, arrows in spacing])
+        check(f"layout {width}: the UMI shelf's heading 56 px below the grippers' last row", [(name, gap) for name, gap, _ in spacing if gap is not None] == [("grippers", 56)],
+              spacing)
         if width == 1440:
             # (Since 2026-11-12 the showcase's one card comes first, in a section of its own: showcase_checks part_page.)
             check("layout: no tile and no 'Start here.'; the showcase's card, the grippers' section, then the UMI finger's shelf",
                   layout["tiles"] == 0 and layout["order"] == ["lib-showcased", "grippers"] + [f"shelf-{part}" for part in SHELVES]
                   and not page.query_selector("#shelf-start"), (layout["tiles"], layout["order"]))
-            check("layout: the UMI shelf with its variants by pitch, closed by the Tapered tips card",
-                  [(row["id"], row["cards"]) for row in layout["rows"]] == expected_rows, [(row["id"], row["cards"]) for row in layout["rows"]])
+            check("layout: the UMI shelf one card per finger shape: the straight finger's (its 2 mm sensor), then each shape's card (its sensor), "
+                  "in the family's order", [(row["id"], row["cards"]) for row in layout["rows"]] == expected_rows, [(row["id"], row["cards"]) for row in layout["rows"]])
             got = [{key: card[key] for key in ("id", "href", "variant", "name", "lines")} for card in cards]
             check("layout: the grippers' section a card per gripper in the parts' order (gripper-<part>, opening its 2 mm sensor, its name, "
                   "'1 to 3 mm' (its own range) and 'Pick your pitch'), no badge line",
@@ -548,86 +609,76 @@ def part_layout(browser):
                   [(one, other) for one, other in zip(got, expected_cards) if one != other][:2] or got[:2])
             headings = {row["id"]: row["heading"] for row in layout["rows"]}
             headings["grippers"] = layout["grid"]["heading"]
-            # One wording on every heading (the user's decision of 2026-11-05): '<title>. <count> pitches, <finest> to
-            # <coarsest> mm.', a shelf closing with families naming them after the range (the UMI finger's ', and tapered
-            # tips'), here from entries.json's pitches, not its headings; the grippers' section its count and theirs.
+            # The grippers' section in one wording (the user's decision of 2026-11-05): its count and their pitches; the UMI
+            # finger's shelf, since the user's request of 2026-11-16, its shapes: the part's own (straight) and each card's,
+            # the last one's named ('Six finger shapes, straight to pointed.'), here from entries.json's cards, not its
+            # headings.
             expected_headings = {"grippers": f"Grippers. {COUNTS[len(CARDED)]}, each fitted at {COUNTS[4].lower()} pitches."}
             for part in SHELVES:
-                pitches = sorted(ENTRIES["variants"][key]["pitch_mm"] for key in ENTRIES["parts"][part]["variants"])
-                clauses = "".join(f", and {ENTRIES['families'][name]['title'].lower()}" for name in FAMILIES_OF[part])
-                expected_headings[f"shelf-{part}"] = (f"{ENTRIES['parts'][part]['title']}. {COUNTS[len(pitches)]} pitches, "
-                                                      f"{pitches[0]:g} to {pitches[-1]:g} mm{clauses}.")
-            check("layout: both headings in one wording, their bold half and their grey half ('Grippers. Seven, each fitted at four pitches.', "
-                  "'UMI Fin-Ray Gripper. Four pitches, 1 to 3 mm, and tapered tips.')",
+                last = shapes_of[part][-1]["axes"][0]["choices"][-1]["label"].lower()
+                expected_headings[f"shelf-{part}"] = f"{ENTRIES['parts'][part]['title']}. {COUNTS[1 + len(shapes_of[part])]} finger shapes, straight to {last}."
+            check("layout: both headings, their bold half and their grey half ('Grippers. Seven, each fitted at four pitches.', "
+                  "'UMI Fin-Ray Gripper. Six finger shapes, straight to pointed.')",
                   headings == expected_headings and headings["grippers"] == "Grippers. Seven, each fitted at four pitches."
-                  and headings["shelf-umi-finray"] == "UMI Fin-Ray Gripper. Four pitches, 1 to 3 mm, and tapered tips."
+                  and headings["shelf-umi-finray"] == "UMI Fin-Ray Gripper. Six finger shapes, straight to pointed."
                   and not [text for text in headings.values() if re.search(r"\b(fine|coarse)\b", text)],
                   {key: value for key, value in headings.items() if value != expected_headings.get(key)} or headings)
-            # The review of 2026-11-05: a gripper's own shelf (its heading names the gripper) names its cards by their pitch.
-            names = {row["id"]: row["names"] for row in layout["rows"]}
-            expected_names = {f"shelf-{part}": [f"{ENTRIES['variants'][key]['pitch_mm']} mm pitch" for key in ENTRIES["parts"][part]["variants"]]
-                              + [ENTRIES["families"][name]["title"] for name in FAMILIES_OF[part]] for part in SHELVES}
-            check("layout: the UMI shelf's cards named by their pitch ('1 mm pitch'), its family card by its title",
-                  names == expected_names, [(key, value) for key, value in names.items() if value != expected_names.get(key)][:3])
-            check("layout 1440: the UMI shelf's five overflow, its arrows shown",
-                  all(row["over"] and row["arrows"] and len(row["cards"]) == 5 for row in layout["rows"]),
-                  [(row["id"], len(row["cards"]), row["over"], row["arrows"]) for row in layout["rows"]])
-            # The second review of 2026-11-05: the UMI shelf's cards each with a badge line (empty but on the 1 mm one: the
-            # names line up); a gripper's name never splits at a hyphen (U+2011: 'Dex1-1' whole).
+            # Each card of the UMI shelf named by its shape, its two grey lines in the grippers' cards' style (the straight
+            # finger's its range and 'Pick your pitch', each shape's card its own), opening its sensor's page; the
+            # straight finger's card no grid id (its place is the shelf's), each shape's card its key.
+            expected_cards_of = {f"shelf-{part}": [(ENTRIES["parts"][part]["card"], [pitch_range(part), "Pick your pitch"], f"#{ENTRIES['parts'][part]['default']}", None)]
+                                 + [(card["title"], card["lines"], f"#{card['default']}", card["key"]) for card in shapes_of[part]] for part in SHELVES}
+            got_cards_of = {row["id"]: list(zip(row["names"], row["lines"], row["hrefs"], row["shapes"])) for row in layout["rows"]}
+            check("layout: the UMI shelf's cards: 'Straight finger' ('1 to 3 mm', 'Pick your pitch'), then 'Short taper' ('5.8 to 21.8 mm', "
+                  "'Pick shape and width'), 'Convex arc tip', 'Trapezoid tip', 'Concave arc tip' ('Pick your tip width') and 'Pointed tip' "
+                  "('2 mm tip', '2 mm pitch'), each opening its sensor's page",
+                  got_cards_of == expected_cards_of and [name for name, *_ in got_cards_of["shelf-umi-finray"]]
+                  == ["Straight finger", "Short taper", "Convex arc tip", "Trapezoid tip", "Concave arc tip", "Pointed tip"]
+                  and all(card_id is None for row in layout["rows"] for card_id in row["ids"]),
+                  got_cards_of)
+            check("layout 1440: the UMI shelf's six cards side by side in two rows of three, all in the window's width (the review of 2026-11-16: "
+                  "in a row four showed, the fifth cut at the edge, the sixth behind the arrows)",
+                  all(row["perRow"] == [3, 3] and row["inside"] and len(row["cards"]) == 6 for row in layout["rows"]),
+                  [(row["id"], row["perRow"], row["inside"]) for row in layout["rows"]])
+            # Since 2026-11-16 no card of the UMI shelf has a badge line (the pitch cards had one, 'Fine' on the 1 mm one,
+            # so their names lined up).
             badges = {row["id"]: row["badges"] for row in layout["rows"]}
-            check("layout 1440: a badge line on each card of the UMI shelf ('Fine', in capitals, on the 1 mm one)",
-                  all(badges[f"shelf-{part}"] == [ENTRIES["variants"][key]["badge"] or "" for key in ENTRIES["parts"][part]["variants"]] for part in SHELVES)
-                  and badges["shelf-umi-finray"][0] == "Fine", badges)
+            check("layout 1440: no badge line on the UMI shelf's cards", all(badge is None for found in badges.values() for badge in found), badges)
             page.screenshot(path=f"{SHOTS}/library_grid_1440.png")
         if width == 390:
-            row = next(row for row in layout["rows"] if row["id"] == "shelf-umi-finray")
-            arrows = page.evaluate("""() => { const s = document.getElementById('shelf-umi-finray'); const [l, r] = s.querySelectorAll('.lib-arrow');
-                return [s.querySelector('.lib-track').scrollLeft, l.disabled, r.disabled]; }""")
-            page.click("#shelf-umi-finray .lib-arrow[aria-label='Scroll right']"); page.wait_for_timeout(400)
-            moved = page.evaluate("() => document.querySelector('#shelf-umi-finray .lib-track').scrollLeft")
-            left = page.evaluate("() => document.querySelector('#shelf-umi-finray .lib-arrow[aria-label=\"Scroll left\"]').disabled")
-            check("layout 390: the UMI shelf's row overflows inside itself (arrows shown), '<' off at its start, '>' moves it by one card",
-                  row["over"] and row["arrows"] and arrows == [0, True, False] and abs(moved - (row["card"] + row["gap"])) <= 2 and left is False,
-                  (row["over"], row["arrows"], arrows, moved, row["card"] + row["gap"], left))
-            page.evaluate("() => { document.querySelector('#shelf-umi-finray .lib-track').scrollLeft = 0; }"); page.wait_for_timeout(100)
             page.screenshot(path=f"{SHOTS}/library_grid_390.png")
     check("layout: the grippers four to a row from 735 px (4 + 3), two below (2 + 2 + 2 + 1), never three",
           all(rows_of[width] == ([4, 3] if width >= 735 else [2, 2, 2, 1]) for width in WIDTHS), rows_of)
-    check("layout: from 735 px a gripper's card never wider than the UMI shelf's, as wide from 1100 px",
-          all(grid <= umi + 0.5 for width, (grid, umi) in sizes_of.items() if width >= 735)
-          and all(abs(grid - umi) <= 1 for width, (grid, umi) in sizes_of.items() if width >= 1100), sizes_of)
+    check("layout: the UMI shelf three to a row from 735 px (3 + 3), two below (2 + 2 + 2)",
+          all(found == {"shelf-umi-finray": [3, 3] if width >= 735 else [2, 2, 2]} for width, found in shelf_rows_of.items()), shelf_rows_of)
+    check("layout: from 735 px a UMI shelf's card a third of the row, wider than a gripper's quarter; below, two to a row each, as wide as a gripper's",
+          all(umi > grid + 1 for width, (grid, umi) in sizes_of.items() if width >= 735)
+          and all(abs(grid - umi) <= 1 for width, (grid, umi) in sizes_of.items() if width < 735), sizes_of)
     check("layout: from 1440 to 320 px every grey line of a gripper's card on one line, no text past its card's box",
           not any(text_of.values()), {width: found for width, found in text_of.items() if found})
-    # Tabbed to, the UMI shelf's arrow shows its whole focus ring in the window (the review of 2026-11-06: at 390 x 844
-    # it sat on the window's bottom edge, its ring cut).
-    rings = {}
-    for width, height in ((390, 844), (360, 740)):
-        page.set_viewport_size({"width": width, "height": height}); page.wait_for_timeout(120)
-        page.evaluate("() => scrollTo(0, 0)")
-        page.focus("#shelf-umi-finray .lib-track > .lib-card:last-child"); page.wait_for_timeout(150)
-        page.keyboard.press("Tab"); page.wait_for_timeout(150)
-        rings[(width, height)] = page.evaluate("""() => { const node = document.activeElement; const r = node.getBoundingClientRect();
-            return {arrow: node.classList.contains('lib-arrow'), top: Math.round(r.top - 4), bottom: Math.round(r.bottom + 4), screen: innerHeight}; }""")
-    check("layout 390 and 360: an arrow of the UMI shelf, Tabbed to, shows its focus ring inside the window",
-          all(ring["arrow"] and ring["top"] >= 0 and ring["bottom"] <= ring["screen"] for ring in rings.values()), rings)
-    # Tabbed to from the grippers' last card, each of the UMI shelf's five cards whole inside its row's gutters (the
-    # review of 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so at 390 px the
-    # 1.5 mm and the 3 mm cards had 192 of their 273 px past the window).
+    check("layout: from 1440 to 735 px each name and grey line of the UMI shelf's cards on one line; below, at most two, none past its card",
+          not any(shelf_text_of.values()), {width: found for width, found in shelf_text_of.items() if found})
+    # Tabbed to from the grippers' last card, each of the UMI shelf's six cards whole in the window (the review of
+    # 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so at 390 px the 1.5 mm and
+    # the 3 mm cards had 192 of their 273 px past the window in their row; six shape cards since 2026-11-16, in a grid
+    # since its review that day: no row to move, no arrow to Tab to).
+    count = len(expected_rows[0][1])
     tabbed = {}
     for width, height in ((390, 844), (360, 740)):
         page.set_viewport_size({"width": width, "height": height}); page.wait_for_timeout(120)
-        page.evaluate("() => { scrollTo(0, 0); document.querySelector('#shelf-umi-finray .lib-track').scrollLeft = 0; }"); page.wait_for_timeout(80)
+        page.evaluate("() => scrollTo(0, 0)"); page.wait_for_timeout(80)
         page.focus("#gripper-makermods-metal")
         tabbed[width] = []
-        for _ in range(5):
+        for _ in range(count):
             page.keyboard.press("Tab"); page.wait_for_timeout(100)
-            tabbed[width].append(page.evaluate(CARD_IN_ROW))
-    check("layout 390 and 360: each card of the UMI shelf, Tabbed to, whole inside its row's gutters (the row moved to it)",
-          all(len(seen) == 5 and all(card and card["left"] >= -1 and card["right"] >= -1 for card in seen) for seen in tabbed.values()), tabbed)
+            tabbed[width].append(page.evaluate(CARD_IN_WINDOW))
+    check("layout 390 and 360: each card of the UMI shelf, Tabbed to in its order, whole in the window's width",
+          all(len(seen) == count and all(card and card["left"] >= 0 and card["right"] >= 0 for card in seen)
+              and [card["card"] for card in seen] == expected_rows[0][1] for seen in tabbed.values()), tabbed)
     # And its focus ring inside the window with room under it, as the grippers' cards (the verification of 2026-11-06:
     # the first card had stopped flush with the window's bottom, its ring cut; scroll-margin 16 px leaves 12 px).
     check("layout 390 and 360: each card of the UMI shelf, Tabbed to, its focus ring inside the window above and below, 8 px or more",
-          all(len(seen) == 5 and all(card and card["top"] >= 8 and card["bottom"] >= 8 for card in seen) for seen in tabbed.values()), tabbed)
+          all(len(seen) == count and all(card and card["top"] >= 8 and card["bottom"] >= 8 for card in seen) for seen in tabbed.values()), tabbed)
     # The review of 2026-11-05: from 1280 px every shelf heading is one line (the UMI finger's, balanced, took two of
     # half the row at 1440 px), and the title's line ends on the gutter at every width from 735 px (right-aligned beside
     # the title: left-aligned, its balanced lines left a third of the hero empty from 1024 to 1280 px) with
@@ -635,36 +686,47 @@ def part_layout(browser):
     headings = {}
     for width in (1440, 1280):
         page.set_viewport_size({"width": width, "height": 900}); page.wait_for_timeout(120)
-        headings[width] = [(name, lines) for name, _, lines, _ in page.evaluate(SPACING) if lines != 1]
+        headings[width] = [(name, lines) for name, _, lines in page.evaluate(SPACING) if lines != 1]
     check("layout: at 1440 and 1280 px both headings one line", headings == {1440: [], 1280: []}, headings)
-    # The one wording's lines (the user's decision of 2026-11-05): at no width does a heading split its range ('1 to 3 mm')
-    # or a family's clause ('and tapered tips'); at 900 px each is at most two lines, its second line a phrase of its own
-    # (the first ends at a comma or a full stop: text-wrap pretty, the range and the clause kept whole, so the UMI
-    # heading breaks as '..., 1 to 3 mm, / and tapered tips.' there, not '..., and / tapered tips.').
+    # The headings' lines (the user's decision of 2026-11-05; the UMI shelf's shapes since 2026-11-16): at no width does a
+    # heading split a range ('1 to 3 mm') or the UMI shelf's 'straight to pointed'; at 900 px each is at most two lines,
+    # its second line a phrase of its own (the first ends at a comma or a full stop: text-wrap pretty, the phrases kept
+    # whole, so the UMI heading breaks as '... Six finger shapes, / straight to pointed.' there).
     lines, split = {}, []
     for width in WIDTHS + (1280,):
         page.set_viewport_size({"width": width, "height": 900}); page.wait_for_timeout(80)
         lines[width] = dict(page.evaluate(HEADING_LINES))
         for name, rows in lines[width].items():
             text = " ".join(rows)
-            whole = re.findall(r"\d[\d.]* to \d[\d.]* mm|and tapered tips", text)
+            whole = re.findall(r"\d[\d.]* to \d[\d.]* mm|straight to [a-z ]+(?=\.)", text)
             if not whole and name.startswith("shelf-") or any(not any(phrase in row for row in rows) for phrase in whole):
                 split.append((width, name, rows))
-    check("layout: at every width from 1440 to 320 px no heading splits its range or a family's clause", not split, split[:4])
-    check("layout: at 900 px both headings at most two lines, a second line a phrase of its own (the UMI's '..., 1 to 3 mm, / and tapered tips.')",
+    check("layout: at every width from 1440 to 320 px no heading splits its range or the UMI shelf's 'straight to pointed'", not split, split[:4])
+    check("layout: at 900 px both headings at most two lines, a second line a phrase of its own (the UMI's '... Six finger shapes, / straight to pointed.')",
           all(len(rows) <= 2 and (len(rows) == 1 or rows[0].endswith((",", "."))) for rows in lines[900].values())
-          and lines[900]["shelf-umi-finray"] == ["UMI Fin-Ray Gripper. Four pitches, 1 to 3 mm,", "and tapered tips."],
+          and lines[900]["shelf-umi-finray"] in (["UMI Fin-Ray Gripper. Six finger shapes, straight to pointed."],
+                                                 ["UMI Fin-Ray Gripper. Six finger shapes,", "straight to pointed."]),
           {name: rows for name, rows in lines[900].items() if len(rows) > 1})
     heroes = {}
     for width in (1440, 1366, 1280, 1200, 1150, 1100, 1024, 900, 820, 735, 600, 410, 390, 320):
         page.set_viewport_size({"width": width, "height": 900}); page.wait_for_timeout(80)
         heroes[width] = page.evaluate(HERO)
-    check("layout: the title's line ends on the gutter from 735 px (each line within 1 px of the content's edge), 'open-source' and 'Gen by Surface' never split",
+    check("layout: the title's line ends on the gutter from 735 px (each row within 1 px of the content's edge), no step split",
           all(all(abs(end) <= 1 for end in hero["ends"]) for width, hero in heroes.items() if width >= 735)
           and all(hero["split"] is False for hero in heroes.values()),
           {width: hero for width, hero in heroes.items() if hero["split"] is not False or (width >= 735 and any(abs(end) > 1 for end in hero["ends"]))})
-    check("layout: the title's line two lines at 1440 px and from 1200 to 1279 px (21 px there), at most four lines from 735 px",
-          heroes[1440]["lines"] == 2 and heroes[1200]["lines"] == 2 and all(hero["lines"] <= 4 for width, hero in heroes.items() if width >= 735),
+    # The user's request of 2026-11-15: "Pre-generated examples · Download Gerbers · Send to fab" as a small heading with
+    # arrows: a list of the three steps, an arrow (hidden from screen readers) after each but the last, 21 px (19 px below
+    # 1100 px, 17 px on a phone), one line from 1280 px, at most two from 735 px and three below.
+    words = ["Pre\u2011generated examples", "Download Gerbers", "Send to fab"]
+    check("layout: the title's line the three steps as a list, a grey arrow after the first two, 21 px (19 px below 1100 px, 17 px below 735 px)",
+          all(hero["tag"] == "OL" and hero["words"] == words and [("\u2192" in arrow) for arrow in hero["arrows"]] == [True, True, False]
+              and hero["size"] == ("21px" if width >= 1100 else "19px" if width >= 735 else "17px") for width, hero in heroes.items())
+          and heroes[1440]["arrow"] in ("rgb(134, 134, 139)", "rgb(142, 142, 147)"),
+          {width: {k: hero[k] for k in ("tag", "words", "arrows", "arrow", "size")} for width, hero in list(heroes.items())[:1] + list(heroes.items())[-1:]})
+    check("layout: the title's line one line from 1280 px, at most two from 735 px, at most three below",
+          all(hero["lines"] == 1 for width, hero in heroes.items() if width >= 1280)
+          and all(hero["lines"] <= (2 if width >= 735 else 3) for width, hero in heroes.items()),
           {width: hero["lines"] for width, hero in heroes.items()})
     page.set_viewport_size({"width": 1440, "height": 900}); page.wait_for_timeout(80)
     check("layout: no console error", not errors_of(page), errors_of(page)[:5])
@@ -693,23 +755,40 @@ def part_grid(browser):
         page.go_back(); page.wait_for_timeout(150)
     check("grid: each gripper's card opens its 2 mm sensor's page, its Pitch the gripper's four pitches",
           not wrong and len(opened) == 7, wrong[:2] or opened)
-    # The UMI shelf's cards and the Tapered tips card, its Shape and Tip width: every tip.
-    for key in ENTRIES["parts"]["umi-finray"]["variants"]:
-        page.click(f"#shelf-umi-finray .lib-card[data-variant='{key}']"); page.wait_for_timeout(100)
+    # The UMI shelf (one card per finger shape since the user's request of 2026-11-16): the straight finger's card opens
+    # its 2 mm page, whose Pitch reaches its four pitches; each shape's card its sensor's page, whose controls are the
+    # card's axes of more than one choice (Tip width; the Short taper's Shape too; none on the Pointed tip's), which
+    # reach every tip of the card.
+    record = ENTRIES["parts"]["umi-finray"]
+    page.click("#shelf-umi-finray .lib-card[data-part='umi-finray']"); page.wait_for_timeout(120)
+    seen = page.evaluate(VIEW)
+    radios = page.evaluate("() => [...document.querySelectorAll('input[name=\"libPitch\"]')].map(input => input.value)")
+    straight = (seen["hash"], seen["checked"], radios, seen["detail"])
+    for key in record["variants"]:
+        page.click(f".lib-seg label:has(input[value='{key}'])"); page.wait_for_timeout(80)
         if page.evaluate(VIEW)["hash"] == f"#{key}":
             reached.add(key)
-        page.go_back(); page.wait_for_timeout(120)
+    page.go_back(); page.wait_for_timeout(120)
+    check("grid: the UMI shelf's Straight finger opens its 2 mm sensor's page, its Pitch the finger's four pitches",
+          straight == (f"#{record['default']}", record["default"], record["variants"], True), straight)
+    shown, wrong = {}, []
     for name, family in ENTRIES["families"].items():
-        page.click(f".lib-card[data-family='{name}']"); page.wait_for_timeout(120)
-        shape, tip = family["axes"]
-        for first in shape["choices"]:
-            page.click(f"label:has(input[name='libAxis-{shape['key']}'][value='{first['value']}'])"); page.wait_for_timeout(60)
-            for second in tip["choices"]:
-                page.click(f"label:has(input[name='libAxis-{tip['key']}'][value='{second['value']}'])"); page.wait_for_timeout(60)
-                key = family["grid"][f"{first['value']}|{second['value']}"]
-                if page.evaluate(VIEW)["hash"] == f"#{key}" and page.evaluate(VIEW)["detail"]:
-                    reached.add(key)
-        page.go_back(); page.wait_for_timeout(120)
+        for card in family["cards"]:
+            page.click(f"#shelf-umi-finray .lib-card[data-card='{card['key']}']"); page.wait_for_timeout(120)
+            seen = page.evaluate(VIEW)
+            groups = page.evaluate("() => [...document.querySelectorAll('#libDetail .lib-seg legend')].map(n => n.textContent)")
+            shown[card["key"]] = (seen["hash"], groups)
+            if (seen["hash"], seen["detail"], groups) != (f"#{card['default']}", True, [axis["label"] for axis in card["axes"] if len(axis["choices"]) > 1]):
+                wrong.append((card["key"], seen["hash"], groups))
+            for key, identifier in card["grid"].items():
+                for axis, value in zip(card["axes"], key.split("|")):
+                    if len(axis["choices"]) > 1:
+                        page.click(f"label:has(input[name='libAxis-{axis['key']}'][value='{value}'])"); page.wait_for_timeout(60)
+                if page.evaluate(VIEW)["hash"] == f"#{identifier}" and page.evaluate(VIEW)["detail"]:
+                    reached.add(identifier)
+            page.go_back(); page.wait_for_timeout(120)
+    check("grid: each shape's card opens its sensor's page with its axes of more than one choice (Short taper: Shape and Tip width; "
+          "Convex arc, Trapezoid and Concave arc tips: Tip width; Pointed tip: none)", not wrong and len(shown) == 5, wrong or shown)
     check(f"grid: every sensor's page reached by clicks alone ({len(reached)} of {len(ENTRIES['variants'])}: the cards, the Pitch, Shape and Tip width)",
           reached == set(ENTRIES["variants"]), sorted(set(ENTRIES["variants"]) - reached)[:5])
     # The window's X (the page's back link until 2026-11-15): the grid where it was, its card focused (opened from the
@@ -760,6 +839,24 @@ def part_grid(browser):
     check("grid: #grippers and #shelf-umi-finray opened anew show their sections (their top at the window's, or the page's end)",
           all(abs(at - target) <= 1 and behavior == "auto" and hash_ == f"#{place}" for place, (at, target, behavior, hash_) in jumps.items())
           and jumps["shelf-umi-finray"][0] > jumps["grippers"][0], jumps)
+    # The UMI finger's removed cards (2026-11-16: the 1, 1.5 and 3 mm cards, one card per shape since) and the Tapered
+    # tips card's address: each opened anew shows its page in the window (its pitch checked, the address kept), the
+    # Library under it; its X closes to the UMI shelf.
+    removed = {}
+    for identifier in [key for key in ENTRIES["parts"]["umi-finray"]["variants"] if key != ENTRIES["parts"]["umi-finray"]["default"]] + list(ENTRIES["families"]):
+        open_library(page, f"#{identifier}")
+        wait_until(page, "() => document.getElementById('libWindow').open", 10)
+        seen = page.evaluate(VIEW)
+        axes = page.evaluate("() => [...document.querySelectorAll('#libDetail .lib-seg input:checked')].map(n => n.value)")
+        page.click("#libClose"); page.wait_for_timeout(150)
+        removed[identifier] = (seen["hash"], seen["detail"], seen["checked"], axes, page.evaluate(VIEW)["hash"])
+    family = next(iter(ENTRIES["families"].values()))
+    check("grid: the removed cards' addresses (#umi-finray-1mm, -1.5mm, -3mm) and #umi-tapers opened anew show their pages, the address kept, "
+          "their X the UMI shelf (#umi-tapers the 13.8 mm trapezoid's page)",
+          all(seen[:3] == (f"#{key}", True, key) and seen[4] == "#shelf-umi-finray" for key, seen in removed.items() if key not in ENTRIES["families"])
+          and all(seen[:2] == (f"#{key}", True) and seen[2] is None and seen[3] == ["13.8"] and seen[4] == "#shelf-umi-finray"
+                  for key, seen in removed.items() if key in ENTRIES["families"])
+          and family["default"] == "umi-trap-tip13.8-2mm" and len(removed) == 4, removed)
     check("grid: no console error (the older addresses)", not errors_of(page), errors_of(page)[:5])
     page.context.close()
 
@@ -772,10 +869,10 @@ def part_routes(browser):
     shown = page.evaluate(VIEW)
     focus = page.evaluate(FOCUS)
     check("routes: a gripper's card opens its 2 mm sensor's page in the window at its top, the grid where it was under it, its title focused, "
-          "Open in Gen by Surface at ./?part=<id>",
+          "Open in Gen by Surface at gen.html?part=<id>",
           shown["hash"] == "#widowx-250-2mm" and shown["detail"] and not shown["grid"] and shown["y"] == before["y"] and shown["top"] == 0
           and focus["id"] == "libDetailTitle"
-          and shown["title"] == "WidowX 250" and shown["open"] == "./?part=widowx-250-2mm" and shown["checked"] == "widowx-250-2mm"
+          and shown["title"] == "WidowX 250" and shown["open"] == "gen.html?part=widowx-250-2mm" and shown["checked"] == "widowx-250-2mm"
           and shown["history"] == before["history"] + 1 and shown["tab"] == "WidowX 250, 2 mm · Library · FlexiTac-Gen", (shown, focus))
     page.click(".lib-seg label:has(input[value='widowx-250-1mm'])"); page.wait_for_timeout(150)
     fine = page.evaluate(VIEW)
@@ -827,7 +924,7 @@ def part_routes(browser):
     pitched = page.evaluate(VIEW)
     check("routes: another pitch replaces the address (no history entry) and shows that sensor, its segment focused",
           pitched["hash"] == "#widowx-250-2mm" and pitched["history"] == shown["history"] and pitched["checked"] == "widowx-250-2mm"
-          and pitched["open"] == "./?part=widowx-250-2mm" and page.evaluate("() => document.activeElement.value") == "widowx-250-2mm", pitched)
+          and pitched["open"] == "gen.html?part=widowx-250-2mm" and page.evaluate("() => document.activeElement.value") == "widowx-250-2mm", pitched)
     page.go_back(); page.wait_for_timeout(200)
     back = page.evaluate(VIEW)
     focus = page.evaluate(FOCUS)
@@ -932,7 +1029,7 @@ def late(seconds):
 
 
 def open_late(browser, fragment, width, height, entries=None):
-    """library.html``fragment`` opened anew, library.js and entries.json late (LATE_S; ``entries``: entries.json's status
+    """The Library (./)``fragment`` opened anew, library.js and entries.json late (LATE_S; ``entries``: entries.json's status
     instead): its frames (FRAMES) and the page as it settled (SETTLED)."""
     page = new_page(browser, width, height)
     page.add_init_script(FRAMES)
@@ -941,7 +1038,7 @@ def open_late(browser, fragment, width, height, entries=None):
         page.route("**/static/library/entries.json", late(LATE_S["entries.json"]))
     else:
         page.route("**/static/library/entries.json", lambda route: route.fulfill(status=entries, content_type="text/plain", body="not here"))
-    page.goto(SITE["base"] + "library.html" + fragment)
+    page.goto(SITE["base"] + fragment)
     wait_until(page, READY, 30)
     page.wait_for_timeout(200)
     frames, settled = page.evaluate("() => window.__libFrames.slice()"), page.evaluate(SETTLED)
@@ -956,7 +1053,7 @@ def routes_opened_directly(browser):
     the footer hidden unchecked): with library.js 0.8 s and entries.json 0.4 s late (LATE_S), so the page paints before
     either arrives, at 1440 x 900 and 390 x 844, a sensor's page shows no frame of the grid's title and no frame of the
     footer before its window opens, then (since the window of 2026-11-15) the Library, its title and footer, under it; #gripper-<part> and #shelf-umi-finray show the grid's title and the footer;
-    library.html alone paints the grid's title before library.js arrives, as before (no mark); entries.json failing (500)
+    the Library alone (./) paints the grid's title before library.js arrives, as before (no mark); entries.json failing (500)
     on a sensor's address shows the title, the footer and the status; Gen by Surface is never marked."""
     for width, height in ((1440, 900), (390, 844)):
         frames, settled, errors = open_late(browser, "#widowx-250-2mm", width, height)
@@ -973,24 +1070,142 @@ def routes_opened_directly(browser):
                   and not errors, (settled, errors[:3]))
     frames, settled, errors = open_late(browser, "", 1440, 900)
     early = [frame for frame in frames[:20] if frame["hero"] and frame["footer"]]
-    check("routes: library.html alone paints the grid's title and the footer before library.js arrives, as before (never marked)",
+    check("routes: the Library alone (./) paints the grid's title and the footer before library.js arrives, as before (never marked)",
           early and not any(frame["marked"] for frame in frames) and settled["hero"] and settled["footer"] and not errors, (frames[:3], settled, errors[:3]))
     frames, settled, errors = open_late(browser, "#widowx-250-2mm", 390, 844, entries=500)
     check("routes: a sensor's address with entries.json failing (500) shows the grid's title, the footer and the status",
           settled["hero"] and settled["footer"] and settled["status"].startswith("The library could not be loaded (HTTP 500).") and not settled["marked"]
           and not errors, (settled, errors[:3]))
     page = new_page(browser)
-    page.goto(SITE["base"] + "#rect", wait_until="domcontentloaded")
+    page.goto(SITE["base"] + "gen.html#rect", wait_until="domcontentloaded")
     check("routes: Gen by Surface opened at an address (#rect) is never marked data-lib-place",
           page.evaluate("() => document.documentElement.hasAttribute('data-lib-place')") is False)
     page.context.close()
+
+
+# The first page (the user's decisions of 2026-11-15 and 2026-11-16: "我觉得之后可以让lib作为第一次点击进入时候使用的界面",
+# "是的 be first page"): the Library at ./, the generator at gen.html, the addresses of before forwarded (rp.FORWARDS).
+def part_first_page(browser):
+    """The first page (2026-11-16), on app.py or the built site (--site): every address of rp.FORWARDS opened after an
+    earlier page, its target held 0.6 s: the generator's addresses of before (./?part=<id>, ./#rect, ./#cad, ?sample,
+    ?debug, its anchors, at ./ and ./index.html) at gen.html and library.html's at ./ (#<id> the Library with that
+    window), their query and hash kept, with no history entry of their own (Back the earlier page) and nothing of the
+    old address's page painted; the Library's own addresses (its sensors, a part, a family, its places, the showcase,
+    ?probe) staying, painted, unmarked.  Then the first page itself: ./ the Library (its title, its grid, its header's
+    Rectangular at gen.html#rect, Gen by Surface at gen.html, the Library link ./ the current page), its mode links and
+    a sensor's Open in Gen by Surface going to the generator in this tab (gen.html, gen.html#rect, gen.html?part=<id>,
+    the generator's title and mode), Back coming back to the Library (the window again for Open's).  Since the review of
+    2026-11-16: an address of before reached by its hash over the open Library (./#rect typed over ./, #cad over a
+    sensor's window, #drc-row over ./?probe) going on to gen.html as at a load, and, on the built site, the Library's
+    header counts refreshed from GitHub's API (answered here) and kept for the tab."""
+    seen = forwarding(browser, SITE["base"])
+    for address, target in FORWARDS:
+        s = seen[address]
+        if target is None:
+            check(f"first page: {address or './'} is the Library's own: it stays, painted ({s['frames']} frames, {s['shown']} things shown), "
+                  "unmarked, no history entry of its own, Back the earlier page",
+                  s["url"] == s["final"] and s["frames"] > 0 and s["shown"] and s["marks"] == ["None"] and s["added"] == 1 and s["back"]
+                  and s["title"].endswith("Library · FlexiTac-Gen"), s)
+        else:
+            check(f"first page: {address} goes to ./{target} (its query and hash kept) with no history entry of its own, Back the earlier "
+                  f"page, and nothing of its own page painted ({s['frames']} frames)",
+                  s["url"] == s["final"] and s["added"] == 1 and s["back"] and not s["shown"]
+                  and s["title"] == ("FlexiTac-Gen" if target.startswith("gen.html") else s["title"]) and s["title"].endswith("FlexiTac-Gen"), s)
+    page = new_page(browser)
+    open_library(page)
+    first = page.evaluate("""() => ({title: document.title, cards: document.querySelectorAll('.lib-card').length,
+        modes: [...document.querySelectorAll('.mode-links a')].map(a => [a.textContent.trim(), a.getAttribute('href'), a.target]),
+        library: (a => [a.getAttribute('href'), a.getAttribute('aria-current'), a.target])(document.querySelector('.masthead-library'))})""")
+    check("first page: ./ is the Library (its title, its grid), its header's Rectangular at gen.html#rect and Gen by Surface at gen.html in "
+          "this tab, its Library link ./ the current page",
+          first["title"] == "Library · FlexiTac-Gen" and first["cards"] >= 12
+          and first["modes"] == [["Rectangular", "gen.html#rect", ""], ["Gen by Surface", "gen.html", ""]] and first["library"] == ["./", "page", ""], first)
+    went = []
+    for name, expected, mode in (("Gen by Surface", "gen.html", "cad"), ("Rectangular", "gen.html#rect", "rect")):
+        with page.expect_navigation():
+            page.click(f".mode-links a:has-text('{name}')")
+        page.wait_for_load_state("domcontentloaded")
+        wait_until(page, "() => Boolean(document.body && document.body.dataset.mode)", 60)
+        went.append([name, page.url == SITE["base"] + expected, page.title(), page.evaluate("() => document.body.dataset.mode") == mode])
+        page.go_back()
+        wait_until(page, READY, 30)
+        went[-1].append(page.url == SITE["base"])
+    check("first page: the Library's Gen by Surface and Rectangular open the generator in this tab at gen.html and gen.html#rect, in that mode; "
+          "Back comes back to the Library", all(row[1:] == [True, "FlexiTac-Gen", True, True] for row in went), went)
+    page.click('.lib-card[href="#widowx-250-2mm"], #gripper-widowx-250')
+    wait_until(page, "() => document.getElementById('libWindow').open && document.querySelector('.lib-open')", 30)
+    href = page.evaluate("() => document.querySelector('.lib-open').getAttribute('href')")
+    with page.expect_navigation():
+        page.click(".lib-open")
+    page.wait_for_load_state("domcontentloaded")
+    opened = [page.url, page.title()]
+    page.go_back()
+    wait_until(page, "() => document.getElementById('libWindow').open", 30)
+    back = [page.url, page.title()]
+    check("first page: a sensor's Open in Gen by Surface goes to gen.html?part=<id> in this tab; Back comes back to the Library with its window",
+          href == "gen.html?part=widowx-250-2mm" and opened == [SITE["base"] + href, "FlexiTac-Gen"]
+          and back == [SITE["base"] + "#widowx-250-2mm", "WidowX 250, 2 mm · Library · FlexiTac-Gen"], (href, opened, back))
+    check("first page: no console error", not errors_of(page), errors_of(page)[:3])
+    page.context.close()
+    # The Library already open (the review of 2026-11-16): an address of before reached by its hash alone (typed over
+    # it, an old bookmark or a link followed from it: a navigation within the page, which runs no script again) goes on
+    # to gen.html as at a load, its query kept, the hash's one entry replaced (no other), the Library never saying "No
+    # sensor in the library is named rect."; Back the Library where it was, shown.
+    went = []
+    for start, then, target in (("", "#rect", "gen.html#rect"), ("#widowx-250-2mm", "#cad", "gen.html#cad"), ("?probe", "#drc-row", "gen.html?probe#drc-row")):
+        page = new_page(browser)
+        notes = []
+        page.on("console", lambda message: notes.append(message.text[9:]) if message.text.startswith("fpc-note ") else None)
+        open_library(page, start)
+        if start.startswith("#"):
+            wait_until(page, "() => document.getElementById('libWindow').open", 30)
+        length = page.evaluate("() => history.length")
+        page.evaluate("""hash => { const note = document.getElementById('libNote');
+            new MutationObserver(() => console.debug('fpc-note ' + note.textContent)).observe(note, {childList: true, characterData: true, subtree: true});
+            location.hash = hash; }""", then)
+        try:
+            page.wait_for_url(SITE["base"] + target, timeout=30_000)
+            page.wait_for_load_state("domcontentloaded")
+        except Exception:  # noqa: BLE001 - reported below as where it ended
+            pass
+        row = [start or "./", then, page.url == SITE["base"] + target, page.evaluate("() => history.length") - length, page.title(), notes]
+        page.go_back(wait_until="commit")
+        page.wait_for_load_state("domcontentloaded")
+        wait_until(page, READY, 30)
+        page.wait_for_timeout(200)
+        row += [page.url == SITE["base"] + start, page.evaluate("() => getComputedStyle(document.documentElement).visibility"),
+                page.evaluate("() => document.getElementById('libNote').textContent"),
+                page.evaluate("() => document.getElementById('libWindow').open") == start.startswith("#"), errors_of(page)]
+        went.append(row)
+        page.context.close()
+    check("first page: an address of before reached by its hash over the open Library (./#rect, #cad over a sensor's window, #drc-row over "
+          "./?probe) goes on to gen.html, the query kept, one history entry (the hash's own), no note of an unknown sensor; Back the Library "
+          "where it was, shown", all(row[2:6] == [True, 1, "FlexiTac-Gen", []] and row[6:] == [True, "visible", "", True, []] for row in went), went)
+    if SITE["root"] is not None:
+        # The built site (the review of 2026-11-16): the Library, the first page, refreshes the header's star and fork
+        # counts from GitHub's API as the generator does (web/counts.js; answered here, answer_github), kept for the tab.
+        asked = len(GITHUB_ASKED)
+        page = new_page(browser)
+        open_library(page)
+        wait_until(page, "() => !document.querySelector('[data-gh-stats]').hidden", 15)
+        library = page.evaluate(CARD)
+        with page.expect_navigation():
+            page.click(".mode-links a:has-text('Gen by Surface')")
+        page.wait_for_load_state("domcontentloaded")
+        wait_until(page, "() => !document.querySelector('[data-gh-stats]').hidden", 15)
+        generator = page.evaluate(CARD)
+        check("first page: on the built site the Library (./) shows the header's counts from GitHub's API (1.2k, 56), asked once; the generator "
+              "in the same tab shows them without asking again", library == GITHUB_CARD and generator == GITHUB_CARD and GITHUB_ASKED[asked:] == [SITE["base"]],
+              (library, generator, GITHUB_ASKED[asked:]))
+        page.context.close()
 
 
 def part_first_screen(browser):
     """The user's decision of 2026-11-05 (the picture may be squashed): below 900 px a sensor's page is one column, its
     picture above Open, and that picture is 3:1, not 16:10, so Open is in a phone's first screen.  Every sensor's page
     and the Tapered tips page (#umi-tapers) at each phone size of PHONES, opened at the window's top, in both CASES:
-    with pictures (the picture loaded, and its Exploded | Assembled control in the frame, above Open) and with none."""
+    with pictures (the picture loaded, and its Exploded | Assembled control in the frame, above Open) and with none; the
+    samples (from 900 px, and with the 3D view) the Short taper's page, the tallest (SHORT_TAPER)."""
     keys = list(ENTRIES["variants"]) + list(ENTRIES["families"])
     tips = {key for key, variant in ENTRIES["variants"].items() if ENTRIES["parts"][variant["part"]]["family"]} | set(ENTRIES["families"])
     grippers = [key for key in ENTRIES["variants"] if key not in tips]
@@ -1003,13 +1218,13 @@ def part_first_screen(browser):
             page = new_page(browser, width, height)
             library_case(page, case, view=view)
             open_library(page)
-            for key in keys if width < 900 else ("widowx-250-1mm", "umi-tapers"):
+            for key in keys if width < 900 else ("widowx-250-1mm", SHORT_TAPER):
                 page.evaluate("(key) => { location.hash = '#' + key; }", key)
                 wait_until(page, "(key) => location.hash === '#' + key && document.getElementById('libWindow').open", 10, key)
                 wait_until(page, PICTURE_SETTLED, 10)
                 page.evaluate(WINDOW_TOP)
                 found[(width, height, key)] = page.evaluate(FIRST_SCREEN)
-            for key in ("trossen-widowx-ai-2mm", "umi-tapers"):
+            for key in ("trossen-widowx-ai-2mm", SHORT_TAPER):
                 if (width, height) in PHONES:
                     page.evaluate("(key) => { location.hash = '#' + key; }", key); page.wait_for_timeout(100)
                     wait_until(page, PICTURE_SETTLED, 10)
@@ -1036,8 +1251,9 @@ def part_first_screen(browser):
         # Since the window of 2026-11-15 (a sheet: no header above the page, which had taken 239 px of these phones' first
         # screen) Open is in the first screen at 375 x 667, 360 x 740 and 320 x 640 on every page too (the tapered tips'
         # had been below it at all three, a gripper's two-line title's at the first and the last); at 320 x 568 not on
-        # the tapered tips' (a three-line title and two controls): its place is reported there, as at every phone size,
-        # the lowest Open's bottom on a gripper's page and on a tapered tip's, and how many pages have it in the window.
+        # the tapered tips' (a three-line title and two controls: the Short taper's since 2026-11-16): its place is
+        # reported there, as at every phone size, the lowest Open's bottom on a gripper's page and on a tapered tip's, and
+        # how many pages have it in the window.
         check(f"first screen ({label}) 375 x 667, 360 x 740 and 320 x 640 (the window a sheet): Open's bottom in the window on every page ({len(keys)})",
               not any(below(size, keys) for size in ((375, 667), (360, 740), (320, 640))),
               {f"{width}x{height}": (below((width, height), keys)[:4], lowest((width, height), keys)) for width, height in ((375, 667), (360, 740), (320, 640))})
@@ -1070,7 +1286,7 @@ def part_first_screen(browser):
             moved = {size: (drawn, [name for name in ("open", "frame", "shot", "drawing") if any(abs(a - b) > 0.5 for a, b in zip(
                          before[name][-4:], after[name][-4:]))], after["live"], after["shot"])
                      for size, (drawn, before, after) in lives.items()}
-            check(f"first screen ({label}): at each phone the 3D view drawn over the picture (Trossen WidowX AI's 2 mm, the Tapered tips), "
+            check(f"first screen ({label}): at each phone the 3D view drawn over the picture (Trossen WidowX AI's 2 mm, the Short taper's), "
                   "nothing moved (Open, the frame, the slot, the picture), the view's box the slot's",
                   len(lives) == 2 * len(PHONES) and all(drawn and not names and live is not None and all(abs(a - b) <= 0.5 for a, b in zip(live, shot))
                                                         for drawn, names, live, shot in moved.values()),
@@ -1085,19 +1301,20 @@ SLOTS = """() => [...document.querySelectorAll('.lib-shot')].filter(shot => shot
   const owner = shot.closest('.lib-card'); const img = shot.querySelector('img'); const r = shot.getBoundingClientRect();
   const round = v => Math.round(v * 10) / 10;
   return {owner: owner ? (owner.classList.contains('lib-showcase') ? 'showcase' : owner.dataset.variant || 'family:' + owner.dataset.family) : 'detail',
-    box: [round(r.width), round(r.height)], background: getComputedStyle(shot).backgroundColor, children: [...shot.children].map(n => n.tagName.toLowerCase()),
+    shelf: shot.closest('.lib-shelf') !== null, tip: shot.classList.contains('lib-shot-tip'), clips: getComputedStyle(shot).overflow, box: [round(r.width), round(r.height)], background: getComputedStyle(shot).backgroundColor, children: [...shot.children].map(n => n.tagName.toLowerCase()),
     field: shot.querySelector('svg .lib-field') !== null, lines: shot.querySelectorAll('svg .lib-lines line').length,
     img: img && {src: img.getAttribute('src'), alt: img.getAttribute('alt'), loading: img.getAttribute('loading'), decoding: img.getAttribute('decoding'),
       size: [img.getAttribute('width'), img.getAttribute('height')], fit: [getComputedStyle(img).objectFit, getComputedStyle(img).objectPosition],
       box: (b => [round(b.left - r.left), round(b.top - r.top), round(b.width), round(b.height)])(img.getBoundingClientRect()),
+      transform: [getComputedStyle(img).transform, getComputedStyle(img).transformOrigin],
       loaded: img.complete && img.naturalWidth > 0, broken: img.complete && img.naturalWidth === 0, natural: [img.naturalWidth, img.naturalHeight]}}; })"""
 # Every card's, shelf's and section's box in the document (the pictures move none of them as they arrive).
 GEOMETRY = """() => [...document.querySelectorAll('.lib-card, .lib-shelf, .lib-section, .lib-footer')].map(n => { const r = n.getBoundingClientRect();
-  const track = n.closest('.lib-track'); return [Math.round((r.left + (track ? track.scrollLeft : 0)) * 10) / 10, Math.round((r.top + scrollY) * 10) / 10,
-    Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10]; })"""
+  return [Math.round(r.left * 10) / 10, Math.round((r.top + scrollY) * 10) / 10, Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10]; })"""
 # A sensor's page's picture and its view control: the picture's attributes and state, the placeholder's drawing, the boxes
 # of the slot, the frame and the control's track, the control's legend, radios, colours, segments and transitions, and
-# the focus, the address, the history's length and the running animations.
+# the focus, the address, the history's length and the running animations (but the 3D view's drag hint's, the page's one
+# motion of its own since 2026-11-15: part_view checks it).
 DETAIL_PICTURE = """() => { const frame = document.querySelector('#libDetail .lib-frame'); const shot = frame.querySelector('.lib-shot'); const img = shot.querySelector('img');
   const view = frame.querySelector('fieldset.lib-view'); const round = v => Math.round(v * 10) / 10;
   const box = n => (r => [r.left, r.top, r.right, r.bottom].map(round))(n.getBoundingClientRect());
@@ -1111,7 +1328,7 @@ DETAIL_PICTURE = """() => { const frame = document.querySelector('#libDetail .li
       segments: [...view.querySelectorAll('span')].map(s => round(s.getBoundingClientRect().width)),
       transitions: [...view.querySelectorAll('*')].map(n => getComputedStyle(n).transitionDuration).filter(d => d.split(', ').some(x => x !== '0s'))},
     focus: [document.activeElement.name || null, document.activeElement.value || null], hash: location.hash, history: history.length,
-    animations: document.getAnimations().length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth}; }"""
+    animations: document.getAnimations().filter(a => !a.effect?.target?.closest?.('.lib-drag')).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth}; }"""
 # A sensor's page's picture done: loaded, broken (a file that failed, left in place) or none (its placeholder).
 DETAIL_DONE = """() => { const shot = document.querySelector('#libDetail .lib-shot'); const img = shot && shot.querySelector('img');
   return Boolean(shot) && (!img || img.complete); }"""
@@ -1136,27 +1353,45 @@ def placeholder_wrong(slot):
     return None if slot["children"] == ["svg"] and slot["field"] and slot["img"] is None and slot["lines"] == lines and slot["lines"] > 0 else slot
 
 
+# A UMI shelf's card's picture framed on the fingertip (library.css .lib-shot-tip, the review of 2026-11-16): scaled this
+# much about this point of its box (fractions of its width and height).
+TIP_FRAME = (2.2, 0.41, 0.03)
+
+
 def card_picture_wrong(slot):
-    """None when a grid slot shows its sensor's Exploded card picture as the contract and library.css have it, else why not."""
+    """None when a grid slot shows its sensor's Exploded card picture as the contract and library.css have it (a shelf's
+    card, the UMI shelf's, its Assembled picture at its full size since the lead's review of 2026-11-16: library.js
+    SHELF_VIEW, framed on the fingertip since the review that day: TIP_FRAME, its box clipping it), else why not."""
     key, alt = card_owner(slot["owner"])
     image = IMAGES[key]
     if image is None:  # a sensor of this tree without a picture yet
         return placeholder_wrong(slot)
     img = slot["img"] or {}
-    want = {"src": f"static/library/{image['exploded']['card']}", "alt": image["alt"] if alt else "", "loading": "lazy", "decoding": "async",
-            "size": [str(CARD_SIZE[0]), str(CARD_SIZE[1])], "fit": ["contain", "50% 50%"], "loaded": True, "natural": list(CARD_SIZE)}
+    if slot.get("shelf"):
+        size = [image["assembled"]["width"], image["assembled"]["height"]]
+        src = f"static/library/{image['assembled']['src']}"
+    else:
+        size, src = list(CARD_SIZE), f"static/library/{image['exploded']['card']}"
+    want = {"src": src, "alt": image["alt"] if alt else "", "loading": "lazy", "decoding": "async",
+            "size": [str(size[0]), str(size[1])], "fit": ["contain", "50% 50%"], "loaded": True, "natural": size}
     got = {name: img.get(name) for name in want}
-    filled = img.get("box") and all(abs(a - b) <= 0.5 for a, b in zip(img["box"], [0, 0] + slot["box"]))
-    return None if got == want and slot["children"] == ["img"] and filled else (slot["owner"], {k: v for k, v in got.items() if v != want[k]}, img.get("box"), slot["box"])
+    width, height = slot["box"]
+    scale, x, y = TIP_FRAME if slot.get("shelf") else (1, 0.5, 0.5)
+    drawn = [x * width * (1 - scale), y * height * (1 - scale), width * scale, height * scale]
+    filled = img.get("box") and all(abs(a - b) <= 1 for a, b in zip(img["box"], drawn))
+    framed = slot.get("tip") == bool(slot.get("shelf")) and slot.get("clips") == "hidden"
+    return None if got == want and slot["children"] == ["img"] and filled and framed else (
+        slot["owner"], {k: v for k, v in got.items() if v != want[k]}, img.get("box"), drawn, slot.get("tip"), slot.get("clips"))
 
 
 def load_grid(page):
-    """Every section brought into sight and each shelf's row scrolled to its end, then back: every lazy picture asked for."""
-    page.evaluate("""() => { for (const shelf of document.querySelectorAll('.lib-section, .lib-shelf')) { shelf.scrollIntoView({block: 'center'});
-        const track = shelf.querySelector('.lib-track'); if (track) track.scrollLeft = track.scrollWidth; } }""")
+    """Every section brought into sight, its end then its start, then back to the top: every lazy picture asked for (each
+    shelf's row was scrolled to its end too while the UMI shelf was one, until 2026-11-16)."""
+    page.evaluate("""() => { for (const shelf of document.querySelectorAll('.lib-section, .lib-shelf')) { shelf.scrollIntoView({block: 'end'});
+        shelf.scrollIntoView({block: 'start'}); } }""")
     page.wait_for_timeout(150)
-    page.evaluate("""() => { for (const shelf of [...document.querySelectorAll('.lib-section, .lib-shelf')].reverse()) { shelf.scrollIntoView({block: 'center'});
-        const track = shelf.querySelector('.lib-track'); if (track) track.scrollLeft = 0; } scrollTo(0, 0); }""")
+    page.evaluate("""() => { for (const shelf of [...document.querySelectorAll('.lib-section, .lib-shelf')].reverse()) shelf.scrollIntoView({block: 'center'});
+        scrollTo(0, 0); }""")
     wait_until(page, "() => [...document.querySelectorAll('#libGrid .lib-shot img')].every(img => img.complete)", 30)
 
 
@@ -1172,7 +1407,7 @@ def pictures_case(browser, view):
     """part_pictures with every view set (``view``) or null."""
     tag, suffix = (" (3D view)", "_view") if view else ("", "")
     # The grid at 1440 px and on a 390 x 844 phone: every card's picture lazy, and the bytes asked for as the page opens
-    # (all 12 at 1440 px: the page is short) within the first screen's budget; then, once every section has been in
+    # (all 13 at 1440 px: the page is short) within the first screen's budget; then, once every section has been in
     # sight, every card's Exploded card picture shown in its light box.
     stand = stand_ins(browser) if not PICTURED else {}
 
@@ -1202,10 +1437,13 @@ def pictures_case(browser, view):
           len(hero) == 1 and (hero[0]["img"] or {}).get("loaded") and hero[0]["children"] == ["img"] and hero[0]["background"] == "rgb(245, 245, 247)", hero[:1])
     wrong = [result for result in map(card_picture_wrong, slots) if result is not None]
     owners = [slot["owner"] for slot in slots]
-    check(f"pictures{tag}: every card (the grippers' seven, each its 2 mm sensor's, the UMI shelf's, the Tapered tips card its default tip's: "
-          f"{len(GRID_CARDS)}) shows its sensor's Exploded card picture (the contract's card file, 640 x 400), contained and centred in its light box, "
-          "lazy, decoded async, its width and height set, its alt the entry's",
-          not wrong and [card_owner(owner)[0] for owner in owners] == GRID_CARDS and "family:umi-tapers" in owners, wrong[:3] or owners)
+    shelf = [card_owner(item["owner"])[0] for item in slots if item["shelf"]]
+    check(f"pictures{tag}: every card (the grippers' seven, each its 2 mm sensor's, the UMI shelf's six shapes, each its sensor's: "
+          f"{len(GRID_CARDS)}) shows its sensor's picture, the grippers' their Exploded card file (640 x 400) filling its light box, the UMI shelf's "
+          "their Assembled picture (1280 x 800: the shapes' outlines, the lead's review of 2026-11-16) framed on the fingertip (2.2 times about "
+          "41 % 3 %, clipped by its box: the review that day), contained and centred, lazy, decoded async, its width and height set, its alt the entry's",
+          not wrong and [card_owner(owner)[0] for owner in owners] == GRID_CARDS and len(GRID_CARDS) == 13 and shelf == GRID_CARDS[7:],
+          wrong[:3] or owners)
     pictured = page.evaluate(GEOMETRY)
     page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_grid_1440_light.png")
     page.set_viewport_size({"width": 900, "height": 900}); page.wait_for_timeout(120)
@@ -1243,9 +1481,10 @@ def pictures_case(browser, view):
           and view["track"][1] >= seen["shot"][3] and view["track"][3] <= seen["frame"][3] and abs((view["track"][0] + view["track"][2]) / 2 - centre) <= 1
           and abs(view["segments"][0] - view["segments"][1]) <= 0.5, (seen, named))
     fills = page.evaluate(FILLS)
-    check(f"pictures{tag}: the control is grey (its chosen view a white thumb on the fill), never blue, nothing green, no transition or animation",
+    check(f"pictures{tag}: the control is grey (its chosen view a white thumb on the fill), never blue, nothing green, no transition or animation "
+          "(but the drag hint's)",
           view.get("thumb") == "rgb(255, 255, 255)" and view.get("fill") == "rgba(118, 118, 128, 0.12)" and view.get("transitions") == []
-          and seen["animations"] == 0 and fills["blue"] == ["a.lib-open"] and fills["green"] == [], (view, fills))
+          and seen["animations"] == 0 and fills["blue"] == blues(page, "a.lib-open") and fills["green"] == [], (view, fills))
     page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_detail_exploded_1440.png")
     before = page.locator("#libDetail .lib-shot").screenshot()
     page.click("#libDetail .lib-view label:has(input[value='assembled'])")
@@ -1277,26 +1516,30 @@ def pictures_case(browser, view):
     check(f"pictures{tag}: each sensor's page opened shows the Exploded picture first (the WidowX 250 card again, after Assembled)",
           opened["src"] == f"static/library/{IMAGES['widowx-250-2mm']['exploded']['src']}" and [radio[3] for radio in (opened["view"] or {}).get("radios", [])] == [True, False],
           (opened["src"], opened["view"]))
-    # The Tapered tips page: Shape and Tip width swap the picture with the sensor, the view kept.
-    open_library(page, "#umi-tapers")
-    tapers = ENTRIES["families"]["umi-tapers"]
-    wait_until(page, DETAIL_SHOWS, 10, IMAGES[tapers["default"]]["exploded"]["src"])
+    # The Short taper's page (its Shape and Tip width; the Tapered tips page until 2026-11-16): opened Assembled, the view
+    # its card shows (the review of 2026-11-16: Exploded, the tapered end lay under the exploded layers); each control
+    # swaps the picture with the sensor, the view kept.
+    open_library(page, f"#{SHORT_TAPER}")
+    wait_until(page, DETAIL_SHOWS, 10, IMAGES[SHORT_TAPER]["assembled"]["src"])
+    first = page.evaluate(DETAIL_PICTURE)
     page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_tapers_1440.png")
     page.click("label:has(input[name='libAxis-shape'][value='convex'])")
-    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-convex-tip13.8-2mm"]["exploded"]["src"])
-    page.click("#libDetail .lib-view label:has(input[value='assembled'])")
-    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-convex-tip13.8-2mm"]["assembled"]["src"])
+    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip9.8-2mm"]["assembled"]["src"])
+    page.click("#libDetail .lib-view label:has(input[value='exploded'])")
+    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip9.8-2mm"]["exploded"]["src"])
     page.click("label:has(input[name='libAxis-tip_mm'][value='5.8'])")
-    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-convex-tip5.8-2mm"]["assembled"]["src"])
-    check(f"pictures{tag}: on the Tapered tips page Shape and Tip width show the chosen tip's picture (the convex 13.8 mm, then 5.8 mm Assembled)",
-          page.evaluate(DETAIL_PICTURE)["hash"] == "#umi-convex-tip5.8-2mm", page.evaluate(DETAIL_PICTURE)["src"])
+    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip5.8-2mm"]["exploded"]["src"])
+    check(f"pictures{tag}: the Short taper's page opens Assembled (its card's view); Shape and Tip width show the chosen tip's picture "
+          "(the convex 9.8 mm Assembled, then Exploded, then 5.8 mm Exploded)",
+          [radio[3] for radio in (first["view"] or {}).get("radios", [])] == [False, True] and page.evaluate(DETAIL_PICTURE)["hash"] == "#umi-short-convex-tip5.8-2mm",
+          (first["src"], page.evaluate(DETAIL_PICTURE)["src"]))
     check(f"pictures{tag}: no console error", not errors_of(page), errors_of(page)[:5])
     page.context.close()
     # Phones and every width: the page never scrolls sideways; the picture 3:1 at 390 x 844 (part_first_screen checks Open).
     overflow = {}
     page = new_page(browser, 390, 844)
     library_case(page, "pictures", view=view)
-    for fragment, name in (("#widowx-250-1mm", "detail"), ("#umi-tapers", "tapers")):
+    for fragment, name in (("#widowx-250-1mm", "detail"), (f"#{SHORT_TAPER}", "tapers")):
         open_library(page, fragment)
         wait_until(page, PICTURE_SETTLED, 10)
         page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_{name}_exploded_390x844.png")
@@ -1306,11 +1549,11 @@ def pictures_case(browser, view):
             page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_detail_assembled_390x844.png")
     for width in WIDTHS:
         page.set_viewport_size({"width": width, "height": 900}); page.wait_for_timeout(80)
-        for fragment in ("", "#umi-tapers"):
+        for fragment in ("", f"#{SHORT_TAPER}"):
             page.evaluate("(fragment) => { location.hash = fragment; }", fragment); page.wait_for_timeout(80)
             overflow[(width, fragment or "grid")] = page.evaluate("() => Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, "
                                                                    "(body => body.scrollWidth - body.clientWidth)(document.getElementById('libWindowBody')))")
-    check(f"pictures{tag}: no sideways scroll from 1440 to 320 px (the grid, and the Tapered tips page in its window)", all(value <= 0 for value in overflow.values()),
+    check(f"pictures{tag}: no sideways scroll from 1440 to 320 px (the grid, and the Short taper's page in its window)", all(value <= 0 for value in overflow.values()),
           {key: value for key, value in overflow.items() if value > 0})
     page.context.close()
     # The dark scheme: the pictures' boxes light (#f5f5f7) on the grid and a sensor's page, the control's thumb grey.
@@ -1329,7 +1572,7 @@ def pictures_case(browser, view):
     fills = page.evaluate(FILLS)
     check(f"pictures{tag} (dark): every picture's box stays light (#f5f5f7), the control's thumb grey, the blue only on Open",
           grounds == {"rgb(245, 245, 247)"} and dark["background"] == "rgb(245, 245, 247)" and dark["view"]["thumb"] == "rgb(99, 99, 102)"
-          and fills["blue"] == ["a.lib-open"] and fills["green"] == [], (grounds, dark["background"], dark["view"]["thumb"], fills))
+          and fills["blue"] == blues(page, "a.lib-open") and fills["green"] == [], (grounds, dark["background"], dark["view"]["thumb"], fills))
     page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_detail_dark.png")
     page.context.close()
     # A picture that does not load: its placeholder in its place (never a broken image or an empty box); on a sensor's
@@ -1388,11 +1631,11 @@ def part_placeholders(browser):
     page.screenshot(path=f"{SHOTS}/library_placeholders_grid_900_light.png")
     page.set_viewport_size({"width": 1440, "height": 900}); page.wait_for_timeout(120)
     pages = {}
-    for fragment in ("#widowx-250-1mm", "#umi-tapers"):
+    for fragment in ("#widowx-250-1mm", f"#{SHORT_TAPER}"):
         open_library(page, fragment)
         pages[fragment] = page.evaluate(DETAIL_PICTURE)
-        page.screenshot(path=f"{SHOTS}/library_placeholders_{'tapers' if fragment == '#umi-tapers' else 'detail'}_1440.png")
-    check("placeholders: a sensor's page and the Tapered tips page show the field's drawing in the frame, no view control (the frame its slot and its padding)",
+        page.screenshot(path=f"{SHOTS}/library_placeholders_{'detail' if fragment == '#widowx-250-1mm' else 'tapers'}_1440.png")
+    check("placeholders: a sensor's page and the Short taper's page show the field's drawing in the frame, no view control (the frame its slot and its padding)",
           all(seen["field"] and seen["children"] == 1 and seen["view"] is None and abs((seen["frame"][3] - seen["frame"][1]) - (seen["shot"][3] - seen["shot"][1]) - 12) <= 0.5
               for seen in pages.values()), pages)
     asked = [url for url in page.requests if "/static/library/shots/" in url]
@@ -1407,7 +1650,7 @@ def part_placeholders(browser):
     page.context.close()
     page = new_page(browser, 390, 844)
     library_case(page, "placeholders")
-    for fragment, name in (("#widowx-250-1mm", "detail"), ("#umi-tapers", "tapers")):
+    for fragment, name in (("#widowx-250-1mm", "detail"), (f"#{SHORT_TAPER}", "tapers")):
         open_library(page, fragment)
         page.screenshot(path=f"{SHOTS}/library_placeholders_{name}_390x844.png")
     page.context.close()
@@ -1419,48 +1662,57 @@ FAMILY_VIEW = """() => ({hash: location.hash, detail: document.getElementById('l
   y: Math.round(scrollY), top: Math.round(document.getElementById('libWindowBody').scrollTop), history: history.length, title: document.getElementById('libDetailTitle')?.textContent.replace(/\u2011/g, '-') || null,
   shape: document.querySelector('input[name="libAxis-shape"]:checked')?.value || null, tip: document.querySelector('input[name="libAxis-tip_mm"]:checked')?.value || null,
   legends: [...document.querySelectorAll('#libDetail .lib-seg legend')].map(l => l.textContent), pitch: document.querySelector('input[name="libPitch"]') !== null,
+  view: document.querySelector('#libDetail input[name="libView"]:checked')?.value || null,
   open: document.querySelector('.lib-open')?.getAttribute('href') || null,
-  focus: [document.activeElement.id, document.activeElement.name || null, document.activeElement.value || null, document.activeElement.dataset?.family || null,
+  focus: [document.activeElement.id, document.activeElement.name || null, document.activeElement.value || null, document.activeElement.dataset?.card || null,
           document.activeElement.closest('.lib-shelf')?.id || null],
   note: document.getElementById('libNote').hidden ? null : document.getElementById('libNote').textContent})"""
 
 
 def part_family(browser):
+    """The tapered tips (2026-11-05), since the user's request of 2026-11-16 one card per shape after the straight finger
+    on the UMI shelf: the shelf's cards, the Short taper's page (Shape and Tip width), the Concave arc and Pointed tips'
+    pages, a tip's id, part id and window's X."""
     family = ENTRIES["families"]["umi-tapers"]
     members = [part for part, record in ENTRIES["parts"].items() if record["family"] == "umi-tapers"]
+    shapes = {card["key"]: card for card in family["cards"]}
     page = new_page(browser)
     open_library(page, "#shelf-umi-finray")
-    cards = page.evaluate("""() => [...document.querySelectorAll('#shelf-umi-finray .lib-card')].map(card => [card.dataset.variant || card.dataset.family,
-        card.getAttribute('href'), [...card.querySelectorAll('.lib-card-name, .lib-card-line')].map(n => n.textContent)])""")
+    cards = page.evaluate("""() => [...document.querySelectorAll('#shelf-umi-finray .lib-card')].map(card => [card.dataset.variant, card.dataset.card || null,
+        card.getAttribute('href'), [...card.querySelectorAll('.lib-card-name, .lib-card-line')].map(n => n.textContent.replace(/\\u00a0/g, ' '))])""")
     everywhere = page.evaluate("() => [...document.querySelectorAll('.lib-card')].map(n => n.dataset.variant || n.dataset.family || n.getAttribute('href'))")
-    check("family: its card ends the UMI shelf ('Tapered tips', 'Trapezoid or convex arc', '5 tip widths · 2 mm pitch', #umi-tapers)",
-          cards[-1] == ["umi-tapers", "#umi-tapers", ["Tapered tips", "Trapezoid or convex arc", "5 tip widths · 2 mm pitch"]]
-          and [card[0] for card in cards[:-1]] == ENTRIES["parts"]["umi-finray"]["variants"], cards)
-    check("family: no tip has a shelf or a card of its own (the family's card is its one)",
-          not [item for item in everywhere if any(member in str(item) for member in members)]
+    expected = [["umi-finray-2mm", None, "#umi-finray-2mm", ["Straight finger", "1 to 3 mm", "Pick your pitch"]]] + [
+        [card["default"], card["key"], f"#{card['default']}", [card["title"], *card["lines"]]] for card in family["cards"]]
+    check("family: the UMI shelf's cards, one per shape: Straight finger, then Short taper, Convex arc tip, Trapezoid tip, Concave arc tip "
+          "and Pointed tip, each its two lines and its sensor's page",
+          cards == expected and [card[3][0] for card in cards] == ["Straight finger", "Short taper", "Convex arc tip", "Trapezoid tip", "Concave arc tip", "Pointed tip"],
+          cards)
+    check("family: no tip has a shelf, and none a card but its shape's (each card's own sensor)",
+          sorted(item for item in everywhere if any(str(item).startswith(member + "-") for member in members)) == sorted(card["default"] for card in family["cards"])
           and not page.query_selector_all(", ".join(f"[id='shelf-{member}']" for member in members)), everywhere)
-    page.locator("#shelf-umi-finray .lib-track").evaluate("track => track.scrollLeft = track.scrollWidth")
-    page.wait_for_timeout(60)
     page.locator("#shelf-umi-finray").screenshot(path=f"{SHOTS}/library_family_card.png")
     before = page.evaluate(FAMILY_VIEW)
-    page.click(".lib-card[data-family='umi-tapers']"); page.wait_for_timeout(200)
+    short = shapes["short"]
+    page.click(".lib-card[data-card='short']"); page.wait_for_timeout(200)
     shown = page.evaluate(FAMILY_VIEW)
     facts = page.inner_text(".lib-facts")
-    default = ENTRIES["variants"][family["default"]]
-    check("family: its card opens #umi-tapers, the 13.8 mm trapezoid's page in the window at its top, the grid where it was under it, its title focused, "
-          "Shape and Tip width in place of the pitch",
-          shown["hash"] == "#umi-tapers" and shown["detail"] and shown["y"] == before["y"] and shown["top"] == 0 and shown["focus"][0] == "libDetailTitle"
-          and shown["title"] == "UMI Fin-Ray Gripper, tapered tip" and (shown["shape"], shown["tip"]) == ("trap", "13.8")
-          and shown["legends"] == ["Shape", "Tip width (mm)"] and not shown["pitch"] and shown["open"] == "./?part=umi-trap-tip13.8-2mm"
-          and shown["history"] == before["history"] + 1, shown)
-    check("family: its facts (the tip, 32 rows × 11 columns · 276 taxels, 2 mm · fill 0.50, the build)",
-          "Trapezoid, 13.8 mm at the tip, over the last 75 mm" in facts and f"{default['rows']} rows × {default['columns']} columns · {default['taxels']} taxels" in facts
+    default = ENTRIES["variants"][short["default"]]
+    # (Its title the card's shape and its view the card's, Assembled, since the review of 2026-11-16: 'UMI Fin-Ray Gripper,
+    # tapered tip' and Exploded, where the tapered end lay under the exploded layers, before.)
+    check("family: the Short taper's card opens its 9.8 mm trapezoid's page in the window at its top, the grid where it was under it, its title "
+          "('UMI Fin-Ray Gripper, short taper') focused, Assembled as its card, Shape and Tip width in place of the pitch",
+          shown["hash"] == f"#{short['default']}" and short["default"] == "umi-short-trap-tip9.8-2mm" and shown["detail"] and shown["y"] == before["y"]
+          and shown["top"] == 0 and shown["focus"][0] == "libDetailTitle" and shown["title"] == "UMI Fin-Ray Gripper, short taper" and shown["view"] in ("assembled", None)
+          and (shown["shape"], shown["tip"]) == ("trap", "9.8") and shown["legends"] == ["Shape", "Tip width (mm)"] and not shown["pitch"]
+          and shown["open"] == f"gen.html?part={short['default']}" and shown["history"] == before["history"] + 1, shown)
+    check(f"family: its facts (the tip over the last 40 mm, {default['rows']} rows × {default['columns']} columns · {default['taxels']} taxels, 2 mm · fill 0.50, the build)",
+          "Trapezoid, 9.8 mm at the tip, over the last 40 mm" in facts and f"{default['rows']} rows × {default['columns']} columns · {default['taxels']} taxels" in facts
           and "2 mm · fill 0.50" in facts and default["build_id"] in facts, facts)
     page.screenshot(path=f"{SHOTS}/library_family_detail.png")
     page.click("label:has(input[name='libAxis-shape'][value='convex'])"); page.wait_for_timeout(150)
     convex = page.evaluate(FAMILY_VIEW)
-    # The review of 2026-11-05: the line under the title ('Soft fin-ray finger, convex arc tip · UMI ...') never starts a
-    # line with its separator (a no-break space joins it to the word before it).
+    # The review of 2026-11-05: the line under the title ('Soft fin-ray finger, short convex arc tip · UMI ...') never
+    # starts a line with its separator (a no-break space joins it to the word before it).
     starts = {}
     for width in (1440, 1100, 900, 390, 320):
         page.set_viewport_size({"width": width, "height": 900}); page.wait_for_timeout(100)
@@ -1470,26 +1722,44 @@ def part_family(browser):
             if (Math.round(box.top) !== top) { lines.push(''); top = Math.round(box.top); } lines[lines.length - 1] += text.data[i]; }
           return lines.map(line => line.trim()); }""")
     page.set_viewport_size({"width": 1440, "height": 900}); page.wait_for_timeout(100)
-    check("family: the convex arc tip's line under the title never starts a line with its '·'",
+    check("family: the short convex arc tip's line under the title never starts a line with its '·'",
           all(not line.startswith("\u00b7") for lines in starts.values() for line in lines) and any(len(lines) > 1 for lines in starts.values()), starts)
     page.click("label:has(input[name='libAxis-tip_mm'][value='5.8'])"); page.wait_for_timeout(150)
     narrow = page.evaluate(FAMILY_VIEW)
-    check("family: Shape and Tip width replace the address (no history entry) with the grid's sensor, the changed control focused",
-          (convex["hash"], convex["shape"], convex["tip"], convex["open"], convex["focus"][1:3]) == ("#umi-convex-tip13.8-2mm", "convex", "13.8", "./?part=umi-convex-tip13.8-2mm", ["libAxis-shape", "convex"])
-          and (narrow["hash"], narrow["shape"], narrow["tip"], narrow["open"], narrow["focus"][1:3]) == ("#umi-convex-tip5.8-2mm", "convex", "5.8", "./?part=umi-convex-tip5.8-2mm", ["libAxis-tip_mm", "5.8"])
-          and convex["history"] == narrow["history"] == shown["history"] and "Convex arc, 5.8 mm at the tip" in page.inner_text(".lib-facts"), (convex, narrow))
+    check("family: Shape and Tip width replace the address (no history entry) with the card's sensor, the changed control focused",
+          (convex["hash"], convex["shape"], convex["tip"], convex["open"], convex["focus"][1:3]) == ("#umi-short-convex-tip9.8-2mm", "convex", "9.8", "gen.html?part=umi-short-convex-tip9.8-2mm", ["libAxis-shape", "convex"])
+          and (narrow["hash"], narrow["shape"], narrow["tip"], narrow["open"], narrow["focus"][1:3]) == ("#umi-short-convex-tip5.8-2mm", "convex", "5.8", "gen.html?part=umi-short-convex-tip5.8-2mm", ["libAxis-tip_mm", "5.8"])
+          and convex["history"] == narrow["history"] == shown["history"] and "Convex arc, 5.8 mm at the tip, over the last 40 mm" in page.inner_text(".lib-facts"),
+          (convex, narrow))
     fills = page.evaluate(FILLS)
     check("family: the action blue fills only Open in Gen by Surface on its page (the controls' thumbs are grey), nothing green",
-          fills["blue"] == ["a.lib-open"] and fills["green"] == [], fills)
+          fills["blue"] == blues(page, "a.lib-open") and fills["green"] == [], fills)
     page.go_back(); page.wait_for_timeout(200)
     back = page.evaluate(FAMILY_VIEW)
-    check("family: Back returns to the grid where it was, the family card focused",
-          back["grid"] and not back["detail"] and abs(back["y"] - before["y"]) <= 1 and back["focus"][3:] == ["umi-tapers", "shelf-umi-finray"], (before["y"], back))
+    check("family: Back returns to the grid where it was, the Short taper's card focused",
+          back["grid"] and not back["detail"] and abs(back["y"] - before["y"]) <= 1 and back["focus"][3:] == ["short", "shelf-umi-finray"], (before["y"], back))
+    # The new shapes' own pages: the concave arc (Tip width alone, its five widths) and the point (no control).
+    pages = {}
+    for key, fact in (("concave", "Concave arc, 9.8 mm at the tip, over the last 75 mm"), ("pointed", "Pointed, 2 mm at the tip, over the last 50 mm")):
+        page.click(f".lib-card[data-card='{key}']"); page.wait_for_timeout(200)
+        seen = page.evaluate(FAMILY_VIEW)
+        tips = page.evaluate("() => [...document.querySelectorAll('input[name=\"libAxis-tip_mm\"]')].map(n => n.value)")
+        pages[key] = (seen["hash"], seen["legends"], tips, seen["tip"], fact in page.inner_text(".lib-facts"), seen["pitch"], seen["title"], seen["view"])
+        page.screenshot(path=f"{SHOTS}/library_family_{key}.png")
+        page.go_back(); page.wait_for_timeout(200)
+    # Each titled by its card and opened Assembled as its card shows it (the review of 2026-11-16).
+    viewed = "assembled" if IMAGES["umi-concave-tip9.8-2mm"] else None
+    check("family: the Concave arc tip's page its Tip width alone (21.8 to 5.8 mm, 9.8 checked), the Pointed tip's no control, each its Tip fact, "
+          "titled by its card ('UMI Fin-Ray Gripper, concave arc tip', '..., pointed tip') and opened Assembled",
+          pages == {"concave": ("#umi-concave-tip9.8-2mm", ["Tip width (mm)"], ["21.8", "17.8", "13.8", "9.8", "5.8"], "9.8", True, False,
+                                "UMI Fin-Ray Gripper, concave arc tip", viewed),
+                    "pointed": ("#umi-pointed-tip2-2mm", [], [], None, True, False, "UMI Fin-Ray Gripper, pointed tip", viewed)}, pages)
     page.context.close()
     page = new_page(browser)
     open_library(page, "#umi-convex-tip9.8-2mm")
     direct = page.evaluate(FAMILY_VIEW)
-    check("family: a tip's id opens its page (Convex arc, 9.8 mm)", direct["detail"] and (direct["shape"], direct["tip"]) == ("convex", "9.8"), direct)
+    check("family: a tip's id opens its page (the Convex arc tip's card, 9.8 mm)",
+          direct["detail"] and (direct["shape"], direct["tip"], direct["legends"]) == (None, "9.8", ["Tip width (mm)"]), direct)
     page.click("#libClose"); page.wait_for_timeout(200)
     at, target, _ = page.evaluate(SHELF_TOP, "shelf-umi-finray")
     closed = page.evaluate(FAMILY_VIEW)
@@ -1497,7 +1767,7 @@ def part_family(browser):
           closed["hash"] == "#shelf-umi-finray" and closed["grid"] and abs(at - target) <= 1, (closed, at, target))
     open_library(page, "#umi-trap-tip5.8")
     part = page.evaluate(FAMILY_VIEW)
-    check("family: a tip's part id opens its one sensor, the address kept", part["detail"] and (part["shape"], part["tip"], part["hash"]) == ("trap", "5.8", "#umi-trap-tip5.8"), part)
+    check("family: a tip's part id opens its one sensor, the address kept", part["detail"] and (part["tip"], part["hash"]) == ("5.8", "#umi-trap-tip5.8"), part)
     open_library(page, "#shelf-umi-trap-tip5.8")
     shelfless = page.evaluate(FAMILY_VIEW)
     check("family: a tip has no shelf (#shelf-umi-trap-tip5.8 is the grid with a note)",
@@ -1562,6 +1832,7 @@ def part_isolation(browser):
             library_case(page, "pictures", view=view)
             open_library(page)
             grid = page.evaluate(FILLS)
+            grid_blue = blues(page)
             before = page.evaluate(SNAPSHOT)
             height = page.evaluate("() => document.documentElement.scrollHeight")
             for y in range(0, height, 400):
@@ -1575,9 +1846,9 @@ def part_isolation(browser):
             open_library(page, "#trossen-widowx-ai-1mm")
             drawn = library_shots.poll(page, LIVE_SHOWN, None, 120) if view else None
             detail = page.evaluate(FILLS)
-            check(f"isolation {tag}: the action blue fills only Open in Gen by Surface, nothing green (the grid and a sensor's page"
-                  f"{', its 3D view drawn' if view else ''})",
-                  grid["blue"] == [] and detail["blue"] == ["a.lib-open"] and grid["green"] == detail["green"] == [] and (drawn or not view), (grid, detail, drawn))
+            check(f"isolation {tag}: the action blue fills only Open in Gen by Surface and the showcase's Design your own, nothing green (the grid "
+                  f"and a sensor's page{', its 3D view drawn' if view else ''})",
+                  grid["blue"] == grid_blue and detail["blue"] == blues(page, "a.lib-open") and grid["green"] == detail["green"] == [] and (drawn or not view), (grid, detail, drawn))
             page.screenshot(path=f"{SHOTS}/library_detail_{scheme}{'_view' if view else ''}.png")
             words = page.evaluate(WORDS)
             open_library(page)
@@ -1586,7 +1857,8 @@ def part_isolation(browser):
                   not [text for text in words if re.search(r"\bCAD\b", text)] and not [text for text in words if re.search(r"[Ѐ-ӿ　-鿿가-힯]", text)],
                   [text[:80] for text in words if re.search(r"\bCAD\b", text)])
             base = SITE["base"]
-            foreign = [url for url in page.requests if not url.startswith(base)]
+            # (GitHub's API for the header's counts on the built site, answered here: web/counts.js, 2026-11-16.)
+            foreign = [url for url in page.requests if not url.startswith(base) and url != GITHUB_API]
             engine = [url for url in page.requests if re.search(r"/py/|worker|backend\.js|app\.js", url)]
             # The 3D view's modules (the user's request of 2026-11-05): three.js and web/cad on a sensor's page with a view only.
             three_d = [url for url in page.requests if re.search(r"three|/cad/", url)]
@@ -1620,11 +1892,12 @@ WINDOW_STATE = """() => { const dialog = document.getElementById('libWindow'); c
     hero: document.getElementById('libHero').checkVisibility(), cards: [...document.querySelectorAll('#libGrid .lib-card')].filter(n => n.checkVisibility()).length}; }"""
 # The grid's cards' boxes in the window (viewport px): opening the window moves none of them.
 GRID_BOXES = """() => [...document.querySelectorAll('#libGrid .lib-card')].map(n => (r => [r.left, r.top, r.width, r.height].map(v => Math.round(v * 10) / 10))(n.getBoundingClientRect()))"""
-# The openers (the user's "all cards"): a gripper's card, a UMI shelf's card, the Tapered tips card, the showcase's Details
-# and its picture; what each opens and what is focused once the window closes.
+# The openers (the user's "all cards"): a gripper's card, the UMI shelf's Straight finger and a shape's card (its 1.5 mm
+# card and the Tapered tips card until the shapes of 2026-11-16), the showcase's Details and its picture; what each opens
+# and what is focused once the window closes.
 OPENERS = (("a gripper's card", "#gripper-franka-hand", "#franka-hand-2mm", "gripper-franka-hand"),
-           ("a UMI shelf's card", "#shelf-umi-finray .lib-card[data-variant='umi-finray-1.5mm']", "#umi-finray-1.5mm", "lib-card"),
-           ("the Tapered tips card", ".lib-card[data-family='umi-tapers']", "#umi-tapers", "lib-card"),
+           ("the UMI shelf's Straight finger", "#shelf-umi-finray .lib-card[data-part='umi-finray']", "#umi-finray-2mm", "lib-card"),
+           ("a shape's card", "#shelf-umi-finray .lib-card[data-card='concave']", "#umi-concave-tip9.8-2mm", "lib-card"),
            ("the showcase's Details", ".lib-showcase-details", None, "lib-pill lib-showcase-details"),
            ("the showcase's picture", ".lib-showcase-pic", None, "lib-pill lib-showcase-details"))
 
@@ -1653,7 +1926,7 @@ def window_box_wrong(state, width, height):
 
 def part_window(browser):
     """The details window (2026-11-15): at 1440 x 900, 900 x 900 and 390 x 844, light and dark, each opener (a gripper's
-    card, a UMI shelf's card, the Tapered tips card, the showcase's Details and its picture) opens its page in the window
+    card, the UMI shelf's Straight finger and a shape's card, the showcase's Details and its picture) opens its page in the window
     over the grid, which neither moves nor scrolls (its cards where they were, the page's scroll kept, the root not
     scrolling: the wheel over the backdrop and over the window, the keys inside it), the window's page at its top with its
     title focused, the tab named after it; the window's box (a sheet below 735 px), the cards' look and the dim backdrop;
@@ -1667,7 +1940,7 @@ def part_window(browser):
         for scheme in ("light", "dark"):
             tag = f"window {width} {scheme}"
             page = new_page(browser, width, height, scheme)
-            page.goto(SITE["base"] + "library.html?probe")
+            page.goto(SITE["base"] + "?probe")
             wait_until(page, READY, 30)
             page.wait_for_timeout(150)
             # Each opener, from the grid scrolled to bring it in sight (the window opens over the grid where it is).
@@ -1689,7 +1962,7 @@ def part_window(browser):
                 after = page.evaluate(WINDOW_STATE)
                 closed[name] = (not after["open"] and after["y"] == before["y"] and after["focus"] == focused and after["tab"] == "Library · FlexiTac-Gen"
                                 and page.evaluate(GRID_BOXES) == grid and after["root"] != "hidden") or after
-            check(f"{tag}: each opener (a gripper's card, a UMI shelf's card, the Tapered tips card, the showcase's Details and picture) opens its page in "
+            check(f"{tag}: each opener (a gripper's card, the UMI shelf's Straight finger and a shape's card, the showcase's Details and picture) opens its page in "
                   "the window (modal) over the grid, which does not move (its cards, the page's scroll), the window's page at its top, its title focused, "
                   "the tab named after it, the root not scrolling",
                   all(value is True for value in opened.values()), {key: value for key, value in opened.items() if value is not True})
@@ -1736,7 +2009,7 @@ def part_window(browser):
                   end["close"] == x_box and end["x"]["hit"] and x_box[0] + x_box[2] <= start["box"][0] + start["box"][2] - 11
                   and x_box[1] >= start["box"][1] + 11 and x_box[1] + x_box[3] <= start["box"][1] + 60, (x_box, end["close"], end["x"]["hit"], start["box"]))
             check(f"{tag}: the action blue fills only Open in Gen by Surface, nothing green (the window and the grid under it)",
-                  fills["blue"] == ["a.lib-open"] and fills["green"] == [], fills)
+                  fills["blue"] == blues(page, "a.lib-open") and fills["green"] == [], fills)
             # The focus kept inside: Tab and Shift+Tab, 30 presses each, never reach the grid (the page's body is the
             # browser's own controls between two rounds); the X among the stops.
             page.evaluate("() => { document.getElementById('libWindowBody').scrollTop = 0; }")
@@ -1811,22 +2084,22 @@ def part_window(browser):
                       double["open"] and double["hash"] == shelf_card.get_attribute("href") and not backed["open"] and backed["hash"] == "#gripper-franka-hand"
                       and card_box["y"] < point[1] < card_box["y"] + card_box["height"] and double["box"][1] + double["box"][3] < point[1],
                       (double["open"], double["hash"], backed["open"], backed["hash"], double["box"], card_box, point))
-            # The showcase's window and the Tapered tips' (screenshots), then each address opened anew: the Library with
-            # the window over it.
-            for what, selector in (("showcase", ".lib-showcase-details"), ("tapers", ".lib-card[data-family='umi-tapers']")):
+            # The showcase's window and the Short taper's (screenshots; the Tapered tips' until 2026-11-16), then each address
+            # opened anew: the Library with the window over it.
+            for what, selector in (("showcase", ".lib-showcase-details"), ("tapers", ".lib-card[data-card='short']")):
                 page.locator(selector).scroll_into_view_if_needed(); page.wait_for_timeout(60)
                 page.click(selector)
                 library_shots.poll(page, LIVE_SHOWN, None, 120)
                 page.wait_for_timeout(250)
                 page.screenshot(path=f"{SHOTS}/library_window_{what}_{width}_{scheme}.png")
                 if what == "showcase":
-                    showcase_fills = page.evaluate(FILLS)
+                    showcase_fills, showcase_blue = page.evaluate(FILLS), blues(page)
                 page.click("#libClose"); page.wait_for_timeout(150)
-            check(f"{tag}: no blue in the showcase's window (no Open in Gen by Surface there), nothing green",
-                  showcase_fills["blue"] == [] and showcase_fills["green"] == [], showcase_fills)
+            check(f"{tag}: no blue in the showcase's window (no Open in Gen by Surface there; the grid's Design your own under it), nothing green",
+                  showcase_fills["blue"] == showcase_blue and showcase_fills["green"] == [], showcase_fills)
             direct = {}
             for address in ("#widowx-250-1mm", "#umi-tapers", f"#{json.loads((LIBRARY / 'showcase.json').read_text(encoding='utf-8'))['id']}"):
-                page.goto(SITE["base"] + "library.html" + address)
+                page.goto(SITE["base"] + address)
                 wait_until(page, READY, 30); page.wait_for_timeout(200)
                 state = page.evaluate(WINDOW_STATE)
                 direct[address] = (state["open"] and state["modal"] and state["hash"] == address and state["y"] == 0 and state["hero"] and state["cards"] > 0
@@ -1855,7 +2128,7 @@ def window_history(browser, width, height, scheme, tag):
     """The review of 2026-11-15: closing the window makes no history entry, so a Back after a close goes where it went
     before the window opened (with Android's Back a close request while the window is open, a new entry had made each
     Back close it and the next open it again, for ever, from the grid and from a shared link).  After an earlier page
-    (library.html?before): a window opened from the grid, closed by a close request (CLOSE_REQUEST) and by a cancel then
+    (./?before): a window opened from the grid, closed by a close request (CLOSE_REQUEST) and by a cancel then
     its close (CANCEL_THEN_CLOSE: one entry back, not two), each to its card's place with its card focused and the
     history's length unchanged, the next Back the earlier page; a pitch chosen, another sensor's address typed over the
     window, Back to the first window (its entry's mark kept through the pitch) and its X: the grid, its card focused;
@@ -1864,11 +2137,11 @@ def window_history(browser, width, height, scheme, tag):
     window opened from the grid its X (in place: the grid's entry under it another document's); each time the next Back
     the earlier page."""
     page = new_page(browser, width, height, scheme)
-    page.goto(SITE["base"] + "library.html?before")
+    page.goto(SITE["base"] + "?before")
     wait_until(page, READY, 30)
 
     def go(address):
-        page.goto(SITE["base"] + "library.html" + address)
+        page.goto(SITE["base"] + address)
         wait_until(page, READY, 30)
         page.wait_for_timeout(150)
 
@@ -1976,7 +2249,7 @@ def part_window_edges(browser):
         if scheme == "dark":
             context.add_init_script(DARK_CHOICE)
         page = context.new_page()
-        page.goto(SITE["base"] + "library.html#arx-x5-2mm")
+        page.goto(SITE["base"] + "#arx-x5-2mm")
         wait_until(page, READY, 30); page.wait_for_timeout(300)
         state = page.evaluate(WINDOW_STATE)
         shot = Image.open(io.BytesIO(page.screenshot())).convert("RGB")
@@ -1994,13 +2267,13 @@ def part_window_edges(browser):
 def part_errors(browser):
     page = new_page(browser)
     page.route("**/static/library/entries.json", lambda route: route.fulfill(status=404, content_type="text/plain", body="not here"))
-    page.goto(SITE["base"] + "library.html")
+    page.goto(SITE["base"])
     wait_until(page, READY, 30)
     status = page.evaluate("() => [document.getElementById('libStatus').textContent, document.getElementById('libStatus').getAttribute('role'), document.getElementById('libGrid').hidden]")
     check("errors: without entries.json the page says so (role alert), the grid hidden",
           status == ["The library could not be loaded (HTTP 404). Gen by Surface and Rectangular still work.", "alert", True], status)
     links = page.evaluate("() => [...document.querySelectorAll('.mode-links a, .masthead-library')].map(a => a.getAttribute('href'))")
-    check("errors: the header's links still work", links == ["./#rect", "./", "library.html"], links)
+    check("errors: the header's links still work (the generator at gen.html, the Library at ./ since 2026-11-16)", links == ["gen.html#rect", "gen.html", "./"], links)
     check("errors: no console error but entries.json's 404", not errors_of(page, ["/static/library/entries.json"]), errors_of(page, ["/static/library/entries.json"])[:5])
     page.context.close()
     if SITE["root"] is None:
@@ -2052,15 +2325,51 @@ LOAD_SAMPLE = """() => { const shot = document.querySelector('#libDetail .lib-sh
   const s = node && node.textContent ? JSON.parse(node.textContent) : {};
   const box = n => n ? (r => [r.left, r.top + scrollY, r.width, r.height].map(v => Math.round(v * 10) / 10))(n.getBoundingClientRect()) : null;
   const seen = n => Boolean(n) && n.checkVisibility({visibilityProperty: true, opacityProperty: true});
+  const hint = host ? host.querySelector('.lib-drag') : null;
   return {state: s.state || null, build: s.build_id || null, img: Boolean(img), loading: img ? img.getAttribute('loading') : null,
     loaded: Boolean(img) && img.complete && img.naturalWidth > 0, picture: seen(img), live: seen(host) && seen(canvas),
-    shot: box(shot), open: box(open), host: box(host), canvas: box(canvas)}; }"""
+    shot: box(shot), open: box(open), host: box(host), canvas: box(canvas), hint: hint ? Number(getComputedStyle(hint).opacity) : null}; }"""
 CANVAS_BOX = "() => { const r = document.querySelector('#libDetail .lib-live canvas').getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; }"
 ARIA = """() => { const host = document.querySelector('#libDetail .lib-live'); const img = document.querySelector('#libDetail .lib-shot-detail img');
   const hint = document.getElementById(host.getAttribute('aria-describedby') || ''); const canvas = host.querySelector('canvas');
   return {role: host.getAttribute('role'), label: host.getAttribute('aria-label'), alt: img ? img.getAttribute('alt') : null, tab: host.tabIndex,
           hint: hint ? hint.textContent : null, inside: Boolean(hint) && host.contains(hint), canvas: canvas ? canvas.getAttribute('aria-hidden') : null,
           touch: canvas ? getComputedStyle(canvas).touchAction : null, cursor: canvas ? getComputedStyle(canvas).cursor : null}; }"""
+# The drag hint (the user's request of 2026-11-15: "箭头能不能做成像schetchfab一样的动画"): its opacity and visibility, its
+# screen-reader state, its box against the host's (inside it, its bottom's distance, its centre's from the host's middle),
+# what lies under its middle for the pointer (the view's canvas: a drag passes through it), its sway (the playing states
+# of its lib-drag-sway animation), its label, its transition, and the host's is-used and its is-gone (null: no hint).
+DRAG_HINT = """() => { const host = document.querySelector('#libDetail .lib-live'); const hint = host && host.querySelector('.lib-drag');
+  if (!hint) return null; const r = hint.getBoundingClientRect(); const h = host.getBoundingClientRect(); const style = getComputedStyle(hint);
+  const label = hint.querySelector('.lib-drag-label'); const x = r.left + r.width / 2, y = r.top + r.height / 2; const under = document.elementFromPoint(x, y);
+  return {opacity: Number(style.opacity), visible: style.visibility === 'visible' && getComputedStyle(hint.querySelector('svg')).visibility === 'visible',
+          hidden: hint.getAttribute('aria-hidden'), centre: [x, y], size: [Math.round(r.width), Math.round(r.height)],
+          inside: r.left >= h.left && r.right <= h.right && r.top >= h.top && r.bottom <= h.bottom, bottom: Math.round(h.bottom - r.bottom),
+          offset: Math.round((x - (h.left + h.width / 2)) * 10) / 10, through: Boolean(under) && under.tagName === 'CANVAS' && host.contains(under),
+          sway: hint.getAnimations().filter(a => a.animationName === 'lib-drag-sway').map(a => a.playState), label: label && label.checkVisibility() ? label.textContent : null,
+          transition: style.transitionDuration, used: host.classList.contains('is-used'), gone: hint.classList.contains('is-gone'),
+          view: Math.round(h.height * 10) / 10, drawing: (d => [Math.round(d.width * 10) / 10, Math.round(d.height * 10) / 10])(hint.querySelector('svg').getBoundingClientRect())}; }"""
+# The drag hint's size from its view's (library.css .lib-drag, the review of 2026-11-15): for a view ``height`` px tall, the
+# drawing's height (13.4 % of it between 28 and 44 px; its width the viewBox's 84:44), its distance from the view's bottom
+# and its sway's reach in proportion (14 and 30 px at 44), and its label shown on a view 270 px tall or more (over 269 px:
+# @container lib-live (max-height:269px) hides it).
+def hint_size(height):
+    drawing = min(44.0, max(28.0, 0.134 * height))
+    return {"drawing": [drawing * 84 / 44, drawing], "bottom": drawing * 14 / 44, "reach": drawing * 30 / 44, "label": height > 269}
+
+
+def hint_fits(hint, size=None):
+    """Whether ``hint`` (DRAG_HINT) has the size of its view's (hint_size), within a pixel."""
+    size = size or hint_size(hint["view"])
+    return (all(abs(a - b) <= 1 for a, b in zip(hint["drawing"], size["drawing"])) and abs(hint["bottom"] - size["bottom"]) <= 1
+            and (hint["label"] == "Drag to rotate") == size["label"] and hint["inside"])
+
+
+# The hint's centre from the host's middle at its sway's start, a quarter and a half of the way (paused there, then played).
+HINT_SWAY = """() => { const host = document.querySelector('#libDetail .lib-live'); const hint = host.querySelector('.lib-drag');
+  const sway = hint.getAnimations().find(a => a.animationName === 'lib-drag-sway'); if (!sway) return null; const h = host.getBoundingClientRect();
+  const at = time => { sway.pause(); sway.currentTime = time; const r = hint.getBoundingClientRect(); return Math.round((r.left + r.width / 2 - (h.left + h.width / 2)) * 10) / 10; };
+  const out = [at(0), at(1250), at(2500)]; sway.play(); return out; }"""
 RING = """() => { const host = document.querySelector('#libDetail .lib-live'); const style = getComputedStyle(host);
   return {focused: document.activeElement === host, visible: host.matches(':focus-visible'), style: style.outlineStyle,
           width: parseFloat(style.outlineWidth), colour: style.outlineColor}; }"""
@@ -2105,14 +2414,14 @@ def view_settled(page, key, timeout=150):
 
 def open_view(page, key, settle=True):
     """``key``'s page opened with ?probe (the view's state read; the visitor's view otherwise), its view settled."""
-    page.goto(SITE["base"] + f"library.html?probe#{key}")
+    page.goto(SITE["base"] + f"?probe#{key}")
     wait_until(page, READY, 30)
     return view_settled(page, key) if settle else None
 
 
 def load_samples(page, key):
     """``key``'s page opened with ?probe, what it shows sampled every few ms until its view settles."""
-    page.goto(SITE["base"] + f"library.html?probe#{key}")
+    page.goto(SITE["base"] + f"?probe#{key}")
     samples, end, build = [], time.monotonic() + 150, ENTRIES["variants"][key]["build_id"]
     while time.monotonic() < end:
         sample = page.evaluate(LOAD_SAMPLE)
@@ -2237,11 +2546,12 @@ def part_view(browser):
             drawn = [index for index, sample in enumerate(shown) if sample["state"] == "drawn" and sample["build"] == variant["build_id"]]
             loaded = [index for index, sample in enumerate(shown) if sample["loaded"]]
             check(f"view {name}: the picture first (eager, loaded, shown; the view hidden), then the view drawn over it (the picture hidden), "
-                  "never neither",
+                  "never neither; the drag hint never shown before the view is drawn (the review of 2026-11-15)",
                   shown and drawn and loaded and loaded[0] <= drawn[0] and shown[0]["loading"] is None and shown[0]["img"]
-                  and all(not sample["live"] and (sample["picture"] or not sample["loaded"]) for sample in before)
+                  and all(not sample["live"] and (sample["picture"] or not sample["loaded"]) and not sample["hint"] for sample in before)
                   and last["state"] == "drawn" and last["live"] and not last["picture"],
-                  {"samples": len(samples), "first": shown[0] if shown else None, "last": last})
+                  {"samples": len(samples), "first": shown[0] if shown else None, "last": last,
+                   "hint before drawn": [sample["hint"] for sample in before if sample["hint"]][:3]})
             moved = [sample for sample in shown if any(abs(a - b) > 0.5 for a, b in zip(sample["shot"] + sample["open"], shown[0]["shot"] + shown[0]["open"]))]
             check(f"view {name}: the picture's box and Open never move as the view arrives; the view's host and canvas the slot's box",
                   not moved and all(abs(a - b) <= 0.5 for a, b in zip(last["host"] or [], last["shot"])) and last["host"]
@@ -2290,6 +2600,37 @@ def part_view(browser):
             centre = (box[0] + box[2] / 2, box[1] + box[3] / 2)
             state = lambda: page.evaluate(LIB_STATE)  # noqa: E731
             turned = {}
+            # The drag hint (the user's request of 2026-11-15): shown once the view is drawn (faded in), at the view's bottom
+            # centre, swaying side to side; a drag begun on it turns the view and hides it (faded out, its sway then stopped).
+            page.wait_for_timeout(300)
+            hint = page.evaluate(DRAG_HINT)
+            sway = page.evaluate(HINT_SWAY) if hint else None
+            page.screenshot(path=f"{SHOTS}/library_view_{key}_{size}_hint.png")
+            on_hint = right = None
+            if hint:
+                # A right click turns nothing, so leaves it (the review of 2026-11-15).
+                page.mouse.click(box[0] + box[2] / 2, box[1] + box[3] / 3, button="right"); page.wait_for_timeout(1100)
+                right = page.evaluate(DRAG_HINT)
+                page.mouse.move(*hint["centre"]); page.mouse.down(); page.mouse.move(hint["centre"][0] - min(120, box[2] / 3), hint["centre"][1] - 10, steps=8)
+                page.mouse.up(); page.wait_for_timeout(150)
+                on_hint = state()["moved"]
+                page.wait_for_timeout(1100)
+                gone = page.evaluate(DRAG_HINT)
+                page.focus("#libDetail .lib-live"); page.keyboard.press("0"); page.wait_for_timeout(120)
+            # Its size the view's (the view 330 px tall at 1440 x 900: the drawing 84 x 44, 14 px up, 30 px either way, its label;
+            # 113 px at 390 x 844: 54 x 28 at its floor, about 9 px up, 19 px either way, no label).
+            want = hint_size(hint["view"]) if hint else None
+            expected = (want["drawing"][1] == 44 and want["label"]) if width >= 900 else (want["drawing"][1] == 28 and not want["label"]) if want else False
+            check(f"view {name}: the drag hint shown once the view is drawn (opacity 1), hidden from a screen reader, at the view's bottom centre, inside it, "
+                  f"sized by the view ({hint and hint['view']} px tall: the drawing {want and [round(v, 1) for v in want['drawing']]} px, "
+                  f"{want and round(want['bottom'], 1)} px up, label {want and want['label']}, swaying {want and round(want['reach'], 1)} px either way, running); "
+                  "a right click leaving it; over the canvas yet letting a drag through (a drag begun on it turns the view), which hides it (faded out, its sway stopped)",
+                  bool(hint) and expected and hint["opacity"] == 1 and hint["visible"] and hint["hidden"] == "true" and hint_fits(hint)
+                  and hint["sway"] == ["running"] and hint["through"] and not hint["used"]
+                  and sway and abs(sway[0] + want["reach"]) <= 1.5 and abs(sway[1]) <= 1 and abs(sway[2] - want["reach"]) <= 1.5
+                  and right and right["opacity"] == 1 and not right["used"] and right["sway"] == ["running"]
+                  and on_hint is True and gone["opacity"] == 0 and gone["used"] and gone["gone"] and gone["sway"] == [],
+                  {"hint": hint, "want": want, "sway": sway, "right click": right, "on hint": on_hint, "after": hint and gone})
             page.mouse.move(*centre); page.mouse.down(); page.mouse.move(centre[0] + min(120, box[2] / 3), centre[1] + 20, steps=8); page.mouse.up()
             page.wait_for_timeout(150)
             turned["drag"] = state()["moved"]
@@ -2306,6 +2647,9 @@ def part_view(browser):
             turned["dblclick"] = state()["moved"]
             check(f"view {name}: a drag turns the view, 0 brings it home, ArrowLeft and ArrowUp turn it, a double click brings it home",
                   turned == {"drag": True, "0": False, "ArrowLeft": True, "ArrowUp": True, "dblclick": False}, turned)
+            still = page.evaluate(DRAG_HINT)
+            check(f"view {name}: the drag hint stays hidden on the page through 0, the arrow keys and a double click (no sway)",
+                  still and still["opacity"] == 0 and still["sway"] == [], still)
             modes = {}
             for mode in ("assembled", "exploded"):
                 page.click(f"#libDetail .lib-view label:has(input[value='{mode}'])")
@@ -2365,10 +2709,41 @@ def part_view(browser):
                       "a sideways one turns the view",
                       scrolled >= 40 and grid_moved == 0 and before is False and stayed is False and state()["moved"] is True,
                       {"scrolled": scrolled, "grid moved": grid_moved, "home before": not before, "turned by the vertical swipes": stayed, "turned": state()["moved"]})
+            # The drag hint as the page has it: another pitch of the same gripper keeps it hidden; another gripper's page shows
+            # it again, a turning key hides it; under reduced motion, back on the first page, it shows still (no sway, no
+            # fade) and a press hides it at once.
+            page.focus("#libDetail .lib-live")
+            page.click("#libDetail input[name='libPitch']:not(:checked)")
+            pitch = page.evaluate("() => decodeURIComponent(location.hash.slice(1))")
+            view_settled(page, pitch); page.wait_for_timeout(300)
+            pitched = page.evaluate(DRAG_HINT)
+            other = VIEW_UMI if key == VIEW_GRIPPER else VIEW_GRIPPER
+            page.evaluate("(key) => { location.hash = '#' + key; }", other)
+            view_settled(page, other); page.wait_for_timeout(300)
+            again = page.evaluate(DRAG_HINT)
+            page.focus("#libDetail .lib-live"); page.keyboard.press("ArrowLeft"); page.wait_for_timeout(150)
+            keyed = (state()["moved"], page.evaluate(DRAG_HINT)["used"])
+            page.wait_for_timeout(1100)
+            keyed += (page.evaluate(DRAG_HINT)["opacity"],)
+            page.emulate_media(reduced_motion="reduce")
+            page.evaluate("(key) => { location.hash = '#' + key; }", key)
+            view_settled(page, key); page.wait_for_timeout(60)
+            still_hint = page.evaluate(DRAG_HINT)
+            box = page.evaluate(CANVAS_BOX)
+            page.mouse.move(box[0] + box[2] / 2, box[1] + box[3] / 3); page.mouse.down(); page.mouse.up(); page.wait_for_timeout(60)
+            pressed = page.evaluate(DRAG_HINT)
+            page.emulate_media(reduced_motion="no-preference")
+            check(f"view {name}: the drag hint stays hidden for another pitch of the gripper, shows again (swaying) on another gripper's page, where "
+                  "a turning key hides it; under reduced motion shown still (no sway, no transition) and hidden at once by a press",
+                  pitched and pitched["opacity"] == 0 and pitched["used"] and again and again["opacity"] == 1 and again["sway"] == ["running"] and not again["used"]
+                  and keyed == (True, True, 0) and still_hint and still_hint["opacity"] == 1 and still_hint["sway"] == [] and still_hint["transition"] == "0s"
+                  and pressed["opacity"] == 0 and pressed["used"],
+                  {"pitch": pitch, "pitched": pitched, "again": again, "keyed": keyed, "reduced": still_hint, "pressed": pressed})
             engine = [url for url in page.requests if re.search(r"/api/|/py/|pyodide|backend\.js|(^|/)app\.js", url)]
             check(f"view {name}: no request for the server's API, py/, Pyodide, backend.js or app.js; no console error",
                   not engine and not errors_of(page), (engine[:3], errors_of(page)[:3]))
             page.context.close()
+        hint_paths(browser, width, height, mobile)
         # A UMI sensor drawn after a gripper on the same page (the one view, its stage taken down) as on a page of its own.
         first = view_page(browser, width, height, mobile=mobile)
         library_case(first, "pictures", view=True)
@@ -2421,6 +2796,110 @@ def part_view(browser):
               look == "dark" and settled.get("state") == "drawn" and grounds == {"slot": "rgb(245, 245, 247)", "host": "rgba(0, 0, 0, 0)"} and not errors_of(page),
               (look, settled.get("state"), grounds))
         page.context.close()
+
+
+# A lost WebGL context for the drag hint's paths (the extension's loseContext, then its restoreContext, on the view's canvas;
+# part_looks's LOSE_CONTEXT does both at once).
+HINT_LOSE = """() => { const canvas = document.querySelector('#libDetail .lib-live canvas'); const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  window.__libLose = gl.getExtension('WEBGL_lose_context'); window.__libLose.loseContext(); }"""
+HINT_RESTORE = "() => { window.__libLose.restoreContext(); }"
+STAGE_LIVE = "() => Boolean(document.querySelector('#libDetail .lib-stage.is-live'))"
+# The view of ``key`` (a variant's or the showcase's id) drawn.
+DRAWN_ID = "(key) => { const node = document.getElementById('libViewState'); const s = node && node.textContent ? JSON.parse(node.textContent) : null; return Boolean(s) && s.id === key && s.state === 'drawn'; }"
+
+
+def hint_paths(browser, width, height, mobile):
+    """The drag hint's paths its review of 2026-11-15 found unchecked, on Trossen WidowX AI's page opened from its card: a
+    lost WebGL context hides it with the view and, restored, shows it again while the view was not used; on a phone a
+    vertical swipe that scrolls the window leaves it and a sideways one (a touch's turn) hides it (elsewhere a turning
+    key); restored after that use, it stays hidden; Back (the grid) then Forward (the window opened again) shows it."""
+    size = f"{width}"
+    page = view_page(browser, width, height, mobile=mobile)
+    library_case(page, "pictures", view=True)
+    page.goto(SITE["base"] + "?probe")
+    wait_until(page, READY, 30)
+    page.click("#gripper-trossen-widowx-ai")
+    view_settled(page, VIEW_GRIPPER); page.wait_for_timeout(300)
+    state = lambda: page.evaluate(LIB_STATE)  # noqa: E731
+
+    def round_trip():
+        # Lost (the picture shown again, the hint with the view), then restored and drawn again.
+        page.evaluate(HINT_LOSE); page.wait_for_timeout(300)
+        lost = (state()["state"], page.evaluate(STAGE_LIVE), page.evaluate(DRAG_HINT)["opacity"])
+        page.evaluate(HINT_RESTORE)
+        library_shots.poll(page, DRAWN_ID, VIEW_GRIPPER, 60); page.wait_for_timeout(400)
+        return lost, (state()["state"], page.evaluate(STAGE_LIVE), page.evaluate(DRAG_HINT))
+
+    before = round_trip()
+    if mobile:
+        page.evaluate(WINDOW_TOP); page.wait_for_timeout(150)
+        box = page.evaluate(CANVAS_BOX)
+        top = page.evaluate("() => document.getElementById('libWindowBody').scrollTop")
+        swipe(page, (box[0] + box[2] / 2, box[1] + box[3] / 2 + 10), (0, -10))
+        page.wait_for_timeout(1100)
+        vertical = (page.evaluate("() => document.getElementById('libWindowBody').scrollTop") - top, state()["moved"], page.evaluate(DRAG_HINT))
+        page.evaluate(WINDOW_TOP); page.wait_for_timeout(150)
+        box = page.evaluate(CANVAS_BOX)
+        swipe(page, (box[0] + box[2] / 2 - 60, box[1] + box[3] / 2), (15, 0))
+        page.wait_for_timeout(1100)
+        use = (state()["moved"], page.evaluate(DRAG_HINT))
+        check(f"view {size}: on a phone a vertical swipe over the view that scrolls the window leaves the drag hint (shown, swaying, the view at "
+              "home: the review of 2026-11-15); a sideways one turns the view and hides it (faded out, its sway stopped)",
+              vertical[0] >= 40 and vertical[1] is False and vertical[2]["opacity"] == 1 and not vertical[2]["used"] and vertical[2]["sway"] == ["running"]
+              and use[0] is True and use[1]["opacity"] == 0 and use[1]["used"] and use[1]["gone"] and use[1]["sway"] == [],
+              {"vertical (scrolled, turned, hint)": vertical, "sideways (turned, hint)": use})
+    else:
+        page.focus("#libDetail .lib-live"); page.keyboard.press("ArrowLeft"); page.wait_for_timeout(1100)
+        use = (state()["moved"], page.evaluate(DRAG_HINT))
+    after = round_trip()
+    check(f"view {size}: a lost WebGL context hides the drag hint with the view (the picture shown); restored and drawn again, the hint shows "
+          "while the view was not used (swaying), stays hidden once it was",
+          before[0] == ("lost", False, 0) and before[1][:2] == ("drawn", True) and before[1][2]["opacity"] == 1 and not before[1][2]["used"]
+          and before[1][2]["sway"] == ["running"] and use[0] is True and use[1]["used"]
+          and after[0] == ("lost", False, 0) and after[1][:2] == ("drawn", True) and after[1][2]["opacity"] == 0 and after[1][2]["used"],
+          {"before a use (lost, restored)": before, "used": use, "after a use (lost, restored)": after})
+    page.go_back(); page.wait_for_timeout(300)
+    grid = page.evaluate("() => document.getElementById('libWindow').open")
+    page.go_forward()
+    view_settled(page, VIEW_GRIPPER); page.wait_for_timeout(300)
+    again = page.evaluate(DRAG_HINT)
+    check(f"view {size}: after a use, Back (the grid) then Forward (the window opened again) shows the drag hint again (swaying)",
+          grid is False and again and again["opacity"] == 1 and not again["used"] and again["sway"] == ["running"], {"window open after Back": grid, "hint": again})
+    check(f"view {size}: the drag hint's paths with no console error", not errors_of(page), errors_of(page)[:3])
+    page.context.close()
+
+
+def part_view_hint_sizes(browser):
+    """The drag hint sized by its view, not the window (the review of 2026-11-15: by the window's width, below 900 px a
+    tablet's wide 3:1 view 685 x 228 px and the showcase's tall one on a phone had the small hint without its label, and a
+    900 px window's 355 x 222 px view the full one over its gripper's base): Unitree Dex1's view (16:10 from 900 px, 3:1
+    below) and the showcase's (4:5) at nine windows, the drawing, its distance from the bottom, its label and its reach
+    the view's (hint_size), inside it."""
+    if not any(arts(browser).values()):
+        check("view sizes: the 3D view's art is there for the sensors entries.json gives a view", not VIEWED, "a built site before the shoot")
+        return
+    windows = ((1440, 900, False), (1280, 800, False), (1100, 800, False), (1024, 768, False), (900, 900, False), (820, 1180, True),
+               (1180, 820, True), (390, 844, True), (320, 640, True))
+    for key in ("unitree-dex1-2mm", "flexitac-g1"):
+        rows = []
+        for width, height, mobile in windows:
+            page = view_page(browser, width, height, mobile=mobile)
+            library_case(page, "pictures", view=True)
+            page.goto(SITE["base"] + f"?probe#{key}")
+            wait_until(page, READY, 30)
+            library_shots.poll(page, DRAWN_ID, key, 150)
+            page.wait_for_timeout(300)
+            hint = page.evaluate(DRAG_HINT)
+            sway = page.evaluate(HINT_SWAY) if hint else None
+            want = hint_size(hint["view"]) if hint else None
+            rows.append((f"{width}x{height}", bool(hint) and hint_fits(hint, want) and hint["opacity"] == 1 and sway is not None
+                         and abs(sway[0] + want["reach"]) <= 1.5 and abs(sway[2] - want["reach"]) <= 1.5,
+                         hint and hint["view"], hint and hint["drawing"], hint and hint["bottom"], hint and hint["label"], sway))
+            page.context.close()
+        by_view = {row[0]: (row[2], row[3][1] if row[3] else None, row[5]) for row in rows}
+        check(f"view sizes, {key}: at nine windows the drag hint the view's (the drawing 13.4 % of its height, 28 to 44 px; its distance, label "
+              "(on a view 270 px tall or more) and reach in proportion), inside it",
+              all(row[1] for row in rows), {"failed": [row for row in rows if not row[1]], "by window (view height, drawing height, label)": by_view})
 
 
 # The race (the review of 2026-11-06): a sensor's page whose view is asked for again and again while its files load (a slow
@@ -2478,7 +2957,7 @@ def part_view_race(browser):
             open_view(page, RACE_FAST)
         session = throttled(page, True)
         if scenario == "pitches":
-            page.goto(SITE["base"] + "library.html?probe#trossen-widowx-ai-1mm")
+            page.goto(SITE["base"] + "?probe#trossen-widowx-ai-1mm")
             page.wait_for_selector("#libDetail .lib-seg input[name=libPitch]", state="attached", timeout=60000)
             for target in RACE_PITCHES:
                 page.wait_for_timeout(350)
@@ -2490,7 +2969,7 @@ def part_view_race(browser):
                         radio.click()
                     page.wait_for_timeout(30)
         elif scenario == "grid":
-            page.goto(SITE["base"] + "library.html?probe")
+            page.goto(SITE["base"] + "?probe")
             page.wait_for_selector("#gripper-trossen-widowx-ai", timeout=60000)
             for action, target in RACE_GRID:
                 if action == "click":
@@ -2777,12 +3256,15 @@ def main(argv=None):
         server = ThreadingHTTPServer(("127.0.0.1", STATIC_PORT), functools.partial(QuietFiles, directory=str(scratch)))
         threading.Thread(target=server.serve_forever, daemon=True).start()
         SITE.update(base=f"http://127.0.0.1:{STATIC_PORT}/{SUBPATH}/", root=root)
-    print(f"the Library at {SITE['base']}library.html", flush=True)
+    print(f"the Library at {SITE['base']}", flush=True)
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(args=WEBGL_ARGS)
-            parts = (part_layout, part_grid, part_routes, part_window, part_window_edges, part_first_screen, part_pictures, part_view, part_view_race, part_looks, part_pad,
-                     part_placeholders, part_family, part_downloads, part_isolation, part_errors)
+            if SITE["root"] is not None:
+                answer_github(browser)  # the built site's pages ask GitHub's API for the header's counts (web/counts.js)
+            parts = (part_layout, part_grid, part_routes, part_window, part_window_edges, part_first_screen, part_pictures, part_view, part_view_hint_sizes,
+                     part_view_race, part_looks, part_pad,
+                     part_placeholders, part_family, part_downloads, part_isolation, part_errors, part_first_page)
             for part in parts:
                 if args.parts and part.__name__ not in args.parts:
                     continue

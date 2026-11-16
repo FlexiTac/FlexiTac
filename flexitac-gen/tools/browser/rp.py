@@ -19,8 +19,11 @@ from playwright.sync_api import sync_playwright
 
 PORT = int(os.environ.get("FPC_PORT", "8008"))
 URL = f"http://127.0.0.1:{PORT}/"
-# The app opens in CAD mode (the user's default of 2026-10-30); the Rectangular mode's checks open it at #rect.
-RECT_URL = URL + "#rect"
+# The generator's page: gen.html since the user's decision of 2026-11-16 ("是的 be first page"), which made the Library
+# the first page (URL; library.html before, which forwards there now).  It opens in CAD mode (the user's default of
+# 2026-10-30); the Rectangular mode's checks open it at #rect.
+GEN_URL = URL + "gen.html"
+RECT_URL = GEN_URL + "#rect"
 SCRATCH = os.environ.get("FPC_BROWSER_OUT", str(Path(tempfile.gettempdir()) / "fpc-browser-checks"))
 SHOTS = f"{SCRATCH}/shots"
 Path(SHOTS).mkdir(parents=True, exist_ok=True)
@@ -488,3 +491,97 @@ def figure_controls(page, wrap=False):
 
 if __name__ == "__main__":
     sys.exit(0)
+
+
+# -- the first page (the user's decisions of 2026-11-15 and 2026-11-16: "我觉得之后可以让lib作为第一次点击进入时候使用的界面",
+# "是的 be first page"): the Library at ./ (index.html), the generator at gen.html, library.html a forwarding page, and
+# web/forward.js sending the addresses of before on with location.replace, their query and hash kept, before anything
+# paints.  library_checks.py part_first_page (app.py, or a built site with --site) and static_checks.py part_first_page
+# (the built site) run forwarding() on FORWARDS.
+#
+# (address after the site's folder, where it ends: None stays): the generator's addresses of before (its ?part, ?sample,
+# ?debug, #rect, #cad and its design checks' anchors, at ./ and ./index.html), library.html's, and the Library's own
+# (its sensors, a part, a family, its places, the showcase, ?probe), which stay.
+FORWARDS = (
+    ("?part=widowx-250-1mm", "gen.html?part=widowx-250-1mm"), ("#rect", "gen.html#rect"), ("?part=umi-tapers#rect", "gen.html?part=umi-tapers#rect"),
+    ("#cad", "gen.html#cad"), ("?sample=arx-x5", "gen.html?sample=arx-x5"), ("?debug", "gen.html?debug"), ("#drc-row", "gen.html#drc-row"),
+    ("index.html#rect", "gen.html#rect"), ("index.html?part=widowx-250-1mm#rect", "gen.html?part=widowx-250-1mm#rect"),
+    ("library.html", ""), ("library.html#widowx-250-2mm", "#widowx-250-2mm"), ("library.html#gripper-arx-x5", "#gripper-arx-x5"),
+    ("library.html#flexitac-g1", "#flexitac-g1"), ("library.html#rect", "gen.html#rect"),
+    ("", None), ("#widowx-250-2mm", None), ("#widowx-250", None), ("#umi-tapers", None), ("#gripper-arx-x5", None), ("#shelf-umi-finray", None),
+    ("#showcase", None), ("#flexitac-g1", None), ("?probe", None),
+)
+# Each frame of each document (an init script: every requestAnimationFrame from the document's first, reported on the
+# console, which outlives the document): its address, web/forward.js's mark, and how many of its texts, links and
+# pictures are shown (checkVisibility with the visibility property: a hidden root hides them all).
+FORWARD_FRAMES = """(() => { const step = () => { const root = document.documentElement;
+    const shown = [...document.querySelectorAll('h1, h2, p, a, img, svg, canvas, button')].filter(node => node.checkVisibility({checkVisibilityCSS: true, visibilityProperty: true})).length;
+    console.debug('fpc-frame ' + JSON.stringify({href: location.href, forward: root.dataset.forward ?? null, visibility: getComputedStyle(root).visibility, shown}));
+    requestAnimationFrame(step); };
+  requestAnimationFrame(step); })();"""
+
+
+# The header's star and fork counts on the built site (web/counts.js; the review of 2026-11-16: the Library, the site's
+# first page, refreshes them as the generator does): GitHub's API answered in every context of a browser as GitHub
+# would (answer_github), never asked of GitHub itself (its hourly limit, a machine offline); each ask kept in
+# GITHUB_ASKED (the asking page's address).
+GITHUB_API = "https://api.github.com/repos/FlexiTac/FlexiTac"
+GITHUB_REPLY = {"stargazers_count": 1234, "forks_count": 56}
+GITHUB_CARD = ["1.2k", "56", False, "FlexiTac on GitHub: 1234 stars, 56 forks"]
+GITHUB_ASKED = []
+CARD = """() => [document.querySelector('[data-gh-stars]').textContent, document.querySelector('[data-gh-forks]').textContent,
+    document.querySelector('[data-gh-stats]').hidden, document.querySelector('[data-gh-badge]').getAttribute('aria-label')]"""
+
+
+def answer_github(browser):
+    """``browser`` with GitHub's API answered here in each context it opens from now on (GITHUB_REPLY)."""
+    opened = browser.new_context
+
+    def new_context(*args, **kwargs):
+        context = opened(*args, **kwargs)
+        context.route(GITHUB_API, lambda route: (GITHUB_ASKED.append(route.request.frame.url), route.fulfill(
+            status=200, content_type="application/json", body=json.dumps(GITHUB_REPLY)))[-1])
+        return context
+    browser.new_context = new_context
+    return browser
+
+
+def forwarding(browser, base, cases=FORWARDS, hold_s=0.6):
+    """Each address of ``cases`` opened after an earlier page (``base``?before, the Library), its target's document held
+    ``hold_s`` so the forwarding one would paint if it could: {address: {url, final, added, back, title, frames, shown,
+    marks, hidden}}: where it ended and where it should, the entries it added to the history (1: none of its own),
+    whether Back went to the earlier page, its title, and the old address's document's frames (how many, the most texts,
+    links and pictures shown in one: 0 or None when nothing of it was painted; Chromium paints none of a page that
+    forwards from <head>), web/forward.js's marks and the root's visibility in them."""
+    out = {}
+    for address, target in cases:
+        context = browser.new_context(viewport={"width": 1440, "height": 900})
+        page = context.new_page()
+        frames = []
+        page.on("console", lambda message: frames.append(json.loads(message.text[len("fpc-frame "):])) if message.text.startswith("fpc-frame ") else None)
+        page.add_init_script(FORWARD_FRAMES)
+        before = base + "?before"
+        page.goto(before)
+        page.wait_for_load_state("load")
+        start = page.evaluate("() => history.length")
+        old = base + address
+        final = old if target is None else base + target
+        held = final.split("#")[0]
+        page.route(lambda url: url == held, lambda route: (time.sleep(hold_s), route.fallback()))
+        page.goto(old, wait_until="commit")
+        try:
+            page.wait_for_url(final, timeout=30_000)
+            page.wait_for_load_state("domcontentloaded")
+        except Exception:  # noqa: BLE001 - reported below as where it ended
+            pass
+        page.wait_for_timeout(300)
+        ended, added, title = page.url, page.evaluate("() => history.length") - start, page.title()
+        page.unroute_all(behavior="ignoreErrors")
+        mine = [frame for frame in frames if frame["href"] == old]
+        page.go_back(wait_until="commit")
+        page.wait_for_timeout(300)
+        out[address] = {"url": ended, "final": final, "added": added, "back": page.url == before, "title": title,
+                        "frames": len(mine), "shown": max((frame["shown"] for frame in mine), default=None),
+                        "marks": sorted({str(frame["forward"]) for frame in mine}), "hidden": sorted({frame["visibility"] for frame in mine})}
+        context.close()
+    return out

@@ -2308,7 +2308,7 @@ EASYEDA = (
     m("X/easyeda-route", "EasyEDA export", "the HTTP route renamed (/api/export/easyeda)",
       (APP, 'EASYEDA_ROUTES = {"/api/export/easyeda-pro": "easyeda_pro_zip"}', 'EASYEDA_ROUTES = {"/api/export/easyeda": "easyeda_pro_zip"}')),
     m("X/easyeda-button", "EasyEDA export", "the web UI without its EasyEDA Pro download",
-      ("web/index.html", '            <button type="button" data-export="easyeda-pro" disabled', '            <button type="button" data-export="easyeda" disabled')),
+      ("web/gen.html", '            <button type="button" data-export="easyeda-pro" disabled', '            <button type="button" data-export="easyeda" disabled')),
     m("X/easyeda-compare-outline", "EasyEDA export", "the comparison tool fills the outline from the outermost crossings (cutouts no longer holes)",
       (COMPARE, "    _pairs(segments, intervals)\n", "    _pairs({k: [min(xs), max(xs)] for k, xs in segments.items()}, intervals)\n")),
 )
@@ -2502,13 +2502,14 @@ LIBRARY_PAGE = (
       ("tools/build_static_site.py", '    if library_write.canonical(document["request"]) != sent:\n', "    if False:\n"), killers=("test_library.",)),
     m("S/library-own-file", "2026-11-05 Library", "the user's own file keeps a Library sensor's ?part and options",
       (CAD_MAIN, "  if (!isDefault) leaveLibrary();  // the user's own file: a Library sensor's ?part and options go\n", ""), killers=("test_library.",)),
-    m("S/library-route", "2026-11-05 Library", "app.py no longer serves library.html",
+    m("S/library-route", "2026-11-05 Library", "app.py no longer serves library.html (its forwarding page since 2026-11-16)",
       (APP, '"/library.html": "library.html"}', '}'), killers=("test_library.",)),
 )
 MUTANTS += LIBRARY_PAGE
 # The Library's tapered tips (2026-11-05): a family of parts as one card on its shelf's part.
 LIBRARY_TAPERS = (
-    m("S/library-family-grid", "2026-11-05 Library", "the Library's writer takes a family whose grid misses or adds a choice of its axes",
+    m("S/library-family-grid", "2026-11-05 Library", "the Library's writer takes a family's card whose grid misses or adds a choice of its axes "
+      "(a family's own grid until its cards of 2026-11-16)",
       (LIBRARY_WRITE, '    if sorted(record["grid"]) != sorted(keys):\n', "    if False:\n"), killers=("test_library.",)),
     m("S/library-family-start", "2026-11-05 Library", "a family's parts get entries of their own in entries.json's start (each gripper's default)",
       (LIBRARY_WRITE, "        if part_id in grippers:\n            document[\"start\"].append(default)\n",
@@ -2533,10 +2534,10 @@ LIBRARY_MINORS = (
        "index.parts[id].default : \"\";"), killers=("test_library.",)),
     m("S/library-deny-list", "2026-11-05 integration", "the Library's deny-list (the writer's, which the private importer takes) lacks an xArm split mesh the test's has",
       (LIBRARY_WRITE, '    "a61abac9746d0319a6e6ab82ba27a7d16afe6f303bc2bac863449b05c27c0661": "xArm (finger_l.stl)",\n', ""), killers=("test_library.",)),
-    m("S/library-shelf-family", "2026-11-05 integration", "the shelf headings in two wordings again: 'from fine 1 mm to coarse 3 mm' on a shelf without a family, the range on the UMI finger's",
-      (LIBRARY_WRITE, '    else:\n        text = f"{count} pitches, {js_string(pitches[0])} to {js_string(pitches[-1])} mm"\n',
-       '    elif families:\n        text = f"{count} pitches, {js_string(pitches[0])} to {js_string(pitches[-1])} mm"\n'
-       '    else:\n        text = f"{count} pitches, from fine {js_string(pitches[0])} mm to coarse {js_string(pitches[-1])} mm"\n'), killers=("test_library.",)),
+    m("S/library-shelf-family", "2026-11-05 integration", "the shelf headings in two wordings again: 'from fine 1 mm to coarse 3 mm' on a gripper's shelf (the "
+      "range on the UMI finger's until its shapes of 2026-11-16)",
+      (LIBRARY_WRITE, '    return f"{count} pitches, {js_string(pitches[0])} to {js_string(pitches[-1])} mm."\n',
+       '    return f"{count} pitches, from fine {js_string(pitches[0])} mm to coarse {js_string(pitches[-1])} mm."\n'), killers=("test_library.",)),
 )
 MUTANTS += LIBRARY_MINORS
 # The Library's polish of 2026-11-05 (the user's decisions of that day): a sensor's picture 3:1 in one column, so Open
@@ -2545,8 +2546,9 @@ MUTANTS += LIBRARY_MINORS
 LIBRARY_POLISH = (
     m("S/library-detail-shot", "2026-11-05 polish", "a sensor's picture 16:10 below 900 px again (the Tapered tips' Open 88 px below a 390 x 844 phone's first screen)",
       ("web/library.css", "@media (max-width:899px) { .lib-shot-detail { aspect-ratio:3 / 1; } }\n", ""), killers=("test_library.",)),
-    m("S/library-shelf-families-unsaid", "2026-11-05 polish", "a shelf closing with families leaves them out of its heading (the UMI shelf's tapered tips unsaid)",
-      (LIBRARY_WRITE, "    for family in families:\n        text += f\", and {family['title'].lower()}\"\n", ""), killers=("test_library.",)),
+    m("S/library-shelf-families-unsaid", "2026-11-05 polish", "a shelf whose part a family's cards follow leaves them out of its heading (its pitches said: "
+      "the UMI shelf's 'Six finger shapes, straight to pointed.' unsaid since 2026-11-16, its tapered tips before)",
+      (LIBRARY_WRITE, "    if cards:\n        count = 1 + len(cards)\n", "    if False:\n        count = 1 + len(cards)\n"), killers=("test_library.",)),
 )
 MUTANTS += LIBRARY_POLISH
 # The 3D views' light (2026-11-05: the user's "the new light on every 3D view"; app.js lightBoard, lightView, styles.css
@@ -2612,13 +2614,14 @@ LIBRARY_PICTURES = (
     m("S/library-picture-unsized", "2026-11-05 pictures", "a picture without its width and height (its box sized only when it arrives)",
       (LIBRARY_JS, 'el("img", {src: BASE + src, width, height, alt:', 'el("img", {src: BASE + src, alt:'), killers=("test_library.",)),
     m("S/library-picture-card-full", "2026-11-05 pictures", "the cards load the 1280 x 800 Exploded picture, not its 640 x 400 card file",
-      (LIBRARY_JS, 'image?.card?.src : image?.exploded?.card;', 'image?.card?.src : image?.exploded?.src;'), killers=("test_library.",)),
+      (LIBRARY_JS, ': assembledCard ? image?.assembled?.src : image?.exploded?.card;', ': assembledCard ? image?.assembled?.src : image?.exploded?.src;'), killers=("test_library.",)),
     m("S/library-picture-broken", "2026-11-05 pictures", "a picture whose file does not load stays a broken image (no placeholder)",
       (LIBRARY_JS, "      shown.replaceWith(field(variant));\n      missed?.(view);\n", "      missed?.(view);\n"), killers=("test_library.",)),
     m("S/library-view-unnamed", "2026-11-05 pictures", "the Exploded | Assembled control without its legend (a screen reader hears two radios of no group)",
       (LIBRARY_JS, 'el("fieldset", {className: "lib-view"}, el("legend", {}, "View"),', 'el("fieldset", {className: "lib-view"},'), killers=("test_library.",)),
-    m("S/library-view-kept", "2026-11-05 pictures", "a sensor's page opened anew keeps the view of the page before (Assembled where Exploded opens)",
-      (LIBRARY_JS, "    state.picture = VIEWS[0][0];\n    setNote(\"\");", "    setNote(\"\");"), killers=("test_library.",)),
+    m("S/library-view-kept", "2026-11-05 pictures", "a sensor's page opened anew keeps the view of the page before (Assembled where Exploded opens; "
+      "since the review of 2026-11-16 its card's view)",
+      (LIBRARY_JS, "    state.picture = isShelved(homeOf(id)) ? SHELF_VIEW : VIEWS[0][0];\n    setNote(\"\");", "    setNote(\"\");"), killers=("test_library.",)),
     m("S/library-view-phone-room", "2026-11-05 pictures", "the phone's page not tighter with the view control (the Tapered tips' Open 25 px below a 390 x 844 first screen "
       "under the header; since the window of 2026-11-15 its page's gaps alone)",
       ("web/library.css", "@media (max-width:899px) { .lib-detail:has(.lib-view) .lib-detail-body { gap:16px; } .lib-detail:has(.lib-view) .lib-info { gap:12px; } }\n", ""),
@@ -2652,8 +2655,8 @@ LIBRARY_GRID = (
     m("S/library-grid-history", "2026-11-06 grid", "Back and Forward not told from a link (the history entries unmarked)",
       (LIBRARY_JS, "const traversed = mark?.library === true;", "const traversed = false;"), killers=("test_library.",)),
     m("S/library-grid-umi-first", "2026-11-06 grid", "the UMI finger's shelf before the grippers' section again",
-      (LIBRARY_JS, "      ...(parts.length ? [grippers(parts)] : []),\n      ...shelvedParts().map(part => shelf(`shelf-${part}`, `${index.parts[part].title}.`, index.parts[part].shelf, index.parts[part].variants, familiesOf(part))));\n",
-       "      ...shelvedParts().map(part => shelf(`shelf-${part}`, `${index.parts[part].title}.`, index.parts[part].shelf, index.parts[part].variants, familiesOf(part))),\n      ...(parts.length ? [grippers(parts)] : []));\n"),
+      (LIBRARY_JS, "      ...(parts.length ? [grippers(parts)] : []),\n      ...shelvedParts().map(part => shelf(part, familiesOf(part))));\n",
+       "      ...shelvedParts().map(part => shelf(part, familiesOf(part))),\n      ...(parts.length ? [grippers(parts)] : []));\n"),
       killers=("test_library.",)),
 )
 MUTANTS += LIBRARY_GRID
@@ -2866,8 +2869,8 @@ THEME_TOGGLE = (
       killers=("test_web_theme.",)),
     m("M/web-theme-no-pressed", "2026-11-06 theme", "theme.js: the toggle's aria-pressed never set (a screen reader hears Dark mode off in dark)",
       (THEME_JS, '    button.setAttribute("aria-pressed", String(theme === "dark"));\n', ""), killers=("test_web_theme.",)),
-    m("M/web-theme-system-meta", "2026-11-06 theme", "index.html: a color-scheme meta of light and dark (a light visitor's first frame and form controls dark on a dark system)",
-      ("web/index.html", '    <meta name="viewport" content="width=device-width, initial-scale=1" />\n',
+    m("M/web-theme-system-meta", "2026-11-06 theme", "gen.html (index.html until 2026-11-16): a color-scheme meta of light and dark (a light visitor's first frame and form controls dark on a dark system)",
+      ("web/gen.html", '    <meta name="viewport" content="width=device-width, initial-scale=1" />\n',
        '    <meta name="viewport" content="width=device-width, initial-scale=1" />\n    <meta name="color-scheme" content="light dark" />\n'),
       killers=("test_web_theme.",)),
     m("M/web-theme-clear-ignored", "2026-11-06 theme", "theme.js: another tab's clear() of the storage ignored (this tab stays dark with nothing stored)",
@@ -2896,15 +2899,16 @@ LIBRARY_PLACE = (
       (THEME_JS, """  if (location.hash.length > 1 && document.querySelector('meta[name="flexitac-page"][content="library"]')) root.dataset.libPlace = "";\n""", ""),
       killers=("test_library.",)),
     m("S/library-place-kept", "2026-11-06 review", "library.js: the first route no longer clears the mark (the footer, its trademark line and its licences, hidden on every page opened at its address)",
-      (LIBRARY_JS, "    if (!state.index) return;\n    opened();\n", "    if (!state.index) return;\n"), killers=("test_library.",)),
+      (LIBRARY_JS, '    if (!state.index || document.documentElement.hasAttribute("data-forward")) return;\n    opened();\n',
+       '    if (!state.index || document.documentElement.hasAttribute("data-forward")) return;\n'), killers=("test_library.",)),
 )
 MUTANTS += LIBRARY_PLACE
 # A card or a sample's tile Tabbed to that its scroller shows in part (the review of 2026-11-06): left cut, its scroller's
 # focusin gone; each killed alone by test_library (PageTests) or test_samples (SampleScriptTests) on a scratch copy;
-# library_checks part_layout and sample_checks part_keys see them in the browser.
+# library_checks part_layout and sample_checks part_keys see them in the browser.  S/library-row-reveal (the Library's
+# row not moved to a card Tabbed to) retired with the UMI shelf's row on 2026-11-16 (its review: a grid, nothing scrolls
+# sideways).
 TAB_REVEAL = (
-    m("S/library-row-reveal", "2026-11-06 review", "library.js: a card Tabbed to that its row shows in part left cut (the row not moved to it)",
-      (LIBRARY_JS, "      if (shift) track.scrollBy({left: shift});\n", ""), killers=("test_library.",)),
     m("M/web-sample-reveal", "2026-11-06 review", "main.js: a sample's tile Tabbed to that the palette's scroller shows in part left cut (no focusin)",
       (CAD_MAIN, '  document.querySelector("#samplePalette .sample-grid")?.addEventListener("focusin", revealTile);\n', ""),
       killers=("test_samples.",)),
@@ -2937,13 +2941,12 @@ MUTANTS += NO_AUTO
 # The verification of 2026-11-06's small findings: the stacked card's last row square at its rounded foot, a shelf's card
 # Tabbed to without room round it in the window, the phone's row of samples of two heights, the runner's default timeout
 # below one run of the suite again; each killed alone on a scratch copy by the test named; cad_checks part_stack_feet,
-# library_checks part_layout and sample_checks part_phones see the first three in the browser.
+# library_checks part_layout and sample_checks part_phones see the first three in the browser.  S/library-shelf-card-margin
+# (the row's own rule) retired with the UMI shelf's row on 2026-11-16: its cards are the grid's, whose room is its own.
 VERIFY_MINORS = (
     m("M/web-stack-foot-square", "2026-11-06 verification", "styles.css: the stacked card's last row square at its rounded foot (the figures' gradient's corners standing out of it)",
       (CSS, '.stack-figure.is-registration > .stacked-canvas,body[data-mode="cad"] .stack-figure.is-on-part > .stacked-canvas '
        "{ border-radius:0 0 var(--stack-foot,7px) var(--stack-foot,7px); }\n", ""), killers=("test_surface_web.",)),
-    m("S/library-shelf-card-margin", "2026-11-06 verification", "library.css: a shelf's card Tabbed to without room round it in the window (at 390 px its focus ring cut at the window's bottom)",
-      ("web/library.css", ".lib-track > .lib-card { scroll-margin:16px 0; }\n", ""), killers=("test_library.",)),
     m("M/web-sample-row-heights", "2026-11-06 verification", "styles.css: the phone's row of samples of two heights again (a two-line name's tile 32 px, the others 30 px)",
       (CSS, "  .sample-grid > li { display:flex; }\n  .sample-grid .sample { min-height:34px; padding-top:3px; padding-bottom:3px; }\n", ""),
       killers=("test_samples.",)),
@@ -3207,7 +3210,8 @@ MUTANTS += SHOWCASE_CARD
 # not scrolling (a scroll bar's width made up on its right), a sheet on a phone and on a short screen; and the review
 # of 2026-11-15's (Android's Back closing and opening it for ever, a double-click closing it, the bar's room left bright,
 # the facts' column narrowed, a landscape phone's cramped card, the dark sheet's frame).  Each killed alone by
-# test_library on a scratch copy; library_checks.py part_window sees each in the browser.
+# test_library on a scratch copy; library_checks.py part_window sees each in the browser.  S/library-window-arrows-unset
+# (the rows' arrows not set as the grid is laid out) retired with the UMI shelf's row on 2026-11-16 (its review: a grid).
 LIBRARY_WINDOW = (
     m("S/library-window-modeless", "2026-11-15 window", "library.js: the window opened with show(), not showModal() (no backdrop, the page behind not inert, "
       "the focus free to leave it, Escape not its cancel)",
@@ -3226,10 +3230,6 @@ LIBRARY_WINDOW = (
     m("S/library-window-bar-always", "2026-11-15 window", "library.js: a scroll bar's width made up under the open window whether or not the bar takes room "
       "(an overlay one's: the grid narrowed by a bar's width, its cards moving, as the window opens)",
       (LIBRARY_JS, 'ROOT.style.setProperty("--lib-bar", `${Math.max(0, window.innerWidth - ROOT.clientWidth)}px`);', 'ROOT.style.setProperty("--lib-bar", "17px");'),
-      killers=("test_library.",)),
-    m("S/library-window-arrows-unset", "2026-11-15 window", "library.js: the rows' arrows not set as the grid is laid out (the UMI shelf's hidden though it "
-      "overflows, until a resize or a window closed)",
-      (LIBRARY_JS, "its arrows set).\n    state.syncs.forEach(sync => sync());\n", "its arrows set).\n"),
       killers=("test_library.",)),
     m("S/library-window-no-sheet", "2026-11-15 window", "library.css: on a phone the window a card within the gutters, not a sheet filling the screen",
       ("web/library.css", "@media (max-width:734px), (max-height:500px) { .lib-window { width:100vw; height:100%; max-height:none; margin:0; border-radius:0; box-shadow:none; }\n",
@@ -3275,6 +3275,285 @@ LIBRARY_WINDOW = (
       killers=("test_library.",)),
 )
 MUTANTS += LIBRARY_WINDOW
+
+# The drag hint on the Library's 3D view (the user's request of 2026-11-15: "箭头能不能做成像schetchfab一样的动画", in place
+# of the turn's mark of that day, whose two mutants went with it): Sketchfab's hint drawn for the page, swaying while shown,
+# hidden at the visitor's first use of the view on its page.
+LIBRARY_DRAG = (
+    m("S/library-drag-blocks", "2026-11-15 drag hint", "library.css: the drag hint takes the pointer (a drag begun on it does not turn the view)",
+      ("web/library.css", "  margin:0 auto; pointer-events:none; opacity:0;", "  margin:0 auto; opacity:0;"), killers=("test_library.",)),
+    m("S/library-drag-over-picture", "2026-11-15 drag hint", "library.css: the drag hint shown before the view is drawn (over the picture, or a placeholder)",
+      ("web/library.css", "  margin:0 auto; pointer-events:none; opacity:0;", "  margin:0 auto; pointer-events:none; opacity:1;"), killers=("test_library.",)),
+    m("S/library-drag-stays", "2026-11-15 drag hint", "library.js: a mouse's press on the view no longer hides the drag hint (only a turning key does)",
+      (LIBRARY_JS, '      live.host.addEventListener("pointerdown", event => {\n        if (event.pointerType !== "touch" && event.button === 0) used();\n      });\n', ""),
+      killers=("test_library.",)),
+    m("S/library-drag-every-pitch", "2026-11-15 drag hint", "library.js: the drag hint shown again for each pitch, shape or tip of the page the visitor has "
+      "turned already (every page drawn a page anew)",
+      (LIBRARY_JS, "    if (page !== live.page) {\n      live.page = page;\n      live.used = false;\n    }\n", "    live.page = page;\n    live.used = false;\n"),
+      killers=("test_library.",)),
+    m("S/library-drag-window-again", "2026-11-15 drag hint", "library.js: the window opened again on the same gripper without its drag hint (rest() keeps "
+      "the page)",
+      (LIBRARY_JS, "    live.stage = null;\n    live.page = null;\n", "    live.stage = null;\n"), killers=("test_library.",)),
+    m("S/library-drag-sways-unseen", "2026-11-15 drag hint", "library.js: the drag hint's sway never stopped once it has faded out (an animation running unseen)",
+      (LIBRARY_JS, '      if (event.propertyName === "opacity" && live.used) hint.classList.add("is-gone");\n', ""), killers=("test_library.",)),
+    m("S/library-drag-reduced-sways", "2026-11-15 drag hint", "library.css: the drag hint sways under prefers-reduced-motion",
+      ("web/library.css", ".lib-live.is-used .lib-drag { transition:none; } .lib-stage.is-live .lib-drag { animation:none; } }",
+       ".lib-live.is-used .lib-drag { transition:none; } }"), killers=("test_library.",)),
+    # Its review of 2026-11-15: the hint sized by the window, a touch's press, a right click, the ink's arrows.
+    m("S/library-drag-by-window", "2026-11-15 drag hint review", "library.css: the drag hint sized by the window's width again (below 900 px small and "
+      "without its label on a tablet's wide 3:1 view and the showcase's tall one, full over a 900 px window's short view)",
+      ("web/library.css", "@container lib-live (max-height:269px) { .lib-drag-label { display:none; } }",
+       "@media (max-width:899px) { .lib-drag { --lib-hint:28px; } .lib-drag-label { display:none; } }"), killers=("test_library.",)),
+    m("S/library-drag-touch-scroll", "2026-11-15 drag hint review", "library.js: a touch's press hides the drag hint (a vertical swipe that scrolls a "
+      "phone's window over the view hides it for the page, the view never turned)",
+      (LIBRARY_JS, '        if (event.pointerType !== "touch" && event.button === 0) used();\n', "        if (event.button === 0) used();\n"),
+      killers=("test_library.",)),
+    m("S/library-drag-any-button", "2026-11-15 drag hint review", "library.js: a right or middle click on the view hides the drag hint (it turns nothing)",
+      (LIBRARY_JS, '        if (event.pointerType !== "touch" && event.button === 0) used();\n', '        if (event.pointerType !== "touch") used();\n'),
+      killers=("test_library.",)),
+    m("S/library-drag-touch-turn-unseen", "2026-11-15 drag hint review", "library.js: a touch's turn of the view leaves the drag hint swaying over it "
+      "(a touch's use is its turn)",
+      (LIBRARY_JS, "      if (!live.used && live.view?.info().moved) used();\n", ""), killers=("test_library.",)),
+    m("S/library-drag-double-tap", "2026-11-15 drag hint review", "library.js: a touch screen's double tap (home again) leaves the drag hint",
+      (LIBRARY_JS, '      live.host.addEventListener("dblclick", used);\n', ""), killers=("test_library.",)),
+    m("S/library-drag-ink-arrows", "2026-11-15 drag hint review", "library.css: the drag hint's arrows the ink's at 72 % again (grey on the black bases "
+      "the hint mostly lies on)",
+      ("web/library.css", ".lib-drag-hand,.lib-drag-arrow { fill:", ".lib-drag-arrow { fill:rgba(29,29,31,.72); stroke:rgba(29,29,31,.72); stroke-width:1.5; "
+       "stroke-linejoin:round; }\n.lib-drag-hand { fill:"), killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_DRAG
+
+# The Library in the same tab from the generator (the user's request of 2026-11-15: "从gen by surface跳到lib,会重开一个页面，
+# 这个改掉，改成直接跳过去 不重开页面"): the header's link and step 1's file note's link without a target.
+LIBRARY_SAME_TAB = (
+    m("M/web-library-link-new-tab", "2026-11-15 same tab", "gen.html (index.html until 2026-11-16): the header's Library link in a new tab again (target _blank, rel noopener)",
+      ("web/gen.html", '<a class="masthead-library" href="./" title=', '<a class="masthead-library" href="./" target="_blank" rel="noopener" title='),
+      killers=("test_library.",)),
+    m("M/web-library-note-new-tab", "2026-11-15 same tab", "main.js: step 1's file note's link to the Library in a new tab again",
+      (CAD_MAIN, 'el("a", {href: `./#${cad.entry.id}`}, "Library")', 'el("a", {href: `./#${cad.entry.id}`, target: "_blank", rel: "noopener"}, "Library")'),
+      killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_SAME_TAB
+
+# The FlexiTac team's footer (the user's request of 2026-11-15: "在我们这个flexitac gen的三个页面底部 ... 都加上flexitac team的
+# 标注，类似于awesome flexitac最下面 ... 但色系和颜色要更consistent to 当前页面"): one footer on both pages, the page's palette.
+TEAM_FOOTER = (
+    m("M/web-footer-pages-differ", "2026-11-15 team footer", "the Library (index.html, library.html until 2026-11-16): the footer's main block not the generator's (YouTube left out of the Library's)",
+      ("web/index.html", '            <li><a href="https://www.youtube.com/watch?v=HYmMbsrwWFA" target="_blank" rel="noopener noreferrer">YouTube</a></li>\n', ""),
+      killers=("test_library.",)),
+    m("M/web-footer-same-tab", "2026-11-15 team footer", "gen.html and index.html (index.html and library.html until 2026-11-16): the footer's GitHub link in this tab (no target, no rel), on both pages",
+      ("web/gen.html", '<li><a href="https://github.com/FlexiTac/FlexiTac" target="_blank" rel="noopener noreferrer">GitHub</a></li>', '<li><a href="https://github.com/FlexiTac/FlexiTac">GitHub</a></li>'), ("web/index.html", '<li><a href="https://github.com/FlexiTac/FlexiTac" target="_blank" rel="noopener noreferrer">GitHub</a></li>', '<li><a href="https://github.com/FlexiTac/FlexiTac">GitHub</a></li>'), killers=("test_library.",)),
+    m("M/web-footer-off-palette", "2026-11-15 team footer", "theme.css: the footer's links in the third grey (#86868b, 3.5:1 on the header's bar: under WCAG AA)",
+      ("web/theme.css", ".site-footer a { color:var(--text-2); text-decoration:none; }", ".site-footer a { color:#86868b; text-decoration:none; }"),
+      killers=("test_web_theme.",)),
+    m("S/library-footer-shown-early", "2026-11-15 team footer", "library.css: the team's footer shown while a window's own address loads (only the fine print "
+      "hidden with the grid's title, the footer's band painted at the page's top for a moment)",
+      ("web/library.css", ":root[data-lib-place] #libHero,:root[data-lib-place] .site-footer { display:none; }",
+       ":root[data-lib-place] #libHero,:root[data-lib-place] .lib-footer { display:none; }"), killers=("test_library.",)),
+    m("M/web-guide-past-work-end", "2026-11-15 team footer", "main.js: the guide's scrolls past <main>'s end into the footer's room again (a step's "
+      "start at the window's top: the sticky guide pushed up, its steps out of sight)",
+      (CAD_MAIN, "  const by = Math.min(target.getBoundingClientRect().top - margin, workEnd() - window.innerHeight);\n",
+       "  const by = target.getBoundingClientRect().top - margin;\n"), killers=("test_surface_web.",)),
+    m("M/web-guide-end-is-page-end", "2026-11-15 team footer", "main.js: the guide's last step lit only at the page's end (under the footer), not at the work's",
+      (CAD_MAIN, "  const atEnd = workEnd() <= window.innerHeight + 2;\n",
+       "  const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;\n"), killers=("test_surface_web.",)),
+    m("M/web-footer-title-unbalanced", "2026-11-15 team footer review", "theme.css: the footer's headings not balanced (\"Team\" alone on the team's second "
+      "line in its narrow column from 735 px and on a 320 px phone)",
+      ("web/theme.css", " color:var(--text); text-wrap:balance; }\n", " color:var(--text); }\n"), killers=("test_web_theme.",)),
+)
+MUTANTS += TEAM_FOOTER
+
+# The Library the first page (the user's decisions of 2026-11-15 and 2026-11-16: "我觉得之后可以让lib作为第一次点击进入时候使用的
+# 界面", "是的 be first page"): index.html the Library, gen.html the generator, library.html a forwarding page, and
+# web/forward.js sending the addresses of before on; each killed alone by test_library on a scratch copy.
+FORWARD_JS = "web/forward.js"
+FIRST_PAGE = (
+    m("M/first-page-rect-stays", "2026-11-16 first page", "forward.js: ./#rect (Rectangular's address of before) no longer a generator's (the Library's note: no sensor named rect)",
+      (FORWARD_JS, '  const GEN_HASHES = ["#rect", "#cad",', '  const GEN_HASHES = ["#cad",'), killers=("test_library.",)),
+    m("M/first-page-part-stays", "2026-11-16 first page", "forward.js: ./?part=<id> (a Library sensor in Gen by Surface, of before) no longer a generator's (the Library opens)",
+      (FORWARD_JS, '  const GEN_KEYS = ["part", "sample", "debug"];', '  const GEN_KEYS = ["sample", "debug"];'), killers=("test_library.",)),
+    m("M/first-page-assign", "2026-11-16 first page", "forward.js: location.assign in place of replace (the old address an entry of its own: Back forwards again)",
+      (FORWARD_JS, "    location.replace(target + location.search + location.hash);", "    location.assign(target + location.search + location.hash);"), killers=("test_library.",)),
+    m("M/first-page-query-dropped", "2026-11-16 first page", "forward.js: the query dropped (./?part=<id>#rect to gen.html#rect: the default part, not the sensor)",
+      (FORWARD_JS, "    location.replace(target + location.search + location.hash);", "    location.replace(target + location.hash);"), killers=("test_library.",)),
+    m("M/first-page-shown", "2026-11-16 first page", "forward.js: the page not hidden while it forwards (a browser that paints the rest of it shows the Library for a moment)",
+      (FORWARD_JS, '    root.style.visibility = "hidden";\n', ""), killers=("test_library.",)),
+    m("M/first-page-library-forwards", "2026-11-16 first page", "forward.js: the Library sends its own addresses to ./ too (a page that reloads itself for ever)",
+      (FORWARD_JS, '    const target = generator ? "gen.html" : page === "forward" ? "./" : null;', '    const target = generator ? "gen.html" : "./";'), killers=("test_library.",)),
+    m("M/first-page-any-page", "2026-11-16 first page", "forward.js: any page forwards (on the generator's own page gen.html#rect sends itself on for ever)",
+      (FORWARD_JS, '  if (page !== "library" && page !== "forward") return;\n', ""), killers=("test_library.",)),
+    m("M/first-page-library-runs", "2026-11-16 first page", "library.js: run on a page forward.js is sending on (its route's replaceState over the old address, where a browser parses on)",
+      ("web/library.js", '  if (document.documentElement.hasAttribute("data-forward")) return;\n', ""), killers=("test_library.",)),
+    m("M/first-page-script-late", "2026-11-16 first page", "index.html: forward.js after theme.js (theme.js marks the Library's place on a page about to leave)",
+      ("web/index.html", '    <script src="static/forward.js"></script>\n', ""),
+      ("web/index.html", '    <script src="static/theme.js"></script>\n', '    <script src="static/theme.js"></script>\n    <script src="static/forward.js"></script>\n'),
+      killers=("test_library.",)),
+    m("M/first-page-old-modes", "2026-11-16 first page", "index.html: the Library's Rectangular at ./#rect again (a forward through the Library to gen.html#rect)",
+      ("web/index.html", '<a href="gen.html#rect" title="A rectangular sensor', '<a href="./#rect" title="A rectangular sensor'), killers=("test_library.",)),
+    m("M/first-page-old-open", "2026-11-16 first page", "library.js: Open in Gen by Surface at ./?part=<id> again (a forward through the Library)",
+      ("web/library.js", 'el("a", {className: "lib-open", href: `gen.html?part=${encodeURIComponent(id)}`}, "Open in Gen by Surface")',
+       'el("a", {className: "lib-open", href: `./?part=${encodeURIComponent(id)}`}, "Open in Gen by Surface")'), killers=("test_library.",)),
+    m("M/first-page-no-gen-route", "2026-11-16 first page", "app.py: no /gen.html (the generator not served)",
+      (APP, '"/gen.html": "gen.html", ', ""), killers=("test_library.",)),
+    m("M/first-page-root-generator", "2026-11-16 first page", "app.py: / the generator as before (the Library not the first page under app.py)",
+      (APP, 'PAGES = {"/": "index.html", "/index.html": "index.html",', 'PAGES = {"/": "gen.html", "/index.html": "index.html",'), killers=("test_library.",)),
+    m("M/first-page-site-counts", "2026-11-16 first page", "build_static_site.py: the counts asked of the forwarding page too (a build with the counts refused: no GitHub card)",
+      ("tools/build_static_site.py", "    if counts and name != FORWARD:\n", "    if counts:\n"), killers=("test_library.",)),
+    m("M/first-page-site-no-gen", "2026-11-16 first page", "build_static_site.py: gen.html not written (the site's generator gone)",
+      ("tools/build_static_site.py", 'PAGES = ("index.html", "gen.html", "library.html")', 'PAGES = ("index.html", "library.html")'), killers=("test_library.",)),
+    m("S/first-page-gate-page", "2026-11-16 first page", "build_static_site.py: the Library's gate reads the request defaults from index.html (the Library: no Resolution step)",
+      ("tools/build_static_site.py", 'jobs: int = 1, index: Path = WEB / "gen.html") -> dict:', 'jobs: int = 1, index: Path = WEB / "index.html") -> dict:'),
+      killers=("test_library.",)),
+)
+MUTANTS += FIRST_PAGE
+
+# The showcase's Design your own (the user's decisions of 2026-11-15 and 2026-11-16: "在flexitac on xarm的details 后面，多一个
+# 按钮，generate sensor by yourself with cad file", its name chosen: "Design your own"); each killed alone by test_library
+# on a scratch copy.
+DESIGN_OWN = (
+    m("M/design-own-missing", "2026-11-16 design your own", "library.js: no Design your own on the showcase's card",
+      ("web/library.js", ',\n            el("a", {className: "lib-pill lib-design", href: "gen.html", "aria-label": "Design your own sensor in Gen by Surface"}, "Design your own")', ""),
+      killers=("test_library.",)),
+    m("M/design-own-new-tab", "2026-11-16 design your own", "library.js: Design your own in a new tab (the Library left open behind it)",
+      ("web/library.js", 'el("a", {className: "lib-pill lib-design", href: "gen.html", "aria-label"', 'el("a", {className: "lib-pill lib-design", href: "gen.html", target: "_blank", rel: "noopener", "aria-label"'),
+      killers=("test_library.",)),
+    m("M/design-own-unnamed", "2026-11-16 design your own", "library.js: Design your own without its name for a screen reader (where it goes unsaid)",
+      ("web/library.js", ', "aria-label": "Design your own sensor in Gen by Surface"}, "Design your own")', '}, "Design your own")'),
+      killers=("test_library.",)),
+    m("M/design-own-before-details", "2026-11-16 design your own", "library.js: Design your own before Details (the card's Tab order Design your own, then Details)",
+      ("web/library.js", '            el("a", {className: "lib-pill lib-showcase-details", href: `#${id}`, "data-showcase": id, "aria-label": `Details: ${data.title}`}, "Details"),\n'
+       '            el("a", {className: "lib-pill lib-design", href: "gen.html", "aria-label": "Design your own sensor in Gen by Surface"}, "Design your own")))));',
+       '            el("a", {className: "lib-pill lib-design", href: "gen.html", "aria-label": "Design your own sensor in Gen by Surface"}, "Design your own"),\n'
+       '            el("a", {className: "lib-pill lib-showcase-details", href: `#${id}`, "data-showcase": id, "aria-label": `Details: ${data.title}`}, "Details")))));'),
+      killers=("test_library.",)),
+    m("M/design-own-grey", "2026-11-16 design your own", "library.css: Design your own a grey pill as Details (not the action blue)",
+      ("web/library.css", ".lib .lib-showcase .lib-design { background:var(--accent); color:#fff; }\n", ""), killers=("test_library.",)),
+    m("M/design-own-open-size", "2026-11-16 design your own", "library.css: Design your own Open in Gen by Surface's size (44 px, 17 px type), not Details'",
+      ("web/library.css", ".lib .lib-showcase .lib-design { background:var(--accent); color:#fff; }",
+       ".lib .lib-showcase .lib-design { background:var(--accent); color:#fff; min-height:44px; font-size:17px; }"), killers=("test_library.",)),
+)
+MUTANTS += DESIGN_OWN
+
+# The review of 2026-11-16 of the first page and Design your own (fixed the same day): a hash of before over the open
+# Library (./#rect typed or followed from it) sent on at its hashchange, library.js's route() idle meanwhile, a Library
+# shown again by the back-forward cache shown; the forwarding page never counted by app.py's rule (FORWARD_PAGE); the
+# header's counts refreshed on the static site's first page too (web/counts.js, out of web/backend.js); each killed
+# alone by its module on a scratch copy.
+COUNTS_JS = "web/counts.js"
+FIRST_PAGE_REVIEW = (
+    m("M/first-page-hash-unheard", "2026-11-16 first page review", "forward.js: no hashchange listener (./#rect typed over the open Library: \"No sensor in "
+      "the library is named rect.\", not Rectangular)",
+      (FORWARD_JS, '  window.addEventListener("hashchange", forward);\n', ""), killers=("test_library.",)),
+    m("M/first-page-route-runs", "2026-11-16 first page review", "library.js: route() at a hash forward.js is sending on (the note of an unknown sensor and a "
+      "replaceState over the address on its way out)",
+      ("web/library.js", '    if (!state.index || document.documentElement.hasAttribute("data-forward")) return;\n', "    if (!state.index) return;\n"),
+      killers=("test_library.",)),
+    m("M/first-page-cache-hidden", "2026-11-16 first page review", "forward.js: a Library shown again by the back-forward cache left hidden (Back from "
+      "gen.html#rect to a blank page)",
+      (FORWARD_JS, '    root.style.visibility = "";\n', ""), killers=("test_library.",)),
+    m("M/first-page-forward-counted", "2026-11-16 first page review", "app.py: the forwarding page asked for counts as any page (sent as it is only while it has "
+      "no GitHub card)",
+      (APP, "        if not counts or name == FORWARD_PAGE:\n", "        if not counts:\n"), killers=("test_library.",)),
+    m("M/counts-library-stale", "2026-11-16 first page review", "index.html: no counts.js (the site's first page keeps the build's counts, or none)",
+      ("web/index.html", '    <script src="static/counts.js" defer></script>\n', ""), killers=("test_library.",)),
+    m("M/counts-asked-by-app", "2026-11-16 first page review", "counts.js: asking GitHub on app.py's pages too (a host their CSP refuses: a console error)",
+      (COUNTS_JS, "  if (document.querySelector('meta[name=\"flexitac-backend\"]')?.content !== \"browser\") return;\n", ""),
+      killers=("test_static_site.",)),
+    m("M/counts-forwarding-asks", "2026-11-16 first page review", "counts.js: a Library being sent on to gen.html asks GitHub too (the next page asks again)",
+      (COUNTS_JS, '  if (document.documentElement.hasAttribute("data-forward")) return;\n', ""), killers=("test_static_site.",)),
+)
+MUTANTS += FIRST_PAGE_REVIEW
+# The UMI finger's shapes (the user's request of 2026-11-16: "后面这三种不是重复了吗，在第一个umi 1mm点进去，config就可以选择毫米
+# 数量；我在这里更多想要体现umi不同shape我们都可以fit"; the shapes chosen: concave arc, pointed, short taper): the UMI shelf one
+# card per finger shape (the straight finger's, then the tapered tips' family's cards), each shape's page its card's
+# axes of more than one choice and its Tip fact over the card's height; the writer's cards, their lines and the labels'
+# length; since the lead's review the same day the shelf's cards in the Assembled view (SHELF_VIEW).  Each killed alone
+# by test_library on a scratch copy.
+UMI_SHAPES = (
+    m("S/umi-shapes-straight-name", "2026-11-16 UMI shapes", "library.js: the UMI shelf's own card named by the gripper's title (the shelf's heading again), "
+      "not by its shape, 'Straight finger'",
+      (LIBRARY_JS, "    const name = shelved ? part.card || part.title : part.title;\n", "    const name = part.title;\n"), killers=("test_library.",)),
+    m("S/umi-shapes-cards-dropped", "2026-11-16 UMI shapes", "library.js: a shelved part's shelf without its families' cards (the UMI shelf the straight "
+      "finger alone, the tapered tips unreachable from the grid)",
+      (LIBRARY_JS, "        families.flatMap(familyId => state.index.families[familyId].cards.map(shape => shapeCard(familyId, shape)))));\n",
+       "        []));\n"), killers=("test_library.",)),
+    m("S/umi-shapes-one-choice-axis", "2026-11-16 UMI shapes", "library.js: a shape's page shows its axes of one choice too (a Shape switch of one shape on "
+      "the Convex arc, Trapezoid and Concave arc tips' pages, both on the Pointed tip's)",
+      (LIBRARY_JS, "    return shape.axes.map((axis, k) => (axis.choices.length < 2 ? null : segments(axis.label, `libAxis-${axis.key}`,\n",
+       "    return shape.axes.map((axis, k) => (false ? null : segments(axis.label, `libAxis-${axis.key}`,\n"), killers=("test_library.",)),
+    m("S/umi-shapes-tip-height", "2026-11-16 UMI shapes", "library.js: every tip's Tip fact over the last 75 mm (the Short taper's 40 mm and the Pointed "
+      "tip's 50 mm misstated)",
+      (LIBRARY_JS, "mm at the tip, over the last ${shape.h_mm} mm`]] : [];\n", "mm at the tip, over the last 75 mm`]] : [];\n"), killers=("test_library.",)),
+    m("S/umi-shapes-gripper-index", "2026-11-16 UMI shapes", "library.js: the grippers' cards made by map(gripperCard) (its index taken as shelved: every "
+      "gripper's card but the first's without its id, its place, #gripper-<part>, lost)",
+      (LIBRARY_JS, '      el("div", {className: "lib-cards"}, parts.map(part => gripperCard(part))));\n',
+       '      el("div", {className: "lib-cards"}, parts.map(gripperCard)));\n'), killers=("test_library.",)),
+    m("S/umi-shapes-range-split", "2026-11-16 UMI shapes", "library.js: the UMI shelf's 'straight to pointed' no unit (from 735 to 900 px its heading broke as "
+      "'..., straight / to pointed.')",
+      (LIBRARY_JS, '.replace(/(\\d|\\bstraight) to (\\w)/g, "$1\\u00a0to\\u00a0$2");\n', '.replace(/(\\d) to (\\d)/g, "$1\\u00a0to\\u00a0$2");\n'),
+      killers=("test_library.",)),
+    m("S/umi-shapes-pick-line", "2026-11-16 UMI shapes", "the writer: the Short taper's card 'Pick your tip width' though its page picks its shape too",
+      (LIBRARY_WRITE, '        record["lines"] = [span, "Pick shape and width" if len(shapes) > 1 else "Pick your tip width"]\n',
+       '        record["lines"] = [span, "Pick your tip width"]\n'), killers=("test_library.",)),
+    m("S/umi-shapes-tip-uncarded", "2026-11-16 UMI shapes", "the writer: a family whose cards miss one of its tips, or show one twice, taken (a sensor no "
+      "card of the shelf reaches)",
+      (LIBRARY_WRITE, "    if sorted(shown) != sorted(members):\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/umi-shapes-foreign-sensor", "2026-11-16 UMI shapes", "the writer: a card whose grid names a sensor of no part of its family taken (the refusal "
+      "said only by the family's count)",
+      (LIBRARY_WRITE, '    if not set(record["grid"].values()) <= set(members):\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/umi-shapes-card-name", "2026-11-16 UMI shapes", "the writer: a shelved part's card name left out of entries.json (the UMI shelf's own card named "
+      "'UMI Fin-Ray Gripper')",
+      (LIBRARY_WRITE, '            "card": part.get("card"),\n', '            "card": None,\n'), killers=("test_library.",)),
+    m("S/umi-shapes-shelf-exploded", "2026-11-16 UMI shapes review", "library.js: the UMI shelf's cards in the Exploded view again (the tapered end "
+      "foreshortened under the exploded layers: the six shapes alike on their cards)",
+      (LIBRARY_JS, '  const SHELF_VIEW = "assembled";\n', '  const SHELF_VIEW = "exploded";\n'), killers=("test_library.",)),
+    m("S/umi-shapes-assembled-card-file", "2026-11-16 UMI shapes review", "library.js: a shelf's card sized as a card file (640 x 400) while its "
+      "Assembled picture is 1280 x 800",
+      (LIBRARY_JS, "      : assembledCard ? [image.assembled.width, image.assembled.height] : CARD;\n", "      : CARD;\n"), killers=("test_library.",)),
+    m("S/umi-shapes-label-max", "2026-11-16 UMI shapes", "the writer: the labels at most 27 characters again ('UMI concave arc tip, 21.8 mm' and 'UMI short "
+      "trapezoid, 21.8 mm', 28, refused though measured on one line)",
+      (LIBRARY_WRITE, "LABEL_MAX = 28\n", "LABEL_MAX = 27\n"), killers=("test_library.",)),
+)
+MUTANTS += UMI_SHAPES
+# The review of the UMI finger's shapes (2026-11-16, fixed the same day): the shelf a grid of three to a row (its shapes
+# side by side; a row that scrolled sideways before), each card's picture framed on the fingertip, its heading's count of
+# shapes one unit, a shape's page titled by its card and opened in its card's view (Assembled), and the tips' meshes
+# measured against tools/library_tips.py's profiles by a stdlib test (a mutant of the private tool itself is out of the
+# catalogue: two tips' meshes swapped in parts.json instead).  Each killed alone by test_library on a scratch copy;
+# library_checks part_layout, part_pictures, part_family and part_window see the page's in the browser.
+LIBRARY_CSS = "web/library.css"
+PARTS_JSON = "web/library/parts.json"
+UMI_SHAPES_REVIEW = (
+    m("S/umi-shapes-four-a-row", "2026-11-16 UMI shapes review", "library.css: the UMI shelf four to a row as the grippers' (4 + 2: its second row two thirds "
+      "empty)",
+      (LIBRARY_CSS, "@media (min-width:735px) { .lib-shelf > .lib-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }\n", ""), killers=("test_library.",)),
+    m("S/umi-shapes-tip-unframed", "2026-11-16 UMI shapes review", "library.js: a shelf's card's picture the whole finger (the taper a third of its width, the "
+      "shapes alike at a card's size)",
+      (LIBRARY_JS, '    box.classList.add("lib-shot-tip");\n', ""), killers=("test_library.",)),
+    m("S/umi-shapes-tip-frame-lost", "2026-11-16 UMI shapes review", "library.css: the fingertip's frame drawn as the whole picture (the class put, no scale)",
+      (LIBRARY_CSS, ".lib-shot-tip > img { transform:scale(2.2); transform-origin:41% 3%; }\n", ""), killers=("test_library.",)),
+    m("S/umi-shapes-heading-split", "2026-11-16 UMI shapes review", "library.js: the UMI shelf's count of shapes no unit (at 390 px 'Six / finger shapes,')",
+      (LIBRARY_JS, 'const keep = text => String(text).replace(/\\b(\\w+) finger shapes\\b/g, "$1\\u00a0finger\\u00a0shapes")\n    .replace(',
+       "const keep = text => String(text).replace("), killers=("test_library.",)),
+    m("S/umi-shapes-page-untitled", "2026-11-16 UMI shapes review", "library.js: a shape's page titled 'UMI Fin-Ray Gripper, tapered tip' (every tip's part "
+      "title), not by its card",
+      (LIBRARY_JS, "    const title = shape ? `${index.parts[home].title}, ${shape.title.toLowerCase()}` : part.title;\n",
+       "    const title = part.title;\n"), killers=("test_library.",)),
+    m("S/umi-shapes-page-exploded", "2026-11-16 UMI shapes review", "library.js: a UMI shelf's sensor's page opened Exploded (its tapered end under the exploded "
+      "layers) though its card shows it Assembled",
+      (LIBRARY_JS, "    state.picture = isShelved(homeOf(id)) ? SHELF_VIEW : VIEWS[0][0];\n", "    state.picture = VIEWS[0][0];\n"), killers=("test_library.",)),
+    m("S/umi-shapes-tips-swapped", "2026-11-16 UMI shapes review", "parts.json: the 9.8 mm concave and convex arc tips' meshes swapped, each record its file's "
+      "hash (the hashes alone had passed it; test_each_tip_is_cut_by_its_profile measures each outline)",
+      (PARTS_JSON, '    "file": "meshes/umi-concave-tip9.8.stl",\n    "name": "umi-concave-tip9.8.stl",\n'
+                   '    "sha256": "e2692fc9f689582d3455755757e04365bcad50eccea2f0bf42e3668d901a6fb0"\n',
+       '    "file": "meshes/umi-convex-tip9.8.stl",\n    "name": "umi-concave-tip9.8.stl",\n'
+       '    "sha256": "3314dca59dd8260caf74ccb957d0ffe3c42e7267ad34f88affd2a818c5a702cb"\n'),
+      (PARTS_JSON, '    "file": "meshes/umi-convex-tip9.8.stl",\n    "name": "umi-convex-tip9.8.stl",\n'
+                   '    "sha256": "3314dca59dd8260caf74ccb957d0ffe3c42e7267ad34f88affd2a818c5a702cb"\n',
+       '    "file": "meshes/umi-concave-tip9.8.stl",\n    "name": "umi-convex-tip9.8.stl",\n'
+       '    "sha256": "e2692fc9f689582d3455755757e04365bcad50eccea2f0bf42e3668d901a6fb0"\n'), killers=("test_library.",)),
+)
+MUTANTS += UMI_SHAPES_REVIEW
 
 
 # --------------------------------------------------------------------------

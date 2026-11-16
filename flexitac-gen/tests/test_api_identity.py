@@ -88,7 +88,7 @@ class IdentityTests(unittest.TestCase):
         payload = json.loads(BROWSER_DEFAULT_PAYLOAD)
         entries = _browser_payload_entries()
         self.assertEqual([key for key, _ in entries], list(payload), "web/app.js payload() changed; update BROWSER_DEFAULT_PAYLOAD")
-        page = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        page = (ROOT / "web" / "gen.html").read_text(encoding="utf-8")
         names = dict(re.findall(r'<(?:input|select)[^>]*\bid="([^"]+)"[^>]*\bname="([^"]+)"', page))
         defaults = default_design()
         for key, expression in entries:

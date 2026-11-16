@@ -1341,7 +1341,7 @@ class FieldWebClientTests(unittest.TestCase):
     def setUp(self) -> None:
         self.app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
         self.main = (ROOT / "web" / "cad" / "main.js").read_text(encoding="utf-8")
-        self.html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        self.html = (ROOT / "web" / "gen.html").read_text(encoding="utf-8")
 
     def _options(self, select_id: str) -> list:
         tag = re.search(rf'<select id="{select_id}"[^>]*>(.*?)</select>', self.html, re.S)
@@ -1789,7 +1789,7 @@ class ReviewWebClientTests(unittest.TestCase):
     def setUp(self) -> None:
         self.app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
         self.main = (ROOT / "web" / "cad" / "main.js").read_text(encoding="utf-8")
-        self.html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        self.html = (ROOT / "web" / "gen.html").read_text(encoding="utf-8")
 
     def test_a_full_field_is_not_called_masked(self) -> None:
         # A diagonal Row bus records its full field's mask too: the badge and the CSV's readout rows are a masked
