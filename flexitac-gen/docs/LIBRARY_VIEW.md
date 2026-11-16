@@ -3,7 +3,8 @@
 The user's requests of 2026-11-05: for the seven grippers that are not UMI
 fingers, the Library shows the **whole gripper** with a sensor on both
 fingers, the jaws fully open; and on each sensor's page in the Library
-(`library.html#<id>`) the picture becomes a 3D view the visitor can
+(`library.html#<id>`; since 2026-11-15 a window over the grid, "The details
+window" below) the picture becomes a 3D view the visitor can
 **turn**, for every sensor (the grippers' whole-gripper scenes, the UMI
 finger's and its tapered tips' fingertip scene).  The grid's cards stay
 static WebP pictures.  Gen by Surface stays as visitors know it: its sensor
@@ -22,7 +23,8 @@ lustre): optional keys only (a scene's `looks`, `part_look` and
 `smooth_deg`, a body's `look`, the rules' `looks`, `part_looks` and
 `part_smooth_deg`, a record's `part_look_sha256`), so a file written before
 it is still a v1 file and is drawn as it was, pixel for pixel; see "The
-looks" below.  Paths are relative to `web/` unless they start with `tools/`
+looks" below.  The rules' optional `part_pad` (2026-11-14, the UMI pad's
+tint) is one more such key.  Paths are relative to `web/` unless they start with `tools/`
 or `tests/`.
 
 ## One renderer
@@ -60,6 +62,109 @@ or `tests/`.
   `library_checks.py` `part_view` turns the view 120, 180 and 240 degrees
   in both modes and finds no drawn pixel on the canvas's edge.
 
+## The details window
+
+The user's request of 2026-11-15: "after we click for all cards to details,
+we may not jump to a new page. lets bump our to a large window, and if you
+click the "x" of right top conrner, it will close and back show lib".
+Since then a sensor's page and the showcase's page are no page of their own
+that replaces the grid: every card's details (a gripper's card, a UMI
+shelf's card, the Tapered tips card, the showcase's picture and Details)
+open in a large window over the Library.
+
+- The window is `library.html`'s `dialog#libWindow` (named by the page's
+  title), which `library.js` opens with `showModal()` (`raise()`): the top
+  layer, the page behind it inert, the focus kept inside it, Escape its
+  cancel.  Its X (`button#libClose`, named "Close": the header's toggle's
+  round grey button, its grey laid on the window's white) stands at its
+  top right outside its scroller (`#libWindowBody`, which holds
+  `#libDetail`), so it stays in sight while the page scrolls under it.
+  Inside, everything is the page of before: the picture and its 3D view
+  with Exploded | Assembled, the title, the line, the Pitch (or Shape and
+  Tip width), the facts, Open in Gen by Surface, the downloads, the links;
+  the showcase's label, line of detail, tutorial and sources.  Two columns
+  from 900 px, one below with the phone's rules (the 3:1 picture, the
+  showcase's 4:5 box).  The back link is gone.  A sensor's two columns are
+  even (7 to 5 from 1280 px as a page of its own until then): in a window
+  of at most 1200 px its facts' column was 440 px at 1440 px, its two
+  Gerber pills stacked from 1024 to 1440 px and more of its facts and
+  titles wrapped (the review of 2026-11-15); evenly, with the window's
+  sides at most 40 px, it is 540 px there and 520 px at 1280 px, the page's
+  520 and 460 px of before.  The pills are side by side from about 1100 px
+  (the page's from about 1020 px).
+- Its size: `min(1200px, 100vw - 2 x the page's gutter)` wide, as tall as
+  its page up to the window less two gutters, its top a gutter below the
+  window's (a pitch that changes its height never moves its top); its page
+  scrolls inside it.  Below 735 px, and on a screen less than 501 px tall
+  (a phone held sideways, where a card within the gutters had been 306 px
+  tall: the review of 2026-11-15), it is a sheet over the whole screen,
+  with no shadow (in the dark scheme the window's hairline had framed the
+  phone's screen).  The cards' look: white (the dark card with its hairline
+  in the dark scheme), 18 px corners, the theme's floating shadow; the
+  backdrop `rgba(0,0,0,.45)` in both schemes; no blue but Open in Gen by
+  Surface.
+- The grid stays where it was under it, dimmed: opening the window moves
+  no card and scrolls nothing, and the page does not scroll while it is
+  open (`:root` `overflow: hidden`).  The width a scroll bar takes is
+  measured as the window opens (`--lib-bar`, 0 for an overlay bar: a
+  phone's, a Mac's) and made up on the page's right while it is open, so
+  the grid keeps its width and place and the backdrop dims the whole
+  screen.  (Until the review of 2026-11-15 `scrollbar-gutter: stable` kept
+  the bar's room: in Chromium that room stayed bright beside the backdrop
+  in the light scheme, and 100vw, the page's gutter with it, shrank by the
+  bar's width, so the grid moved.)
+- The address is the page's, as before: a card's link goes to `#<id>`, and
+  that route opens the window, so Back closes it, Forward opens it again
+  and `library.html#<id>` opened anew (a shared link, a reload) shows the
+  Library with the window over it.  The Pitch, Shape and Tip width replace
+  the address (no history entry) with the window open.  The tab names the
+  sensor while the window is open and the Library when it closes.
+- Its X, Escape (and Android's Back, a close request while a modal dialog
+  is open) and a press and release on the backdrop (both on it: a drag of
+  the 3D view, or of a selection, released over the backdrop never closes
+  it, nor the second click of a double-click, as on a card where the
+  backdrop then lies) close it (`closeWindow()`) to the grid's place of its
+  sensor, the back link's address of before (`#gripper-<part>`,
+  `#shelf-umi-finray`, `#showcase`), the card that opened it focused (the
+  showcase's Details for its picture too); a window opened anew closes to
+  its gripper's place, as the back link went.  No native jump, so the
+  grid does not move.
+- Closing makes no history entry (since the review of 2026-11-15: the
+  first version pushed the place, as the back link had, and with Android's
+  Back a close request while the window is open, each Back closed it and
+  the next opened it again, for ever, from the grid and from a shared
+  link).  `route()` marks each entry it comes to with this visit (the
+  document's life) and its depth: a window's entry reached from the grid
+  1, from a window's entry of depth n n + 1, else 0; the Pitch's, Shape's
+  and Tip width's replaced address keeps the mark.  A window of depth n
+  closes by `history.go(-n)`, back over the window's entries to the
+  grid's, whose address then becomes the window's place, the grid shown
+  as the back link showed it (its opener focused where the place holds
+  it, else the place's card); one of depth 0 (opened at its own address,
+  or reached from one, or marked before a reload) replaces its entry by
+  that place.  A close on its way is asked once (a cancel the browser does
+  not let be cancelled, then its close event).  So Back after a close goes
+  where it went before the window opened, and Forward opens it again.
+- One 3D view for the page (one WebGL context), its host moved into the
+  window; three.js loads only when a window with a view opens, never on
+  the grid.  The shots tool's `library.html?probe=shoot#<id>` is a window
+  too; its pane (the view's host fixed at 640 x 400, or 640 x 800 for the
+  showcase, CSS px) and so the pictures are as before: on 2026-11-15
+  `library_shots.py --check` found 0 of the 42 sensors differing,
+  `--showcase --check` the showcase the same and `--check-generator` 0 of
+  the 14 differing.
+- Checks: `tests/test_library.py`
+  `test_a_card_s_details_open_in_a_window_over_the_library` and the
+  `LIBRARY_WINDOW` mutants; `tools/browser/library_checks.py` `part_window`
+  (at 1440 x 900, 900 x 900 and 390 x 844, light and dark: each opener, the
+  grid unmoved, the box and the look, the page held, the X in sight, the
+  focus kept, the X, Escape, the backdrop, a double-click, Back and
+  Forward, an address opened anew, and the window's history after an
+  earlier page: close requests, a shared link, two windows' entries, a
+  reload), `part_window_edges` (scroll bars that take room, landscape
+  phones, the dark sheet) and `part_routes` (the even columns at 1280 and
+  1440 px); `showcase_checks.py` `part_page`.
+
 ## Files
 
 | Path | Written by | What it is |
@@ -82,11 +187,14 @@ or `tests/`.
 The bodies are third-party files (each one a row of `library/NOTICE.md`'s
 tables, its licence text in `library/licenses/`, modified as its row says)
 or the project's own (`bodies/makermods-metal/rail.stl`: a plain rail drawn
-by the project, not MakerMods hardware; and any
-`bodies/<part>/drawn-<name>.stl`: a plain shape `tools/library_split.py`
-draws where a model lacks a component the photos show, its STL header
-saying so, as the MakerMods tips' steel guide rail, its bores and end
-stops drawn on that rail).  No MakerMods body is ever committed (`tools/library_write.py`
+by the project, not MakerMods hardware, 158 mm long, no longer than the
+open jaws need; and any `bodies/<part>/drawn-<name>.stl`: a plain shape
+`tools/library_split.py` draws where a model lacks a component the photos
+show, its STL header saying so, as the MakerMods Metal Arm's body drawn by
+eye after the maker's photos round that rail since the user's decision of
+2026-11-14: the beam's walls and end stops, the steel guide rail and its
+holes, the housing and motor can, the camera's mount and lens).  No
+MakerMods file is ever committed or drawn from (`tools/library_write.py`
 `DENIED_SHA256`).
 
 ## The art: `library/art/<id>.json.gz`
@@ -150,7 +258,9 @@ one stack explodes.
 - The stage has no defaults: without either key it draws no gripper.
 - Optional, since 2026-11-12 (see "The looks"): `looks` `{name: look}`,
   `part_looks` `{part or family: a name of looks, or a look}` and
-  `part_smooth_deg`, the look of the parts that have no scene.
+  `part_smooth_deg`, the look of the parts that have no scene; since
+  2026-11-14 `part_pad` `{color, opacity}`, the tint of their assembled
+  sensor's pad (see "Parts without a scene").
 
 `library/scenes/<part>.json` (`"format": "flexitac-library-scene/v1"`):
 
@@ -224,7 +334,9 @@ A name is lower case letters, digits and hyphens.
 - A material per look and drawing; the part's own material wears
   `part_look` for the drawing and is put back when the scene goes, so a
   UMI finger drawn after a gripper is as on a fresh page.  The sheets
-  (film, boards) keep their own look.
+  (film, boards) keep their own look; the one exception is the UMI pad's
+  tint in Assembled (the rules' `part_pad`, "Parts without a scene"),
+  drawn over them, never into their materials.
 - The **gripper studio** (`GRIPPER_STUDIO`): a second environment, built in
   the stage with `studio.js`'s recipe and its own numbers, made on the
   first drawing that has a look and again when a lost WebGL context comes
@@ -358,7 +470,12 @@ with looks of its own):
   `"rest"`.  Every triangle must be taken; no component may be empty.
 - `draw` instead of `pick`: plain shapes the project draws for a component
   the model lacks (`{"box": box}`, `{"cylinder": {"from", "to", "radius",
-  "segments"}}`), in the frame of the body they are listed under, so they
+  "segments"}}` or, since 2026-11-14, `{"prism": {"axis", "from", "to",
+  "profile"}}`: a convex polygon of 3 to 32 corners, counter-clockwise seen
+  from the positive end of `axis` (`"x"`, `"y"` or `"z"`), drawn from `from`
+  to `to` along it, its corners `(y, z)` about x, `(z, x)` about y and
+  `(x, y)` about z: a chamfered block or a rail's rounded section in one
+  shape), in the frame of the body they are listed under, so they
   stand on every copy of it; or under the file's `drawn` list, in the
   part's frame.  They are written as `bodies/<part>/drawn-<name>.stl`,
   the project's own (no row in `NOTICE.md`; say so in the file's `about`,
@@ -410,7 +527,8 @@ product; Gen by Surface keeps its grey part):
 
 ```json
 "rules": {"looks": {"umi-tpu-orange": {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}},
-          "part_looks": {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"}}
+          "part_looks": {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"},
+          "part_pad": {"color": "#545a3a", "opacity": 0.65}}
 ```
 
 - `part_looks` maps a part's id, or its family's (`parts.json`), to a name
@@ -437,8 +555,9 @@ product; Gen by Surface keeps its grey part):
   degrees) are of the same lightness as the lit orange (hue 19),
   so they stand apart by hue and by their dark edges, not by lightness (a
   luminance ratio of 1.07 to 1.10 on the lit face, 1.3 to 1.5 on the
-  rest), as the real sensor does on the real finger; the film is far
-  darker (2.4 to 3.7).  That is why the orange is at the red end of the
+  rest); the film is far darker (2.4 to 3.7).  Exploded, as the sheets
+  apart are; assembled, the real sensor's pad is far darker than its
+  finger, and the pad's tint (`part_pad`, below) draws it so.  That is why the orange is at the red end of the
   photos' range: `#ee6606`, nearer the photos' mean, drew the boards and
   the finger in one hue (23 against 33 degrees).  The base look
   `tpu-orange` keeps its numbers: the base table is not the rules' to
@@ -465,13 +584,58 @@ product; Gen by Surface keeps its grey part):
   a highlight along the mount block's rounded corner.  Side by side the
   two are the same picture.  Flat, the part's geometry and normals are
   exactly Gen by Surface's.
+- `part_pad` is the tint of the assembled sensor's pad on those parts
+  (the user's decision of 2026-11-14 on the UMI pad, "you can do it
+  darken"): `{"color": "#rrggbb", "opacity": above 0 and at most 1}`,
+  only with `part_looks`.  The final visual check of the stage-2 Library
+  found every Assembled picture of the UMI rows and the tapered tips one
+  orange block: the top board's art alone over the field, a bright amber
+  (`#cc7103`, hue 34 degrees, value 0.80) on the orange finger
+  (`#d95317`, hue 19) at the same brightness, where every photo of the
+  built sensor shows a dark olive-brown pad on the orange finger: the
+  black film seen through the top board's amber polyimide between its
+  copper (FlexiTac's own photo of the sensor on a UMI finger:
+  the pad `#725013` to `#665318`, hue 39 to 45, value 0.40 to 0.45; the
+  finger `#e84407` to `#ea4501`).  The stage lays the film's own sheet
+  once more, its assembled place lifted one nest and 0.02 mm along its
+  normals (just over the top board), its outline the film's texture's
+  alpha, in the tint's colour at its opacity, lit by the figure's
+  lights, satin as the boards' coverlay (roughness 0.45), shown in
+  Assembled only (`library_stage.js` `layPad`, `PAD`).  So the field
+  reads the photos' olive-brown, the top board's traces still faintly
+  seen through it, while the board's border round the field, its tails,
+  the edges and the whole of Exploded (the sheets apart, the film between)
+  keep the sheets' own look.  The committed tint, `#545a3a` at 0.65,
+  was tuned in the stage on the 2 mm finger against that photo; at the
+  Assembled home the pad's pixels (those the tint changes) read
+  `#6f5413` (hue 42, saturation 0.83, value 0.44; `#ca7003`, hue 33,
+  value 0.79, without it) and the finger's orange pixels `#ba4709`
+  (hue 21, value 0.73) as before; turned a third of a turn either way
+  `#6e5310` and `#735719` (hue 41 to 43, value 0.43 to 0.45); the same
+  in the light and the dark scheme (the view's pane is light in both),
+  and the same on the tapered tips (the 5.8 mm trapezoid, the 13.8 mm
+  convex tip, whose masked field the film's outline follows).  In the
+  fourteen committed Assembled pictures the pad's pixels are `#705512`
+  to `#715612` (hue 42 to 43 degrees, value 0.44; `#cb7103`, hue 33,
+  value 0.80, before), 13 to 27 % of the drawing (the 1 mm finger's
+  the least, the 2 mm finger's the most), and the finger's orange
+  `#bc4709` (its lit quarter `#da520b`, hue 21, value 0.85) as before:
+  the photo's gap of about 21 degrees of hue and half the
+  brightness.  The photo's traces are stronger than the tint leaves
+  them (its copper bright between dark stripes of film; here the
+  board's art, whose copper reads a little darker than its polyimide,
+  at a third of its contrast).  Gen by
+  Surface draws no pad: its figure is its own, and `--check-generator`
+  holds the tint to the Assembled sheets (below).
 - `cad/library_view.js` reads the rules for such a part and hands the
-  stage `{look, smooth_deg}`; the stage draws the part's own material in
-  it for that drawing.  Without a rule the part is Gen by Surface's grey.
+  stage `{look, smooth_deg, pad}`; the stage draws the part's own
+  material in it for that drawing, and the pad's tint where there is one.
+  Without a rule the part is Gen by Surface's grey.
 - The rules are hashed into every gripper's `scene_sha256`, and a record
   of such a part keeps `part_look_sha256`
-  (`tools/library_write.py` `part_look_sha256(part_look(...))`): a changed
-  look makes the pictures stale.
+  (`tools/library_write.py` `part_look_sha256(part_look(...))`, the pad's
+  tint among it where the rules give one): a changed look or tint makes
+  the pictures stale.
 
 Until the look, the Library's pictures of these sensors were Gen by
 Surface's figure byte for byte, and `library_shots.py --check-generator`
@@ -501,7 +665,16 @@ writing nothing):
    pixel.  The pixels the colour does reach, and the others, must each be
    a share of the drawing (0.1 and 0.25 at least), so neither statement
    is about nothing; on the fourteen sensors the part's are 44 to 52 % of
-   the Exploded drawing and 26 to 41 % of the Assembled one.
+   the Exploded drawing and 26 to 41 % of the Assembled one.  Where the
+   rules give the pad a tint, this comparison is of the view with the
+   tint served away (`unpadded()`).
+5. The pad's tint touches the Assembled sheets alone (since 2026-11-14;
+   `pad_differences()`, `pad_problems()`): the view with the tint (the
+   pictures') against the view without it has the same alpha at every
+   pixel, changes nothing in Exploded, and in Assembled changes only
+   pixels the part's colour does not reach (by the fourth comparison's
+   witness in the other colour), `PAD_SHARE_MIN` (0.05) of the drawing at
+   least.  Five drawings a sensor then.
 
 `tests/test_library.py` holds, without a browser, that the pin is of
 exactly these sensors and their builds, and that the committed pictures
@@ -688,7 +861,8 @@ committed meshes.
 ## The showcase's page
 
 The user's request of 2026-11-12: at the top of the Library, the original
-version, hand-designed and not auto-generated.  `library/showcase.json`
+version, hand-designed and not auto-generated (worded on 2026-11-15 as the
+original FlexiTac, hand-designed, pre-agent).  `library/showcase.json`
 (`"format": "flexitac-library-showcase/v1"`) is its document, beside
 `entries.json`; `library.js` reads both as the page opens, and a Library
 without it (or with a document of another format, or whose `id` is an
@@ -697,7 +871,8 @@ entry's) is the Library of before.
 | Key | What it is |
 | --- | --- |
 | `id` | `"flexitac-g1"`: the page's address (`library.html#flexitac-g1`); no part's, variant's or family's |
-| `title`, `label`, `text` | the card's and the page's words, one line each: "FlexiTac on xArm"; "Hand-designed, not auto-generated" (the label must say both); one line of text |
+| `title`, `label`, `text` | the card's and the page's words, one line each: "FlexiTac on xArm"; "Original FlexiTac · Hand-designed, pre-agent" (the label must say original, hand-designed and pre-agent; it said "Hand-designed, not auto-generated" until 2026-11-15); "FlexiTac PCBs make tactile sensors accessible, reliable and standardized." |
+| `detail` | the page's line of detail under its line, one line: the sensor's size and fingers ("The original FlexiTac sensor, 12 × 32 taxels at 2 mm, on the xArm gripper's soft fingers."), which the card no longer says (2026-11-15) |
 | `sensor` | `{rows, columns, pitch_mm, field_mm}`: the pad (32 x 12 at 2 mm, the art's 23 x 63 mm field), for the picture's placeholder |
 | `placed` | the pad's placed record (`vendor/flexitac-v2/umi-finray.placed.json`, "A placed sensor") with `"scene": "scenes/flexitac-g1.json"`: what the 3D view draws |
 | `image` | `{exploded, assembled, card: {src, width, height, bytes, sha256}, alt}`: the three pictures, paths relative to `library/` |
@@ -716,15 +891,27 @@ entry's) is the Library of before.
   `shot` (nothing when the stage's numbers are not sound, below);
   `--check` shoots again and compares every byte.
 - The grid: its first section is the showcase's one card
-  (`a.lib-card.lib-showcase#showcase`), as wide as the row: its picture
+  (`div.lib-card.lib-showcase#showcase`), as wide as the row: its picture
   (`slot()`'s third kind, `"showcase"`: the card file, loaded at once; a
-  picture, as every card: no 3D on the grid) on the right of its label, its
-  title and its line from 735 px, above them below.
-- The page: the picture in its frame with the Exploded | Assembled control,
+  picture, as every card: no 3D on the grid) on the left of its label, its
+  title, its line and Details from 735 px, the words just beside it (on
+  the right of them until 2026-11-15), above them below.  Since the
+  user's request of 2026-11-15 ("xarm can be smaller ... make only the image
+  that can click to the details ... a button called details") the card is no
+  link and does not lift when hovered: its picture (`a.lib-showcase-pic`, a
+  fifth of the row within 220 to 300 px, 60 % of a phone's card) and its
+  Details (`a.lib-pill.lib-showcase-details`, a grey pill) open the page.
+  The picture's link repeats Details', so it is out of the Tab order and
+  hidden from assistive technology; Details is the card's one stop, and
+  the page's back link came back to it (since 2026-11-15 the window's X,
+  Escape and the backdrop focus it).
+- The page (in the window over the grid since 2026-11-15, "The details
+  window"): the picture in its frame with the Exploded | Assembled control,
   the 3D view drawn over it from `placed`
   (`show({base, id, placed, mode})`, the one dynamic import), opening
   Assembled, the view its card shows; beside it the label, the title, the
-  line, a grey pill to the tutorial and the sources with their notices.
+  line, the line of detail, a grey pill to the tutorial and the sources
+  with their notices.
   No pitch, no Open in Gen by Surface, no generator download.  Its box is
   4:5 at every width (a sensor's is 3:1 in one column, to keep Open in a
   phone's first screen: this page has no such action).
@@ -994,7 +1181,8 @@ and the tests' too):
   none; a `drawn-` shape whose header says it is the project's); the looks
   (each name a look of the scene, each look used and in range, the part's
   without a clear coat; the rules' `part_looks` naming only parts without
-  a scene or their families); `see_through` and `picture`; the overrides
+  a scene or their families, their `part_pad` a tint with them);
+  `see_through` and `picture`; the overrides
   within their bounds
   with "reason" in `about`; a file of `scenes/` or `bodies/` no scene
   names; `DENIED_SHA256` over every body and every hash `NOTICE.md` names,

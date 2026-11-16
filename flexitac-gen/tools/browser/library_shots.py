@@ -77,10 +77,15 @@ Gen by Surface's figure byte for byte; Gen by Surface keeps its grey part).  For
    the drawing's alpha is the figure's at every pixel (the same outline), and every drawn pixel that the part's colour
    does not reach (the same in both colours: the sheets, and their edges on the ground) is the figure's pixel (the look
    touches the part alone); the pixels it does reach (the part's) and the others must each be PART_SHARE_MIN and
-   SHEETS_SHARE_MIN of the drawing at least, so that neither statement is empty.
+   SHEETS_SHARE_MIN of the drawing at least, so that neither statement is empty.  Where the rules also give the
+   assembled pad a tint (their part_pad, since 2026-11-14), this comparison is of the view with the tint served away;
+5. and then the view with the tint (the pictures') against that view without it: the same alpha at every pixel, nothing
+   changed in Exploded, and in Assembled only pixels the part's colour does not reach (the sheets'), PAD_SHARE_MIN of
+   the drawing at least.
 A gripper's sensor is refused (its picture is the whole scene).  --pin-generator [ID,...] writes the pin from Gen by
 Surface's figure as it is now, saying which pictures changed: only for a deliberate change of the figure, or a sensor's
-new build.  Four drawings a sensor: 43 to 57 s on the shared host of 2026-11-12 (a shoot's one drawing 8 to 18 s there).
+new build.  Four drawings a sensor: 43 to 57 s on the shared host of 2026-11-12 (a shoot's one drawing 8 to 18 s there);
+five with the pad's tint.
 --sheet writes a contact sheet (PNG) of every sensor's Exploded card in the manifest, in the Library's order,
 each in the page's light box.  About 6 to 10 s a sensor, the art 0.6 to 1.6 s of it (the 42 in 5.4 minutes on a shared
 host, 2026-11-05, with the scenes of the design: 126 files, 3.70 MB; the first screen's cards 0.21 MB; the art 0.41 MB).
@@ -782,6 +787,11 @@ GENERATOR_ABOUT = ("Gen by Surface's sensor on the part (./?part=<id>: web/cad/o
 # fourteen sensors of 2026-11-12: the part's 44 to 52 % of the Exploded drawing and 26 to 41 % of the Assembled one.
 PART_SHARE_MIN = 0.1
 SHEETS_SHARE_MIN = 0.25
+# The least share of the Assembled drawing that the pad's tint (the rules' part_pad, the user's decision of 2026-11-14)
+# must reach (--check-generator's fifth comparison: fewer, and "the pad touches the sheets alone" would be about almost
+# nothing).  Measured on the fourteen sensors of 2026-11-14 (its pixel counts against the drawing's): 13 to 27 % of the
+# Assembled drawing, the 1 mm finger's the least.
+PAD_SHARE_MIN = 0.05
 PIN_PROBLEM = "pin Gen by Surface's figure again with tools/browser/library_shots.py --pin-generator"
 
 
@@ -845,8 +855,8 @@ def other_look(look: dict) -> dict:
 
 def served_scenes(index: dict, part_id: str, given: dict | None) -> str:
     """scenes/scenes.json's text as --check-generator serves it: the rules without their looks (``given`` None: the part
-    as Gen by Surface draws it) or with ``given`` ({"look", "smooth_deg"}, as library_write.part_look() gives it) for
-    ``part_id`` alone; everything else as it is."""
+    as Gen by Surface draws it) or with ``given`` ({"look", "smooth_deg"} and any "pad", as library_write.part_look()
+    gives it) for ``part_id`` alone; everything else as it is."""
 
     served = json.loads(json.dumps(index))
     for key in library_write.RULES_OPTIONAL:
@@ -855,7 +865,15 @@ def served_scenes(index: dict, part_id: str, given: dict | None) -> str:
         served["rules"]["part_looks"] = {part_id: given["look"]}
         if given.get("smooth_deg") is not None:
             served["rules"]["part_smooth_deg"] = given["smooth_deg"]
+        if given.get("pad") is not None:
+            served["rules"]["part_pad"] = given["pad"]
     return json.dumps(served)
+
+
+def unpadded(given: dict) -> dict:
+    """``given`` (library_write.part_look()) without its pad: the part's look alone."""
+
+    return {key: value for key, value in given.items() if key != "pad"}
 
 
 def view_differences(figure: bytes, look: bytes, other: bytes) -> dict:
@@ -902,6 +920,48 @@ def view_problems(counts: dict) -> list:
     return found
 
 
+def pad_differences(look: bytes, padded: bytes, other: bytes) -> dict:
+    """The Library's view of a part in its look with the pad's tint (the rules' part_pad) against the same view without
+    it, pixel by pixel: three drawings of one size as RGBA bytes (four a pixel): the view in the part's look without
+    the pad, the view with it (the pictures'), and the view without it in the look's other colour (other_look(): the
+    witness of the part's pixels).  {"drawn": the padded view's drawn pixels, "alpha": the pixels whose alpha is not the
+    unpadded view's (another outline), "pad": the drawn pixels the pad changes, "part": those of them that the part's
+    colour reaches (not the same in both colours)}."""
+
+    if not (len(look) == len(padded) == len(other)) or len(look) % 4:
+        raise ShotError(f"the drawings are not RGBA of one size ({len(look)}, {len(padded)} and {len(other)} bytes)")
+    counts = {"drawn": 0, "alpha": 0, "pad": 0, "part": 0}
+    for k in range(3, len(look), 4):
+        if padded[k] != look[k]:
+            counts["alpha"] += 1
+        if not padded[k]:
+            continue
+        counts["drawn"] += 1
+        if padded[k - 3:k + 1] == look[k - 3:k + 1]:
+            continue
+        counts["pad"] += 1
+        if look[k - 3:k + 1] != other[k - 3:k + 1]:
+            counts["part"] += 1
+    return counts
+
+
+def pad_problems(mode: str, counts: dict) -> list:
+    """What pad_differences()'s counts in ``mode`` show that the pad's tint is not the Assembled sheets' alone, one line
+    each (none: []): another outline, a pixel of the part changed, the pad drawn in Exploded, or in Assembled on less
+    than PAD_SHARE_MIN of the drawing."""
+
+    found = []
+    if counts["alpha"]:
+        found.append(f"{counts['alpha']} px of another alpha with the pad than without it (another outline)")
+    if counts["part"]:
+        found.append(f"the pad changes {counts['part']} px of the part (the pad is not the sheets' alone)")
+    if mode != "assembled" and counts["pad"]:
+        found.append(f"the pad changes {counts['pad']} px in {mode} (it is the assembled sensor's alone)")
+    if mode == "assembled" and counts["pad"] < PAD_SHARE_MIN * counts["drawn"]:
+        found.append(f"the pad changes {counts['pad']} of the {counts['drawn']} px drawn, under {PAD_SHARE_MIN:g} of them (is the pad drawn?)")
+    return found
+
+
 def rgba(png: bytes) -> bytes:
     """A canvas's PNG as RGBA bytes (SHOT_SIZE)."""
 
@@ -929,8 +989,9 @@ def twice(what: str, shot):
 def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, index: dict, parts: dict, pin: dict) -> int:
     """--check-generator (the module's docstring): for each sensor of a part without a scene, Gen by Surface's figure
     against its pin, the Library's view without the rules' looks against that figure, the view as the rules are against
-    the folder's pictures, and for a part with a look the view against the figure pixel by pixel (view_differences());
-    writes nothing."""
+    the folder's pictures, and for a part with a look the view against the figure pixel by pixel (view_differences(): the
+    look without the pad) and, where the rules give the pad a tint, the view with it against the view without it
+    (pad_differences()); writes nothing."""
 
     from playwright.sync_api import Error as PlaywrightError
 
@@ -950,7 +1011,9 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
             figure = twice(identifier, lambda: generator_shoot(browser, url, identifier, variant))
             bare = twice(identifier, lambda: viewed(None))
             looked = twice(identifier, lambda: viewed(given)) if given else bare
-            other = twice(identifier, lambda: viewed(dict(given, look=other_look(given["look"])))) if given else None
+            # The look alone (the pad's tint served away, where the rules give one) and in its other colour.
+            alone = twice(identifier, lambda: viewed(unpadded(given))) if given and given.get("pad") is not None else looked
+            other = twice(identifier, lambda: viewed(dict(unpadded(given), look=other_look(given["look"])))) if given else None
             files, _ = encode(figure)
             pictures, _ = encode(looked)
             unlike = []
@@ -974,13 +1037,18 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
                      if not (out / Path(paths[kind][0]).name).is_file() or (out / Path(paths[kind][0]).name).read_bytes() != data]
             if kinds:
                 unlike.append(f"the folder's pictures are not the Library's view ({', '.join(kinds)})")
-            # 4. In its look, the view differs from the figure on the part's pixels alone.
+            # 4. In its look (without the pad's tint), the view differs from the figure on the part's pixels alone.
             said = "no look: the pictures are the figure's"
             if given:
-                counted = {mode: view_differences(pixels[mode]["figure"], rgba(looked[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}
+                counted = {mode: view_differences(pixels[mode]["figure"], rgba(alone[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}
                 unlike += [f"{mode}: {problem}" for mode in MODES for problem in view_problems(counted[mode])]
                 said = "; ".join(f"{mode} {counted[mode]['part']} of {counted[mode]['drawn']} px the part's, the other {counted[mode]['sheets']} the figure's"
                                  for mode in MODES)
+            # 5. The pad's tint changes the Assembled sheets alone: never the part, nothing in Exploded, the same outline.
+            if given and given.get("pad") is not None:
+                padded = {mode: pad_differences(rgba(alone[mode]["png"]), rgba(looked[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}
+                unlike += [f"{mode}: {problem}" for mode in MODES for problem in pad_problems(mode, padded[mode])]
+                said += "; the pad " + ", ".join(f"{padded[mode]['pad']} px in {mode}" for mode in MODES)
         except (ShotError, PlaywrightError) as error:
             failed.append(identifier)
             print(f"FAIL {identifier}: {error}", flush=True)

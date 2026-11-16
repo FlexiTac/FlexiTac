@@ -37,7 +37,10 @@ A look file (tools/library_looks/<part>.json, FORMAT):
     {"components_inside": [[lo], [hi]]}        every connected component whose bounding box lies in the box (one at
                                                least).
 - "draw": plain shapes for a component the model lacks (the photos show it and it matters for the look): {"box":
-  [[lo], [hi]]} or {"cylinder": {"from", "to", "radius", "segments": 24}}, in the frame of the body they are listed
+  [[lo], [hi]]}, {"cylinder": {"from", "to", "radius", "segments": 24}} or {"prism": {"axis": "x", "from": a, "to": b,
+  "profile": [[p, q], ...]}} (a convex polygon of 3 to 32 corners, counter-clockwise seen from the axis's positive end,
+  drawn from a to b along the axis: a chamfered block, a rail's rounded section; its corners are (y, z) about x, (z, x)
+  about y and (x, y) about z), in the frame of the body they are listed
   under (so they stand on every copy of that body: both fingers), or, under "drawn", in the part's frame ("matrix",
   the identity by default; "finger").  A drawn file is bodies/<part>/drawn-<name>.stl, the project's own (no NOTICE
   row; its header says so, library_write.own_body()); say so in "about" too.
@@ -107,6 +110,10 @@ BASE_FILE = "base.json"
 WELD_MM = 0.01
 TOL_MM = 0.05
 SEGMENTS = 24
+# A prism's axis and the order of its profile's two numbers about it (right-handed: the profile counter-clockwise seen
+# from the axis's positive end faces outward), and its most corners.
+PRISM_AXES = {"x": (1, 2), "y": (2, 0), "z": (0, 1)}
+PRISM_CORNERS = 32
 RECORD = struct.Struct("<12fH")
 NAME = re.compile(r"[a-z0-9]+(?:[_-][a-z0-9]+)*")
 PART_KEYS = {"format", "part", "about", "smooth_deg", "part_look", "looks", "bodies", "drawn"}
@@ -289,10 +296,10 @@ def _facet(a, b, c) -> bytes:
 
 
 def drawn(shape, what: str) -> list:
-    """The facet records of one shape of a "draw" list: a box or a cylinder, closed, facing outward."""
+    """The facet records of one shape of a "draw" list: a box, a cylinder or a prism, closed, facing outward."""
 
     if not isinstance(shape, dict) or len(shape) != 1:
-        raise SplitError(f"{what}: {shape!r} is not one shape (box or cylinder)")
+        raise SplitError(f"{what}: {shape!r} is not one shape (box, cylinder or prism)")
     kind, value = next(iter(shape.items()))
     if kind == "box":
         (x0, y0, z0), (x1, y1, z1) = _box(value, what)
@@ -332,7 +339,48 @@ def drawn(shape, what: str) -> list:
             out += [_facet(low[k], low[j], high[j]), _facet(low[k], high[j], high[k]),
                     _facet(start, low[j], low[k]), _facet(end, high[k], high[j])]
         return out
-    raise SplitError(f"{what}: {kind!r} is not a shape (box or cylinder)")
+    if kind == "prism":
+        if not isinstance(value, dict) or set(value) != {"axis", "from", "to", "profile"}:
+            raise SplitError(f"{what}: a prism is {{axis, from, to, profile}}, not {value!r}")
+        axis, start, end, profile = value["axis"], value["from"], value["to"], value["profile"]
+        if axis not in PRISM_AXES or not (library_write._number(start) and library_write._number(end) and start < end):
+            raise SplitError(f"{what}: the prism {value!r} has not an axis x, y or z and a from below its to")
+        if not (isinstance(profile, list) and 3 <= len(profile) <= PRISM_CORNERS
+                and all(isinstance(point, list) and len(point) == 2 and all(library_write._number(v) for v in point) for point in profile)):
+            raise SplitError(f"{what}: the prism's profile is not 3 to {PRISM_CORNERS} corners [p, q]")
+        # Convex and counter-clockwise: a left turn at every corner, and the turns one revolution together (a star's
+        # corners turn left too, twice round).
+        count = len(profile)
+        turns = []
+        for k in range(count):
+            a, b, c = profile[k - 1], profile[k], profile[(k + 1) % count]
+            u = (b[0] - a[0], b[1] - a[1])
+            v = (c[0] - b[0], c[1] - b[1])
+            cross = u[0] * v[1] - u[1] * v[0]
+            if cross <= 0:
+                raise SplitError(f"{what}: the prism's profile does not turn left at its corner {k + 1} {b!r} "
+                                 "(convex, counter-clockwise seen from the axis's positive end, no corner twice or in line)")
+            turns.append(math.atan2(cross, u[0] * v[0] + u[1] * v[1]))
+        if abs(math.fsum(turns) - 2 * math.pi) > 1e-6:
+            raise SplitError(f"{what}: the prism's profile goes round more than once (a star, not a convex polygon)")
+        across = PRISM_AXES[axis]
+        along = "xyz".index(axis)
+
+        def point(corner, level):
+            out = [0.0, 0.0, 0.0]
+            out[across[0]], out[across[1]], out[along] = corner[0], corner[1], level
+            return out
+
+        low = [point(corner, start) for corner in profile]
+        high = [point(corner, end) for corner in profile]
+        out = []
+        for k in range(count):
+            j = (k + 1) % count
+            out += [_facet(low[k], low[j], high[j]), _facet(low[k], high[j], high[k])]
+        for k in range(1, count - 1):
+            out += [_facet(low[0], low[k + 1], low[k]), _facet(high[0], high[k], high[k + 1])]
+        return out
+    raise SplitError(f"{what}: {kind!r} is not a shape (box, cylinder or prism)")
 
 
 def own_header(name: str) -> str:

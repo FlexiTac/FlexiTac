@@ -3,7 +3,8 @@
 
 - the rules: connected components after welding (0.01 mm by default), recognised by their box and triangle count; the
   triangles inside a box (all three corners); "rest"; every triangle taken once, no component empty;
-- the shapes the project draws (a box, a cylinder): closed, facing outward, the project's own by name and header;
+- the shapes the project draws (a box, a cylinder, a prism of a convex profile): closed, facing outward, the
+  project's own by name and header;
 - the looks: a base look by its name, a part's own look with its evidence, never under a base look's name;
 - what is written: the component files (the body's facet records, sorted, under its header with "; split"), the scene
   (its bodies, looks, part_look, smooth_deg and the look file's words after its about; every other key as it was),
@@ -224,6 +225,45 @@ class RuleTests(unittest.TestCase):
         self.assertFalse(library_write.own_body("bodies/grip/cap.stl", data))
         with self.assertRaisesRegex(library_split.SplitError, "an STL's holds 80"):
             library_split.stl(library_split.own_header("a-name-too-long-for-the-header"), [])
+
+    def test_a_prism_is_its_convex_profile_drawn_along_its_axis(self) -> None:
+        # Since the MakerMods body of 2026-11-14: a chamfered block or a rail's rounded section in one shape, its corners
+        # (y, z) about x, (z, x) about y and (x, y) about z, counter-clockwise seen from the axis's positive end.
+        octagon = [[2, 0], [4, 0], [5, 1], [5, 3], [4, 4], [2, 4], [1, 3], [1, 1]]  # p 1..5, q 0..4
+        area = 4 * 4 - 4 * 0.5
+        for axis, low, high in (("x", [2, 1, 0], [7, 5, 4]), ("y", [0, 2, 1], [4, 7, 5]), ("z", [1, 0, 2], [5, 4, 7])):
+            with self.subTest(axis=axis):
+                records = library_split.drawn({"prism": {"axis": axis, "from": 2, "to": 7, "profile": octagon}}, "x")
+                self.assertEqual(len(records), 2 * (8 - 2) + 2 * 8)
+                self.assertAlmostEqual(volume(library_split.stl("x", records)), area * 5, places=4)
+                self.assertEqual(library_split.bounds(records), (low, high))
+                edges = {}
+                for record in records:
+                    a, b, c = library_split.corners(record)
+                    for start, end in ((a, b), (b, c), (c, a)):
+                        edges[(start, end)] = edges.get((start, end), 0) + 1
+                self.assertTrue(all(count == 1 and edges.get((end, start)) == 1 for (start, end), count in edges.items()))
+        triangle = library_split.drawn({"prism": {"axis": "z", "from": -1, "to": 0.5, "profile": [[0, 0], [2, 0], [0, 3]]}}, "x")
+        self.assertEqual(len(triangle), 8)
+        self.assertAlmostEqual(volume(library_split.stl("x", triangle)), 3 * 1.5, places=5)
+        star = [[round(math.cos(4 * math.pi * k / 5), 6), round(math.sin(4 * math.pi * k / 5), 6)] for k in range(5)]
+        for value, problem in (({"axis": "x", "from": 0, "to": 1, "profile": octagon[::-1]}, "does not turn left at its corner 1 "),
+                               ({"axis": "x", "from": 0, "to": 1, "profile": [[0, 0], [1, 0], [2, 0], [0, 2]]}, "does not turn left at its corner 2 "),
+                               ({"axis": "x", "from": 0, "to": 1, "profile": [[0, 0], [2, 0], [2, 0], [0, 2]]}, "does not turn left at its corner"),
+                               ({"axis": "x", "from": 0, "to": 1, "profile": star}, "goes round more than once"),
+                               ({"axis": "x", "from": 0, "to": 1, "profile": [[0, 0], [1, 0]]}, "is not 3 to 32 corners"),
+                               ({"axis": "x", "from": 0, "to": 1, "profile": [[math.cos(k / 5.3), math.sin(k / 5.3)] for k in range(33)]},
+                                "is not 3 to 32 corners"),
+                               ({"axis": "x", "from": 0, "to": 1, "profile": [[0, 0], [1, 0], ["1", 1]]}, "is not 3 to 32 corners"),
+                               ({"axis": "x", "from": 1, "to": 1, "profile": octagon}, "a from below its to"),
+                               ({"axis": "w", "from": 0, "to": 1, "profile": octagon}, "an axis x, y or z"),
+                               ({"axis": "x", "from": 0, "to": 1}, "a prism is"),
+                               ({"axis": "x", "from": 0, "to": 1, "profile": octagon, "segments": 8}, "a prism is")):
+            with self.subTest(value=value), self.assertRaisesRegex(library_split.SplitError, problem):
+                library_split.drawn({"prism": value}, "x")
+        # 32 corners, the most, are taken.
+        circle = [[math.cos(2 * math.pi * k / 32), math.sin(2 * math.pi * k / 32)] for k in range(32)]
+        self.assertEqual(len(library_split.drawn({"prism": {"axis": "y", "from": 0, "to": 1, "profile": circle}}, "x")), 2 * 30 + 2 * 32)
 
     def test_a_component_s_header_says_split(self) -> None:
         self.assertEqual(library_split.split_header(HEADER.encode("ascii").ljust(80, b" ")),

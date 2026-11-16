@@ -42,11 +42,11 @@ fit, no entries.json, no engine.  Its state is <pre id="showcaseState">.
 - part_page: the showcase on the Library (library.html, web/library/showcase.json): at 1440 px the grid's first section
   is the showcase's one card, as wide as the row, its picture (one image, the card file, 4:5, no canvas and no three.js
   on the grid) beside its label, its title and its line; reached with Tab and opened with Enter it gives the showcase's
-  own page, its title focused: the 3D view drawn over the picture from the placed record (no build, the scene's
-  gripper, Assembled at its home, the scene's looks and camera, the fingers orange, the boards amber), its box 4:5; the
-  page's Tab order, the Exploded | Assembled control worked with the arrow keys, the view turned with them and brought
-  back with 0; the tutorial's link and the two notices (each answered by the server); no Open in Gen by Surface, no
-  download; Back to the card, focused.  At 390 px, light and dark: the card stacked within the window, nothing scrolling sideways, the
+  own page in the window over the grid (since 2026-11-15), its title focused: the 3D view drawn over the picture from the
+  placed record (no build, the scene's gripper, Assembled at its home, the scene's looks and camera, the fingers orange,
+  the boards amber), its box 4:5; the window's Tab order (its X first), the Exploded | Assembled control worked with the
+  arrow keys, the view turned with them and brought back with 0; the tutorial's link and the two notices (each answered
+  by the server); no Open in Gen by Surface, no download; the window's X back to the card, its Details focused.  At 390 px, light and dark: the card stacked within the window, nothing scrolling sideways, the
   page's view drawn in its light box; no console error anywhere.  --out DIR: the pages' screenshots.
 """
 from __future__ import annotations
@@ -389,9 +389,13 @@ GRID = """() => {
   if (!first || !card) return null;
   const box = element => { const r = element.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
   const image = card.querySelector('img'); const shot = card.querySelector('.lib-shot'); const text = card.querySelector('.lib-card-text');
-  return {first: first.className, inFirst: first.contains(card), cards: first.querySelectorAll('a.lib-card').length, href: card.getAttribute('href'),
+  const pic = card.querySelector('a.lib-showcase-pic'); const details = card.querySelector('a.lib-showcase-details');
+  return {first: first.className, inFirst: first.contains(card), cards: first.querySelectorAll('.lib-card').length, tag: card.tagName,
+    hrefs: [...card.querySelectorAll('a')].map(a => a.getAttribute('href')), href: card.getAttribute('href'),
+    pic: pic ? [pic.getAttribute('tabindex'), pic.getAttribute('aria-hidden'), pic.contains(shot)] : null,
+    details: details ? [details.textContent, getComputedStyle(details).backgroundColor, box(details)] : null,
     label: card.querySelector('.lib-badge')?.textContent, title: card.querySelector('.lib-showcase-title')?.textContent,
-    line: card.querySelector('.lib-showcase-line')?.textContent, named: card.getAttribute('aria-label'),
+    line: card.querySelector('.lib-showcase-line')?.textContent, named: details?.getAttribute('aria-label'),
     images: card.querySelectorAll('img').length, src: image?.getAttribute('src'), natural: image ? [image.naturalWidth, image.naturalHeight] : null,
     complete: Boolean(image?.complete), alt: image?.alt, loading: image?.getAttribute('loading'),
     card: box(card), shot: box(shot), text: box(text), row: box(shelves), next: first.nextElementSibling?.id,
@@ -404,10 +408,12 @@ PAGE = """() => {
   const detail = document.getElementById('libDetail'); const stage = detail.querySelector('.lib-stage'); const live = detail.querySelector('.lib-live');
   const box = element => { if (!element) return null; const r = element.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
   const pill = detail.querySelector('.lib-pills a');
-  return {hidden: detail.hidden, grid: document.getElementById('libGrid').hidden, hash: location.hash, title: document.title,
+  const dialog = document.getElementById('libWindow');
+  return {windowed: dialog.open, covered: dialog.open && !document.getElementById('libGrid').hidden, hash: location.hash, title: document.title,
     focused: document.activeElement?.id || document.activeElement?.className, heading: detail.querySelector('#libDetailTitle')?.textContent,
     label: detail.querySelector('.lib-badge')?.textContent, line: detail.querySelector('.lib-detail-line')?.textContent,
-    back: detail.querySelector('.lib-back')?.getAttribute('href'), live: Boolean(stage?.classList.contains('is-live')),
+    detail: detail.querySelector('.lib-showcase-detail')?.textContent,
+    live: Boolean(stage?.classList.contains('is-live')),
     stage: box(stage), canvas: box(live?.querySelector('canvas')), frame: box(detail.querySelector('.lib-frame')), info: box(detail.querySelector('.lib-info')),
     ground: stage ? getComputedStyle(stage.querySelector('.lib-shot')).backgroundColor : null,
     views: [...detail.querySelectorAll('input[name=libView]')].map(input => [input.value, input.checked]),
@@ -471,34 +477,46 @@ def part_page(browser, url: str, out: Path) -> None:
         grid = page.evaluate(GRID)
         page.screenshot(path=str(out / "grid.1440.light.png"))
         rp.check("1440: the grid's first section is the showcase's one card, before the grippers",
-                 bool(grid) and "lib-showcased" in grid["first"] and grid["inFirst"] and grid["cards"] == 1 and grid["next"] == "grippers"
-                 and grid["href"] == f"#{identifier}", grid and (grid["first"], grid["cards"], grid["next"], grid["href"]))
-        rp.check("1440: its words are showcase.json's: the label, the title, one line",
+                 bool(grid) and "lib-showcased" in grid["first"] and grid["inFirst"] and grid["cards"] == 1 and grid["next"] == "grippers",
+                 grid and (grid["first"], grid["cards"], grid["next"]))
+        # The user's request of 2026-11-15: the card no link; its picture and its Details open the page, the picture's
+        # link out of the Tab order and hidden from assistive technology; Details a grey pill, not the action blue.
+        rp.check("1440: the card is no link; its picture and its Details open the page, the picture out of the Tab order",
+                 grid["tag"] == "DIV" and grid["href"] is None and grid["hrefs"] == [f"#{identifier}", f"#{identifier}"]
+                 and grid["pic"] == ["-1", "true", True] and grid["details"][0] == "Details"
+                 and grid["details"][1] not in ("rgb(0, 113, 227)", "rgb(41, 151, 255)"), (grid["tag"], grid["hrefs"], grid["pic"], grid["details"]))
+        rp.check("1440: its words are showcase.json's: the label, the title, one line, and Details named after the title",
                  (grid["label"], grid["title"], " ".join(grid["line"].split())) == (document["label"], document["title"], document["text"])
-                 and grid["named"] == f"{document['title']}: {document['label'].lower()}", (grid["label"], grid["title"], grid["line"], grid["named"]))
+                 and grid["named"] == f"Details: {document['title']}", (grid["label"], grid["title"], grid["line"], grid["named"]))
         card = document["image"]["card"]
         rp.check("1440: its picture is one image, the card file at its size, loaded at once; no canvas and no three.js on the grid",
                  grid["images"] == 1 and grid["src"] == f"static/library/{card['src']}" and grid["natural"] == [card["width"], card["height"]]
                  and grid["complete"] and grid["loading"] is None and grid["alt"] == document["image"]["alt"] and grid["canvases"] == 0
                  and grid["scripts"] == [], (grid["images"], grid["src"], grid["natural"], grid["loading"], grid["canvases"], grid["scripts"]))
-        rp.check("1440: the card is as wide as the row, its picture a 4:5 light box on the right of its words, nothing past the window",
-                 near(grid["card"][2], grid["row"][2]) and near(grid["shot"][2] * 5, grid["shot"][3] * 4, 4) and grid["shot"][0] > grid["text"][0] + grid["text"][2] - 1
-                 and grid["ground"] == "rgb(245, 245, 247)" and grid["wide"] <= grid["window"], (grid["card"], grid["shot"], grid["text"], grid["ground"]))
+        rp.check("1440: the card is as wide as the row, its picture a 4:5 light box on the left, its words just beside it, a fifth of the row, nothing past the window",
+                 near(grid["card"][2], grid["row"][2]) and near(grid["shot"][2] * 5, grid["shot"][3] * 4, 4)
+                 and grid["shot"][0] < grid["text"][0] and 0 <= grid["text"][0] - (grid["shot"][0] + grid["shot"][2]) <= 1
+                 and 220 <= grid["shot"][2] <= 300 and grid["ground"] == "rgb(245, 245, 247)" and grid["wide"] <= grid["window"],
+                 (grid["card"], grid["shot"], grid["text"], grid["ground"]))
         rp.check("1440: the grippers' heading 56 px below the card, as the UMI shelf's is below the grippers' last row, and in a 900 px window's first screen",
                  grid["below"] == 56 and grid["card"][1] + grid["card"][3] + 56 < 900, (grid["below"], grid["card"][1] + grid["card"][3]))
-        # The keyboard: Tab from the page's top to the card (the header's links come first), Enter opens its page.
+        # The keyboard: Tab from the page's top to the card's Details, its one stop (the header's links come first; the
+        # picture's link is no stop), Enter opens its page.
         presses = 0
-        while presses < 30 and page.evaluate("() => document.activeElement?.id") != "showcase":
+        stops = []
+        while presses < 30 and not page.evaluate("() => document.activeElement?.matches('.lib-showcase-details')"):
             page.keyboard.press("Tab")
             presses += 1
-        ring = page.evaluate("() => { const s = getComputedStyle(document.activeElement); return [document.activeElement.id, s.outlineStyle, s.outlineWidth, document.activeElement.matches(':focus-visible')]; }")
-        rp.check("1440: Tab reaches the card, the first card of the page, with the page's focus ring", ring == ["showcase", "solid", "2px", True], (presses, ring))
+            stops.append(page.evaluate("() => document.activeElement?.className"))
+        ring = page.evaluate("() => { const s = getComputedStyle(document.activeElement); return [document.activeElement.className, s.outlineStyle, s.outlineWidth, document.activeElement.matches(':focus-visible')]; }")
+        rp.check("1440: Tab reaches the card's Details, the page's first card's one stop, with the page's focus ring, never its picture",
+                 ring == ["lib-pill lib-showcase-details", "solid", "2px", True] and "lib-showcase-pic" not in stops, (presses, ring))
         page.keyboard.press("Enter")
         state = view_state(page, drawn("assembled"))
         info = page.evaluate(PAGE)
-        rp.check("1440: Enter opens the showcase's own page, its title focused, the tab named after it",
-                 (info["hash"], info["hidden"], info["grid"], info["focused"], info["heading"]) == (f"#{identifier}", False, True, "libDetailTitle", document["title"])
-                 and info["title"].startswith(f"{document['title']} · "), (info["hash"], info["focused"], info["heading"], info["title"]))
+        rp.check("1440: Enter opens the showcase's own page in the window over the grid, its title focused, the tab named after it",
+                 (info["hash"], info["windowed"], info["covered"], info["focused"], info["heading"]) == (f"#{identifier}", True, True, "libDetailTitle", document["title"])
+                 and info["title"].startswith(f"{document['title']} · "), (info["hash"], info["windowed"], info["covered"], info["focused"], info["heading"], info["title"]))
         rp.check("1440: the 3D view is drawn from the placed record: no build, the scene's gripper, Assembled at its home",
                  bool(state) and (state.get("state"), state.get("id"), state.get("build_id"), state.get("gripper"), state.get("mode"), state.get("drawn_mode"), state.get("moved"))
                  == ("drawn", identifier, None, True, "assembled", "assembled", False) and info["live"],
@@ -522,8 +540,8 @@ def part_page(browser, url: str, out: Path) -> None:
         rp.check("1440: the canvas shows the orange fingers, the amber boards, the white shell and holders and the black links",
                  orange > 0.08 and amber > 0.03 and white > 0.25 and black > 0.03, f"orange {orange:.3f}, amber {amber:.3f}, white {white:.3f}, black {black:.3f}")
         page.screenshot(path=str(out / "page.assembled.1440.light.png"))
-        rp.check("1440: the page's words: the label, one line, the tutorial for the Gerbers (a grey pill, a new tab), the two notices",
-                 (info["label"], " ".join(info["line"].split())) == (document["label"], document["text"])
+        rp.check("1440: the page's words: the label, one line, the line of detail, the tutorial for the Gerbers (a grey pill, a new tab), the two notices",
+                 (info["label"], " ".join(info["line"].split()), " ".join((info["detail"] or "").split())) == (document["label"], document["text"], document["detail"])
                  and info["pill"][:4] == [document["tutorial"]["href"], "_blank", "noopener noreferrer", document["tutorial"]["label"]]
                  and info["notices"] == [f"static/library/{item['notice']}" for item in document["sources"]]
                  and all(item["text"] in info["sources"] for item in document["sources"]), (info["label"], info["pill"], info["notices"]))
@@ -532,8 +550,8 @@ def part_page(browser, url: str, out: Path) -> None:
         rp.check("1440: no Open in Gen by Surface, no download, no pitch or facts; the pill is not the action blue",
                  (info["open"], info["downloads"], info["pitch"]) == (0, 0, 0) and info["pill"][4] not in ("rgb(0, 113, 227)", "rgb(41, 151, 255)"),
                  (info["open"], info["downloads"], info["pitch"], info["pill"][4]))
-        # The keyboard on the page.  Its Tab order is the page's order: the back link, the view, the Exploded | Assembled
-        # control, then the words' links; the title, focused as the page opens, comes after the control, so Shift+Tab
+        # The keyboard on the page.  Its Tab order is the window's order: its X (since 2026-11-15; the page's back link
+        # before), the view, the Exploded | Assembled control, then the words' links; the title, focused as the page opens, comes after the control, so Shift+Tab
         # from it reaches the control (the arrow keys choose) and then the view (the arrow keys turn it, 0 brings it back).
         presses = 0
         while presses < 6 and page.evaluate("() => document.activeElement?.name") != "libView":
@@ -553,20 +571,31 @@ def part_page(browser, url: str, out: Path) -> None:
         turned = view_state(page, lambda state: state.get("moved") is True, 20)
         page.keyboard.press("0")
         back = view_state(page, lambda state: state.get("moved") is False, 20)
-        order = page.evaluate("""() => [...document.querySelectorAll('#libDetail a, #libDetail input, #libDetail [tabindex="0"]')]
+        order = page.evaluate("""() => [...document.querySelectorAll('#libWindow button, #libWindow a, #libWindow input, #libWindow [tabindex="0"]')]
           .map(node => node.className || node.name || node.textContent)""")
-        rp.check("1440: the page's Tab order: the back link, the view, the control's two views, the tutorial, the two notices",
-                 order == ["lib-back", "lib-live", "libView", "libView", "lib-pill", "notice", "notice"], order)
+        rp.check("1440: the window's Tab order: its X, the view, the control's two views, the tutorial, the two notices",
+                 order == ["lib-close", "lib-live", "libView", "libView", "lib-pill", "notice", "notice"], order)
         rp.check("1440: the keyboard reaches the view (a group named by the picture's alt); the arrow keys turn it and 0 brings it back",
                  focused == ["lib-live", document["image"]["alt"], "group"] and bool(turned) and turned.get("moved") is True and bool(back) and back.get("moved") is False,
                  (focused, turned and turned.get("moved"), back and back.get("moved")))
-        # Back: the grid where it was, the card focused.
-        page.click(".lib-back")
+        # The window's X (the page's back link until 2026-11-15): the grid where it was, the card's Details focused.
+        page.click("#libClose")
         page.wait_for_timeout(300)
-        after = page.evaluate("() => [location.hash, document.getElementById('libGrid').hidden, document.activeElement?.id, document.title]")
+        after = page.evaluate("() => [location.hash, document.getElementById('libWindow').open, document.activeElement?.className, document.title]")
         off = page.evaluate(VIEW_STATE)
-        rp.check("1440: the back link comes back to the grid, the showcase's card focused, the view taken down",
-                 after[:3] == ["#showcase", False, "showcase"] and after[3].startswith("Library") and (off or {}).get("state") == "off", (after, (off or {}).get("state")))
+        rp.check("1440: the window's X comes back to the grid, the showcase's Details focused, the view taken down",
+                 after[:3] == ["#showcase", False, "lib-pill lib-showcase-details"] and after[3].startswith("Library") and (off or {}).get("state") == "off",
+                 (after, (off or {}).get("state")))
+        # The picture opens the page too (by the mouse), and Back comes back to Details.
+        page.click(".lib-showcase-pic")
+        state = view_state(page, drawn("assembled"))
+        opened = page.evaluate("() => [location.hash, document.getElementById('libWindow').open]")
+        page.go_back()
+        page.wait_for_timeout(300)
+        again = page.evaluate("() => [location.hash, document.getElementById('libWindow').open, document.activeElement?.className]")
+        rp.check("1440: a click on the picture opens the page in the window; Back closes it, the card's Details focused",
+                 opened == [f"#{identifier}", True] and bool(state) and state.get("state") == "drawn" and again[1] is False
+                 and again[2] == "lib-pill lib-showcase-details", (opened, state and state.get("state"), again))
         rp.check("1440: no console error or warning", not page.errors, page.errors[:3])
     finally:
         page.context.close()
@@ -577,17 +606,21 @@ def part_page(browser, url: str, out: Path) -> None:
         try:
             grid = page.evaluate(GRID)
             page.screenshot(path=str(out / f"grid.390.{scheme}.png"))
-            rp.check(f"390 {scheme}: the card within the window, its picture above its words, a 4:5 light box, nothing scrolling sideways",
+            rp.check(f"390 {scheme}: the card within the window, its picture above its words, a 4:5 light box, centred, 60 % of the card, nothing scrolling sideways",
                      bool(grid) and grid["card"][0] >= 0 and grid["card"][0] + grid["card"][2] <= 390 and near(grid["card"][2], grid["row"][2])
                      and grid["shot"][1] + grid["shot"][3] <= grid["text"][1] + 1 and near(grid["shot"][2] * 5, grid["shot"][3] * 4, 4)
+                     and near(grid["shot"][0] + grid["shot"][2] / 2, grid["card"][0] + grid["card"][2] / 2, 1) and near(grid["shot"][2], 0.6 * (grid["card"][2] - 12), 2)
                      and grid["ground"] == "rgb(245, 245, 247)" and grid["wide"] <= 390 and grid["complete"],
                      grid and (grid["card"], grid["shot"], grid["text"], grid["ground"], grid["wide"]))
-            page.click("#showcase")
+            rp.check(f"390 {scheme}: Details its own size under the words, not the column's width",
+                     bool(grid["details"]) and grid["details"][2][2] < 0.5 * grid["card"][2] and grid["details"][2][1] >= grid["text"][1],
+                     grid["details"] and grid["details"][2])
+            page.click(".lib-showcase-pic")
             state = view_state(page, drawn("assembled"))
             info = page.evaluate(PAGE)
             page.wait_for_timeout(300)
-            page.screenshot(path=str(out / f"page.assembled.390.{scheme}.png"), full_page=True)
-            rp.check(f"390 {scheme}: the showcase's page in one column, its view drawn in a 4:5 light box above its words, nothing scrolling sideways",
+            page.screenshot(path=str(out / f"page.assembled.390.{scheme}.png"))
+            rp.check(f"390 {scheme}: the showcase's page in one column (the window a sheet), its view drawn in a 4:5 light box above its words, nothing scrolling sideways",
                      bool(state) and state.get("state") == "drawn" and state.get("drawn_mode") == "assembled" and info["live"]
                      and near(info["stage"][2] * 5, info["stage"][3] * 4, 4) and info["stage"][0] >= 0 and info["stage"][0] + info["stage"][2] <= 390
                      and info["info"][1] >= info["frame"][1] + info["frame"][3] and info["ground"] == "rgb(245, 245, 247)" and info["wide"] <= 390,

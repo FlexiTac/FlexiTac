@@ -312,7 +312,11 @@ APPROVED_RULES = {"gap_share": 0.42, "min_step_mm": 2, "ghost_opacity": 0.28, "m
                   # 255, at most 28, a highlight along the mount block's rounded corner; docs/LIBRARY_VIEW.md).  Roughness 0.85
                   # since the verification of 2026-11-13 (0.6 drew the faces turned up to the lights a washed salmon).
                   "looks": {"umi-tpu-orange": {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}},
-                  "part_looks": {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"}}
+                  "part_looks": {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"},
+                  # Their assembled sensor's pad over the film in the photos' dark olive-brown (the user's decision of
+                  # 2026-11-14, "you can do it darken": the amber top board had read as one block with the orange finger),
+                  # a tint tuned in the stage against flexitac.github.io's photo of the built sensor (docs/LIBRARY_VIEW.md).
+                  "part_pad": {"color": "#545a3a", "opacity": 0.65}}
 # The near finger (the mate) see-through on every gripper (the user's decision of 2026-11-06).
 SEE_THROUGH = {"franka-hand": ["mate"], "widowx-250": ["mate"], "trossen-widowx-ai": ["mate"], "arx-x5": ["mate"], "i2rt-yam": ["mate"],
                "unitree-dex1": ["mate"], "makermods-metal": ["mate"]}
@@ -320,7 +324,8 @@ MATE_KINDS = {"franka-hand": "turned", "widowx-250": "turned", "trossen-widowx-a
               "unitree-dex1": "turned", "makermods-metal": "turned"}
 PICTURE = "on both fingers of the open gripper"
 RAIL = "bodies/makermods-metal/rail.stl"
-PICTURES = {"makermods-metal": "on both fingertips on a plain rail"}
+# Since its body drawn by eye (the user's decision of 2026-11-14) the MakerMods picture is the open gripper's too.
+PICTURES = {"makermods-metal": "on both fingertips of the open gripper"}
 IDENTITY = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 TURNED = [[-1, 0, 0, 0], [0, -1, 0, -80], [0, 0, 1, 0], [0, 0, 0, 1]]
 MIRROR = [[-1, 0, 0, -88], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
@@ -1005,6 +1010,46 @@ class PictureTests(LibraryTestCase):
         self.assertEqual(library_write.part_look(json.loads(tool.served_scenes(index, "umi-trap-tip5.8", given)), self.parts, "umi-trap-tip5.8"), given)
         self.assertIsNone(library_write.part_look(json.loads(tool.served_scenes(index, "umi-finray", None)), self.parts, "umi-finray"))
 
+    def test_the_pad_s_tint_is_held_to_the_assembled_sheets(self) -> None:
+        # library_shots.py --check-generator's fifth comparison (pad_differences(), pad_problems()), where the rules give
+        # the assembled pad a tint (part_pad, the user's decision of 2026-11-14): the Library's view with the tint (the
+        # pictures') against the view without it, with the view without it in the look's other colour as the witness of
+        # the part's pixels.  Tiny drawings: RGBA, one row; o the part's orange, b its other colour, s a sheet's pixel, d
+        # the pad's dark olive over it, e a sheet's edge on the ground (half alpha), _ the transparent ground.
+        tool = SHOTS_TOOL
+        pixel = {"o": (232, 90, 5, 255), "b": (104, 218, 133, 255), "s": (207, 121, 0, 255), "d": (111, 84, 19, 255), "e": (207, 121, 0, 128),
+                 "_": (0, 0, 0, 0)}
+        drawing = lambda text: bytes(value for letter in text for value in pixel[letter])  # noqa: E731
+        look, other = drawing("_ooossssse_"), drawing("_bbbssssse_")
+        counts = tool.pad_differences(look, drawing("_ooosdddse_"), other)
+        self.assertEqual(counts, {"drawn": 9, "alpha": 0, "pad": 3, "part": 0})
+        self.assertEqual((tool.pad_problems("assembled", counts), tool.pad_problems("exploded", counts)),
+                         ([], ["the pad changes 3 px in exploded (it is the assembled sensor's alone)"]))
+        # Exploded as without the tint: nothing changed, and nothing asked of it.
+        counts = tool.pad_differences(look, look, other)
+        self.assertEqual((counts, tool.pad_problems("exploded", counts)), ({"drawn": 9, "alpha": 0, "pad": 0, "part": 0}, []))
+        self.assertEqual(tool.pad_problems("assembled", counts), ["the pad changes 0 of the 9 px drawn, under 0.05 of them (is the pad drawn?)"])
+        # The tint on the part's pixels (the part's colour reaches them), and an outline of another alpha.
+        counts = tool.pad_differences(look, drawing("_oddsddsse_"), other)
+        self.assertEqual(counts, {"drawn": 9, "alpha": 0, "pad": 4, "part": 2})
+        self.assertEqual(tool.pad_problems("assembled", counts), ["the pad changes 2 px of the part (the pad is not the sheets' alone)"])
+        counts = tool.pad_differences(look, drawing("_ooosdddsd_"), other)
+        self.assertEqual((counts["alpha"], counts["pad"]), (1, 4))
+        self.assertEqual(tool.pad_problems("assembled", counts), ["1 px of another alpha with the pad than without it (another outline)"])
+        self.assertEqual(tool.PAD_SHARE_MIN, 0.05)
+        with self.assertRaises(tool.ShotError):
+            tool.pad_differences(look, look, other[:-4])
+        # Served: the look with its pad for the one part (the pictures'), or without it (the fourth comparison's).
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        given = library_write.part_look(index, self.parts, "umi-finray")
+        self.assertEqual(given["pad"], index["rules"]["part_pad"])
+        served = json.loads(tool.served_scenes(index, "umi-finray", given))["rules"]
+        self.assertEqual((served["part_looks"], served["part_pad"]), ({"umi-finray": given["look"]}, given["pad"]))
+        self.assertEqual(library_write.part_look(json.loads(tool.served_scenes(index, "umi-finray", given)), self.parts, "umi-finray"), given)
+        self.assertEqual(tool.unpadded(given), {"look": given["look"], "smooth_deg": None})
+        self.assertNotIn("part_pad", json.loads(tool.served_scenes(index, "umi-finray", tool.unpadded(given)))["rules"])
+        self.assertNotIn("part_pad", json.loads(tool.served_scenes(index, "umi-finray", None))["rules"])
+
     def test_a_picture_is_a_webp_with_alpha_of_its_size(self) -> None:
         info = library_write.webp_info
         # The fixture as the tool's encoder writes it: the extended layout (VP8X), its canvas and its alpha flag.
@@ -1143,7 +1188,7 @@ class SceneTests(LibraryTestCase):
         # The prototype the user approved on 2026-11-05: the seven grippers whole (Franka's whole hand), each with its
         # scene, the UMI finger and its tapered tips none (their fingertip scene); both fingers, the jaws fully open, the
         # other finger turned (the same part: the same board) or mirrored (the mirror-image board); the MakerMods tips on
-        # the project's own plain rail, never its body.  The user's decision of 2026-11-06: the near finger (the mate)
+        # the project's own plain rail, never its body's file.  The user's decision of 2026-11-06: the near finger (the mate)
         # see-through on every gripper, in both views, its stack assembled, the sensor finger's alone exploded.
         index = _json(LIBRARY / library_write.SCENES_INDEX)
         grippers = library_write.gripper_parts(self.parts)
@@ -1160,8 +1205,8 @@ class SceneTests(LibraryTestCase):
                 self.assertEqual(scene["picture"], PICTURES.get(part_id, PICTURE))
                 meshes = [body["mesh"] for body in scene["bodies"]]
                 if part_id == "makermods-metal":
-                    # Since the looks of 2026-11-12: the rail, then the steel rail, its bores and end stops the
-                    # project drew on it (bodies/makermods-metal/drawn-*.stl), all its own drawing.
+                    # Since the looks of 2026-11-12: the rail, then the shapes the project drew round it
+                    # (bodies/makermods-metal/drawn-*.stl: since 2026-11-14 the gripper's body by eye), all its own drawing.
                     self.assertEqual(meshes[0], RAIL, "the project's own rail, no MakerMods body")
                     for mesh in meshes[1:]:
                         self.assertRegex(mesh, r"^bodies/makermods-metal/drawn-[a-z0-9-]+\.stl$")
@@ -1174,6 +1219,46 @@ class SceneTests(LibraryTestCase):
                 self.assertNotIn("explode", scene, "the approved explode (the rules' gap share)")
         self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "bodies" / "makermods-metal").iterdir()),
                          sorted(rail_meshes), "the folder holds the scene's meshes and nothing else")
+
+    def test_the_makermods_body_is_the_project_s_drawing_by_eye(self) -> None:
+        # The user's decision of 2026-11-14 ("makermods, yes, you can do it by eye"): the Metal Arm's body drawn round the
+        # project's own rail after the maker's photos, no MakerMods file: the beam no longer than the open jaws need (their
+        # bases at full opening and a few mm for the end stops), every shape the project drew credited in NOTICE.md as its
+        # own drawing by eye, the scene's about saying it is not MakerMods' 3D model or hardware.
+        def points(data: bytes, scale: float = 1.0) -> list:
+            count = struct.unpack_from("<I", data, 80)[0]
+            out = []
+            for k in range(count):
+                record = struct.unpack_from("<12f", data, 84 + 50 * k)
+                out += [[record[3 * j + 3 + a] * scale for a in range(3)] for j in range(3)]
+            return out
+
+        scene = _json(LIBRARY / "scenes" / "makermods-metal.json")
+        part = self.parts["parts"]["makermods-metal"]
+        self.assertEqual(_json(LIBRARY / "fits" / "makermods-metal-2mm.json")["reply"]["mesh"]["unit"], "m", "the tip's file in metres")
+        tip = points((LIBRARY / part["mesh"]["file"]).read_bytes(), 1000.0)
+        mate = scene["mate"]["matrix"]
+        turned = [[math.fsum(mate[r][c] * p[c] for c in range(3)) + mate[r][3] for r in range(3)] for p in tip]
+        jaws = (min(p[0] for p in tip + turned), max(p[0] for p in tip + turned))
+        rail = points((LIBRARY / RAIL).read_bytes())
+        beam = (min(p[0] for p in rail), max(p[0] for p in rail))
+        self.assertTrue(beam[0] <= jaws[0] and jaws[1] <= beam[1], f"the jaws {jaws} on the beam {beam} at full opening")
+        self.assertLessEqual(max(jaws[0] - beam[0], beam[1] - jaws[1]), 4.0, f"the beam {beam} no longer than the open jaws {jaws} need")
+        text = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        drawn = sorted(path.name for path in (LIBRARY / "bodies" / "makermods-metal").iterdir() if path.name != "rail.stl")
+        self.assertGreaterEqual(len(drawn), 5, "the beam's shapes, the housing and the camera's mount")
+        for name in drawn:
+            with self.subTest(drawn=name):
+                self.assertRegex(name, r"^drawn-[a-z0-9-]+\.stl$")
+                self.assertIn(f"`bodies/makermods-metal/{name}`", text, "credited as the project's own drawing")
+                extent = points((LIBRARY / "bodies" / "makermods-metal" / name).read_bytes())
+                self.assertTrue(all(beam[0] - 4.5 <= p[0] <= beam[1] + 4.5 for p in extent), f"{name} within the beam and its end stops")
+        self.assertIn("no MakerMods model was used, traced or measured", text)
+        self.assertIn("not MakerMods' 3D model, geometry or hardware", text)
+        about = scene["about"]
+        self.assertIn("No MakerMods file is used", about)
+        self.assertIn("by eye", about)
+        self.assertIn("not MakerMods' 3D model or hardware", about)
 
     def test_one_stack_explodes_and_the_near_finger_is_see_through_in_both_views(self) -> None:
         # The user's decision of 2026-11-06 ("每一个夹爪只用爆炸一个sensor, 靠近外面的finger透明, 夹爪不爆炸; 靠近里面的finger
@@ -1378,9 +1463,9 @@ class SceneTests(LibraryTestCase):
         cases = (
             (lambda index: index.update(format="x"), "scenes/scenes.json: the format is 'x', not flexitac-library-scenes/v1"),
             (lambda index: index["rules"].pop("ghost_opacity"), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, "
-             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg)"),
+             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad)"),
             (lambda index: index["rules"].pop("explode_stacks"), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, "
-             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg)"),
+             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad)"),
             (lambda index: index["rules"].update(gap_share=-1), "scenes/scenes.json: its rule gap_share (-1) is not a positive number"),
             (lambda index: index["rules"]["camera"]["exploded"].update(tilt_deg=80), "scenes/scenes.json: its rules' camera is not {exploded, assembled} each of elevation_deg, front, tilt_deg within their bounds"),
             (lambda index: index["rules"]["checks"].pop("card_min_px"), "scenes/scenes.json: its rules' checks are not card_min_px, clearance_min_mm, ghost_cover_min, "
@@ -1520,12 +1605,21 @@ class SceneTests(LibraryTestCase):
                      "        extras.looks.forEach(material => material.dispose());\n        extras.ghostLooks.forEach(material => material.dispose());\n",
                      "      const material = ghostLook.clone();\n",
                      "        const mesh = new THREE.Mesh(geometryOf(body.positions, smooth), looks.get(body.look) || partLook);\n",
-                     "          if (!given) return figure.show(args);\n"):
+                     "          if (!given) return figure.show(args);\n",
+                     # The pad's tint (the rules' part_pad): the film's sheet laid again over the top FPC, in Assembled
+                     # alone, taken down (its texture the figure's: never disposed here) with the drawing.
+                     "      for (let i = 0; i < position.length; i += 1) position[i] = film.assembled[i] + lift * film.normals[i];\n",
+                     "      if (state.pad) state.pad.visible = view.mode === \"assembled\";\n",
+                     "      if (dispose) { pad.geometry.dispose(); pad.material.dispose(); }\n",
+                     "      clearPad(dispose);\n", "          if (given.pad) layPad(args.stack, given.pad);\n"):
             self.assertIn(text, stage)
-        self.assertEqual(len(re.findall(r'setAttribute\("normal"', stage)), 3, "a body's own geometry and the still stack's two; never the part's drawn geometry")
+        self.assertEqual(len(re.findall(r'setAttribute\("normal"', stage)), 4,
+                         "a body's own geometry, the still stack's two and the pad's own; never the part's drawn geometry")
+        self.assertNotIn("map.dispose()", stage, "the pad's texture is the film's, the figure's to dispose")
         self.assertNotRegex(stage, r"\bSTUDIO\.(room|panels)\b|LIGHTS\b|toneMapping", "studio.js's own numbers are not the stage's to change")
         self.assertIn("partLook: given || placed ? null : partLookOf(rules, variant.part, part.family)", view)
         self.assertIn("scenePath || placed ? null : rulesOf(base)", view)
+        self.assertIn("pad: rules.part_pad || null};", view)
 
     def test_the_rules_may_give_a_part_without_a_scene_its_look(self) -> None:
         # The UMI finger and its tapered tips have no scene: scenes.json's rules may name their look (part_looks: a part
@@ -1545,7 +1639,7 @@ class SceneTests(LibraryTestCase):
 
         orange = {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}
         index = _json(LIBRARY / library_write.SCENES_INDEX)
-        self.assertEqual(library_write.RULES_OPTIONAL, ("looks", "part_looks", "part_smooth_deg"))
+        self.assertEqual(library_write.RULES_OPTIONAL, ("looks", "part_looks", "part_smooth_deg", "part_pad"))
         self.assertEqual((index["rules"]["looks"], index["rules"]["part_looks"]),
                          ({"umi-tpu-orange": orange}, {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"}))
         self.assertNotIn("part_smooth_deg", index["rules"], "flat facets, as Gen by Surface draws the part")
@@ -1560,22 +1654,22 @@ class SceneTests(LibraryTestCase):
         self.assertEqual(self.problems(rules_edit()), [], "the committed rules")
         self.assertEqual(self.problems(rules_edit(looks={"tpu-orange": orange}, part_looks={"umi-finray": "tpu-orange", "umi-tapers": "tpu-orange"}, part_smooth_deg=35)), [])
         self.assertEqual(self.problems(rules_edit(looks=None, part_looks={"umi-finray": orange})), [], "a look given in place")
-        self.assertEqual(self.problems(rules_edit(looks=None, part_looks=None)), [], "no look: the parts as Gen by Surface draws them")
+        self.assertEqual(self.problems(rules_edit(looks=None, part_looks=None, part_pad=None)), [], "no look: the parts as Gen by Surface draws them")
         cases = (
             (dict(looks=None, part_looks={"umi-finray": "tpu-orange"}), "scenes/scenes.json: its looks are not a map of names to looks"),
             (dict(looks={"tpu-red": orange}, part_looks={"umi-finray": "tpu-red", "umi-tapers": "tpu-orange"}),
              "scenes/scenes.json: its rule part_looks (umi-tapers) names the look 'tpu-orange', which is not one of its looks"),
             (dict(looks={"tpu-orange": orange, "spare": orange}, part_looks={"umi-finray": "tpu-orange"}), "scenes/scenes.json: its look 'spare' is used by nothing"),
-            (dict(part_looks=None), "scenes/scenes.json: its look 'umi-tpu-orange' is used by nothing"),
+            (dict(part_looks=None, part_pad=None), "scenes/scenes.json: its look 'umi-tpu-orange' is used by nothing"),
             (dict(looks={"tpu-orange": dict(orange, clearcoat=1)}, part_looks={"umi-finray": "tpu-orange"}),
              "scenes/scenes.json: its look tpu-orange has a clear coat, which the part's own material cannot take (a body's look can)"),
             (dict(looks=None, part_looks={"umi-finray": dict(orange, color="orange")}),
              "scenes/scenes.json: its rule part_looks: the look of umi-finray has the colour 'orange', not an sRGB #rrggbb in lower case"),
             (dict(looks=None, part_looks={}), "scenes/scenes.json: its rule part_looks is not a map of parts (or families) to looks"),
             (dict(looks=None, part_looks={"umi-finray": orange}, part_smooth_deg=120), "scenes/scenes.json: its rule part_smooth_deg (120) is not a crease angle of 1 to 90 degrees"),
-            (dict(looks=None, part_looks=None, part_smooth_deg=35), "scenes/scenes.json: its rule part_smooth_deg without part_looks"),
+            (dict(looks=None, part_looks=None, part_pad=None, part_smooth_deg=35), "scenes/scenes.json: its rule part_smooth_deg without part_looks"),
             (dict(colours={}), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, gap_share, ghost_opacity, measure_px, "
-                               "min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg)"),
+                               "min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad)"),
         )
         for changes, problem in cases:
             with self.subTest(problem=problem):
@@ -1584,13 +1678,15 @@ class SceneTests(LibraryTestCase):
         self.assertEqual(self.problems(rules_edit(looks=None, part_looks={"franka-hand": orange})),
                          [(None, "scenes/scenes.json: its rule part_looks names 'franka-hand', not a part without a scene or its family (a gripper's look is its scene's)")])
         # part_look(): the part's id before its family's, a gripper none; its hash the record's.  The committed rules:
-        # the finger by its id, each tip by its family, in the one orange, flat.
+        # the finger by its id, each tip by its family, in the one orange, flat, with the pad's tint (part_pad: below).
+        pad = index["rules"]["part_pad"]
         for part_id in ("umi-finray", "umi-convex-tip5.8", "umi-trap-tip21.8"):
             with self.subTest(part=part_id):
-                self.assertEqual(library_write.part_look(index, self.parts, part_id), {"look": orange, "smooth_deg": None})
+                self.assertEqual(library_write.part_look(index, self.parts, part_id), {"look": orange, "smooth_deg": None, "pad": pad})
         self.assertIsNone(library_write.part_look(index, self.parts, "franka-hand"))
         index["rules"].update(looks={"tpu-orange": orange, "tip": dict(orange, roughness=0.5)}, part_looks={"umi-tapers": "tpu-orange", "umi-trap-tip5.8": "tip"},
                               part_smooth_deg=35)
+        index["rules"].pop("part_pad")
         self.assertEqual(library_write.part_look(index, self.parts, "umi-convex-tip5.8"), {"look": orange, "smooth_deg": 35})
         self.assertEqual(library_write.part_look(index, self.parts, "umi-trap-tip5.8"), {"look": dict(orange, roughness=0.5), "smooth_deg": 35})
         self.assertIsNone(library_write.part_look(index, self.parts, "umi-finray"))
@@ -1601,6 +1697,49 @@ class SceneTests(LibraryTestCase):
         self.assertIsNone(library_write.part_look_sha256(None))
         self.assertRegex(library_write.part_look_sha256({"look": orange, "smooth_deg": None}), r"^[0-9a-f]{64}$")
         self.assertNotEqual(library_write.part_look_sha256({"look": orange, "smooth_deg": None}), library_write.part_look_sha256({"look": orange, "smooth_deg": 35}))
+
+    def test_the_rules_may_tint_the_assembled_pad_on_those_parts(self) -> None:
+        # The user's decision of 2026-11-14 on the UMI pad ("you can do it darken"): every photo of the built sensor shows
+        # a dark olive-brown pad on the orange finger (the film seen through the top board's amber polyimide), where the
+        # Library's Assembled view drew the amber board alone, one block with the finger.  The rules' part_pad is the
+        # tint the stage lays over the film's field in Assembled on a part the rules give a look (docs/LIBRARY_VIEW.md
+        # "Parts without a scene"): a colour as a look's and an opacity above 0 and at most 1, only with part_looks;
+        # part_look() hands it on, so a fingertip's record of its look is of its pad too (pictures of another pad, or of
+        # none, stale).  Committed: #545a3a at 0.65, tuned in the stage against the photo (its pad #725013 to #665318,
+        # the stage's #6f5413 at the Assembled home).
+        def rules_edit(**changes):
+            def change(library: Path) -> None:
+                index = _json(library / library_write.SCENES_INDEX)
+                for key, value in changes.items():
+                    if value is None:
+                        index["rules"].pop(key, None)
+                    else:
+                        index["rules"][key] = value
+                _write_json(library / library_write.SCENES_INDEX, index)
+            return change
+
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        pad = {"color": "#545a3a", "opacity": 0.65}
+        self.assertEqual((library_write.PAD_KEYS, index["rules"]["part_pad"]), (("color", "opacity"), pad))
+        self.assertEqual(self.problems(rules_edit(part_pad=dict(pad, opacity=1))), [], "a tint that hides the board's traces is still a tint")
+        self.assertEqual(self.problems(rules_edit(part_pad=None)), [], "no pad: the sheets' own look in Assembled too")
+        bad = "scenes/scenes.json: its rule part_pad ({!r}) is not a tint: an sRGB #rrggbb in lower case and an opacity above 0 and at most 1"
+        cases = (dict(pad, opacity=0), dict(pad, opacity=1.5), dict(pad, opacity=True), dict(pad, opacity="0.6"), dict(pad, color="#545A3A"),
+                 dict(pad, color="olive"), {"color": "#545a3a"}, dict(pad, roughness=0.4), [pad])
+        for value in cases:
+            with self.subTest(pad=value):
+                self.assertEqual(self.problems(rules_edit(part_pad=value)), [(None, f"{bad.format(value)}: {REBUILD}")])
+        self.assertEqual(self.problems(rules_edit(looks=None, part_looks=None)),
+                         [(None, f"scenes/scenes.json: its rule part_pad without part_looks: {REBUILD}")])
+        # part_look() carries the pad where the rules give one, and its hash is of it.
+        given = library_write.part_look(index, self.parts, "umi-finray")
+        self.assertEqual(given["pad"], pad)
+        hashes = {library_write.part_look_sha256(dict(given, pad=value)) for value in (pad, dict(pad, opacity=0.5), dict(pad, color="#000000"))}
+        hashes.add(library_write.part_look_sha256({key: value for key, value in given.items() if key != "pad"}))
+        self.assertEqual(len(hashes), 4, "another tint, or none, is another look of the part's pictures")
+        index["rules"].pop("part_pad")
+        self.assertNotIn("pad", library_write.part_look(index, self.parts, "umi-finray"), "no pad: the look's record as before the tint")
+        self.assertIsNone(library_write.part_look(dict(index, rules=dict(index["rules"], part_pad=pad)), self.parts, "franka-hand"), "a gripper: its scene's")
 
     def test_a_shape_the_project_drew_needs_no_row_but_says_so(self) -> None:
         # tools/library_split.py draws plain shapes where a model lacks a component: bodies/<part>/drawn-<name>.stl, the
@@ -2188,9 +2327,13 @@ class ShowcasePageTests(LibraryTestCase):
         document = _json(LIBRARY / SHOWCASE_FILE)
         self.assertEqual(sorted(document), list(library_write.SHOWCASE_KEYS))
         self.assertEqual((document["format"], document["id"], document["title"]), ("flexitac-library-showcase/v1", "flexitac-g1", "FlexiTac on xArm"))
-        # The user's request of 2026-11-12: labelled as hand-designed, not auto-generated; one line beside it.
-        self.assertEqual(document["label"], "Hand-designed, not auto-generated")
-        self.assertLessEqual(len(document["text"]), 100)
+        # The user's request of 2026-11-12 (labelled as hand-designed, not auto-generated), worded again on 2026-11-15
+        # ("pre-agent hand design version, original flexitac ... using flexitac PCB to making the tactile sensor
+        # accessible, reliable, and standarlized"): the label, the card's one line; the page's line of detail keeps the
+        # sensor's size and fingers.
+        self.assertEqual(document["label"], "Original FlexiTac \u00b7 Hand-designed, pre-agent")
+        self.assertEqual(document["text"], "FlexiTac PCBs make tactile sensors accessible, reliable and standardized.")
+        self.assertEqual(document["detail"], "The original FlexiTac sensor, 12 \u00d7 32 taxels at 2 mm, on the xArm gripper's soft fingers.")
         self.assertNotRegex(json.dumps(document), r"\bCAD\b")
         # It is no entry: no fit, no build, no download of the generator's; its id is no part's, variant's or family's.
         for key in ("fit", "build_id", "files", "variants", "pitch_mm"):
@@ -2270,9 +2413,13 @@ class ShowcasePageTests(LibraryTestCase):
             (lambda d: d.update(title=""), [f"{name}: its title is not one line of 1 to 40 characters"]),
             (lambda d: d.update(title="FlexiTac on xArm\nand more"), [f"{name}: its title is not one line of 1 to 40 characters"]),
             (lambda d: d.update(text="x" * 141), [f"{name}: its text is not one line of 1 to 140 characters"]),
-            # The label says both: hand-designed, and not auto-generated.
-            (lambda d: d.update(label="Hand-designed"), [f"{name}: its label does not say hand-designed and not auto-generated"]),
-            (lambda d: d.update(label="Not auto-generated"), [f"{name}: its label does not say hand-designed and not auto-generated"]),
+            (lambda d: d.update(detail="x" * 141), [f"{name}: its detail is not one line of 1 to 140 characters"]),
+            (lambda d: d.update(detail="12 x 32 taxels\nat 2 mm"), [f"{name}: its detail is not one line of 1 to 140 characters"]),
+            (lambda d: d.pop("detail"), [f"{name} has not the keys {', '.join(library_write.SHOWCASE_KEYS)}"]),
+            # The label says all three: the original FlexiTac, hand-designed, pre-agent (2026-11-15).
+            (lambda d: d.update(label="Hand-designed, pre-agent"), [f"{name}: its label does not say original, hand-designed, pre-agent"]),
+            (lambda d: d.update(label="Original FlexiTac, pre-agent"), [f"{name}: its label does not say original, hand-designed, pre-agent"]),
+            (lambda d: d.update(label="Original FlexiTac, hand-designed"), [f"{name}: its label does not say original, hand-designed, pre-agent"]),
             (lambda d: d.update(text="The original CAD of the sensor."), [f"{name} says CAD (the page's words are 3D model)"]),
             (lambda d: d.update(text="Read from /home/someone/files."), [f"{name} names '/home/', the private importer's inputs"]),
             (lambda d: d["sensor"].update(field_mm=[24, 64]), [f"{name}: its sensor's field [24, 64] mm is not the art's ([23, 63])"]),
@@ -2726,7 +2873,12 @@ class ViewTests(LibraryTestCase):
             (records[self.FINGERTIP]["part_look_sha256"], "part_look_sha256" in records[self.GRIPPER]),
             (library_write.part_look_sha256(library_write.part_look(index, self.parts, "umi-finray")), False)))
         self.assertEqual(problems, [])
-        self.assertEqual(library_write.part_look_sha256(library_write.part_look(index, self.parts, "umi-finray")), of(orange))
+        pad = index["rules"]["part_pad"]
+        self.assertEqual(library_write.part_look_sha256(library_write.part_look(index, self.parts, "umi-finray")),
+                         library_write.part_look_sha256({"look": orange, "smooth_deg": None, "pad": pad}))
+        # The pad's tint is of the look's record too (the user's decision of 2026-11-14): a record of the look without it
+        # is stale where the rules give one.
+        self.refused(self.FINGERTIP, stale, edit=lambda records, library: records[self.FINGERTIP].update(part_look_sha256=of(orange)))
         images, problems, _, views = self.pictures(require_view=True, edit=looked(dict(orange, color="#102030"), dict(orange, color="#102030")))
         self.assertEqual(problems, [], "a look given in place, the record of it")
         self.assertEqual(views[self.FINGERTIP], {"art": "art/umi-finray-2mm.json.gz", "scene": None})
@@ -3158,7 +3310,7 @@ class PageTests(unittest.TestCase):
         ids = [attributes["id"] for _, attributes in self.page.elements if "id" in attributes]
         self.assertEqual(sorted({identifier for identifier in ids if ids.count(identifier) > 1}), [])
         self.assertIn("<title>Library · FlexiTac-Gen</title>", self.html)
-        for identifier in ("libHero", "libNote", "libGrid", "libShelves", "libDetail", "libStatus"):
+        for identifier in ("libHero", "libNote", "libGrid", "libShelves", "libWindow", "libClose", "libWindowBody", "libDetail", "libStatus"):
             self.assertIn(identifier, ids)
         self.assertNotIn("libTiles", ids, "no tiles since the layout of 2026-11-06")
 
@@ -3333,7 +3485,8 @@ class PageTests(unittest.TestCase):
         self.assertEqual(styled[".lib-view .lib-seg-track"].get("background"), "var(--fill)")
         roomy = sorted(selector for rule in rules if rule.conditions == ("@media (max-width:899px)",) for selector in rule.selectors
                        if ".lib-view" in selector)
-        self.assertEqual(roomy, [".lib-detail:has(.lib-view)", ".lib-detail:has(.lib-view) .lib-detail-body", ".lib-detail:has(.lib-view) .lib-info"])
+        # (The page's top and the room under its back link tightened too until the window of 2026-11-15, which has neither.)
+        self.assertEqual(roomy, [".lib-detail:has(.lib-view) .lib-detail-body", ".lib-detail:has(.lib-view) .lib-info"])
 
     def test_a_sensors_page_turns_in_3d_and_only_there(self) -> None:
         # The user's request of 2026-11-05 (lib 点进去具体的每个夹爪的时候, 那个图也做成可以三维旋转的; docs/LIBRARY_VIEW.md): a
@@ -3412,13 +3565,15 @@ class PageTests(unittest.TestCase):
         self.assertLess(grid.index("grippers(parts)"), grid.index("...shelvedParts().map("), "the grippers' section first, the UMI shelf after it")
         for word in ("lib-tile", "libTiles", "index.start"):
             self.assertNotIn(word, script, word)
-        # Its back links: the UMI finger's pages (its tips' too) to its shelf, another gripper's to its card.
-        self.assertIn('el("a", {className: "lib-back", href: `#${placeOf(home)}`}', _inner(script, "renderDetail"))
+        # Its back links (since 2026-11-15 the window's X, which closes to the same place): the UMI finger's pages (its
+        # tips' too) to its shelf, another gripper's to its card.
+        self.assertIn("    state.place = placeOf(home);\n", _inner(script, "renderDetail"))
         self.assertIn('const placeOf = part => (isShelved(part) ? `shelf-${part}` : `gripper-${part}`);', script)
         # The older addresses: #shelf-start the top, #shelf-<gripper> its card; Back and Forward (an entry the page has
         # marked) put the grid back where it was, a link to another card goes to that card.
         route = _inner(script, "route")
-        self.assertIn('const traversed = history.state?.library === true;\n    if (!traversed) history.replaceState({library: true}, "");', route)
+        self.assertIn('const traversed = mark?.library === true;', route)
+        self.assertIn('if (place !== id) history.replaceState(history.state, "", place ? `#${place}` : location.pathname + location.search);', route)
         self.assertIn('if (id === "shelf-start") place = "";', route)
         self.assertIn('else if (id.startsWith("shelf-") && carded().includes(id.slice(6))) place = `gripper-${id.slice(6)}`;', route)
         self.assertIn('if (!known || id === "shelf-start") window.scrollTo(0, 0);', route)
@@ -3461,33 +3616,47 @@ class PageTests(unittest.TestCase):
         grid = _inner(script, "renderGrid")
         self.assertIn("      ...(state.showcase ? [showcaseCard()] : []),\n      ...(parts.length ? [grippers(parts)] : []),\n", grid)
         card = _inner(script, "showcaseCard")
-        self.assertIn('el("a", {className: "lib-card lib-showcase", id: "showcase", href: `#${id}`, "data-showcase": id,', card)
-        self.assertIn('slot(entry, "showcase", SHOWCASE_VIEW),', card)
-        # Its words: the label, the title and one line, each showcase.json's; nothing else is written on the card.
-        self.assertEqual(re.findall(r"data\.(\w+)", card), ["title", "label", "label", "title", "text"])
-        self.assertEqual(re.findall(r'el\("\w+", \{className: "([^"]+)"', card), ["lib-showcased", "lib-card lib-showcase", "lib-card-text", "lib-badge",
-                                                                                     "lib-showcase-title", "lib-showcase-line"])
+        # The user's request of 2026-11-15 ("make only the image that can click to the details ... a button called
+        # details"): the card is no link; its picture and its Details pill open the page, the picture's link out of the
+        # Tab order and hidden from assistive technology (it repeats Details').
+        self.assertIn('el("div", {className: "lib-card lib-showcase", id: "showcase"},', card)
+        self.assertIn('el("a", {className: "lib-showcase-pic", href: `#${id}`, tabindex: "-1", "aria-hidden": "true"}, slot(entry, "showcase", SHOWCASE_VIEW)),', card)
+        self.assertIn('el("a", {className: "lib-pill lib-showcase-details", href: `#${id}`, "data-showcase": id, "aria-label": `Details: ${data.title}`}, "Details")', card)
+        self.assertEqual(re.findall(r"href: ([^,]+),", card), ["`#${id}`", "`#${id}`"])
+        # Its words: the label, the title and one line, each showcase.json's, and Details, the card's one word of its own.
+        self.assertEqual(re.findall(r"data\.(\w+)", card), ["label", "title", "text", "title"])
+        self.assertEqual(re.findall(r'"([A-Z][^"]*)"', card), ["Details"])
+        self.assertEqual(re.findall(r'el\("\w+", \{className: "([^"]+)"', card), ["lib-showcased", "lib-card lib-showcase", "lib-showcase-pic", "lib-card-text",
+                                                                                     "lib-badge", "lib-showcase-title", "lib-showcase-line", "lib-pills",
+                                                                                     "lib-pill lib-showcase-details"])
+        # Back to the grid focuses the link that opened the page; the showcase's card, no link, gives its Details.
+        grid_code = _inner(script, "renderGrid")
+        self.assertIn('const opener = event.target.closest("a.lib-card, .lib-showcase");\n      if (opener) state.opener = opener.querySelector(".lib-showcase-details") || opener;', grid_code)
+        self.assertIn('state.opener = target.querySelector(".lib-showcase-details") || target;', _inner(script, "showGrid"))
         # The routes: its page at its id (before the variants: showcase.json's id is none of them), its card a place.
         route = _inner(script, "route")
         self.assertIn("    if (state.showcase?.id === id) { showShowcase(); return; }\n    if (Object.hasOwn(variants, id)) { showDetail(id); return; }", route)
         self.assertIn('const places = new Set([...(state.showcase ? ["showcase"] : []), "grippers",', route)
         shown = _inner(script, "showShowcase")
         self.assertIn("    state.picture = SHOWCASE_VIEW;\n", shown)
-        self.assertIn("    renderShowcase();\n    window.scrollTo(0, 0);\n    $(\"libDetailTitle\").focus({preventScroll: true});", shown)
+        self.assertIn("    renderShowcase();\n    raise();\n", shown)
         # Its page: the picture's frame with the Exploded | Assembled control (gallery()), the 3D view over it
-        # (present()), the back link to its card, the tutorial (the address is showcase.json's: the script names none)
-        # as a grey pill opened in a new tab, the sources' notices as files of the site.
+        # (present()), its card the window's place (its X closes to it: the page's back link until 2026-11-15), the
+        # tutorial (the address is showcase.json's: the script names none) as a grey pill opened in a new tab, the
+        # sources' notices as files of the site.
         page = _inner(script, "renderShowcase")
-        self.assertIn('el("a", {className: "lib-back", href: "#showcase"}, chevron("left"), el("span", {}, "Library")),', page)
+        self.assertIn('    state.place = "showcase";\n', page)
         self.assertIn('el("div", {className: "lib-detail-body lib-detail-showcase"},\n        gallery(entry),', page)
         self.assertIn('el("a", {className: "lib-pill", href: data.tutorial.href, target: "_blank", rel: "noopener noreferrer"}, data.tutorial.label)', page)
         self.assertIn('el("a", {href: BASE + source.notice, target: "_blank", rel: "noopener"}, "notice")', page)
         self.assertIn('el("h2", {className: "lib-detail-title", id: "libDetailTitle", tabindex: "-1"}, whole(data.title)),', page)
+        # Its line, then its line of detail (the sensor's size and fingers: the card's line no longer says them, 2026-11-15).
+        self.assertIn('el("p", {className: "lib-detail-line"}, keep(data.text)),\n          el("p", {className: "lib-showcase-detail"}, keep(data.detail)),', page)
         # No generator downloads, no Open in Gen by Surface, no pitch, no facts, no prose of its own.
         for word in ("lib-open", "?part=", "renderDownloads", "lib-downloads", "lib-facts", "segments(", "lib-detail-note", "api/export", "Gerber ZIP"):
             with self.subTest(absent=word):
                 self.assertNotIn(word, page)
-        self.assertEqual(re.findall(r'"([A-Z][^"]*)"', page), ["Library"], "the page's only word of its own: the back link's")
+        self.assertEqual(re.findall(r'"([A-Z][^"]*)"', page), [], "no word of its own (the back link's \"Library\" went with it, 2026-11-15)")
         # The 3D view: the one of a sensor's page, drawn from the placed record (docs/LIBRARY_VIEW.md "A placed sensor").
         self.assertIn("if (variant.view.placed) return live.view.show({base: BASE, id, placed: variant.view.placed, mode: state.picture});", _inner(script, "draw"))
         self.assertIn("const shown = id => (id && state.showcase?.id === id ? state.showcase.entry : state.index.variants[id]);", script)
@@ -3506,7 +3675,18 @@ class PageTests(unittest.TestCase):
                     styled.setdefault((selector, rule.conditions), {}).update({name: value for name, value, _ in rule.declarations})
         self.assertEqual(styled[(".lib .lib-showcase", ())].get("flex-direction"), "row")
         self.assertEqual(styled[(".lib .lib-showcase", ("@media (max-width:734px)",))].get("flex-direction"), "column")
-        self.assertEqual((styled[(".lib-shot-showcase", ())].get("order"), styled[(".lib-shot-showcase", ("@media (max-width:734px)",))].get("order")), ("1", "0"))
+        # The picture first, on the left, in every width (2026-11-15: "picture put to the left, and the words just next to
+        # the picture"; on the right before), the words close beside it.
+        self.assertEqual(re.findall(r'el\("\w+", \{className: "(lib-showcase-pic|lib-card-text)"', card), ["lib-showcase-pic", "lib-card-text"])
+        self.assertNotIn("order", styled[(".lib-showcase-pic", ())])
+        self.assertNotIn("order", styled[(".lib-showcase-pic", ("@media (max-width:734px)",))])
+        self.assertEqual(styled[(".lib-showcase .lib-card-text", ())].get("padding"), "24px clamp(24px,3vw,40px)")
+        # Smaller since 2026-11-15 ("xarm can be smaller"): a fifth of the row within 220 to 300 px, 60 % of a phone's card.
+        self.assertEqual((styled[(".lib-showcase-pic", ())].get("width"), styled[(".lib-showcase-pic", ("@media (max-width:734px)",))].get("width")),
+                         ("clamp(220px, 20%, 300px)", "60%"))
+        self.assertEqual(styled[(".lib-shot-showcase", ())].get("aspect-ratio"), "4 / 5")
+        # Details its own size in every width (a sensor's page's pills fill the column below 900 px).
+        self.assertEqual(styled[(".lib .lib-showcase .lib-pill", ())], {"align-self": "flex-start", "width": "auto"})
         self.assertEqual(styled[(".lib-detail-body.lib-detail-showcase", ("@media (min-width:900px)",))], {"grid-template-columns": "minmax(0,5fr) minmax(0,7fr)"})
         self.assertEqual(styled[(".lib-detail-showcase .lib-frame", ("@media (max-width:899px)",))].get("max-width"), "440px")
         for (selector, _), declarations in styled.items():
@@ -3522,6 +3702,134 @@ class PageTests(unittest.TestCase):
         self.assertNotIn(document["id"], taken)
         self.assertEqual({kind: (document["image"][kind]["width"], document["image"][kind]["height"]) for kind in ("exploded", "assembled", "card")},
                          {"exploded": (1280, 1600), "assembled": (1280, 1600), "card": (800, 1000)})
+
+    def test_a_card_s_details_open_in_a_window_over_the_library(self) -> None:
+        # The user's request of 2026-11-15 ("after we click for all cards to details, we may not jump to a new page. lets
+        # bump our to a large window, and if you click the "x" of right top conrner, it will close and back show lib"):
+        # every card's page (a gripper's, the UMI shelf's, the tapered tips', the showcase's) opens in a large window over
+        # the Library, a modal dialog (showModal(): the top layer, the page behind inert, Escape its cancel), the grid where
+        # it was under it, the page not scrolling while it is open; its X at its top right closes it, as Escape and a
+        # press and release on its backdrop do (never a drag begun inside it, nor a double-click's second click), to the
+        # grid's place of its sensor (the page's back link's address, no native jump) with the card that opened it
+        # focused; the address is the page's #<id>, so Back closes it and Forward opens it again.  The back link is gone.
+        # Since the review of 2026-11-15 a close makes no history entry (with Android's Back a close request while the
+        # window is open, a new entry there had made each Back close it and the next open it again): opened from the grid
+        # it goes back over the window's entries, opened at its own address it replaces its entry.
+        # (library_checks.py part_window sees it in the browser.)
+        elements = self.page.elements
+        ids = [attributes.get("id") for _, attributes in elements]
+        at = ids.index("libWindow")
+        self.assertEqual(elements[at], ("dialog", {"class": "lib-window", "id": "libWindow", "aria-labelledby": "libDetailTitle"}))
+        self.assertEqual(elements[at + 1], ("button", {"type": "button", "class": "lib-close", "id": "libClose", "aria-label": "Close"}))
+        self.assertEqual((elements[at + 2][0], elements[at + 2][1].get("aria-hidden"), elements[at + 2][1].get("focusable")), ("svg", "true", "false"))
+        self.assertFalse([attributes for _, attributes in elements[at + 2:ids.index("libWindowBody")] if "stroke" in attributes], "a filled mark, as the toggle's")
+        self.assertEqual(elements[ids.index("libWindowBody")], ("div", {"class": "lib-window-body", "id": "libWindowBody"}))
+        self.assertEqual(elements[ids.index("libWindowBody") + 1], ("div", {"class": "lib-detail", "id": "libDetail"}), "shown by the window, never hidden itself")
+        self.assertLess(ids.index("libGrid"), at)
+        self.assertLess(at, ids.index("libStatus"), "in main.lib: the page's .lib rules")
+        for name, text in (("library.html", self.html), ("library.js", self.script), ("library.css", self.style)):
+            with self.subTest(file=name):
+                self.assertNotIn("lib-back", text)
+        script = self.script
+        self.assertIn('  const WINDOW = $("libWindow");\n', script)
+        self.assertEqual(script.count(".showModal("), 1, "one place opens it")
+        # (The width a scroll bar takes measured first, --lib-bar: made up on the page's right while it cannot scroll, so
+        # the grid keeps its width and place and the backdrop covers the screen; an overlay one, a phone's or the checks'
+        # headless browser's, 0, which a kept room would narrow the grid by.  The review of 2026-11-15: scrollbar-gutter's
+        # room had stayed bright and shrunk 100vw.)
+        self.assertIn('    if (!WINDOW.open) {\n      ROOT.style.setProperty("--lib-bar", `${Math.max(0, window.innerWidth - ROOT.clientWidth)}px`);\n'
+                      '      WINDOW.showModal();\n    }\n    $("libWindowBody").scrollTop = 0;\n    $("libDetailTitle").focus({preventScroll: true});\n',
+                      _inner(script, "raise"))
+        for name in ("showDetail", "showShowcase"):
+            with self.subTest(function=name):
+                shown = _inner(script, name)
+                self.assertIn("    opening();\n", shown)
+                self.assertTrue(shown.endswith("    raise();\n  }"), shown[-80:])
+                self.assertNotRegex(shown, r"scrollTo|\.hidden|libHero|libGrid")
+        opening = _inner(script, "opening")
+        self.assertIn('    if (state.view === "grid") {\n      state.gridY = window.scrollY;\n      state.fromGrid = true;\n    }\n    state.view = "detail";\n', opening)
+        grid = _inner(script, "showGrid")
+        self.assertIn("    rest();\n    if (WINDOW.open) WINDOW.close();\n", grid)
+        # The rows' arrows set as the grid is laid out (they were set as the grid was shown, which it no longer is: a
+        # window opened at its address has it under it; library_checks part_layout and part_window).
+        self.assertTrue(_inner(script, "renderGrid").endswith("    state.syncs.forEach(sync => sync());\n  }"))
+        self.assertNotRegex(grid, r"\.hidden|libHero|libGrid|libDetail")
+        close = _inner(script, "closeWindow")
+        self.assertIn('    if (state.view !== "detail" || state.closing) return;\n    if (state.depth > 0) {\n      state.closing = state.place;\n'
+                      '      history.go(-state.depth);\n      return;\n    }\n    history.replaceState(null, "", `#${state.place}`);\n    route();\n', close)
+        self.assertNotIn("location.hash", close, "no native jump to the place (the grid stays where it is)")
+        self.assertNotIn("pushState", script, "no close makes a history entry")
+        # Each entry's depth (route()): the window's entries of this visit over the grid's, so a close goes back over them;
+        # a close come back to the grid's entry makes its address the window's place; the Pitch's, Shape's and Tip
+        # width's replaced address keeps the entry's mark.
+        route = _inner(script, "route")
+        self.assertIn("    const mark = history.state;\n    const traversed = mark?.library === true;\n    const closing = state.closing;\n    state.closing = null;\n", route)
+        self.assertIn('    if (closing && !windowed) {\n', route)
+        self.assertIn('      history.replaceState(mark, "", `#${closing}`);\n      id = closing;\n    }\n', route)
+        self.assertIn("    showGrid(place && known ? $(place) : null, traversed && !closing);\n", route)
+        self.assertIn("    if (!windowed) state.depth = 0;\n    else if (traversed) state.depth = mark.visit === VISIT ? mark.depth || 0 : 0;\n"
+                      '    else state.depth = state.view === "grid" ? 1 : state.view === "detail" && state.depth > 0 ? state.depth + 1 : 0;\n'
+                      '    if (!traversed) history.replaceState({library: true, visit: VISIT, depth: state.depth}, "");\n', route)
+        self.assertLess(route.index("const windowed = "), route.index("if (state.showcase?.id === id) { showShowcase(); return; }"))
+        self.assertIn('    const windowed = state.showcase?.id === id || [variants, parts, state.index.families || {}].some(kind => Object.hasOwn(kind, id));\n', route)
+        self.assertIn('  const VISIT = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;\n', script)
+        self.assertIn('      history.replaceState(history.state, "", `#${target}`);\n', _inner(script, "segments"))
+        events = _inner(script, "windowEvents")
+        self.assertIn('    $("libClose").addEventListener("click", closeWindow);\n', events)
+        self.assertIn('    WINDOW.addEventListener("cancel", event => {\n      event.preventDefault();\n      closeWindow();\n    });\n', events)
+        self.assertIn('    WINDOW.addEventListener("close", () => { if (!WINDOW.open && state.view === "detail") closeWindow(); });\n', events)
+        self.assertIn("      return event.target === WINDOW && (event.clientX < box.left || event.clientX >= box.right || event.clientY < box.top || event.clientY >= box.bottom);\n", events)
+        self.assertIn('    WINDOW.addEventListener("pointerdown", event => { pressed = outside(event); });\n', events)
+        self.assertIn("      if (pressed && event.detail < 2 && outside(event)) closeWindow();\n      pressed = false;\n", events)
+        self.assertIn('    windowEvents();\n    window.addEventListener("hashchange", route);\n', _inner(script, "start"))
+        # Its style: the cards' own look, large, its page scrolling inside it, the root not scrolling while it is open
+        # (its scroll bar's width made up on its right), a sheet with no shadow below 735 px and on a screen less than
+        # 501 px tall (a phone held sideways; the review of 2026-11-15); the X the header's toggle's round grey button over
+        # its top right corner, opaque, with the page's focus ring; no blue.
+        rules, _ = parse_css(self.style)
+        styled = {}
+        for rule in rules:
+            for selector in rule.selectors:
+                if "lib-window" in selector or "lib-close" in selector:
+                    styled.setdefault((selector, rule.conditions), {}).update({name: value for name, value, _ in rule.declarations})
+        window = styled[(".lib-window", ())]
+        self.assertEqual({key: window.get(key) for key in ("width", "max-width", "max-height", "height", "margin", "padding", "border", "border-radius", "background",
+                                                           "box-shadow", "overflow")},
+                         {"width": "min(1200px, calc(100vw - 2 * var(--lib-gutter)))", "max-width": "none", "max-height": "calc(100dvh - 2 * var(--lib-gutter))",
+                          "height": "fit-content", "margin": "var(--lib-gutter) auto auto", "padding": "0", "border": "0", "border-radius": "var(--r-lg)",
+                          "background": "var(--surface)", "box-shadow": "var(--shadow-float)", "overflow": "hidden"})
+        self.assertEqual(styled[(".lib-window[open]", ())], {"display": "flex", "flex-direction": "column"})
+        body = styled[(".lib-window-body", ())]
+        self.assertEqual({key: body.get(key) for key in ("flex", "min-height", "overflow-y", "overscroll-behavior")},
+                         {"flex": "1 1 auto", "min-height": "0", "overflow-y": "auto", "overscroll-behavior": "contain"})
+        # (Its page's top leaves the X its room, its 16 + 36 px and more; its sides at most 40 px, so its facts' column is
+        # as wide as the page's was: the review of 2026-11-15.)
+        self.assertEqual(body.get("padding"), "56px clamp(20px,2.5vw,40px) 40px")
+        self.assertEqual(styled[(":root:has(.lib-window[open])", ())], {"overflow": "hidden", "padding-right": "var(--lib-bar,0px)"})
+        self.assertFalse([rule.selectors for rule in rules for name, _, _ in rule.declarations if name == "scrollbar-gutter"])
+        self.assertNotIn("libBar", script)
+        self.assertEqual(styled[(".lib-window::backdrop", ())], {"background": "rgba(0,0,0,.45)"})
+        sheet = ("@media (max-width:734px), (max-height:500px)",)
+        self.assertEqual(styled[(".lib-window", sheet)], {"width": "100vw", "height": "100%", "max-height": "none", "margin": "0", "border-radius": "0", "box-shadow": "none"})
+        self.assertEqual(styled[(':where(:root[data-theme="dark"]) .lib-window', sheet)], {"box-shadow": "none"}, "no hairline framing the screen")
+        self.assertLess(self.style.index(':where(:root[data-theme="dark"]) .lib-window { box-shadow:inset'),
+                        self.style.index('@media (max-width:734px), (max-height:500px) { :where(:root[data-theme="dark"]) .lib-window { box-shadow:none; } }'),
+                        "after the dark window's hairline, which it overrides")
+        # A sensor's page in it two even columns from 900 px (the window at most 1200 px wide: at 7 to 5 its facts' column
+        # was 440 px at 1440 px, its pills stacked; the review of 2026-11-15), the showcase's 5 to 7.
+        split = sorted((rule.conditions, value) for rule in rules for selector in rule.selectors if selector.startswith(".lib-detail-body")
+                       for name, value, _ in rule.declarations if name == "grid-template-columns")
+        self.assertEqual(split, [((), "minmax(0,1fr) minmax(0,1fr)"), (("@media (max-width:899px)",), "minmax(0,1fr)"),
+                                 (("@media (min-width:900px)",), "minmax(0,5fr) minmax(0,7fr)")])
+        close = styled[(".lib .lib-close", ())]
+        self.assertEqual({key: close.get(key) for key in ("position", "top", "right", "width", "height", "border-radius", "background", "color")},
+                         {"position": "absolute", "top": "16px", "right": "16px", "width": "36px", "height": "36px", "border-radius": "50%",
+                          "background": "linear-gradient(var(--fill),var(--fill)) var(--surface)", "color": "var(--text)"})
+        self.assertIn("var(--focus)", styled[(".lib-close:focus-visible", ())].get("outline", ""))
+        self.assertEqual(sorted(selector for selector, _ in styled if "lib-close:" in selector and "focus" not in selector), [".lib .lib-close:active", ".lib .lib-close:hover"])
+        for (selector, _), declarations in styled.items():
+            with self.subTest(selector=selector):
+                self.assertFalse([value for value in declarations.values() if "accent" in value], "no blue")
 
     def test_a_page_opened_at_its_address_paints_no_frame_of_the_grid_s_title(self) -> None:
         # The reviews of 2026-11-06: a sensor's page shared or reloaded had first painted the grid's title and tagline

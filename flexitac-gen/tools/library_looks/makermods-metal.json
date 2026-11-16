@@ -1,36 +1,45 @@
 {
  "format": "flexitac-library-look/v1",
  "part": "makermods-metal",
- "about": "drawn after the maker's product photos of the Metal Arm (makermods.ai, 2026-11-12): the two jaws matte black resin, the cross beam black anodised aluminium, the linear guide rail on it bright ground steel.  The plain rail is drawn as that beam, and three things on it are the project's own drawing too, plain boxes and cylinders sized by eye from the photos, not MakerMods geometry: the steel guide rail as a strip 7 mm wide with rounded shoulders along the middle of the beam's top (bodies/makermods-metal/drawn-rail-steel.stl; the real rail is taller and carries the jaws on carriages, which are not drawn), its counterbored holes as dark discs every 15 mm (drawn-rail-bores.stl: the seven between the jaws, the two under the see-through jaw and the one in the open slot at the other jaw's back) and the beam's two end stops (drawn-end-stops.stl).  No gripper body, carriage, screw, camera mount or finger loop is drawn.",
+ "about": "drawn after the maker's product photos of the Metal Arm (makermods.ai, 2026-11-12): the two jaws matte black resin, the cross beam and the gripper's body black anodised aluminium, the linear guide rail ground steel, the camera's mount and housing black print.  The gripper's body is the project's own drawing, by eye after those photos and the maker's published 0 to 95 mm stroke (the user's decision of 2026-11-14), in plain boxes, cylinders and prisms: not MakerMods' 3D model or hardware, and no MakerMods model was used, traced or measured for it.  The plain rail is the beam, a C-channel with its two walls (bodies/makermods-metal/drawn-beam-walls.stl) and two end stops (drawn-end-stops.stl); on its floor the steel guide rail with rounded shoulders (drawn-rail-steel.stl) and its counterbored holes as dark hexagons every 20 mm (drawn-rail-bores.stl); behind the beam the gripper's housing, a chamfered block and its motor can (drawn-housing.stl); beside them the printed camera mount, its bracket, the camera's flat housing and lens barrel (drawn-camera-mount.stl), and the lens (drawn-camera-lens.stl).  The carriages, the screws, the finger loops and the cables are not drawn, and the jaws are HandUMI's replica tips.",
  "smooth_deg": 35,
  "part_look": "jaw-resin",
  "looks": {
-  "jaw-resin": {"base": "print-black", "color": "#3b3b41", "roughness": 0.8, "env_intensity": 1.8, "evidence": "the maker's own 3D viewer names the jaws matte resin beside black anodised links (roughness 0.8, no metal); the studio photo on grey and the station photo in daylight (photos 3 and 4 of the research notes): the jaws' lit faces read #636175 and #6a6571, a broad matt grey with lighter edges and no highlight, lighter than the anodised beam beside them (#312e3d and #18171c), and every black a little cool"},
-  "beam-anodized": {"base": "anodized-black", "color": "#2c2c32", "metalness": 0.5, "roughness": 0.8, "env_intensity": 2.3, "evidence": "photos 3, 4 and 6: the beam reads #312e3d lit and #18171c to #272726 in shade, darker than the jaws beside it under the same light and with one broad soft sheen, no mirror image (satin, beside the glossier turned motor housing), so rougher than the base look; drawn here as a plain box, each of whose faces mirrors one patch of the room whole: with the base look's numbers its long faces, turned to a dark flag, read #0e0f16, darker than the film beside them (#111319), and its top, turned to a softbox, a mid grey lighter than the jaws; these numbers keep the box darker than the jaws at the homes and no face of it under the film"},
-  "rail-ground": {"base": "steel-ground", "roughness": 0.45, "env_intensity": 0.7, "evidence": "photos 1, 3 and 4: the rail reads #8a8589 to #aca7ae with its brightest tenth at #d7d3d9, bright steel but never white; drawn here as a strip whose flat top mirrors one patch of the room whole, and with the base look's numbers it read #f0f2f5 where that patch is a softbox, white on the card's light ground; a little rougher and dimmer, the top stays a grey under the photos' brightest tenth from every side"}
+  "jaw-resin": {"base": "print-black", "color": "#313134", "roughness": 0.8, "env_intensity": 1.8, "evidence": "the maker's own 3D viewer names the jaws matte resin (roughness 0.8, no metal) beside black anodised links; the close photo (photo 1) reads the jaw #222126 at its median and #424044 at its brightest tenth, the station photo (4) a matte charcoal with lighter edges, every black a little cool: the base print-black as matte as the maker's resin, a little lighter and lifted so that its faces turned from the light stay over the film: #343437 and #363639 at the homes, its lit edges to #48484b, and #242428 turned to the back, where the film reads #111319 (smoother, at roughness 0.5, the faces turned to the back fell to the film's own level, #1b1b1e, and a lift that kept them clear of it lit the homes to #4b4b4d)"},
+  "beam-anodized": {"base": "anodized-black", "color": "#2c2c32", "metalness": 0.5, "roughness": 0.7, "env_intensity": 2.8, "evidence": "photos 3, 4 and 6: the beam reads #312e3d lit and #18171c to #272726 in shade, with one broad soft sheen and no mirror image (satin, beside the glossier motor housing); drawn as a box whose flat faces each mirror one patch of the room, rougher than the base and lifted: #323239 and #39393f at the homes, its darkest #2a2a32 over the film's #222326, and #24242c turned to the back, where the film reads #111319"},
+  "housing-anodized": {"base": "anodized-black", "color": "#2a2b30", "metalness": 0.4, "roughness": 0.6, "env_intensity": 2.6, "evidence": "photos 1, 2 and 4: the gripper's housing and motor can black anodised, #19181b to #24222b with sharp highlights to #dad9eb on the can's rim; at the base look's numbers the can's facets turned to the room's dark flags read #0f1118, under the film, so less metal, rougher and lifted: #404146 and #434449 at the homes with its sheen to #6a6b70 and its darkest #26272e"},
+  "rail-ground": {"base": "steel-ground", "roughness": 0.45, "env_intensity": 0.8, "evidence": "photos 1, 3 and 4: the rail reads #8a8589 to #aca7ae, its brightest tenth #d7d3d9 and its highlights to #fff8f8; here #8e9194 and #838689 at the homes and #b8bbbe on its rounded shoulders; turned to the back its top mirrors a softbox, and below roughness 0.45 it washes out (7 to 23 % of it white at roughness 0.4, 10 to 23 % at 0.35), so 0.45, where at most 1 % reaches white"},
+  "lens-glass": {"base": "plastic-black-satin", "color": "#1e1f24", "roughness": 0.45, "env_intensity": 1.6, "evidence": "photo 1 and the station photo: the camera's lens a dark, faintly blue glass in its barrel; smoother, it mirrored a softbox whole as a white disc turned to the back, so a satin #37373b and #2e2f34 at the homes"}
  },
  "bodies": {
-  "bodies/makermods-metal/rail.stl": {"sha256": "5e7fb69b93bc051ce01619729dee5d70b8578369b03355712f05ceff262f6a89", "look": "beam-anodized"}
+  "bodies/makermods-metal/rail.stl": {"sha256": "9ecc75d35672a1734053293c52773861cd6ca03fca7f9561243d5b265498c745", "look": "beam-anodized"}
  },
  "drawn": [
   {"name": "rail-steel", "look": "rail-ground", "draw": [
-    {"box": [[-33.5, -3.5, -3.3], [128.5, 3.5, -2.2]]},
-    {"box": [[-33.5, -2.3, -2.5], [128.5, 2.3, -1.0]]},
-    {"cylinder": {"from": [-33.5, -2.3, -2.2], "to": [128.5, -2.3, -2.2], "radius": 1.2, "segments": 12}},
-    {"cylinder": {"from": [-33.5, 2.3, -2.2], "to": [128.5, 2.3, -2.2], "radius": 1.2, "segments": 12}}], "finger": null},
+    {"prism": {"axis": "x", "from": -31.5, "to": 126.5, "profile": [[-4.5, -3.15], [4.5, -3.15], [4.5, -1.15], [4.348, -0.385], [3.914, 0.264], [3.265, 0.698], [2.5, 0.85], [-2.5, 0.85], [-3.265, 0.698], [-3.914, 0.264], [-4.348, -0.385], [-4.5, -1.15]]}}], "finger": null},
   {"name": "rail-bores", "look": "plastic-black-matte", "draw": [
-    {"cylinder": {"from": [2.5, 0, -1.4], "to": [2.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [17.5, 0, -1.4], "to": [17.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [32.5, 0, -1.4], "to": [32.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [47.5, 0, -1.4], "to": [47.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [62.5, 0, -1.4], "to": [62.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [77.5, 0, -1.4], "to": [77.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [92.5, 0, -1.4], "to": [92.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [107.5, 0, -1.4], "to": [107.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [122.5, 0, -1.4], "to": [122.5, 0, -0.85], "radius": 1.5, "segments": 8}},
-    {"cylinder": {"from": [-27.5, 0, -1.4], "to": [-27.5, 0, -0.85], "radius": 1.5, "segments": 8}}], "finger": null},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[-20.768, 1.0], [-22.5, 2.0], [-24.232, 1.0], [-24.232, -1.0], [-22.5, -2.0], [-20.768, -1.0]]}},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[-0.768, 1.0], [-2.5, 2.0], [-4.232, 1.0], [-4.232, -1.0], [-2.5, -2.0], [-0.768, -1.0]]}},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[19.232, 1.0], [17.5, 2.0], [15.768, 1.0], [15.768, -1.0], [17.5, -2.0], [19.232, -1.0]]}},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[39.232, 1.0], [37.5, 2.0], [35.768, 1.0], [35.768, -1.0], [37.5, -2.0], [39.232, -1.0]]}},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[59.232, 1.0], [57.5, 2.0], [55.768, 1.0], [55.768, -1.0], [57.5, -2.0], [59.232, -1.0]]}},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[79.232, 1.0], [77.5, 2.0], [75.768, 1.0], [75.768, -1.0], [77.5, -2.0], [79.232, -1.0]]}},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[99.232, 1.0], [97.5, 2.0], [95.768, 1.0], [95.768, -1.0], [97.5, -2.0], [99.232, -1.0]]}},
+    {"prism": {"axis": "z", "from": 0.55, "to": 1.0, "profile": [[119.232, 1.0], [117.5, 2.0], [115.768, 1.0], [115.768, -1.0], [117.5, -2.0], [119.232, -1.0]]}}], "finger": null},
+  {"name": "beam-walls", "look": "beam-anodized", "draw": [
+    {"prism": {"axis": "x", "from": -31.5, "to": 126.5, "profile": [[10.0, -3.15], [13.15, -3.15], [13.15, -0.9], [12.65, -0.4], [10.0, -0.4]]}},
+    {"prism": {"axis": "x", "from": -31.5, "to": 126.5, "profile": [[-13.15, -3.15], [-10.0, -3.15], [-10.0, -0.4], [-12.65, -0.4], [-13.15, -0.9]]}}], "finger": null},
   {"name": "end-stops", "look": "beam-anodized", "draw": [
-    {"box": [[-37.65, -13.15, -3.0], [-33.5, 13.15, 1.0]]},
-    {"box": [[128.5, -13.15, -3.0], [132.65, 13.15, 1.0]]}], "finger": null}
+    {"prism": {"axis": "y", "from": -13.3, "to": 13.3, "profile": [[1.5, -35.5], [3.0, -34.0], [3.0, -31.35], [-15.15, -31.35], [-15.15, -35.5]]}},
+    {"prism": {"axis": "y", "from": -13.3, "to": 13.3, "profile": [[3.0, 126.35], [3.0, 129.0], [1.5, 130.5], [-15.15, 130.5], [-15.15, 126.35]]}}], "finger": null},
+  {"name": "housing", "look": "housing-anodized", "draw": [
+    {"prism": {"axis": "x", "from": 25.5, "to": 69.5, "profile": [[-12.0, -34.0], [12.0, -34.0], [15.0, -31.0], [15.0, -18.15], [12.0, -15.15], [-12.0, -15.15], [-15.0, -18.15], [-15.0, -31.0]]}},
+    {"cylinder": {"from": [47.5, 0.0, -33.85], "to": [47.5, 0.0, -52.0], "radius": 20.0, "segments": 24}}], "finger": null},
+  {"name": "camera-mount", "look": "print-black", "draw": [
+    {"box": [[44.5, 14.85, -40.0], [50.5, 44.0, -25.85]]},
+    {"prism": {"axis": "z", "from": -26.0, "to": -14.0, "profile": [[36.5, 30.0], [58.5, 30.0], [61.5, 33.0], [61.5, 53.0], [58.5, 56.0], [36.5, 56.0], [33.5, 53.0], [33.5, 33.0]]}},
+    {"cylinder": {"from": [50.5, 46.0, -14.15], "to": [50.5, 46.0, -9.0], "radius": 6.0, "segments": 16}}], "finger": null},
+  {"name": "camera-lens", "look": "lens-glass", "draw": [
+    {"prism": {"axis": "z", "from": -9.15, "to": -8.85, "profile": [[54.7, 46.0], [54.137, 48.1], [52.6, 49.637], [50.5, 50.2], [48.4, 49.637], [46.863, 48.1], [46.3, 46.0], [46.863, 43.9], [48.4, 42.363], [50.5, 41.8], [52.6, 42.363], [54.137, 43.9]]}}], "finger": null}
  ]
 }

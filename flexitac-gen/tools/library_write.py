@@ -146,7 +146,8 @@ DENIED_SHA256 = {
     "f6b588d88bd3f4788b237899092c8008119b8b5d3f7cdb8ec0c35d4f9742aa72": "xArm Gripper G1, not decimated (finger_l_pins.stl)",
     # The MakerMods Metal Arm's gripper body (metal-python-ros: its package.xml says "Business", no licence file), not
     # cleared for redistribution: the Library's whole-gripper scene draws its HandUMI tips on a plain rail of the
-    # project's own instead (the user's decision of 2026-11-05, docs/LIBRARY_VIEW.md).
+    # project's own instead (the user's decision of 2026-11-05, docs/LIBRARY_VIEW.md), and since 2026-11-14 its body
+    # round that rail by eye after the maker's photos, never from these files.
     "19ab43c406f349d62dc7a9932b66fb28053cf96152ab00d71a93945a43ddd8cd": "MakerMods Metal Arm (gripper_base.STL): not cleared",
     "3c813623f4c273bfb6f4fd483fc8ee23dc4325de32e9d89d7c44cb1a0e97c033": "MakerMods Metal Arm (link7.STL): not cleared",
     "62d0ed4072aea7e4d0655e16edbf8243317e3e106996f00f06e72afc78d091ec": "MakerMods Metal Arm (link8.STL): not cleared",
@@ -224,14 +225,14 @@ REBUILD_SHOWCASE = "rebuild the showcase with tools/library_showcase.py"
 REMOVE_FILE = "remove it"
 # The showcase's page (library.html's first card and its own page at #flexitac-g1; docs/LIBRARY_VIEW.md "The showcase's
 # page"): showcase.json beside entries.json, a document of its own format.  Its words are written by hand (the title,
-# the label that it is hand-designed and not auto-generated, one line, the sensor's size, the link to the FlexiTac
-# hardware tutorial for the Gerbers, the sources with their notices); its "placed" is the pad's placed record
+# the label that it is the original FlexiTac, hand-designed, pre-agent, the card's one line, the page's line of detail,
+# the sensor's size, the link to the FlexiTac hardware tutorial for the Gerbers, the sources with their notices); its "placed" is the pad's placed record
 # (SHOWCASE_PLACED, a file of the pad's own folder) with the showcase's scene; its "image" and "shot" are written by
 # tools/browser/library_shots.py --showcase: the three pictures in showcase/ (their sizes below: 4:5, the gripper
 # upright), each with its bytes and SHA-256, and what they were shot from.  showcase_page() checks all of it.
 SHOWCASE_FILE = "showcase.json"
 SHOWCASE_FORMAT = "flexitac-library-showcase/v1"
-SHOWCASE_KEYS = ("about", "format", "id", "image", "label", "placed", "sensor", "shot", "sources", "text", "title", "tutorial")
+SHOWCASE_KEYS = ("about", "detail", "format", "id", "image", "label", "placed", "sensor", "shot", "sources", "text", "title", "tutorial")
 SHOWCASE_PLACED = "vendor/flexitac-v2/umi-finray.placed.json"
 SHOWCASE_PAD_NOTICE = "vendor/flexitac-v2/NOTICE.md"
 SHOWCASE_SHOT_SIZE = (1280, 1600)
@@ -241,9 +242,10 @@ SHOWCASE_SHOTS = {"exploded": (f"showcase/{SHOWCASE_ID}.exploded.webp", SHOWCASE
                   "assembled": (f"showcase/{SHOWCASE_ID}.assembled.webp", SHOWCASE_SHOT_SIZE, "assembled"),
                   "card": (f"showcase/{SHOWCASE_ID}.card.webp", SHOWCASE_CARD_SIZE, "assembled")}
 SHOWCASE_SHOT_KEYS = ("art_sha256", "figure_sha256", "look", "margins_px", "numbers", "placed_sha256", "scene", "scene_sha256", "view_sha256")
-# The label's words (the user's request of 2026-11-12: "这个版本是人手design的不是autogenerate") and the sources' notices,
-# in the page's order: the gripper's (the one place showcase.json names the vendor's folder) and the pad's.
-SHOWCASE_LABEL_WORDS = ("hand-designed", "not auto-generated")
+# The label's words (the user's request of 2026-11-12: "这个版本是人手design的不是autogenerate"; worded again on 2026-11-15:
+# "pre-agent hand design version, original flexitac") and the sources' notices, in the page's order: the gripper's (the
+# one place showcase.json names the vendor's folder) and the pad's.
+SHOWCASE_LABEL_WORDS = ("original", "hand-designed", "pre-agent")
 SHOWCASE_NOTICES = (f"../{SHOWCASE_VENDOR}/{SHOWCASE_NOTICE}", f"../{SHOWCASE_PAD_NOTICE}")
 SHOWCASE_SOURCE_WORDS = (("UFACTORY", "3D model"), ("FlexiTac", "CC BY-NC 4.0"))
 SHOWCASE_ALT = "The hand-designed FlexiTac sensor on both soft fingers of the xArm gripper"
@@ -943,7 +945,8 @@ def scenes_index(library: Path = LIBRARY) -> dict:
 # the Library is a gripper, drawn whole on its sensor's page and in its pictures (the user's requests of 2026-11-05).
 UMI_FINGER = "umi-finray"
 # The bodies drawn by the project itself (no NOTICE row): the plain rail the MakerMods Metal Arm's two HandUMI tips stand
-# on, not MakerMods hardware (its gripper body is not cleared: DENIED_SHA256).
+# on, not MakerMods hardware (its gripper body's files are not cleared: DENIED_SHA256; the body drawn round the rail
+# by eye is bodies/makermods-metal/drawn-*.stl, below).
 OWN_BODIES = ("bodies/makermods-metal/rail.stl",)
 # And, since the looks of 2026-11-12, the plain shapes tools/library_split.py draws where a model lacks a component the
 # photos show (a screw head, a rail strip): bodies/<part>/drawn-<name>.stl, whose 80-byte header says so (OWN_HEADER and
@@ -981,9 +984,13 @@ FINGERS = ("sensor", "mate")
 # of a body ("look") and of scenes.json's rules ("looks", "part_looks", "part_smooth_deg": the parts without a scene).  A
 # look is LOOK_KEYS and any of LOOK_OPTIONAL: an sRGB colour "#rrggbb" (lower case), numbers 0 to 1 (LOOK_UNIT), an
 # env_intensity of 0 or more; a name is LOOK_NAME (lower case, digits, hyphens).  A crease angle is SMOOTH_BOUNDS degrees.
+# The rules' "part_pad" (the user's decision of 2026-11-14 on the UMI pad, "you can do it darken") is the tint the
+# assembled sensor's pad takes on a part the rules give a look: PAD_KEYS, its colour as a look's, its opacity a number
+# above 0 and at most 1.
 SCENE_OPTIONAL = ("camera", "explode", "looks", "part_look", "smooth_deg")
 BODY_OPTIONAL = ("look",)
-RULES_OPTIONAL = ("looks", "part_looks", "part_smooth_deg")
+RULES_OPTIONAL = ("looks", "part_looks", "part_smooth_deg", "part_pad")
+PAD_KEYS = ("color", "opacity")
 LOOK_NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 LOOK_COLOR = re.compile(r"#[0-9a-f]{6}")
 LOOK_KEYS = ("color", "metalness", "roughness")
@@ -1062,8 +1069,9 @@ def own_body(mesh: str, data: bytes | None = None) -> bool:
 def part_look(index: dict, parts: dict, part_id: str):
     """The look scenes.json's rules give a part without a scene (the UMI finger and its tapered tips; docs/LIBRARY_VIEW.md
     "The looks"): {"look": the look, "smooth_deg": the rules' part_smooth_deg or None}, by the part's id, else by its
-    family's, in the rules' "part_looks" (a name of the rules' "looks", or the look itself); None without a rule (the
-    part as Gen by Surface draws it) and for a gripper (its scene's looks)."""
+    family's, in the rules' "part_looks" (a name of the rules' "looks", or the look itself), and "pad": the rules'
+    part_pad where they have one (the assembled pad's tint: its pictures are of it too); None without a rule (the part
+    as Gen by Surface draws it) and for a gripper (its scene's looks)."""
 
     rules = index.get("rules") if isinstance(index, dict) else None
     named = (rules or {}).get("part_looks")
@@ -1074,7 +1082,10 @@ def part_look(index: dict, parts: dict, part_id: str):
     if chosen is None:
         return None
     look = (rules.get("looks") or {}).get(chosen) if isinstance(chosen, str) else chosen
-    return {"look": look, "smooth_deg": rules.get("part_smooth_deg")}
+    given = {"look": look, "smooth_deg": rules.get("part_smooth_deg")}
+    if rules.get("part_pad") is not None:
+        given["pad"] = rules["part_pad"]
+    return given
 
 
 def part_look_sha256(given) -> str | None:
@@ -1321,6 +1332,15 @@ def _index_problems(index) -> list:
             found.append(f"{SCENES_INDEX}: its rule part_smooth_deg ({angle!r}) is not a crease angle of {SMOOTH_BOUNDS[0]} to {SMOOTH_BOUNDS[1]} degrees")
         if "part_looks" not in rules:
             found.append(f"{SCENES_INDEX}: its rule part_smooth_deg without part_looks")
+    # The assembled pad's tint on those parts (the user's decision of 2026-11-14): a colour as a look's and an opacity
+    # above 0 (a pad of none is no rule) and at most 1, with the looks it goes with.
+    if "part_pad" in rules:
+        pad = rules["part_pad"]
+        if not (isinstance(pad, dict) and sorted(pad) == list(PAD_KEYS) and isinstance(pad["color"], str) and LOOK_COLOR.fullmatch(pad["color"])
+                and _number(pad["opacity"]) and 0 < pad["opacity"] <= 1):
+            found.append(f"{SCENES_INDEX}: its rule part_pad ({pad!r}) is not a tint: an sRGB #rrggbb in lower case and an opacity above 0 and at most 1")
+        if "part_looks" not in rules:
+            found.append(f"{SCENES_INDEX}: its rule part_pad without part_looks")
     return found
 
 
@@ -1684,7 +1704,8 @@ def showcase_page(parts: dict, library: Path = LIBRARY) -> tuple:
     them), and older, whether its pictures are of older figure or view sources (still shown: a warning, as a sensor's).
 
     - the file missing or not JSON, its keys, its format, its id (SHOWCASE_ID: no part's, entry's or family's);
-    - its title, label and text not short plain strings, the label without its words (SHOWCASE_LABEL_WORDS), the word CAD;
+    - its title, label, text and detail not short plain strings, the label without its words (SHOWCASE_LABEL_WORDS), the
+      word CAD;
     - its sensor not {rows, columns, pitch_mm, field_mm} with the art's field;
     - its placed record not the pad's own with the showcase's scene, or about another mesh than the UMI finger's;
     - its tutorial not {label, href} with the address the pad's notice records;
@@ -1711,12 +1732,12 @@ def showcase_page(parts: dict, library: Path = LIBRARY) -> tuple:
     families = parts.get("families") or {}
     if document["id"] != SHOWCASE_ID or SHOWCASE_ID in parts["parts"] or SHOWCASE_ID in families:
         found.append(f"{name}: its id is not {SHOWCASE_ID}, or a part or a family has that id")
-    for key, most in (("title", 40), ("label", 60), ("text", 140), ("about", 2000)):
+    for key, most in (("title", 40), ("label", 60), ("text", 140), ("detail", 140), ("about", 2000)):
         value = document[key]
         if not (isinstance(value, str) and value.strip() == value and 0 < len(value) <= most and "\n" not in value):
             found.append(f"{name}: its {key} is not one line of 1 to {most} characters")
     if isinstance(document["label"], str) and not all(words in document["label"].lower() for words in SHOWCASE_LABEL_WORDS):
-        found.append(f"{name}: its label does not say {' and '.join(SHOWCASE_LABEL_WORDS)}")
+        found.append(f"{name}: its label does not say {', '.join(SHOWCASE_LABEL_WORDS)}")
     said = re.search(r"\bCAD\b", text)
     if said:
         found.append(f"{name} says CAD (the page's words are 3D model)")

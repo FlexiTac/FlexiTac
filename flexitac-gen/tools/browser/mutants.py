@@ -19,7 +19,8 @@ other way, the see-through finger's depth pass writing no depth, the see-through
 clearing an address's mark (the footer hidden), a card Tabbed to left cut by its row; and since the reviews of 2026-11-12
 five of the looks (library_stage.js, served to part_looks): the bodies drawn without their looks, the part left in a
 gripper's look when its scene goes, the part's corners welded in its file's unit, the gripper studio not made again for a
-context that comes back, the looks without their share of the studio's diffuse light.
+context that comes back, the looks without their share of the studio's diffuse light; and since the user's decision of
+2026-11-14 on the UMI pad two of the pad's tint (library_stage.js, served to part_pad): shown in Exploded too, never laid.
 """
 from __future__ import annotations
 
@@ -220,6 +221,11 @@ MUTANTS += [
      "      if (state.studio !== undefined) state.studio = gripperStudio(renderer);\n", "", "part_looks"),
     ("the looks without their share of the gripper studio's diffuse light: a white shell's faces turned from the key grey again (library_stage.js)", "lib",
      "`iblIrradiance += ${GRIPPER_STUDIO.diffuse.toFixed(3)} * getIBLIrradiance( geometryNormal );`", "``", "part_looks"),
+    # The UMI pad's tint (the rules' part_pad; the user's decision of 2026-11-14, "you can do it darken").
+    ("the pad's tint shown in Exploded too: the exploded top board darkened over the film (library_stage.js)", "lib",
+     '      if (state.pad) state.pad.visible = view.mode === "assembled";\n', "      if (state.pad) state.pad.visible = true;\n", "part_pad"),
+    ("the pad's tint never laid: the assembled UMI pad the bright amber of before, one block with the orange finger (library_stage.js)", "lib",
+     "          if (given.pad) layPad(args.stack, given.pad);\n", "", "part_pad"),
 ]
 LIB_FILES = {"**/static/cad/library_view.js": LIB_VIEW, "**/static/cad/library_stage.js": LIB_STAGE, "**/static/library.js": LIBRARY_JS}
 

@@ -2619,9 +2619,10 @@ LIBRARY_PICTURES = (
       (LIBRARY_JS, 'el("fieldset", {className: "lib-view"}, el("legend", {}, "View"),', 'el("fieldset", {className: "lib-view"},'), killers=("test_library.",)),
     m("S/library-view-kept", "2026-11-05 pictures", "a sensor's page opened anew keeps the view of the page before (Assembled where Exploded opens)",
       (LIBRARY_JS, "    state.picture = VIEWS[0][0];\n    setNote(\"\");", "    setNote(\"\");"), killers=("test_library.",)),
-    m("S/library-view-phone-room", "2026-11-05 pictures", "the phone's page not tighter with the view control (the Tapered tips' Open 25 px below a 390 x 844 first screen)",
-      ("web/library.css", "@media (max-width:899px) { .lib-detail:has(.lib-view) { padding-top:16px; } .lib-detail:has(.lib-view) .lib-detail-body { margin-top:12px; gap:16px; }\n"
-       "  .lib-detail:has(.lib-view) .lib-info { gap:12px; } }\n", ""), killers=("test_library.",)),
+    m("S/library-view-phone-room", "2026-11-05 pictures", "the phone's page not tighter with the view control (the Tapered tips' Open 25 px below a 390 x 844 first screen "
+      "under the header; since the window of 2026-11-15 its page's gaps alone)",
+      ("web/library.css", "@media (max-width:899px) { .lib-detail:has(.lib-view) .lib-detail-body { gap:16px; } .lib-detail:has(.lib-view) .lib-info { gap:12px; } }\n", ""),
+      killers=("test_library.",)),
 )
 MUTANTS += LIBRARY_PICTURES
 # The Library's grid of 2026-11-06 (the user's requests: the grippers once each, four to a row, each card naming its
@@ -2637,8 +2638,9 @@ LIBRARY_GRID = (
     m("S/library-grid-family-shelf", "2026-11-06 grid", "a part a family closes gets no shelf unless SHELVED names it (its family's card unreachable)",
       (LIBRARY_JS, "const isShelved = part => SHELVED.includes(part) || familiesOf(part).length > 0;", "const isShelved = part => SHELVED.includes(part);"),
       killers=("test_library.",)),
-    m("S/library-grid-back-shelf", "2026-11-06 grid", "a gripper's page's back link at #shelf-<part> (the older address, not its card)",
-      (LIBRARY_JS, 'el("a", {className: "lib-back", href: `#${placeOf(home)}`}', 'el("a", {className: "lib-back", href: `#shelf-${home}`}'),
+    m("S/library-grid-back-shelf", "2026-11-06 grid", "a gripper's page's back link at #shelf-<part> (the older address, not its card; since 2026-11-15 the place "
+      "its window's X closes to)",
+      (LIBRARY_JS, "    state.place = placeOf(home);\n", "    state.place = `shelf-${home}`;\n"),
       killers=("test_library.",)),
     m("S/library-grid-three", "2026-11-06 grid", "the grippers three to a row (3 + 3 + 1)",
       ("web/library.css", ".lib-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr));", ".lib-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr));"),
@@ -2648,7 +2650,7 @@ LIBRARY_GRID = (
     m("S/library-grid-wrong-card", "2026-11-06 grid", "a back link restores the grid with the card that opened the page focused, whichever card it names",
       (LIBRARY_JS, "(traversed || !target || target.contains(state.opener))", "(traversed || !target || true)"), killers=("test_library.",)),
     m("S/library-grid-history", "2026-11-06 grid", "Back and Forward not told from a link (the history entries unmarked)",
-      (LIBRARY_JS, "const traversed = history.state?.library === true;", "const traversed = false;"), killers=("test_library.",)),
+      (LIBRARY_JS, "const traversed = mark?.library === true;", "const traversed = false;"), killers=("test_library.",)),
     m("S/library-grid-umi-first", "2026-11-06 grid", "the UMI finger's shelf before the grippers' section again",
       (LIBRARY_JS, "      ...(parts.length ? [grippers(parts)] : []),\n      ...shelvedParts().map(part => shelf(`shelf-${part}`, `${index.parts[part].title}.`, index.parts[part].shelf, index.parts[part].variants, familiesOf(part))));\n",
        "      ...shelvedParts().map(part => shelf(`shelf-${part}`, `${index.parts[part].title}.`, index.parts[part].shelf, index.parts[part].variants, familiesOf(part))),\n      ...(parts.length ? [grippers(parts)] : []));\n"),
@@ -2860,7 +2862,7 @@ THEME_TOGGLE = (
       (THEME_JS, '      return window.localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light";',
        '      return window.localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark";'), killers=("test_web_theme.",)),
     m("M/web-theme-hook-specificity", "2026-11-06 theme", "library.css: a dark rule on :root[data-theme] without :where() (it outranks the light rules it did not beat under the system's scheme)",
-      ("web/library.css", ':where(:root[data-theme="dark"]) .lib .lib-card:hover {', ':root[data-theme="dark"] .lib .lib-card:hover {'),
+      ("web/library.css", ':where(:root[data-theme="dark"]) .lib a.lib-card:hover {', ':root[data-theme="dark"] .lib a.lib-card:hover {'),
       killers=("test_web_theme.",)),
     m("M/web-theme-no-pressed", "2026-11-06 theme", "theme.js: the toggle's aria-pressed never set (a screen reader hears Dark mode off in dark)",
       (THEME_JS, '    button.setAttribute("aria-pressed", String(theme === "dark"));\n', ""), killers=("test_web_theme.",)),
@@ -3033,7 +3035,7 @@ LIBRARY_SPLIT = "tools/library_split.py"
 SHOWCASE_PAGE = (
     m("S/showcase-page-unchecked", "2026-11-12 showcase page", "showcase() without the page's problems (showcase.json, its placed record and its pictures unchecked by every gate)",
       (LIBRARY_WRITE, "    found += showcase_page(parts, library)[0]\n", ""), killers=("test_library.",)),
-    m("S/showcase-page-label", "2026-11-12 showcase page", "the showcase's label free not to say hand-designed, not auto-generated (the user's request)",
+    m("S/showcase-page-label", "2026-11-12 showcase page", "the showcase's label free not to say original, hand-designed, pre-agent (the user's requests of 2026-11-12 and 2026-11-15)",
       (LIBRARY_WRITE, '    if isinstance(document["label"], str) and not all(words in document["label"].lower() for words in SHOWCASE_LABEL_WORDS):\n', "    if False:\n"),
       killers=("test_library.",)),
     m("S/showcase-page-placed", "2026-11-12 showcase page", "showcase.json's placed record not held to the pad's own with the showcase's scene (another face, wrap or scene drawn)",
@@ -3143,6 +3145,136 @@ VERIFY_FIX = (
       killers=("test_library_showcase.", "test_library.")),
 )
 MUTANTS += VERIFY_FIX
+# The UMI pad darker in the Library's Assembled view (the user's decision of 2026-11-14, "you can do it darken"): the
+# rules' part_pad checked, recorded with the part's look and held to the Assembled sheets by --check-generator, and the
+# stage laying it in Assembled alone; each killed alone by test_library on a scratch copy (the stage's in the browser
+# too: tools/browser/mutants.py's lib kind with library_checks.py's part_pad).
+LIBRARY_STAGE = "web/cad/library_stage.js"
+LIBRARY_PAD = (
+    m("S/library-pad-unchecked", "2026-11-14 UMI pad", "the rules' part_pad taken whatever it is (an opacity of 0 or above 1, a colour three.js reads otherwise)",
+      (LIBRARY_WRITE, "        if not (isinstance(pad, dict) and sorted(pad) == list(PAD_KEYS) and isinstance(pad[\"color\"], str)",
+       "        if False and (isinstance(pad, dict) and sorted(pad) == list(PAD_KEYS) and isinstance(pad[\"color\"], str)"), killers=("test_library.",)),
+    m("S/library-pad-unrecorded", "2026-11-14 UMI pad", "part_look() without the pad (a fingertip's pictures of another tint, or of none, taken as current)",
+      (LIBRARY_WRITE, '    if rules.get("part_pad") is not None:\n        given["pad"] = rules["part_pad"]\n', ""), killers=("test_library.",)),
+    m("S/library-figure-pad-part", "2026-11-14 UMI pad", "--check-generator's fifth comparison not holding the tint off the part's pixels (a tint over the finger passes)",
+      (LIBRARY_SHOTS_TOOL, '    if counts["part"]:\n        found.append(f"the pad changes', '    if False:\n        found.append(f"the pad changes'), killers=("test_library.",)),
+    m("S/library-figure-pad-exploded", "2026-11-14 UMI pad", "--check-generator's fifth comparison taking a tint drawn in Exploded (the exploded top board darkened passes)",
+      (LIBRARY_SHOTS_TOOL, '    if mode != "assembled" and counts["pad"]:\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/library-pad-exploded", "2026-11-14 UMI pad", "library_stage.js: the pad's tint shown in Exploded too",
+      (LIBRARY_STAGE, '      if (state.pad) state.pad.visible = view.mode === "assembled";\n', "      if (state.pad) state.pad.visible = true;\n"),
+      killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_PAD
+# The MakerMods Metal Arm's body drawn by eye (the user's decision of 2026-11-14: "makermods, yes, you can do it by eye"):
+# the split tool's prism (a convex profile drawn along an axis) and the guards on the drawing's credit.  Each killed
+# alone by its killers' module on a scratch copy.
+MAKERMODS_BODY = (
+    m("S/split-prism-in-line", "2026-11-14 MakerMods body", "library_split.py: a prism's corner in line with its neighbours (or twice) taken (a flat sliver, a lost turn)",
+      (LIBRARY_SPLIT, "            if cross <= 0:\n", "            if cross < 0:\n"), killers=("test_library_split.",)),
+    m("S/split-prism-star", "2026-11-14 MakerMods body", "library_split.py: a prism's profile that goes round twice (a star) taken: caps fanned over its own folds",
+      (LIBRARY_SPLIT, "        if abs(math.fsum(turns) - 2 * math.pi) > 1e-6:\n", "        if False:\n"), killers=("test_library_split.",)),
+    m("S/split-prism-corners", "2026-11-14 MakerMods body", "library_split.py: a prism's profile of any number of corners taken (a look file's shape of thousands of triangles)",
+      (LIBRARY_SPLIT, "        if not (isinstance(profile, list) and 3 <= len(profile) <= PRISM_CORNERS\n",
+       "        if not (isinstance(profile, list) and 3 <= len(profile)\n"), killers=("test_library_split.",)),
+    m("S/split-prism-axes", "2026-11-14 MakerMods body", "library_split.py: a prism about y with its profile's (z, x) read as (x, z): drawn inside out, mirrored",
+      (LIBRARY_SPLIT, 'PRISM_AXES = {"x": (1, 2), "y": (2, 0), "z": (0, 1)}\n', 'PRISM_AXES = {"x": (1, 2), "y": (0, 2), "z": (0, 1)}\n'),
+      killers=("test_library_split.",)),
+    m("S/makermods-body-uncredited", "2026-11-14 MakerMods body", "NOTICE.md: a shape the project drew of the MakerMods body (its housing) not credited as the project's own drawing by eye",
+      ("web/library/NOTICE.md", "`bodies/makermods-metal/drawn-housing.stl`,\n", ""), killers=("test_library.",)),
+    m("S/makermods-about-model", "2026-11-14 MakerMods body", "the MakerMods scene's about no longer saying its drawn body is not MakerMods' 3D model or hardware",
+      ("web/library/scenes/makermods-metal.json", "not MakerMods' 3D model or hardware", "after MakerMods' 3D model"), killers=("test_library.", "test_library_split.")),
+)
+MUTANTS += MAKERMODS_BODY
+
+# The showcase's card of 2026-11-15 (the user's request: "xarm can be smaller. make only the image that can click to
+# the details ... a button called details", the label and line worded again, the page keeping the sensor's size): the
+# picture's link out of the Tab order, Back focusing the card's Details, and the page's line of detail checked.
+SHOWCASE_CARD = (
+    m("S/showcase-card-pic-tabbed", "2026-11-15 showcase card", "library.js: the showcase's picture link in the Tab order and read out, a second stop repeating Details",
+      (LIBRARY_JS, '"lib-showcase-pic", href: `#${id}`, tabindex: "-1", "aria-hidden": "true"}', '"lib-showcase-pic", href: `#${id}`}'), killers=("test_library.",)),
+    m("S/showcase-card-back-card", "2026-11-15 showcase card", "library.js: Back to the grid takes the showcase's card, no link and no stop, for the link that opened its page",
+      (LIBRARY_JS, '      if (opener) state.opener = opener.querySelector(".lib-showcase-details") || opener;\n', '      if (opener) state.opener = opener;\n'),
+      killers=("test_library.",)),
+    m("S/showcase-detail-unchecked", "2026-11-15 showcase card", "library_write.py: showcase.json's line of detail free to be empty, long or of several lines",
+      (LIBRARY_WRITE, '("text", 140), ("detail", 140), ', '("text", 140), '), killers=("test_library.",)),
+)
+MUTANTS += SHOWCASE_CARD
+
+# The details window of 2026-11-15 (the user's request: "after we click for all cards to details, we may not jump to a new
+# page. lets bump our to a large window, and if you click the "x" of right top conrner, it will close and back show
+# lib"): a modal dialog over the grid, closed by its X, Escape or a press and release on its backdrop, to the grid's
+# place with no new history entry (back over the window's entries, or its own replaced) and no jump, the page behind
+# not scrolling (a scroll bar's width made up on its right), a sheet on a phone and on a short screen; and the review
+# of 2026-11-15's (Android's Back closing and opening it for ever, a double-click closing it, the bar's room left bright,
+# the facts' column narrowed, a landscape phone's cramped card, the dark sheet's frame).  Each killed alone by
+# test_library on a scratch copy; library_checks.py part_window sees each in the browser.
+LIBRARY_WINDOW = (
+    m("S/library-window-modeless", "2026-11-15 window", "library.js: the window opened with show(), not showModal() (no backdrop, the page behind not inert, "
+      "the focus free to leave it, Escape not its cancel)",
+      (LIBRARY_JS, "      WINDOW.showModal();\n", "      WINDOW.show();\n"), killers=("test_library.",)),
+    m("S/library-window-drag-closes", "2026-11-15 window", "library.js: a release over the backdrop closes the window whatever the press began on (a turn of "
+      "the 3D view dragged out of it closes it)",
+      (LIBRARY_JS, "      if (pressed && event.detail < 2 && outside(event)) closeWindow();\n", "      if (event.detail < 2 && outside(event)) closeWindow();\n"),
+      killers=("test_library.",)),
+    m("S/library-window-jump", "2026-11-15 window", "library.js: closing a window opened at its own address sets location.hash (a new entry, and the native "
+      "jump scrolls the grid under it to the place)",
+      (LIBRARY_JS, '    history.replaceState(null, "", `#${state.place}`);\n    route();\n', "    location.hash = state.place;\n"), killers=("test_library.",)),
+    m("S/library-window-page-scrolls", "2026-11-15 window", "library.css: the page behind the window scrolls while it is open (the wheel over the backdrop, a "
+      "swipe past the window's end)",
+      ("web/library.css", ":root:has(.lib-window[open]) { overflow:hidden; padding-right:var(--lib-bar,0px); }\n", ":root:has(.lib-window[open]) { padding-right:var(--lib-bar,0px); }\n"),
+      killers=("test_library.",)),
+    m("S/library-window-bar-always", "2026-11-15 window", "library.js: a scroll bar's width made up under the open window whether or not the bar takes room "
+      "(an overlay one's: the grid narrowed by a bar's width, its cards moving, as the window opens)",
+      (LIBRARY_JS, 'ROOT.style.setProperty("--lib-bar", `${Math.max(0, window.innerWidth - ROOT.clientWidth)}px`);', 'ROOT.style.setProperty("--lib-bar", "17px");'),
+      killers=("test_library.",)),
+    m("S/library-window-arrows-unset", "2026-11-15 window", "library.js: the rows' arrows not set as the grid is laid out (the UMI shelf's hidden though it "
+      "overflows, until a resize or a window closed)",
+      (LIBRARY_JS, "its arrows set).\n    state.syncs.forEach(sync => sync());\n", "its arrows set).\n"),
+      killers=("test_library.",)),
+    m("S/library-window-no-sheet", "2026-11-15 window", "library.css: on a phone the window a card within the gutters, not a sheet filling the screen",
+      ("web/library.css", "@media (max-width:734px), (max-height:500px) { .lib-window { width:100vw; height:100%; max-height:none; margin:0; border-radius:0; box-shadow:none; }\n",
+       "@media (max-width:734px), (max-height:500px) {\n"), killers=("test_library.",)),
+    # The review of 2026-11-15.
+    m("S/library-window-close-pushes", "2026-11-15 window review", "library.js: closing a window opened from the grid pushes the grid's place as a new entry "
+      "(with Android's Back a close request while it is open, each Back closes it and the next opens it again, for ever)",
+      (LIBRARY_JS, '    if (state.depth > 0) {\n      state.closing = state.place;\n      history.go(-state.depth);\n      return;\n    }\n    history.replaceState(null, "", `#${state.place}`);\n',
+       '    history.pushState(null, "", `#${state.place}`);\n'), killers=("test_library.",)),
+    m("S/library-window-close-twice", "2026-11-15 window review", "library.js: a close on its way asked again (a cancel the browser does not let be "
+      "cancelled, then its close event: two entries back, past the grid, out of the Library)",
+      (LIBRARY_JS, '    if (state.view !== "detail" || state.closing) return;\n', '    if (state.view !== "detail") return;\n'), killers=("test_library.",)),
+    m("S/library-window-depth-any-visit", "2026-11-15 window review", "library.js: an entry's depth believed after a reload (the grid's entry under it another "
+      "document's: the close reloads the Library at its top, the card neither in sight nor focused)",
+      (LIBRARY_JS, "state.depth = mark.visit === VISIT ? mark.depth || 0 : 0;", "state.depth = mark.depth || 0;"), killers=("test_library.",)),
+    m("S/library-window-pitch-unmarks", "2026-11-15 window review", "library.js: a pitch's, shape's or tip width's replaced address drops the entry's mark (Back "
+      "to it from a later window counts its depth anew, one too many: its close goes back past the grid)",
+      (LIBRARY_JS, '      history.replaceState(history.state, "", `#${target}`);\n', '      history.replaceState(null, "", `#${target}`);\n'), killers=("test_library.",)),
+    m("S/library-window-close-address", "2026-11-15 window review", "library.js: a close come back to the grid's entry leaves its address as it was (not the "
+      "window's place, as the page's back link's was)",
+      (LIBRARY_JS, '      history.replaceState(mark, "", `#${closing}`);\n      id = closing;\n', ""), killers=("test_library.",)),
+    m("S/library-window-close-as-back", "2026-11-15 window review", "library.js: a close come back to the grid's entry shows the grid as Back does (a window "
+      "reached by Back from a place typed over it focuses that place's card, not its own: the review of 2026-11-06's fault again)",
+      (LIBRARY_JS, "    showGrid(place && known ? $(place) : null, traversed && !closing);\n", "    showGrid(place && known ? $(place) : null, traversed);\n"),
+      killers=("test_library.",)),
+    m("S/library-window-double-click", "2026-11-15 window review", "library.js: a double-click's second click closes the window (a card double-clicked where "
+      "the backdrop then lies opens it and closes it at once)",
+      (LIBRARY_JS, "      if (pressed && event.detail < 2 && outside(event)) closeWindow();\n", "      if (pressed && outside(event)) closeWindow();\n"),
+      killers=("test_library.",)),
+    m("S/library-window-bar-gutter", "2026-11-15 window review", "library.css: the scroll bar's room kept by scrollbar-gutter (left bright beside the backdrop, "
+      "100vw and the page's gutter shrunk by it, the grid moving)",
+      ("web/library.css", ":root:has(.lib-window[open]) { overflow:hidden; padding-right:var(--lib-bar,0px); }\n", ":root:has(.lib-window[open]) { overflow:hidden; scrollbar-gutter:stable; }\n"),
+      killers=("test_library.",)),
+    m("S/library-window-seven-five", "2026-11-15 window review", "library.css: a sensor's page in the window 7 to 5 from 1280 px again (its facts' column 440 px "
+      "at 1440 px, its pills stacked)",
+      ("web/library.css", ".lib-detail-body { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);", ".lib-detail-body { display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr);"),
+      killers=("test_library.",)),
+    m("S/library-window-landscape", "2026-11-15 window review", "library.css: the sheet by width alone (a phone held sideways a card 306 px tall in the gutters)",
+      ("web/library.css", "@media (max-width:734px), (max-height:500px) { .lib-window {", "@media (max-width:734px) { .lib-window {"), killers=("test_library.",)),
+    m("S/library-window-sheet-hairline", "2026-11-15 window review", "library.css: the dark scheme's sheet keeps the window's hairline (a grey frame round the "
+      "phone's screen)",
+      ("web/library.css", '@media (max-width:734px), (max-height:500px) { :where(:root[data-theme="dark"]) .lib-window { box-shadow:none; } }\n', ""),
+      killers=("test_library.",)),
+)
+MUTANTS += LIBRARY_WINDOW
 
 
 # --------------------------------------------------------------------------

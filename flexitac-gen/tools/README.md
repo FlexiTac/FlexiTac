@@ -177,7 +177,9 @@ shapes and scene, `web/vendor/ufactory-g1/` and `web/library/`).
   scene, or shares a body out into components by rule (a connected
   component after welding at 0.01 mm, recognised by its box and triangle
   count; the triangles inside a box; the rest) or draws a plain shape the
-  model lacks; `library_looks/base.json` holds the base looks every part
+  model lacks (a box, a cylinder, or a prism: a convex profile drawn along
+  an axis, as the MakerMods Metal Arm's body drawn by eye after the maker's
+  photos, 2026-11-14); `library_looks/base.json` holds the base looks every part
   starts from.  It writes `web/library/bodies/<part>/<component>.stl`, the
   scene's bodies, `looks`, `part_look` and `smooth_deg`, and the bodies'
   rows of `NOTICE.md`; the same input gives the same bytes, from the

@@ -104,8 +104,9 @@ carrying the same board, or a mirror-image part carrying the mirror-image
 board, which is not the sensor's Gerbers; the finger nearer the viewer is
 see-through in both views and its sensor stays assembled, the other
 finger's sensor explodes into the gap; the MakerMods Metal Arm's two tips
-stand on a plain rail drawn by this project, not MakerMods hardware, with
-its steel guide rail, bores and end stops drawn over it by eye), the
+stand on a plain rail drawn by this project, not MakerMods hardware, and
+the rest of its body, the guide rail, housing and camera, is drawn by eye
+after the maker's photos too), the
 UMI finger and its tapered tips as the fingertip.  Each card shows it
 exploded; a sensor's page shows its picture and, drawn over it, the same
 scene in 3D to turn (drag it, or the arrow keys; 0 or a double click
@@ -543,8 +544,8 @@ it is published with `web/` by the static site and the public export.
 The Library's gripper parts, the bodies of its 3D view's grippers and their
 licence texts (Apache-2.0, MIT and BSD-3-Clause, from their pinned upstream
 commits; the Franka pad's hull, the UMI finger's tapered tips and the
-decimated bodies are modified files, so stated; the MakerMods rail is this
-project's own) are listed with
+decimated bodies are modified files, so stated; the MakerMods rail and
+body drawn round it are this project's own) are listed with
 their sources in [web/library/NOTICE.md](web/library/NOTICE.md); part names are
 their makers' trademarks, and FlexiTac is not affiliated with them.
 
