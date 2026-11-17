@@ -79,7 +79,7 @@ Pointed tip's page with none; `part_pictures`, `part_first_screen` and `part_pla
 shape's card; `part_pictures` wants the UMI shelf's cards' Assembled picture (1280 x 800, library.js `SHELF_VIEW`: the
 lead's review of the same day) and the grippers' Exploded card file, the first screen's 13 pictures 315 KB.
 `library_shots.grid_cards()` (the grid's 13 cards) takes each card's sensor, its first-screen sum the shelf's Assembled
-files; the sixteen new sensors
+files (each card's Exploded card file since the user's request of the same day, below); the sixteen new sensors
 were shot (`--only`) and Gen by Surface's figure pinned for them (`--pin-generator ID,...`), the 42 others' pictures,
 art and pins unchanged.  Since its review the same day the shelf is a grid (three to a row from 735 px, two below; no
 row, no arrows): `part_layout` checks its cards per row at every width, each its column's width inside the content's
@@ -88,6 +88,28 @@ whole in the window (`CARD_IN_WINDOW`; the row's gutters and its arrows' checks 
 finger shapes," whole; `part_pictures` each shelf card's picture framed on the fingertip (`TIP_FRAME`: scaled 2.2 times
 about 41 % 3 %, its box clipping it); `part_family` the shapes' pages titled by their cards ("UMI Fin-Ray Gripper,
 concave arc tip") and opened Assembled, as the Short taper's in `part_pictures`.
+
+The UMI shelf's cards aligned with the grippers' (the user's request of 2026-11-16: "图一中umicard图太大，确保你要和上面
+的card大小保持一致 ... 你做成和这个finger一样的空间角度，而且可以做成exploded ... 最上面的xarm gripper的空间朝向也要跟下面的这些
+家爪都对齐"): `part_layout` wants the shelf four to a row from 735 px (4 + 2) and two below, each UMI card and its
+picture's box a gripper card's size at every width (309 x 185.6 px of picture at 1440 px, 232.5 px cards at 1100,
+157.8 at 768, 167 at 390), its words on one line from 900 px and at most two below (four to a row from 735 px: 'Pick
+shape / and width' as the grippers' 'Franka / Hand'); `part_pictures` every card's Exploded card file filling its box
+(`TIP_FRAME` gone) and the Short taper's page opening Exploded, as `part_family` the shapes' pages; the new
+`part_aligned` reads each gripper's 2 mm sensor's and each UMI card's homes from the probe's stage (its home and up,
+`home_frame()`) in the drawing's own frame: 30 degrees above the plane across the approach axis, 65 (Exploded) and 57
+(Assembled) degrees off the face's normal, from the front, the face to the screen's left and the approach up, for all
+thirteen, and the UMI's explode 0.8; `part_view`'s UMI drawn after a gripper reports its home and no numbers.  The 30
+UMI sensors' pictures were shot again and the 28 grippers' to the same bytes (`--check`: 0 of them differ);
+`--check-generator` holds the look and the tint at Gen by Surface's homes and the pictures at the grippers'
+(docs/LIBRARY_VIEW.md "Parts without a scene"), and since the review of the same day the look and the tint at the
+grippers' homes too (its sixth comparison: the witness the part grey there, the rules' home alone served; nine drawings
+a sensor, about 25 s).  The showcase at the rules' camera, and since that review its near finger see-through as every
+gripper's (solid, it hid its own pad whole from there): `showcase_checks.py`'s `part_page` wants the stage's
+`see_through` `["mate"]` and both pads in sight (the boards' amber a share above 0.12 of the canvas's left half, 0.19 at
+the review, 0.07 with the near finger solid), and the shell and holders light and neutral (above 150 in every channel,
+at least 0.3 of the drawing, 0.42 at the review) where it held their near white (0.12, then 0.124 with the near holder
+ghosted: the shell's face reads a light grey from this side, a look for the user to judge).
 
 Run them from a virtual environment of your own (outside the project):
 

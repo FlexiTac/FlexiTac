@@ -614,11 +614,17 @@ class PoseTests(unittest.TestCase):
         for point in ((0.0, 0.0, 0.0), (10.0, -5.0, -60.0)):
             twin = (point[0], -25.8 - point[1], point[2])
             self.assertLess(math.dist(moved(part, point), moved(mirrored, twin)), 1e-9)
-        # The camera's override: from that side (front -1 with this part), within the rules' bounds, no finger see-through.
-        for mode in ("exploded", "assembled"):
-            self.assertTrue(library_write._camera(library_showcase.CAMERA[mode], whole=True), mode)
-            self.assertEqual(library_showcase.CAMERA[mode]["front"], -1)
-        self.assertEqual(library_showcase.SEE_THROUGH, [])
+        # The camera: the rules', the grippers' homes (the user's request of 2026-11-16: "最上面的xarm gripper的空间朝向也要跟
+        # 下面的这些家爪都对齐"; an override of its own, from the side without the logo, until then), and since the review of
+        # that day the near finger see-through as every gripper's (drawn solid, it hid its own pad whole from there).
+        self.assertFalse(hasattr(library_showcase, "CAMERA"))
+        scene = json.loads((WEB / "library" / "scenes" / "flexitac-g1.json").read_text(encoding="utf-8"))
+        self.assertNotIn("camera", scene)
+        self.assertIn("The camera is the rules', the grippers' homes", scene["about"])
+        self.assertIn("The near finger is drawn see-through, as every gripper's near finger is", scene["about"])
+        self.assertNotIn("No finger is drawn see-through", scene["about"])
+        self.assertEqual(library_showcase.SEE_THROUGH, ["mate"])
+        self.assertEqual(scene["see_through"], ["mate"])
 
     def test_the_scene_s_matrices_are_rigid_and_its_approach_the_fingers_way(self) -> None:
         approach = self.matrices["approach"]

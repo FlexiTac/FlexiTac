@@ -224,7 +224,9 @@ shapes and scene, `web/vendor/ufactory-g1/` and `web/library/`).
   steel, the screws' matte black, the fingers' orange TPU, the UMI rows'
   own `umi-tpu-orange`, the boards' yellow, the cables' white),
   chosen after photos of the real gripper and judged from both sides of
-  it, with a camera of its own and no finger see-through.  The sources are read
+  it, at the rules' camera (the grippers' homes, since 2026-11-16) with its
+  near finger see-through as every gripper's (since the review of that
+  day).  The sources are read
   from a folder given on the command line (`--sources DIR`) and never
   copied; a file that is not the pinned one (by SHA-256) is refused.  Every
   mesh it writes and every shape it draws is pinned by SHA-256 in

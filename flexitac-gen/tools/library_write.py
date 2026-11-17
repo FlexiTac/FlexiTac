@@ -258,20 +258,24 @@ SHOWCASE_SOURCE_WORDS = (("UFACTORY", "3D model"), ("FlexiTac", "CC BY-NC 4.0"))
 SHOWCASE_ALT = "The hand-designed FlexiTac sensor on both soft fingers of the xArm gripper"
 RESHOOT_SHOWCASE = "re-shoot with tools/browser/library_shots.py --showcase"
 # The stage's numbers of the showcase's shoot (showcase.json's "shot"."numbers"; the rules' table of
-# docs/LIBRARY_VIEW.md).  Four of the rules' checks hold of the showcase as of any gripper (SHOWCASE_RULED: a number, the
-# rule it is held to).  Three cannot: both its fingers are drawn solid and its pad's tails wrap behind its finger, so it
-# has bounds of its own for them (SHOWCASE_BOUNDS), each a little past what was measured (2026-11-13, the shoot of the
-# scene of that day, and the same scene with one finger see-through, by a route), so that a scene or a camera that
-# hides more of the pad is refused:
-# - assembled_opaque, how much of the far (sensor) finger's top FPC the solid bodies cover in Assembled: 0.19, its own
-#   tails behind its own finger and their ends under the extender board (0 with that finger see-through);
-# - opaque_max, the same of any layer in Exploded: 0.679, the near finger's own pad behind its own finger (0.017 with
-#   that finger see-through);
-# - near_seen, what is seen of the near finger's bottom FPC: 0.321, its straps on the side face (0.858 with that
-#   finger see-through).
+# docs/LIBRARY_VIEW.md).  Six of the rules' checks hold of the showcase as of any gripper (SHOWCASE_RULED: a number, the
+# rule it is held to).  The others cannot: its pad's tails wrap behind its finger.  Since the user's request of
+# 2026-11-16 the showcase is seen from the grippers' homes (the rules' camera, from the logo's side of the shell), where
+# the near finger's pad faces away from the camera, as every gripper's does; since the review of that day its near
+# finger is see-through as theirs (library_showcase.SEE_THROUGH), so that pad is seen through it as theirs is:
+# near_seen (0.891; 0.002 with the finger solid, which hid it whole) and ghost_cover (0.996) are held to the rules'
+# near_seen_min and ghost_cover_min.  Two bounds of its own (SHOWCASE_BOUNDS), each a little past what was measured
+# (2026-11-16, the shoot of the scene of the review), so that a scene or a camera that hides more of a pad is refused:
+# - assembled_opaque, how much of the far (sensor) finger's top FPC the solid bodies cover in Assembled: 0.613, its
+#   straps across the finger's side face away from the camera, its tails behind its own finger and their ends under
+#   the extender board; its field, on the face toward the camera, is seen whole;
+# - opaque_max, the same of any layer in Exploded: 0.508, the far finger's own straps and tails behind it (0.996 with
+#   the near finger solid).
+# (From the showcase's own camera of 2026-11-13 to 2026-11-16, the side of the shell without the logo, assembled_opaque,
+# opaque_max and near_seen had been 0.19, 0.679 and 0.321, held below 0.25, below 0.75 and at least 0.25.)
 SHOWCASE_RULED = (("visible_min", "layer_visible_min"), ("clearance_mm", "clearance_min_mm"), ("stacks_apart_px", "stacks_apart_min_px"),
-                  ("card_px", "card_min_px"))
-SHOWCASE_BOUNDS = (("assembled_opaque", "below", 0.25), ("opaque_max", "below", 0.75), ("near_seen", "at least", 0.25))
+                  ("card_px", "card_min_px"), ("near_seen", "near_seen_min"), ("ghost_cover", "ghost_cover_min"))
+SHOWCASE_BOUNDS = (("assembled_opaque", "below", 0.65), ("opaque_max", "below", 0.55))
 # How the lines of a stale showcase end (each says its own fix: REBUILD_SHOWCASE or RESHOOT_SHOWCASE).
 SHOWCASE_STALE = "the showcase is stale: tools/library_showcase.py writes its scene, tools/browser/library_shots.py --showcase its pictures"
 
@@ -1022,11 +1026,17 @@ FINGERS = ("sensor", "mate")
 # env_intensity of 0 or more; a name is LOOK_NAME (lower case, digits, hyphens).  A crease angle is SMOOTH_BOUNDS degrees.
 # The rules' "part_pad" (the user's decision of 2026-11-14 on the UMI pad, "you can do it darken") is the tint the
 # assembled sensor's pad takes on a part the rules give a look: PAD_KEYS, its colour as a look's, its opacity a number
-# above 0 and at most 1.
+# above 0 and at most 1.  The rules' "part_homes" (the user's request of 2026-11-16: the UMI finger seen as the grippers'
+# fingers are, "这样所有card都是对齐的，大小对齐，空间朝向对齐") is {part or family: HOME_KEYS}: the part drawn at the
+# grippers' homes (the rules' camera), its camera's up "approach" (a unit vector in the part's file axes, the fingers'
+# approach axis as a scene's), its stack exploded "explode_share" (HOME_EXPLODE_BOUNDS) of the boards' narrower side a
+# layer; without it the part is at Gen by Surface's figure's homes.
 SCENE_OPTIONAL = ("camera", "explode", "looks", "part_look", "smooth_deg")
 BODY_OPTIONAL = ("look",)
-RULES_OPTIONAL = ("looks", "part_looks", "part_smooth_deg", "part_pad")
+RULES_OPTIONAL = ("looks", "part_looks", "part_smooth_deg", "part_pad", "part_homes")
 PAD_KEYS = ("color", "opacity")
+HOME_KEYS = ("approach", "explode_share")
+HOME_EXPLODE_BOUNDS = (0.3, 1.2)
 LOOK_NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 LOOK_COLOR = re.compile(r"#[0-9a-f]{6}")
 LOOK_KEYS = ("color", "metalness", "roughness")
@@ -1106,22 +1116,30 @@ def part_look(index: dict, parts: dict, part_id: str):
     """The look scenes.json's rules give a part without a scene (the UMI finger and its tapered tips; docs/LIBRARY_VIEW.md
     "The looks"): {"look": the look, "smooth_deg": the rules' part_smooth_deg or None}, by the part's id, else by its
     family's, in the rules' "part_looks" (a name of the rules' "looks", or the look itself), and "pad": the rules'
-    part_pad where they have one (the assembled pad's tint: its pictures are of it too); None without a rule (the part
-    as Gen by Surface draws it) and for a gripper (its scene's looks)."""
+    part_pad where they have one (the assembled pad's tint: its pictures are of it too), and "home": the rules'
+    part_homes of the part (by its id, else its family's) with the rules' camera where they give one (the grippers'
+    homes, since 2026-11-16: its pictures are of it too); None without a rule (the part as Gen by Surface draws it) and
+    for a gripper (its scene's looks)."""
 
     rules = index.get("rules") if isinstance(index, dict) else None
-    named = (rules or {}).get("part_looks")
-    if not isinstance(named, dict) or part_id in (index.get("scenes") or {}):
+    if not isinstance(rules, dict) or part_id in (index.get("scenes") or {}):
         return None
     family = parts["parts"].get(part_id, {}).get("family")
-    chosen = named.get(part_id, named.get(family) if family else None)
-    if chosen is None:
-        return None
-    look = (rules.get("looks") or {}).get(chosen) if isinstance(chosen, str) else chosen
-    given = {"look": look, "smooth_deg": rules.get("part_smooth_deg")}
-    if rules.get("part_pad") is not None:
-        given["pad"] = rules["part_pad"]
-    return given
+
+    def given_for(key):
+        named = rules.get(key)
+        return named.get(part_id, named.get(family) if family else None) if isinstance(named, dict) else None
+
+    chosen, home = given_for("part_looks"), given_for("part_homes")
+    given = {}
+    if chosen is not None:
+        look = (rules.get("looks") or {}).get(chosen) if isinstance(chosen, str) else chosen
+        given = {"look": look, "smooth_deg": rules.get("part_smooth_deg")}
+        if rules.get("part_pad") is not None:
+            given["pad"] = rules["part_pad"]
+    if home is not None:
+        given["home"] = dict(home, camera=rules.get("camera"))
+    return given or None
 
 
 def part_look_sha256(given) -> str | None:
@@ -1377,6 +1395,20 @@ def _index_problems(index) -> list:
             found.append(f"{SCENES_INDEX}: its rule part_pad ({pad!r}) is not a tint: an sRGB #rrggbb in lower case and an opacity above 0 and at most 1")
         if "part_looks" not in rules:
             found.append(f"{SCENES_INDEX}: its rule part_pad without part_looks")
+    # The grippers' homes for those parts (the user's request of 2026-11-16): {part or family: {approach, explode_share}}.
+    if "part_homes" in rules:
+        homes = rules["part_homes"]
+        if not (isinstance(homes, dict) and homes and all(isinstance(key, str) for key in homes)):
+            found.append(f"{SCENES_INDEX}: its rule part_homes is not a map of parts (or families) to homes")
+            homes = {}
+        for key, home in homes.items():
+            approach = home.get("approach") if isinstance(home, dict) else None
+            share = home.get("explode_share") if isinstance(home, dict) else None
+            if not (isinstance(home, dict) and sorted(home) == list(HOME_KEYS) and isinstance(approach, list) and len(approach) == 3
+                    and all(_number(value) for value in approach) and abs(math.fsum(value * value for value in approach) - 1) <= UNIT_TOL
+                    and _number(share) and HOME_EXPLODE_BOUNDS[0] <= share <= HOME_EXPLODE_BOUNDS[1]):
+                found.append(f"{SCENES_INDEX}: its rule part_homes: the home of {key} ({home!r}) is not {{approach: a unit vector, "
+                             f"explode_share: {HOME_EXPLODE_BOUNDS[0]} to {HOME_EXPLODE_BOUNDS[1]}}}")
     return found
 
 
@@ -1906,6 +1938,10 @@ def scenes(parts: dict, library: Path = LIBRARY) -> tuple:
         if key not in plain | families:
             problems.append((None, f"{SCENES_INDEX}: its rule part_looks names {key!r}, not a part without a scene or its family "
                                    f"(a gripper's look is its scene's)"))
+    for key in sorted(rules["part_homes"]) if isinstance(rules.get("part_homes"), dict) else ():
+        if key not in plain | families:
+            problems.append((None, f"{SCENES_INDEX}: its rule part_homes names {key!r}, not a part without a scene or its family "
+                                   f"(a gripper's home is its scene's)"))
     notice = (library / "NOTICE.md").read_text(encoding="utf-8") if (library / "NOTICE.md").is_file() else ""
     rows = {row[0]: row for row in NOTICE_ROW.findall(notice)}
     keys = re.compile(r"\b(" + "|".join(re.escape(part_id.replace("-", "_")) for part_id in parts["parts"]) + r")\b")

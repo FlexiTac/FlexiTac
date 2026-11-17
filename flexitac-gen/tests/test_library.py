@@ -339,8 +339,9 @@ def _json(path: Path):
 
 
 def shelf_cards(entries: dict) -> list:
-    """The sensors of grid_cards() on a shelf (the UMI finger's: its own card's and its families' cards'), whose cards show
-    their Assembled picture (library.js SHELF_VIEW, the lead's review of the UMI shelf's shapes, 2026-11-16)."""
+    """The sensors of grid_cards() on a shelf (the UMI finger's: its own card's and its families' cards'), whose cards
+    showed their Assembled picture from the lead's review of the UMI shelf's shapes to the user's request of the same
+    day, 2026-11-16 (library.js SHELF_VIEW), and show their Exploded card file since, as every card."""
     shelved = {"umi-finray"} | {family["shelf"] for family in entries["families"].values()}
     return grid_cards(entries)[sum(1 for part in entries["order"] if part not in shelved):]
 
@@ -419,7 +420,13 @@ APPROVED_RULES = {"gap_share": 0.42, "min_step_mm": 2, "ghost_opacity": 0.28, "m
                   # Their assembled sensor's pad over the film in the photos' dark olive-brown (the user's decision of
                   # 2026-11-14, "you can do it darken": the amber top board had read as one block with the orange finger),
                   # a tint tuned in the stage against flexitac.github.io's photo of the built sensor (docs/LIBRARY_VIEW.md).
-                  "part_pad": {"color": "#545a3a", "opacity": 0.65}}
+                  "part_pad": {"color": "#545a3a", "opacity": 0.65},
+                  # At the grippers' homes (the user's request of 2026-11-16: "你做成和这个finger一样的空间角度，而且可以做成
+                  # exploded"): the camera's up the finger's length toward its tip (-z of its file), the rules' camera, its
+                  # stack exploded 0.8 of the boards' narrower side a layer (Gen by Surface's 0.55 left the bottom FPC against
+                  # the finger's face from there).
+                  "part_homes": {"umi-finray": {"approach": [0, 0, -1], "explode_share": 0.8},
+                                 "umi-tapers": {"approach": [0, 0, -1], "explode_share": 0.8}}}
 # The near finger (the mate) see-through on every gripper (the user's decision of 2026-11-06).
 SEE_THROUGH = {"franka-hand": ["mate"], "widowx-250": ["mate"], "trossen-widowx-ai": ["mate"], "arx-x5": ["mate"], "i2rt-yam": ["mate"],
                "unitree-dex1": ["mate"], "makermods-metal": ["mate"]}
@@ -738,9 +745,9 @@ class FileTests(LibraryTestCase):
         size = sum(path.stat().st_size for path in shots)
         self.assertLessEqual(size, SHOTS_BUDGET_BYTES, f"web/library/shots/ and showcase/ are {size} bytes")
         # The grid's first screen: every card's picture, the showcase's large card's with them (it is the first); the UMI
-        # shelf's cards their Assembled picture's full file since 2026-11-16 (shelf_cards()).
-        shelf = set(shelf_cards(self.entries))
-        first = sum((LIBRARY / (image["assembled"]["src"] if identifier in shelf else image["exploded"]["card"])).stat().st_size
+        # shelf's cards their Exploded card file as every card's (their Assembled picture's full file for part of
+        # 2026-11-16: shelf_cards()).
+        first = sum((LIBRARY / image["exploded"]["card"]).stat().st_size
                     for identifier in grid_cards(self.entries) for image in [self.entries["variants"][identifier]["image"]] if image)
         first += (LIBRARY / _json(LIBRARY / SHOWCASE_FILE)["image"]["card"]["src"]).stat().st_size
         self.assertLessEqual(first, FIRST_SCREEN_BYTES, f"the grid's first screen's pictures are {first} bytes")
@@ -1152,16 +1159,111 @@ class PictureTests(LibraryTestCase):
         self.assertEqual(tool.PAD_SHARE_MIN, 0.05)
         with self.assertRaises(tool.ShotError):
             tool.pad_differences(look, look, other[:-4])
-        # Served: the look with its pad for the one part (the pictures'), or without it (the fourth comparison's).
+        # Served: the look with its pad and its home for the one part (the pictures'), or without its home (the fifth
+        # comparison's, at the figure's homes), or without both (the fourth comparison's).
         index = _json(LIBRARY / library_write.SCENES_INDEX)
         given = library_write.part_look(index, self.parts, "umi-finray")
         self.assertEqual(given["pad"], index["rules"]["part_pad"])
         served = json.loads(tool.served_scenes(index, "umi-finray", given))["rules"]
         self.assertEqual((served["part_looks"], served["part_pad"]), ({"umi-finray": given["look"]}, given["pad"]))
         self.assertEqual(library_write.part_look(json.loads(tool.served_scenes(index, "umi-finray", given)), self.parts, "umi-finray"), given)
-        self.assertEqual(tool.unpadded(given), {"look": given["look"], "smooth_deg": None})
-        self.assertNotIn("part_pad", json.loads(tool.served_scenes(index, "umi-finray", tool.unpadded(given)))["rules"])
+        self.assertEqual(tool.without(given, "pad", "home"), {"look": given["look"], "smooth_deg": None})
+        self.assertNotIn("part_pad", json.loads(tool.served_scenes(index, "umi-finray", tool.without(given, "pad", "home")))["rules"])
         self.assertNotIn("part_pad", json.loads(tool.served_scenes(index, "umi-finray", None))["rules"])
+        self.assertEqual(library_write.part_look(json.loads(tool.served_scenes(index, "umi-finray", tool.without(given, "home"))), self.parts, "umi-finray"),
+                         tool.without(given, "home"))
+        # The fourth and fifth comparisons at the figure's homes (the rules' home served away: the figure, the witness, is
+        # at its own angle), the third the pictures as the rules are (at the grippers' homes).
+        source = inspect.getsource(tool.check_generator)
+        self.assertIn('dressed = twice(identifier, lambda: viewed(without(given, "home"))) if homed else looked', source)
+        self.assertIn('alone = twice(identifier, lambda: viewed(without(given, "pad", "home"))) if given and given.get("pad") is not None else dressed', source)
+        self.assertIn('other = (twice(identifier, lambda: viewed(dict(without(given, "pad", "home"), look=other_look(given["look"]))))', source)
+        self.assertIn('padded = {mode: pad_differences(rgba(alone[mode]["png"]), rgba(dressed[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}', source)
+        self.assertIn("pictures, _ = encode(looked)", source)
+        # The sixth (the review of 2026-11-16: the look and the tint held at the pictures' own homes too, which a visitor
+        # sees): at the grippers' homes, the witness the part grey there, the rules' home alone served (aimed, no look),
+        # the look without the tint and in the other colour against it, the pictures' view (looked) against the look
+        # without the tint.
+        witness = {"home": given["home"]}
+        self.assertIsNotNone(given["home"])
+        rules = json.loads(tool.served_scenes(index, "umi-finray", witness))["rules"]
+        self.assertEqual(rules["part_homes"], {"umi-finray": {key: value for key, value in given["home"].items() if key != "camera"}})
+        self.assertNotIn("part_looks", rules)
+        self.assertNotIn("part_pad", rules)
+        self.assertEqual(library_write.part_look(json.loads(tool.served_scenes(index, "umi-finray", witness)), self.parts, "umi-finray"), witness,
+                         "the witness has a home and no look: the grey part aimed")
+        self.assertIn("if homed and other is not None:", source)
+        self.assertIn('aimed = twice(identifier, lambda: viewed({"home": given["home"]}))', source)
+        self.assertIn('aimed_alone = twice(identifier, lambda: viewed(without(given, "pad"))) if given.get("pad") is not None else looked', source)
+        self.assertIn('aimed_other = twice(identifier, lambda: viewed(dict(without(given, "pad"), look=other_look(given["look"]))))', source)
+        self.assertIn('counted = {mode: view_differences(rgba(aimed[mode]["png"]), rgba(aimed_alone[mode]["png"]), rgba(aimed_other[mode]["png"])) for mode in MODES}', source)
+        self.assertIn('padded = {mode: pad_differences(rgba(aimed_alone[mode]["png"]), rgba(looked[mode]["png"]), rgba(aimed_other[mode]["png"])) for mode in MODES}', source)
+        self.assertEqual(source.count("at the grippers' homes: {problem}"), 2)
+
+    def test_the_umi_finger_takes_the_grippers_homes(self) -> None:
+        # The user's request of 2026-11-16 ("你做成和这个finger一样的空间角度，而且可以做成exploded,这样所有card都是对齐的，
+        # 大小对齐，空间朝向对齐"): scenes.json's rules give the UMI finger and its tips the grippers' homes (part_homes:
+        # the camera's up the fingers' approach axis, the finger's length toward its tip, -z in its file; its stack
+        # exploded 0.8 of the boards' narrower side a layer), drawn by the rules' camera as every gripper is (no gripper's
+        # scene overrides it).  Gen by Surface keeps its own figure (onpart.js, drape.js: untouched).
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        rules = index["rules"]
+        home = {"approach": [0, 0, -1], "explode_share": 0.8}
+        self.assertEqual(rules["part_homes"], {"umi-finray": home, "umi-tapers": home})
+        self.assertEqual(rules["camera"], {"exploded": {"tilt_deg": 65, "elevation_deg": 30, "front": 1}, "assembled": {"tilt_deg": 57, "elevation_deg": 30, "front": 1}})
+        for part in index["scenes"]:
+            with self.subTest(part=part):
+                self.assertNotIn("camera", _json(LIBRARY / index["scenes"][part]), "a gripper at the rules' camera")
+        # The finger's file: its length along z, its tip at the far end of -z, its face the x = 0 plane (the fit's base on it).
+        for part_id in ("umi-finray", "umi-pointed-tip2"):
+            corners = [corner for triangle in _stl_triangles((LIBRARY / self.parts["parts"][part_id]["mesh"]["file"]).read_bytes()) for corner in triangle]
+            low = [min(corners[axis::3]) for axis in range(3)]
+            high = [max(corners[axis::3]) for axis in range(3)]
+            self.assertEqual(max(range(3), key=lambda axis: high[axis] - low[axis]), 2, part_id)
+            self.assertAlmostEqual(high[2], 0, places=3)
+            self.assertLess(low[2], -120)
+        # Each sensor's record's hash holds its home (part_look(): a changed home makes its pictures stale), the rules'
+        # camera with it; a gripper has none (its scene's), and the home is the family's for a tip.
+        given = library_write.part_look(index, self.parts, "umi-convex-tip9.8")
+        self.assertEqual(given["home"], dict(home, camera=rules["camera"]))
+        self.assertIsNone(library_write.part_look(index, self.parts, "franka-hand"))
+        # The writer refuses a home that is not one: no unit approach, an explode out of bounds, other keys, a gripper's.
+        self.assertEqual(library_write.HOME_KEYS, ("approach", "explode_share"))
+        self.assertEqual(library_write.HOME_EXPLODE_BOUNDS, (0.3, 1.2))
+        self.assertEqual(library_write._index_problems(index), [])
+        for broken in ({"approach": [0, 0, -2], "explode_share": 0.8}, {"approach": [0, -1], "explode_share": 0.8}, {"approach": [0, 0, -1], "explode_share": 1.5},
+                       {"approach": [0, 0, -1]}, dict(home, camera=rules["camera"])):
+            with self.subTest(home=broken):
+                spoiled = json.loads(json.dumps(index))
+                spoiled["rules"]["part_homes"]["umi-finray"] = broken
+                self.assertEqual(len(library_write._index_problems(spoiled)), 1)
+        spoiled = json.loads(json.dumps(index))
+        spoiled["rules"]["part_homes"]["franka-hand"] = home
+        with tempfile.TemporaryDirectory() as folder:
+            library = Path(folder) / "library"
+            (library / "scenes").mkdir(parents=True)
+            (library / library_write.SCENES_INDEX).write_text(json.dumps(spoiled), encoding="utf-8")
+            problems = [message for _, message in library_write.scenes(self.parts, library)[1]]
+        self.assertIn(f"{library_write.SCENES_INDEX}: its rule part_homes names 'franka-hand', not a part without a scene or its family "
+                      "(a gripper's home is its scene's)", problems)
+        # The view: library_view.js hands the stage the rules' home of a part without a scene, and the stage aims it.
+        view = (WEB / "cad" / "library_view.js").read_text(encoding="utf-8")
+        stage = (WEB / "cad" / "library_stage.js").read_text(encoding="utf-8")
+        self.assertIn("const home = rules?.part_homes?.[partId] ?? (family ? rules?.part_homes?.[family] : undefined);", view)
+        self.assertIn("return {approach, explode_share: share, camera: rules.camera};", view)
+        self.assertIn("partLook: own?.look ?? null, partHome: own?.home ?? null", view)
+        self.assertIn("if (args.partHome) aim(args.stack, args.partHome, args.positions);", stage)
+        aim = stage[stage.index("    function aim(stack, home, positions) {"):stage.index("    function prepare(stack, given, positions) {")]
+        self.assertIn("const up = new THREE.Vector3(...home.approach).transformDirection(P);", aim)
+        self.assertIn("view.homes = {exploded: direction(home.camera.exploded, up, normal).toArray(), assembled: direction(home.camera.assembled, up, normal).toArray()};", aim)
+        self.assertIn("camera.up.copy(up);", aim)
+        self.assertIn("const step = home.explode_share * stack.width_mm;", aim)
+        self.assertIn("sample(positions, P, 3000, points);", aim)
+        # The studio rolled and the film's lamp aimed at the camera as a gripper's stack 1 (onBeforeRender), and defaults()
+        # takes the home down for the next drawing.
+        self.assertIn("if (aimed && !state.extras && view.stack) {", stage)
+        self.assertIn("lampAt(one, new THREE.Vector3(0, 0, 1), aimed.lamp);", stage)
+        self.assertIn("state.aimed = null;", stage[stage.index("    function defaults() {"):stage.index("    function aim(")])
 
     def test_a_picture_is_a_webp_with_alpha_of_its_size(self) -> None:
         info = library_write.webp_info
@@ -1576,9 +1678,9 @@ class SceneTests(LibraryTestCase):
         cases = (
             (lambda index: index.update(format="x"), "scenes/scenes.json: the format is 'x', not flexitac-library-scenes/v1"),
             (lambda index: index["rules"].pop("ghost_opacity"), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, "
-             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad)"),
+             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad, part_homes)"),
             (lambda index: index["rules"].pop("explode_stacks"), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, "
-             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad)"),
+             "gap_share, ghost_opacity, measure_px, min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad, part_homes)"),
             (lambda index: index["rules"].update(gap_share=-1), "scenes/scenes.json: its rule gap_share (-1) is not a positive number"),
             (lambda index: index["rules"]["camera"]["exploded"].update(tilt_deg=80), "scenes/scenes.json: its rules' camera is not {exploded, assembled} each of elevation_deg, front, tilt_deg within their bounds"),
             (lambda index: index["rules"]["checks"].pop("card_min_px"), "scenes/scenes.json: its rules' checks are not card_min_px, clearance_min_mm, ghost_cover_min, "
@@ -1730,7 +1832,8 @@ class SceneTests(LibraryTestCase):
                          "a body's own geometry, the still stack's two and the pad's own; never the part's drawn geometry")
         self.assertNotIn("map.dispose()", stage, "the pad's texture is the film's, the figure's to dispose")
         self.assertNotRegex(stage, r"\bSTUDIO\.(room|panels)\b|LIGHTS\b|toneMapping", "studio.js's own numbers are not the stage's to change")
-        self.assertIn("partLook: given || placed ? null : partLookOf(rules, variant.part, part.family)", view)
+        self.assertIn("const own = given || placed ? null : {look: partLookOf(rules, variant.part, part.family), home: partHomeOf(rules, variant.part, part.family)};", view)
+        self.assertIn("partLook: own?.look ?? null, partHome: own?.home ?? null", view)
         self.assertIn("scenePath || placed ? null : rulesOf(base)", view)
         self.assertIn("pad: rules.part_pad || null};", view)
 
@@ -1752,7 +1855,7 @@ class SceneTests(LibraryTestCase):
 
         orange = {"color": "#e85a1c", "metalness": 0, "roughness": 0.85, "env_intensity": 0.3}
         index = _json(LIBRARY / library_write.SCENES_INDEX)
-        self.assertEqual(library_write.RULES_OPTIONAL, ("looks", "part_looks", "part_smooth_deg", "part_pad"))
+        self.assertEqual(library_write.RULES_OPTIONAL, ("looks", "part_looks", "part_smooth_deg", "part_pad", "part_homes"))
         self.assertEqual((index["rules"]["looks"], index["rules"]["part_looks"]),
                          ({"umi-tpu-orange": orange}, {"umi-finray": "umi-tpu-orange", "umi-tapers": "umi-tpu-orange"}))
         self.assertNotIn("part_smooth_deg", index["rules"], "flat facets, as Gen by Surface draws the part")
@@ -1782,7 +1885,7 @@ class SceneTests(LibraryTestCase):
             (dict(looks=None, part_looks={"umi-finray": orange}, part_smooth_deg=120), "scenes/scenes.json: its rule part_smooth_deg (120) is not a crease angle of 1 to 90 degrees"),
             (dict(looks=None, part_looks=None, part_pad=None, part_smooth_deg=35), "scenes/scenes.json: its rule part_smooth_deg without part_looks"),
             (dict(colours={}), "scenes/scenes.json: its rules have not the keys camera, checks, depth_tol_mm, explode_stacks, gap_share, ghost_opacity, measure_px, "
-                               "min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad)"),
+                               "min_step_mm, see_through_modes (and any of looks, part_looks, part_smooth_deg, part_pad, part_homes)"),
         )
         for changes, problem in cases:
             with self.subTest(problem=problem):
@@ -1791,15 +1894,18 @@ class SceneTests(LibraryTestCase):
         self.assertEqual(self.problems(rules_edit(looks=None, part_looks={"franka-hand": orange})),
                          [(None, "scenes/scenes.json: its rule part_looks names 'franka-hand', not a part without a scene or its family (a gripper's look is its scene's)")])
         # part_look(): the part's id before its family's, a gripper none; its hash the record's.  The committed rules:
-        # the finger by its id, each tip by its family, in the one orange, flat, with the pad's tint (part_pad: below).
+        # the finger by its id, each tip by its family, in the one orange, flat, with the pad's tint (part_pad: below) and,
+        # since 2026-11-16, at the grippers' homes (part_homes, with the rules' camera: test_the_umi_finger_takes_the_grippers_homes).
         pad = index["rules"]["part_pad"]
+        home = dict(index["rules"]["part_homes"]["umi-finray"], camera=index["rules"]["camera"])
         for part_id in ("umi-finray", "umi-convex-tip5.8", "umi-trap-tip21.8"):
             with self.subTest(part=part_id):
-                self.assertEqual(library_write.part_look(index, self.parts, part_id), {"look": orange, "smooth_deg": None, "pad": pad})
+                self.assertEqual(library_write.part_look(index, self.parts, part_id), {"look": orange, "smooth_deg": None, "pad": pad, "home": home})
         self.assertIsNone(library_write.part_look(index, self.parts, "franka-hand"))
         index["rules"].update(looks={"tpu-orange": orange, "tip": dict(orange, roughness=0.5)}, part_looks={"umi-tapers": "tpu-orange", "umi-trap-tip5.8": "tip"},
                               part_smooth_deg=35)
         index["rules"].pop("part_pad")
+        index["rules"].pop("part_homes")
         self.assertEqual(library_write.part_look(index, self.parts, "umi-convex-tip5.8"), {"look": orange, "smooth_deg": 35})
         self.assertEqual(library_write.part_look(index, self.parts, "umi-trap-tip5.8"), {"look": dict(orange, roughness=0.5), "smooth_deg": 35})
         self.assertIsNone(library_write.part_look(index, self.parts, "umi-finray"))
@@ -1979,14 +2085,13 @@ class ShowcaseTests(LibraryTestCase):
         umi = self.parts["parts"]["umi-finray"]
         self.assertEqual((scene["format"], scene["part"], scene["part_mesh_sha256"], scene["frame"]),
                          ("flexitac-library-scene/v1", "umi-finray", umi["mesh"]["sha256"], "the part's file axes, mm"))
-        # Both fingers solid (the showcase is the gripper as built; from its camera the near finger hides nothing of the
-        # far one's pad), seen by a camera of its own: from the side of the shell's face without the logo (front -1 with
-        # the part the left finger), 60 degrees off the pad's normal, 20 degrees up; exploded 70 off and 40 up, the
-        # lifted layers seen apart (the verification of 2026-11-13: edge-on at the Assembled camera).
-        self.assertEqual((scene["mate"]["kind"], scene["mate"]["part"], scene["see_through"]), ("mirror", True, []))
+        # Seen by the rules' camera, the grippers' homes (the user's request of 2026-11-16: "最上面的xarm gripper的空间朝向也要
+        # 跟下面的这些家爪都对齐"; a camera of its own until then, from the side of the shell's face without the logo, 60
+        # degrees off the pad's normal and 20 up, exploded 70 off and 40 up), its near finger see-through as every
+        # gripper's since the review of that day (both solid before: from its own camera the near finger hid nothing).
+        self.assertEqual((scene["mate"]["kind"], scene["mate"]["part"], scene["see_through"]), ("mirror", True, ["mate"]))
         self.assertAlmostEqual(library_write.determinant(scene["mate"]["matrix"]), -1, places=8)
-        self.assertEqual(scene["camera"], {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1},
-                                           "assembled": {"tilt_deg": 60, "elevation_deg": 20, "front": -1}})
+        self.assertNotIn("camera", scene)
         # Twice the holder (the sensor finger's, the gripper's left: HandUMI's right one as its mirror image; then the
         # mate's, as it is), then the vendor's twelve, then the shapes the project draws: the shell's twelve screws,
         # each holder's three bolt heads and three nuts, the block in the top slot, and behind each finger the extender
@@ -2047,7 +2152,7 @@ class ShowcaseTests(LibraryTestCase):
         for words in ("hand-designed", "the property of UFACTORY", "project owner's decision of 2026-11-12", "Apache-2.0", "handumi-hw 1448278",
                       "drawn as the mirror image", "as the Tactile Demo draws it", "The gripper as built differs there",
                       "the Library's base looks", "looks of the showcase's own", "Drawn by the project", "no vendor's geometry",
-                      "for this reason", "the gripper's left finger", "is not drawn", "which no photo shows",
+                      "The camera is the rules', the grippers' homes", "the gripper's left finger", "is not drawn", "which no photo shows",
                       "each tail's end in one of its two sockets", "one small board for each tail", "each judged from both sides"):
             with self.subTest(about=words):
                 self.assertIn(words, scene["about"])
@@ -2497,7 +2602,9 @@ class ShowcasePageTests(LibraryTestCase):
                 self.assertLessEqual(abs(left - right), 1)
                 self.assertLessEqual(abs(top - bottom), 1)
         self.assertTrue(53 < shot["numbers"]["jaw_gap_mm"] < 55, "the two pads' faces: their centres 55 mm apart")
-        self.assertIsNone(shot["numbers"]["ghost_cover"], "no finger is see-through")
+        # The near finger see-through as every gripper's (since the review of 2026-11-16; solid before, ghost_cover None).
+        self.assertGreaterEqual(shot["numbers"]["ghost_cover"], 0.02, "the near finger is see-through")
+        self.assertGreaterEqual(shot["numbers"]["near_seen"], 0.5, "the near finger's pad is seen through it")
         self.assertTrue((LIBRARY / SHOWCASE_FILE).read_text(encoding="utf-8").isascii())
         self.assertEqual((LIBRARY / SHOWCASE_FILE).read_text(encoding="utf-8"), library_write.showcase_text(document))
 
@@ -2644,25 +2751,36 @@ class ShowcasePageTests(LibraryTestCase):
 
     def test_its_stage_numbers_hold_the_rules_and_its_own_bounds(self) -> None:
         # The stage's numbers recorded with the pictures (the review of 2026-11-12: no gate looked at them, so a scene or
-        # a camera that hid the pad would pass): four held to the rules' checks as any gripper's, three to the
-        # showcase's own bounds (its fingers solid, its tails behind its finger); the committed ones within all.
+        # a camera that hid the pad would pass): six held to the rules' checks as any gripper's, two to the showcase's own
+        # bound (its tails behind its finger); the committed ones within all.  Since the user's request of 2026-11-16 the
+        # showcase is at the grippers' homes, where the near finger's pad faces away behind its own finger; since the
+        # review of that day that finger is see-through as every gripper's, so near_seen and ghost_cover are held to the
+        # rules as a gripper's (drawn solid, it hid that pad whole: near_seen 0.002, opaque_max 0.996, which the builder
+        # had left unbounded), opaque_max to a bound of its own again (three bounds from its own camera before).
         name = SHOWCASE_FILE
         numbers = _json(LIBRARY / SHOWCASE_FILE)["shot"]["numbers"]
         rules = _json(LIBRARY / library_write.SCENES_INDEX)["rules"]
         self.assertEqual(library_write.showcase_numbers(numbers, rules), [])
-        self.assertEqual([key for key, _ in library_write.SHOWCASE_RULED], ["visible_min", "clearance_mm", "stacks_apart_px", "card_px"])
-        self.assertEqual(library_write.SHOWCASE_BOUNDS, (("assembled_opaque", "below", 0.25), ("opaque_max", "below", 0.75), ("near_seen", "at least", 0.25)))
+        self.assertEqual([key for key, _ in library_write.SHOWCASE_RULED],
+                         ["visible_min", "clearance_mm", "stacks_apart_px", "card_px", "near_seen", "ghost_cover"])
+        self.assertEqual(library_write.SHOWCASE_BOUNDS, (("assembled_opaque", "below", 0.65), ("opaque_max", "below", 0.55)))
         bounds = "(the scene or its camera hides the pad, or the bounds are no longer the showcase's: SHOWCASE_BOUNDS)"
         cases = (
             ({"visible_min": 0.2}, "the stage's visible_min is 0.2, not at least 0.25"),
             ({"clearance_mm": {"bodies": 2, "other_finger": 12, "stacks": 30.9}}, "the stage's clearance_mm is [2, 12, 30.9], not at least 3"),
             ({"stacks_apart_px": 19}, "the stage's stacks_apart_px is 19, not at least 20"),
             ({"card_px": [82, 19]}, "the stage's card_px is [82, 19], not at least 20"),
-            ({"assembled_opaque": 0.25}, "the stage's assembled_opaque is 0.25, not below 0.25"),
-            ({"opaque_max": 0.8}, "the stage's opaque_max is 0.8, not below 0.75"),
-            ({"near_seen": 0.2}, "the stage's near_seen is 0.2, not at least 0.25"),
-            ({"near_seen": None}, "the stage's near_seen is None, not at least 0.25"),
+            ({"near_seen": 0.002}, "the stage's near_seen is 0.002, not at least 0.5"),
+            ({"near_seen": None}, "the stage's near_seen is None, not at least 0.5"),
+            ({"ghost_cover": None}, "the stage's ghost_cover is None, not at least 0.02"),
+            ({"assembled_opaque": 0.65}, "the stage's assembled_opaque is 0.65, not below 0.65"),
+            ({"assembled_opaque": None}, "the stage's assembled_opaque is None, not below 0.65"),
+            ({"opaque_max": 0.996}, "the stage's opaque_max is 0.996, not below 0.55"),
         )
+        # (The near finger solid again, as the builder of 2026-11-16 drew it: its pad hidden whole, refused twice.)
+        self.assertEqual(library_write.showcase_numbers(dict(numbers, near_seen=0.002, opaque_max=0.996), rules),
+                         ["the stage's near_seen is 0.002, not at least 0.5", "the stage's opaque_max is 0.996, not below 0.55"])
+        self.assertGreaterEqual(numbers["near_seen"], 0.85)
         for change, problem in cases:
             with self.subTest(problem=problem):
                 self.assertEqual(library_write.showcase_numbers(dict(numbers, **change), rules), [problem])
@@ -2989,7 +3107,12 @@ class ViewTests(LibraryTestCase):
         self.assertEqual(problems, [])
         pad = index["rules"]["part_pad"]
         self.assertEqual(library_write.part_look_sha256(library_write.part_look(index, self.parts, "umi-finray")),
-                         library_write.part_look_sha256({"look": orange, "smooth_deg": None, "pad": pad}))
+                         library_write.part_look_sha256({"look": orange, "smooth_deg": None, "pad": pad,
+                                                         "home": {"approach": [0, 0, -1], "explode_share": 0.8, "camera": index["rules"]["camera"]}}))
+        # And its home (the user's request of 2026-11-16, the grippers' homes): a record of the look and tint without it
+        # is stale where the rules give one.
+        self.refused(self.FINGERTIP, stale, edit=lambda records, library: records[self.FINGERTIP].update(
+            part_look_sha256=library_write.part_look_sha256({"look": orange, "smooth_deg": None, "pad": pad})))
         # The pad's tint is of the look's record too (the user's decision of 2026-11-14): a record of the look without it
         # is stale where the rules give one.
         self.refused(self.FINGERTIP, stale, edit=lambda records, library: records[self.FINGERTIP].update(part_look_sha256=of(orange)))
@@ -3696,25 +3819,26 @@ class PageTests(unittest.TestCase):
         self.assertIn('const VIEWS = [["exploded", "Exploded"], ["assembled", "Assembled"]];', self.script)
         slot = _inner(self.script, "slot")
         # (Since 2026-11-12 a third kind, the showcase's large card: its own card file at its own size, loaded at once,
-        # being the grid's first picture; a card's and a sensor's page's as they were.  Since the lead's review of the UMI
-        # shelf's shapes, 2026-11-16, a shelf's card asks for its Assembled picture, its full file at its size: SHELF_VIEW.)
-        self.assertIn('const assembledCard = kind === "card" && view === "assembled";', slot)
-        self.assertIn('const src = kind === "detail" ? image?.[view]?.src : kind === "showcase" ? image?.card?.src\n'
-                      '      : assembledCard ? image?.assembled?.src : image?.exploded?.card;', slot)
+        # being the grid's first picture; a card's and a sensor's page's as they were.  From the lead's review of the UMI
+        # shelf's shapes to the user's request of the same day, 2026-11-16, a shelf's card asked for its Assembled
+        # picture, SHELF_VIEW: every card is its Exploded card file again, the UMI shelf's at the grippers' homes.)
+        self.assertIn('const src = kind === "detail" ? image?.[view]?.src : kind === "showcase" ? image?.card?.src : image?.exploded?.card;', slot)
         self.assertIn("if (!src) {\n      box.append(field(variant));\n      return box;\n    }", slot)
         self.assertIn('const [width, height] = kind === "detail" ? [image[view].width, image[view].height] '
-                      ': kind === "showcase" ? [image.card.width, image.card.height]\n'
-                      '      : assembledCard ? [image.assembled.width, image.assembled.height] : CARD;', slot)
+                      ': kind === "showcase" ? [image.card.width, image.card.height] : CARD;', slot)
+        self.assertNotIn("assembled", slot)
+        self.assertNotIn("SHELF_VIEW", self.script)
         self.assertIn('el("img", {src: BASE + src, width, height, alt: image.alt || "", decoding: "async",\n'
                       '      loading: kind === "card" ? "lazy" : null});', slot)
         self.assertIn('shown.addEventListener("error", () => {\n      shown.replaceWith(field(variant));\n      missed?.(view);\n    }, {once: true});', slot)
         self.assertIn("return drawing;", _inner(self.script, "field"))
         # Every picture is slot()'s: a family's cards (each its sensor's: the UMI shelf's shapes since 2026-11-16), a
-        # gripper's card and a shelved part's own (its part's default); the shelf's in its view (SHELF_VIEW, Assembled)
-        # framed on the fingertip (tipShot(), the review of 2026-11-16), a gripper's Exploded.
-        self.assertIn("      tipShot(state.index.variants[shape.default]),\n", _inner(self.script, "shapeCard"))
-        self.assertIn('shelved ? tipShot(state.index.variants[part.default]) : slot(state.index.variants[part.default], "card"),', _inner(self.script, "gripperCard"))
-        self.assertIn('const box = slot(variant, "card", SHELF_VIEW);\n    box.classList.add("lib-shot-tip");\n    return box;', _inner(self.script, "tipShot"))
+        # gripper's card and a shelved part's own (its part's default), each its Exploded card file (the user's request of
+        # 2026-11-16: "这样所有card都是对齐的，大小对齐，空间朝向对齐"; the shelf's Assembled picture framed on the tip,
+        # tipShot(), before).
+        self.assertIn('      slot(state.index.variants[shape.default], "card"),\n', _inner(self.script, "shapeCard"))
+        self.assertIn('      slot(state.index.variants[part.default], "card"),\n', _inner(self.script, "gripperCard"))
+        self.assertNotIn("tipShot", self.script)
         self.assertIn('slot(entry, "showcase", SHOWCASE_VIEW)', _inner(self.script, "showcaseCard"))
         self.assertNotIn('"tile"', self.script)
         self.assertEqual(len(re.findall(r'el\("img"', self.script)), 1, "one image: slot()'s")
@@ -3723,8 +3847,9 @@ class PageTests(unittest.TestCase):
         # A sensor's page (2026-11-05): the Exploded picture and, with both views, a small grey "Exploded | Assembled"
         # control under it in its frame: radios in a fieldset with a legend (a group named View: the arrow keys and a
         # screen reader), swapping the picture in place (no address or history change), the view kept across the
-        # pitch, Shape and Tip width, its card's view again on each page opened (Exploded; a UMI shelf's sensor's
-        # Assembled since the review of 2026-11-16, SHELF_VIEW), the control gone once both views failed.
+        # pitch, Shape and Tip width, its card's view again on each page opened (Exploded, a UMI shelf's sensor's too since
+        # the user's request of 2026-11-16; Assembled from the review of that day, SHELF_VIEW), the control gone once both
+        # views failed.
         gallery = _inner(self.script, "gallery")
         self.assertIn('control = el("fieldset", {className: "lib-view"}, el("legend", {}, "View"),', gallery)
         self.assertIn('el("input", {type: "radio", name: "libView", value, checked: value === state.picture}),', gallery)
@@ -3734,7 +3859,7 @@ class PageTests(unittest.TestCase):
         self.assertIn("if (control && failed.size === views.length) control.remove();", gallery)
         self.assertNotIn("history", gallery)
         self.assertNotIn("renderDetail", gallery)
-        self.assertIn("    state.picture = isShelved(homeOf(id)) ? SHELF_VIEW : VIEWS[0][0];\n    setNote(\"\");", _inner(self.script, "showDetail"))
+        self.assertIn("    state.picture = VIEWS[0][0];\n    setNote(\"\");", _inner(self.script, "showDetail"))
         self.assertNotIn("state.picture", _inner(self.script, "segments"))
         # Its style: the pitch's control made small, its legend for a screen reader only, its thumb grey (theme_checks
         # and library_checks see it never blue), and below 900 px the page tighter with it only, so Open stays in a
@@ -3935,28 +4060,26 @@ class PageTests(unittest.TestCase):
         # picture of its sensor, its title and two lines, opening that sensor's page.
         script = self.script
         shelf = _inner(script, "shelf")
-        # Since its review the same day a grid as the grippers' section, three to a row from 735 px (two rows: 4 + 2
-        # would leave a row half empty) and two below: the shapes side by side (a row that scrolled sideways showed four
-        # at 1440 px, one on a phone).
+        # Since its review the same day a grid as the grippers' section (a row that scrolled sideways showed four at
+        # 1440 px, one on a phone), three to a row from 735 px until the user's request of the same day ("图一中umicard图
+        # 太大，确保你要和上面的card大小保持一致"): the grippers' own grid, four to a row (4 + 2) and two below 735 px, so a
+        # shelf's card is a gripper's card's size at every width (no rule of the shelf's own).
         self.assertIn("el(\"div\", {className: \"lib-cards\"}, gripperCard(partId, true),\n"
                       "        families.flatMap(familyId => state.index.families[familyId].cards.map(shape => shapeCard(familyId, shape)))));", shelf)
         self.assertIn("heading(id, `${part.title}.`, part.shelf)", shelf)
         rules, _ = parse_css(self.style)
-        shelved = sorted((rule.conditions, value) for rule in rules if ".lib-shelf > .lib-cards" in rule.selectors
+        columns = sorted((rule.conditions, selector, value) for rule in rules for selector in rule.selectors if "lib-cards" in selector
                          for name, value, _ in rule.declarations if name == "grid-template-columns")
-        self.assertEqual(shelved, [(("@media (min-width:735px)",), "repeat(3,minmax(0,1fr))")])
-        # Each card's picture framed on the fingertip (the review of 2026-11-16: at the Assembled home the taper was a
-        # third of the picture's width, the shapes alike at a card's size): the same Assembled file scaled about the
-        # tip's corner inside its clipping box, the placeholder unframed.
-        framed = {name: value for rule in rules if rule.selectors == (".lib-shot-tip > img",) and not rule.conditions for name, value, _ in rule.declarations}
-        self.assertEqual(framed, {"transform": "scale(2.2)", "transform-origin": "41% 3%"})
-        clipped = {name: value for rule in rules if rule.selectors == (".lib-shot",) and not rule.conditions for name, value, _ in rule.declarations}
-        self.assertEqual(clipped.get("overflow"), "hidden")
-        self.assertEqual(script.count("tipShot("), 3, "tipShot() and the shelf's two kinds of card")
+        self.assertEqual(columns, [((), ".lib-cards", "repeat(4,minmax(0,1fr))"), (("@media (max-width:734px)",), ".lib-cards", "repeat(2,minmax(0,1fr))")])
+        self.assertFalse([rule for rule in rules if any(".lib-shelf" in selector and "lib-card" in selector for selector in rule.selectors)],
+                         "no rule sizes a shelf's cards apart from a gripper's")
+        # The picture as the grippers' cards' (the review's frame on the fingertip, .lib-shot-tip, gone with it).
+        self.assertNotIn("lib-shot-tip", self.style)
+        self.assertNotIn("tipShot", script)
         # Its heading's count of shapes one unit too (the review of 2026-11-16: 'Six / finger shapes,' at 390 px).
         self.assertIn('const keep = text => String(text).replace(/\\b(\\w+) finger shapes\\b/g, "$1\\u00a0finger\\u00a0shapes")', script)
         # A shape's page titled by its card (every tip's part is 'UMI Fin-Ray Gripper, tapered tip'), and opened in the
-        # view its card shows (Assembled: from Exploded the tapered end lay under the exploded layers).
+        # view its card shows (Exploded, as a gripper's page: showDetail()).
         self.assertIn("const title = shape ? `${index.parts[home].title}, ${shape.title.toLowerCase()}` : part.title;", _inner(script, "renderDetail"))
         self.assertIn('el("h2", {className: "lib-detail-title", id: "libDetailTitle", tabindex: "-1"}, whole(title)),', _inner(script, "renderDetail"))
         card = _inner(script, "gripperCard")
@@ -3964,9 +4087,9 @@ class PageTests(unittest.TestCase):
         shape = _inner(script, "shapeCard")
         self.assertIn('return el("a", {className: "lib-card", href: `#${shape.default}`, "data-variant": shape.default, "data-family": familyId, "data-card": shape.key,', shape)
         self.assertIn('el("span", {className: "lib-card-name"}, shape.title),\n        shape.lines.map(line => el("span", {className: "lib-card-line"}, keep(line)))', shape)
-        # The shelf's cards in the Assembled view (the lead's review of 2026-11-16: from the Exploded home the tapered end was
-        # foreshortened under the exploded layers, the six shapes alike); the grippers' cards Exploded.
-        self.assertIn('const SHELF_VIEW = "assembled";', script)
+        # The shelf's cards in the Exploded view as the grippers' (the user's request of 2026-11-16: "你做成和这个finger一样
+        # 的空间角度，而且可以做成exploded"; Assembled from the lead's review that day, SHELF_VIEW, until then).
+        self.assertNotIn("SHELF_VIEW", script)
         self.assertEqual(shelf_cards(_json(LIBRARY / "entries.json")), ["umi-finray-2mm"] + [default for *_, default in TAPER_CARDS])
         # The heading's range of shapes one unit, as a range of pitches ('straight to pointed' broke from 735 to 900 px).
         self.assertIn('.replace(/(\\d|\\bstraight) to (\\w)/g, "$1\\u00a0to\\u00a0$2");', script)

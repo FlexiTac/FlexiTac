@@ -101,9 +101,10 @@ meeting at a 2 mm point).  The seven grippers
 come first, one card each, four to a row (two on a phone), each with its
 pitch range ("1 to 3 mm") and "Pick your pitch": it opens the gripper's
 2 mm sensor, whose Pitch switch offers the others.  The UMI finger's shelf
-follows ("Six finger shapes, straight to pointed."), its six cards side by
-side, three to a row (two on a phone), each showing its fingertip
-assembled and framed on the tip so its outline reads: the straight finger's
+follows ("Six finger shapes, straight to pointed."), its six cards in the
+grippers' grid, each a gripper card's size, exploded and seen from the
+same side as the grippers' fingers (the finger upright, its sensor's
+layers apart beside it): the straight finger's
 card, like a gripper's, then a card per tip shape with its tip widths
 ("5.8 to 21.8 mm", "Pick your tip width"), whose page's Tip width switch
 (and the short taper's Shape) offers the others; 58 sensors in all.
@@ -189,7 +190,9 @@ no sensor of `entries.json`: `web/library/showcase.json` holds its words,
 its placed record and its pictures (`tools/library_showcase.py` builds its
 scene, `tools/browser/library_shots.py --showcase` shoots it,
 `tools/library_write.py --check` and the site build check it; see
-[docs/LIBRARY_VIEW.md](docs/LIBRARY_VIEW.md)).  Its card has two pills
+[docs/LIBRARY_VIEW.md](docs/LIBRARY_VIEW.md)).  Its picture sees the
+gripper from the same side as the grippers' cards below it, its near
+finger see-through as theirs, so both sensors show.  Its card has two pills
 (since the user's decision of 2026-11-16): the grey Details opens its page,
 and the blue Design your own opens Gen by Surface (`gen.html`) in the same
 tab, to fit a sensor to one's own 3D model.

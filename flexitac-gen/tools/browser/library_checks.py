@@ -405,7 +405,8 @@ LAYOUT = """() => { const de = document.documentElement;
             lines: cards.map(card => [...card.querySelectorAll('.lib-card-line')].map(n => n.textContent.replace(/\u00a0/g, ' '))),
             lineRows: cards.map(card => [card.querySelector('.lib-card-name'), ...card.querySelectorAll('.lib-card-line')].map(rowsOf)),
             badges: cards.filter(card => card.dataset.variant).map(card => card.querySelector('.lib-badge')?.textContent ?? null),
-            ids: cards.map(card => card.id || null), heading: shelf.querySelector('h3').textContent.replace(/\u00a0/g, ' ')}; });
+            ids: cards.map(card => card.id || null), heading: shelf.querySelector('h3').textContent.replace(/\u00a0/g, ' '),
+            shots: cards.map(card => { const r = card.querySelector('.lib-shot').getBoundingClientRect(); return [Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10]; })}; });
   const section = document.getElementById('grippers');
   const grid = section && {heading: section.querySelector('h3').textContent.replace(/\u00a0/g, ' '), badges: section.querySelectorAll('.lib-badge').length,
     cards: [...section.querySelectorAll('.lib-cards > .lib-card')].map(card => { const text = card.querySelector('.lib-card-text');
@@ -416,7 +417,8 @@ LAYOUT = """() => { const de = document.documentElement;
       const r = card.getBoundingClientRect();
       return {id: card.id, href: card.getAttribute('href'), variant: card.dataset.variant, name: card.querySelector('.lib-card-name').textContent.replace(/\u2011/g, '-'),
               nameRows: rowsOf(card.querySelector('.lib-card-name')), lines: [...card.querySelectorAll('.lib-card-line')].map(n => n.textContent.replace(/\u00a0/g, ' ')),
-              lineRows: [...card.querySelectorAll('.lib-card-line')].map(rowsOf), top: Math.round(r.top + scrollY), width: r.width, past: Math.round(past * 10) / 10}; })};
+              lineRows: [...card.querySelectorAll('.lib-card-line')].map(rowsOf), top: Math.round(r.top + scrollY), width: r.width, past: Math.round(past * 10) / 10,
+              shot: (s => [Math.round(s.width * 10) / 10, Math.round(s.height * 10) / 10])(card.querySelector('.lib-shot').getBoundingClientRect())}; })};
   const main = document.querySelector('main.lib');
   return {overflow: de.scrollWidth - de.clientWidth, main: main.scrollWidth - main.clientWidth, rows, grid,
           order: [...document.getElementById('libShelves').children].map(n => n.id || n.className), tiles: document.querySelectorAll('.lib-tile, #libTiles').length}; }"""
@@ -567,9 +569,9 @@ def part_layout(browser):
         layout = page.evaluate(LAYOUT)
         check(f"layout {width}: no horizontal page overflow", layout["overflow"] <= 0, layout["overflow"])
         # The UMI shelf a grid since the review of 2026-11-16 (its shapes side by side; a row that scrolled sideways
-        # before): three to a row from 735 px, two below, each card its column's width, all inside the content's edges,
-        # no row scrolling and no arrows.
-        per_row = 3 if width >= 735 else 2
+        # before): since the user's request of that day the grippers' grid, four to a row from 735 px (three until
+        # then), two below, each card its column's width, all inside the content's edges, no row scrolling and no arrows.
+        per_row = 4 if width >= 735 else 2
         sizes = []
         for row in layout["rows"]:
             expected = (row["inner"] - (per_row - 1) * row["gap"]) / per_row
@@ -581,12 +583,16 @@ def part_layout(browser):
         tops = sorted({card["top"] for card in cards})
         rows_of[width] = [sum(1 for card in cards if card["top"] == top) for top in tops]
         umi = layout["rows"][0]["card"] if layout["rows"] else 0
-        sizes_of[width] = (round(max(card["width"] for card in cards), 1) if cards else None, round(umi, 1))
+        # Each card's width and its picture's box (the user's request of 2026-11-16: "确保你要和上面的card大小保持一致"):
+        # every gripper's and every UMI card's, one size.
+        sizes_of[width] = (sorted({(round(card["width"], 1), tuple(card["shot"])) for card in cards}),
+                           sorted({(width_, tuple(shot)) for row in layout["rows"] for width_, shot in zip(row["widths"], row["shots"])}))
         text_of[width] = [(card["name"], card["lineRows"], card["past"]) for card in cards if any(rows != 1 for rows in card["lineRows"]) or card["past"] > 0.5]
-        # The UMI shelf's cards (2026-11-16): each one's name and grey lines on one line each from 735 px; on a phone, two
-        # to a row (since its review that day), at most two lines each (balanced: 'Concave / arc tip', 'Pick shape /
-        # and width', as the grippers' 'Franka / Hand'), never past the card's box.
-        most = 1 if width >= 735 else 2
+        # The UMI shelf's cards (2026-11-16): each one's name and grey lines on one line each from 900 px; below, at most
+        # two lines each (balanced: 'Concave / arc tip', 'Pick shape / and width', as the grippers' 'Franka / Hand'), never
+        # past the card's box: four to a row from 735 px since the user's request of that day (the grippers' 150 to 190 px
+        # cards; three to a row, from its review that day, had kept them on one line from 735 px), two on a phone.
+        most = 1 if width >= 900 else 2
         shelf_text_of[width] = [(row["id"], name, rows, past) for row in layout["rows"] for name, rows, past in zip(row["names"], row["lineRows"], row["past"])
                                 if any(n > most for n in rows) or past > 0.5]
         # The review of 2026-11-05: the grippers' section as far from the UMI shelf's heading (its cards' 28 px and the
@@ -636,9 +642,9 @@ def part_layout(browser):
                   == ["Straight finger", "Short taper", "Convex arc tip", "Trapezoid tip", "Concave arc tip", "Pointed tip"]
                   and all(card_id is None for row in layout["rows"] for card_id in row["ids"]),
                   got_cards_of)
-            check("layout 1440: the UMI shelf's six cards side by side in two rows of three, all in the window's width (the review of 2026-11-16: "
-                  "in a row four showed, the fifth cut at the edge, the sixth behind the arrows)",
-                  all(row["perRow"] == [3, 3] and row["inside"] and len(row["cards"]) == 6 for row in layout["rows"]),
+            check("layout 1440: the UMI shelf's six cards in the grippers' grid, four and two, all in the window's width (the user's request of "
+                  "2026-11-16; two rows of three since its review that day, a row that scrolled sideways before)",
+                  all(row["perRow"] == [4, 2] and row["inside"] and len(row["cards"]) == 6 for row in layout["rows"]),
                   [(row["id"], row["perRow"], row["inside"]) for row in layout["rows"]])
             # Since 2026-11-16 no card of the UMI shelf has a badge line (the pitch cards had one, 'Fine' on the 1 mm one,
             # so their names lined up).
@@ -649,14 +655,14 @@ def part_layout(browser):
             page.screenshot(path=f"{SHOTS}/library_grid_390.png")
     check("layout: the grippers four to a row from 735 px (4 + 3), two below (2 + 2 + 2 + 1), never three",
           all(rows_of[width] == ([4, 3] if width >= 735 else [2, 2, 2, 1]) for width in WIDTHS), rows_of)
-    check("layout: the UMI shelf three to a row from 735 px (3 + 3), two below (2 + 2 + 2)",
-          all(found == {"shelf-umi-finray": [3, 3] if width >= 735 else [2, 2, 2]} for width, found in shelf_rows_of.items()), shelf_rows_of)
-    check("layout: from 735 px a UMI shelf's card a third of the row, wider than a gripper's quarter; below, two to a row each, as wide as a gripper's",
-          all(umi > grid + 1 for width, (grid, umi) in sizes_of.items() if width >= 735)
-          and all(abs(grid - umi) <= 1 for width, (grid, umi) in sizes_of.items() if width < 735), sizes_of)
+    check("layout: the UMI shelf four to a row from 735 px (4 + 2), two below (2 + 2 + 2), as the grippers'",
+          all(found == {"shelf-umi-finray": [4, 2] if width >= 735 else [2, 2, 2]} for width, found in shelf_rows_of.items()), shelf_rows_of)
+    check("layout: at every width from 1440 to 320 px each UMI shelf's card a gripper's card's size, its width and its picture's box (one size "
+          "for all thirteen; the user's request of 2026-11-16: the shelf's cards had been a third of the row)",
+          all(len(grid) == 1 and umi == grid for grid, umi in sizes_of.values()), {width: sizes for width, sizes in sizes_of.items() if width in (1440, 1100, 768, 390)})
     check("layout: from 1440 to 320 px every grey line of a gripper's card on one line, no text past its card's box",
           not any(text_of.values()), {width: found for width, found in text_of.items() if found})
-    check("layout: from 1440 to 735 px each name and grey line of the UMI shelf's cards on one line; below, at most two, none past its card",
+    check("layout: from 1440 to 900 px each name and grey line of the UMI shelf's cards on one line; below, at most two, none past its card",
           not any(shelf_text_of.values()), {width: found for width, found in shelf_text_of.items() if found})
     # Tabbed to from the grippers' last card, each of the UMI shelf's six cards whole in the window (the review of
     # 2026-11-06: a browser scrolls a focused element into view only when none of it shows, so at 390 px the 1.5 mm and
@@ -1353,35 +1359,23 @@ def placeholder_wrong(slot):
     return None if slot["children"] == ["svg"] and slot["field"] and slot["img"] is None and slot["lines"] == lines and slot["lines"] > 0 else slot
 
 
-# A UMI shelf's card's picture framed on the fingertip (library.css .lib-shot-tip, the review of 2026-11-16): scaled this
-# much about this point of its box (fractions of its width and height).
-TIP_FRAME = (2.2, 0.41, 0.03)
-
-
 def card_picture_wrong(slot):
-    """None when a grid slot shows its sensor's Exploded card picture as the contract and library.css have it (a shelf's
-    card, the UMI shelf's, its Assembled picture at its full size since the lead's review of 2026-11-16: library.js
-    SHELF_VIEW, framed on the fingertip since the review that day: TIP_FRAME, its box clipping it), else why not."""
+    """None when a grid slot shows its sensor's Exploded card picture as the contract and library.css have it, filling its
+    light box (every card, the UMI shelf's too since the user's request of 2026-11-16; from the lead's review that day
+    until then its Assembled picture framed on the fingertip), else why not."""
     key, alt = card_owner(slot["owner"])
     image = IMAGES[key]
     if image is None:  # a sensor of this tree without a picture yet
         return placeholder_wrong(slot)
     img = slot["img"] or {}
-    if slot.get("shelf"):
-        size = [image["assembled"]["width"], image["assembled"]["height"]]
-        src = f"static/library/{image['assembled']['src']}"
-    else:
-        size, src = list(CARD_SIZE), f"static/library/{image['exploded']['card']}"
+    size, src = list(CARD_SIZE), f"static/library/{image['exploded']['card']}"
     want = {"src": src, "alt": image["alt"] if alt else "", "loading": "lazy", "decoding": "async",
             "size": [str(size[0]), str(size[1])], "fit": ["contain", "50% 50%"], "loaded": True, "natural": size}
     got = {name: img.get(name) for name in want}
     width, height = slot["box"]
-    scale, x, y = TIP_FRAME if slot.get("shelf") else (1, 0.5, 0.5)
-    drawn = [x * width * (1 - scale), y * height * (1 - scale), width * scale, height * scale]
-    filled = img.get("box") and all(abs(a - b) <= 1 for a, b in zip(img["box"], drawn))
-    framed = slot.get("tip") == bool(slot.get("shelf")) and slot.get("clips") == "hidden"
-    return None if got == want and slot["children"] == ["img"] and filled and framed else (
-        slot["owner"], {k: v for k, v in got.items() if v != want[k]}, img.get("box"), drawn, slot.get("tip"), slot.get("clips"))
+    filled = img.get("box") and all(abs(a - b) <= 1 for a, b in zip(img["box"], [0, 0, width, height]))
+    return None if got == want and slot["children"] == ["img"] and filled and not slot.get("tip") else (
+        slot["owner"], {k: v for k, v in got.items() if v != want[k]}, img.get("box"), slot.get("tip"))
 
 
 def load_grid(page):
@@ -1439,9 +1433,9 @@ def pictures_case(browser, view):
     owners = [slot["owner"] for slot in slots]
     shelf = [card_owner(item["owner"])[0] for item in slots if item["shelf"]]
     check(f"pictures{tag}: every card (the grippers' seven, each its 2 mm sensor's, the UMI shelf's six shapes, each its sensor's: "
-          f"{len(GRID_CARDS)}) shows its sensor's picture, the grippers' their Exploded card file (640 x 400) filling its light box, the UMI shelf's "
-          "their Assembled picture (1280 x 800: the shapes' outlines, the lead's review of 2026-11-16) framed on the fingertip (2.2 times about "
-          "41 % 3 %, clipped by its box: the review that day), contained and centred, lazy, decoded async, its width and height set, its alt the entry's",
+          f"{len(GRID_CARDS)}) shows its sensor's Exploded card file (640 x 400) filling its light box, the UMI shelf's as the grippers' (the user's "
+          "request of 2026-11-16; their Assembled picture framed on the fingertip from the review that day), contained and centred, lazy, "
+          "decoded async, its width and height set, its alt the entry's",
           not wrong and [card_owner(owner)[0] for owner in owners] == GRID_CARDS and len(GRID_CARDS) == 13 and shelf == GRID_CARDS[7:],
           wrong[:3] or owners)
     pictured = page.evaluate(GEOMETRY)
@@ -1516,22 +1510,22 @@ def pictures_case(browser, view):
     check(f"pictures{tag}: each sensor's page opened shows the Exploded picture first (the WidowX 250 card again, after Assembled)",
           opened["src"] == f"static/library/{IMAGES['widowx-250-2mm']['exploded']['src']}" and [radio[3] for radio in (opened["view"] or {}).get("radios", [])] == [True, False],
           (opened["src"], opened["view"]))
-    # The Short taper's page (its Shape and Tip width; the Tapered tips page until 2026-11-16): opened Assembled, the view
-    # its card shows (the review of 2026-11-16: Exploded, the tapered end lay under the exploded layers); each control
-    # swaps the picture with the sensor, the view kept.
+    # The Short taper's page (its Shape and Tip width; the Tapered tips page until 2026-11-16): opened Exploded, the view
+    # its card shows as a gripper's (the user's request of 2026-11-16; Assembled from the review that day until then);
+    # each control swaps the picture with the sensor, the view kept.
     open_library(page, f"#{SHORT_TAPER}")
-    wait_until(page, DETAIL_SHOWS, 10, IMAGES[SHORT_TAPER]["assembled"]["src"])
+    wait_until(page, DETAIL_SHOWS, 10, IMAGES[SHORT_TAPER]["exploded"]["src"])
     first = page.evaluate(DETAIL_PICTURE)
     page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_tapers_1440.png")
     page.click("label:has(input[name='libAxis-shape'][value='convex'])")
-    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip9.8-2mm"]["assembled"]["src"])
-    page.click("#libDetail .lib-view label:has(input[value='exploded'])")
     wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip9.8-2mm"]["exploded"]["src"])
+    page.click("#libDetail .lib-view label:has(input[value='assembled'])")
+    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip9.8-2mm"]["assembled"]["src"])
     page.click("label:has(input[name='libAxis-tip_mm'][value='5.8'])")
-    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip5.8-2mm"]["exploded"]["src"])
-    check(f"pictures{tag}: the Short taper's page opens Assembled (its card's view); Shape and Tip width show the chosen tip's picture "
-          "(the convex 9.8 mm Assembled, then Exploded, then 5.8 mm Exploded)",
-          [radio[3] for radio in (first["view"] or {}).get("radios", [])] == [False, True] and page.evaluate(DETAIL_PICTURE)["hash"] == "#umi-short-convex-tip5.8-2mm",
+    wait_until(page, DETAIL_SHOWS, 10, IMAGES["umi-short-convex-tip5.8-2mm"]["assembled"]["src"])
+    check(f"pictures{tag}: the Short taper's page opens Exploded (its card's view, as a gripper's); Shape and Tip width show the chosen tip's "
+          "picture (the convex 9.8 mm Exploded, then Assembled, then 5.8 mm Assembled)",
+          [radio[3] for radio in (first["view"] or {}).get("radios", [])] == [True, False] and page.evaluate(DETAIL_PICTURE)["hash"] == "#umi-short-convex-tip5.8-2mm",
           (first["src"], page.evaluate(DETAIL_PICTURE)["src"]))
     check(f"pictures{tag}: no console error", not errors_of(page), errors_of(page)[:5])
     page.context.close()
@@ -1697,12 +1691,12 @@ def part_family(browser):
     shown = page.evaluate(FAMILY_VIEW)
     facts = page.inner_text(".lib-facts")
     default = ENTRIES["variants"][short["default"]]
-    # (Its title the card's shape and its view the card's, Assembled, since the review of 2026-11-16: 'UMI Fin-Ray Gripper,
-    # tapered tip' and Exploded, where the tapered end lay under the exploded layers, before.)
+    # (Its title the card's shape since the review of 2026-11-16, 'UMI Fin-Ray Gripper, tapered tip' before; its view the
+    # card's, Exploded as a gripper's since the user's request of that day, Assembled from the review until then.)
     check("family: the Short taper's card opens its 9.8 mm trapezoid's page in the window at its top, the grid where it was under it, its title "
-          "('UMI Fin-Ray Gripper, short taper') focused, Assembled as its card, Shape and Tip width in place of the pitch",
+          "('UMI Fin-Ray Gripper, short taper') focused, Exploded as its card, Shape and Tip width in place of the pitch",
           shown["hash"] == f"#{short['default']}" and short["default"] == "umi-short-trap-tip9.8-2mm" and shown["detail"] and shown["y"] == before["y"]
-          and shown["top"] == 0 and shown["focus"][0] == "libDetailTitle" and shown["title"] == "UMI Fin-Ray Gripper, short taper" and shown["view"] in ("assembled", None)
+          and shown["top"] == 0 and shown["focus"][0] == "libDetailTitle" and shown["title"] == "UMI Fin-Ray Gripper, short taper" and shown["view"] in ("exploded", None)
           and (shown["shape"], shown["tip"]) == ("trap", "9.8") and shown["legends"] == ["Shape", "Tip width (mm)"] and not shown["pitch"]
           and shown["open"] == f"gen.html?part={short['default']}" and shown["history"] == before["history"] + 1, shown)
     check(f"family: its facts (the tip over the last 40 mm, {default['rows']} rows × {default['columns']} columns · {default['taxels']} taxels, 2 mm · fill 0.50, the build)",
@@ -1747,10 +1741,10 @@ def part_family(browser):
         pages[key] = (seen["hash"], seen["legends"], tips, seen["tip"], fact in page.inner_text(".lib-facts"), seen["pitch"], seen["title"], seen["view"])
         page.screenshot(path=f"{SHOTS}/library_family_{key}.png")
         page.go_back(); page.wait_for_timeout(200)
-    # Each titled by its card and opened Assembled as its card shows it (the review of 2026-11-16).
-    viewed = "assembled" if IMAGES["umi-concave-tip9.8-2mm"] else None
+    # Each titled by its card and opened Exploded as its card shows it (the user's request of 2026-11-16).
+    viewed = "exploded" if IMAGES["umi-concave-tip9.8-2mm"] else None
     check("family: the Concave arc tip's page its Tip width alone (21.8 to 5.8 mm, 9.8 checked), the Pointed tip's no control, each its Tip fact, "
-          "titled by its card ('UMI Fin-Ray Gripper, concave arc tip', '..., pointed tip') and opened Assembled",
+          "titled by its card ('UMI Fin-Ray Gripper, concave arc tip', '..., pointed tip') and opened Exploded",
           pages == {"concave": ("#umi-concave-tip9.8-2mm", ["Tip width (mm)"], ["21.8", "17.8", "13.8", "9.8", "5.8"], "9.8", True, False,
                                 "UMI Fin-Ray Gripper, concave arc tip", viewed),
                     "pointed": ("#umi-pointed-tip2-2mm", [], [], None, True, False, "UMI Fin-Ray Gripper, pointed tip", viewed)}, pages)
@@ -2760,7 +2754,8 @@ def part_view(browser):
         check(f"view {size}: the UMI finger drawn after Trossen WidowX AI's whole gripper (one view, the stage's scene taken down) "
               "draws as on a page of its own (the same margins and colours at both homes)",
               (own or {}).get("state") == (gripper or {}).get("state") == (then or {}).get("state") == "drawn" and (gripper or {}).get("gripper") is True
-              and (then or {}).get("gripper") is False and (then or {}).get("stage") is None
+              and (then or {}).get("gripper") is False and ((then or {}).get("stage") or {}).get("numbers", 0) is None
+              and ((then or {}).get("stage") or {}).get("home") == ((own or {}).get("stage") or {}).get("home")
               and all(item and item["margins"][0] == item["margins"][1] and item["mean"] == 0 and item["share"] == 1 for item in same.values()), same)
         after.context.close()
         # Without WebGL, without DecompressionStream, its art a 404 or asked to save data: the picture stays.
@@ -3157,8 +3152,10 @@ def part_looks(browser):
 # The UMI pad's tint (the rules' part_pad; the user's decision of 2026-11-14, "you can do it darken"): every photo of the
 # built sensor shows a dark olive-brown pad on the orange finger.  PAD_LOOK: what the pixels the tint changes must read
 # at the Assembled home, their median (hue in degrees, HSV value 0-1) with it and without it, and their least share of
-# the drawing.
-PAD_LOOK = {"hue": (30, 55), "value_most": 0.55, "value_before_least": 0.7, "share_least": 0.05}
+# the drawing.  (The amber before it at least 0.6 since the grippers' homes of 2026-11-16, 0.7 before: seen 57 degrees
+# off the face's normal, the figure's 35 until then, the board's median reads value 0.659, the tint's 0.349, hue 32.9
+# and 43.7.)
+PAD_LOOK = {"hue": (30, 55), "value_most": 0.55, "value_before_least": 0.6, "share_least": 0.05}
 
 
 def pad_reads(tinted, bare):
@@ -3239,6 +3236,54 @@ class QuietFiles(SimpleHTTPRequestHandler):
         pass
 
 
+def home_frame(stage, mode):
+    """The camera's home of ``mode`` in the drawing's own frame (the probe's stage: its home's direction toward the camera
+    and its up, the fingers' approach axis; the face's normal the world's z): {elevation_deg: above the plane across the
+    approach axis, tilt_deg: off the face's normal, front: the side of the face the camera turns from (+1: up x the
+    normal's part across the approach, a gripper's front), left: the normal's share of the screen's leftward direction,
+    upright: the approach's share of the screen's up}, rounded to 0.01."""
+    d, up, n = stage["home"][mode], stage["up"], (0.0, 0.0, 1.0)
+    dot = lambda a, b: sum(x * y for x, y in zip(a, b))  # noqa: E731
+    cross = lambda a, b: (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])  # noqa: E731
+    unit = lambda a: tuple(x / math.sqrt(dot(a, a)) for x in a)  # noqa: E731
+    c = unit(tuple(x - dot(n, up) * u for x, u in zip(n, up)))
+    right = unit(cross(up, d))
+    screen_up = cross(d, right)
+    return {"elevation_deg": round(math.degrees(math.asin(dot(d, up))), 2), "tilt_deg": round(math.degrees(math.acos(dot(d, n))), 2),
+            "front": 1 if dot(d, cross(up, c)) > 0 else -1, "left": round(-dot(n, right), 2), "upright": round(dot(up, screen_up), 2)}
+
+
+def part_aligned(browser):
+    """The user's request of 2026-11-16 ("你做成和这个finger一样的空间角度 ... 这样所有card都是对齐的，大小对齐，空间朝向对齐"): every
+    gripper's 2 mm sensor and every UMI shelf's card's sensor at its homes, read from the probe's stage, in the drawing's
+    own frame: the grippers' common convention (the rules' camera, no scene overriding it: elevation 30 degrees above the
+    plane across the approach axis, 65 degrees off the face's normal Exploded and 57 Assembled, from the front; the face
+    to the screen's left, the approach up), and the UMI finger and its tips at the same homes (scenes.json's part_homes)."""
+    rules = json.loads((LIBRARY / "scenes" / "scenes.json").read_text(encoding="utf-8"))["rules"]
+    page = view_page(browser)
+    library_case(page, "pictures", view=True)
+    shelf = [ENTRIES["parts"][part]["default"] for part in SHELVES] + [card["default"] for part in SHELVES for name in FAMILIES_OF[part] for card in ENTRIES["families"][name]["cards"]]
+    read = {}
+    for key in [ENTRIES["parts"][part]["default"] for part in CARDED] + shelf:
+        state = open_view(page, key) or {}
+        stage = state.get("stage") or {}
+        read[key] = {mode: home_frame(stage, mode) for mode in library_shots.MODES} if state.get("state") == "drawn" and stage.get("home") and stage.get("up") else state.get("state")
+        if key in shelf and isinstance(read[key], dict):
+            read[key]["explode_share"] = stage.get("explode_share")
+    want = {mode: (rules["camera"][mode]["elevation_deg"], rules["camera"][mode]["tilt_deg"], rules["camera"][mode]["front"]) for mode in library_shots.MODES}
+    held = {key: all(isinstance(found, dict) and (found[mode]["elevation_deg"], found[mode]["tilt_deg"], found[mode]["front"]) == want[mode]
+                     and found[mode]["left"] > 0.5 and found[mode]["upright"] > 0.8 for mode in library_shots.MODES) for key, found in read.items()}
+    print(f"    aligned: {json.dumps({key: found for key, found in read.items() if key in shelf[:1] + [ENTRIES['parts'][CARDED[0]]['default']]})}", flush=True)
+    check("aligned: every gripper's 2 mm sensor at the rules' homes in its own frame (30 degrees up, 65 / 57 off the face's normal, from the front; "
+          "the face to the screen's left, the approach up)", all(held[ENTRIES["parts"][part]["default"]] for part in CARDED),
+          {key: found for key, found in read.items() if not held[key] and key not in shelf})
+    check("aligned: the UMI finger and its five shapes at the same homes (scenes.json's part_homes: the approach its tip's way), exploded 0.8 of the "
+          "boards' narrower side a layer", all(held[key] and read[key].get("explode_share") == 0.8 for key in shelf),
+          {key: found for key, found in read.items() if key in shelf and not (held[key] and isinstance(found, dict) and found.get("explode_share") == 0.8)})
+    check("aligned: no console error", not errors_of(page), errors_of(page)[:5])
+    page.context.close()
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--site", type=Path, default=None, help="a site tools/build_static_site.py built, served here (default: app.py at FPC_PORT)")
@@ -3263,7 +3308,7 @@ def main(argv=None):
             if SITE["root"] is not None:
                 answer_github(browser)  # the built site's pages ask GitHub's API for the header's counts (web/counts.js)
             parts = (part_layout, part_grid, part_routes, part_window, part_window_edges, part_first_screen, part_pictures, part_view, part_view_hint_sizes,
-                     part_view_race, part_looks, part_pad,
+                     part_view_race, part_looks, part_pad, part_aligned,
                      part_placeholders, part_family, part_downloads, part_isolation, part_errors, part_first_page)
             for part in parts:
                 if args.parts and part.__name__ not in args.parts:

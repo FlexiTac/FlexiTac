@@ -2614,14 +2614,14 @@ LIBRARY_PICTURES = (
     m("S/library-picture-unsized", "2026-11-05 pictures", "a picture without its width and height (its box sized only when it arrives)",
       (LIBRARY_JS, 'el("img", {src: BASE + src, width, height, alt:', 'el("img", {src: BASE + src, alt:'), killers=("test_library.",)),
     m("S/library-picture-card-full", "2026-11-05 pictures", "the cards load the 1280 x 800 Exploded picture, not its 640 x 400 card file",
-      (LIBRARY_JS, ': assembledCard ? image?.assembled?.src : image?.exploded?.card;', ': assembledCard ? image?.assembled?.src : image?.exploded?.src;'), killers=("test_library.",)),
+      (LIBRARY_JS, ': kind === "showcase" ? image?.card?.src : image?.exploded?.card;', ': kind === "showcase" ? image?.card?.src : image?.exploded?.src;'), killers=("test_library.",)),
     m("S/library-picture-broken", "2026-11-05 pictures", "a picture whose file does not load stays a broken image (no placeholder)",
       (LIBRARY_JS, "      shown.replaceWith(field(variant));\n      missed?.(view);\n", "      missed?.(view);\n"), killers=("test_library.",)),
     m("S/library-view-unnamed", "2026-11-05 pictures", "the Exploded | Assembled control without its legend (a screen reader hears two radios of no group)",
       (LIBRARY_JS, 'el("fieldset", {className: "lib-view"}, el("legend", {}, "View"),', 'el("fieldset", {className: "lib-view"},'), killers=("test_library.",)),
     m("S/library-view-kept", "2026-11-05 pictures", "a sensor's page opened anew keeps the view of the page before (Assembled where Exploded opens; "
-      "since the review of 2026-11-16 its card's view)",
-      (LIBRARY_JS, "    state.picture = isShelved(homeOf(id)) ? SHELF_VIEW : VIEWS[0][0];\n    setNote(\"\");", "    setNote(\"\");"), killers=("test_library.",)),
+      "its card's view, Exploded on every card since the user's request of 2026-11-16)",
+      (LIBRARY_JS, "    state.picture = VIEWS[0][0];\n    setNote(\"\");", "    setNote(\"\");"), killers=("test_library.",)),
     m("S/library-view-phone-room", "2026-11-05 pictures", "the phone's page not tighter with the view control (the Tapered tips' Open 25 px below a 390 x 844 first screen "
       "under the header; since the window of 2026-11-15 its page's gaps alone)",
       ("web/library.css", "@media (max-width:899px) { .lib-detail:has(.lib-view) .lib-detail-body { gap:16px; } .lib-detail:has(.lib-view) .lib-info { gap:12px; } }\n", ""),
@@ -2785,7 +2785,8 @@ LIBRARY_LOOKS = (
     m("S/library-look-part-hash", "2026-11-12 looks", "a fingertip's pictures of another look than the rules give its part taken (part_look_sha256 not compared)",
       (LIBRARY_WRITE, '        if shot.get("part_look_sha256") != expected:\n', "        if False:\n"), killers=("test_library.",)),
     m("S/library-look-part-gripper", "2026-11-12 looks", "the rules' part_looks naming a gripper taken (its scene's looks and the rules' disagreeing in silence)",
-      (LIBRARY_WRITE, "        if key not in plain | families:\n", "        if False:\n"), killers=("test_library.",)),
+      (LIBRARY_WRITE, '    for key in sorted(rules["part_looks"]) if isinstance(rules.get("part_looks"), dict) else ():\n        if key not in plain | families:\n',
+       '    for key in sorted(rules["part_looks"]) if isinstance(rules.get("part_looks"), dict) else ():\n        if False:\n'), killers=("test_library.",)),
     m("S/library-split-weld", "2026-11-12 looks", "the split's weld at 0.1 mm (the ARX X5's motor can and its rail beam, 0.07 mm apart, one component)",
       (LIBRARY_SPLIT, "\nWELD_MM = 0.01\n", "\nWELD_MM = 0.1\n"), killers=("test_library_split.",)),
     m("S/library-split-box-any", "2026-11-12 looks", "a box rule taking the triangles that only touch the box (a neighbour's facets coloured as the rail)",
@@ -3078,11 +3079,6 @@ SHOWCASE_PAGE = (
     m("S/showcase-screws-half", "2026-11-12 showcase page", "library_showcase.py: the shell's screws drawn on its right half only",
       (SHOWCASE_TOOL, '            out += [("shell-screw", product(into, shift(sign * x, y, z)), None) for sign in (1.0, -1.0)]\n',
        '            out += [("shell-screw", product(into, shift(sign * x, y, z)), None) for sign in (1.0,)]\n'), killers=("test_library_showcase.",)),
-    m("S/showcase-camera-front", "2026-11-12 showcase page", "library_showcase.py: the showcase's camera on the side of the logo's face (the straps on the fingers' far sides)",
-      (SHOWCASE_TOOL, 'CAMERA = {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1},\n', 'CAMERA = {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": 1},\n'),
-      killers=("test_library_showcase.",)),
-    m("S/showcase-see-through", "2026-11-12 showcase page", "library_showcase.py: the showcase's near finger see-through again",
-      (SHOWCASE_TOOL, "SEE_THROUGH = []\n", 'SEE_THROUGH = ["mate"]\n'), killers=("test_library_showcase.",)),
     m("S/library-showcase-entry", "2026-11-12 showcase page", "library.js: a showcase.json whose id is a sensor's or a part's taken (its page in place of theirs)",
       (LIBRARY_JS, "      state.showcase = Object.hasOwn(index.variants, showcase?.id) || Object.hasOwn(index.parts, showcase?.id) ? null : showcaseOf(showcase);\n",
        "      state.showcase = showcaseOf(showcase);\n"), killers=("test_library.",)),
@@ -3143,9 +3139,6 @@ VERIFY_FIX = (
     m("V/split-one-file", "2026-11-13 verification", "library_split.py: a split body of one file worded 'one of the 1 files' again",
       (LIBRARY_SPLIT, "        note = (SPLIT_NOTE if len(components_) > 1 else SPLIT_NOTE_ONE).format(count=len(components_), stem=stem)\n",
        "        note = SPLIT_NOTE.format(count=len(components_), stem=stem)\n"), killers=("test_library_split.",)),
-    m("V/showcase-exploded-camera", "2026-11-13 verification", "library_showcase.py: the showcase's Exploded home the Assembled camera again (the lifted layers edge-on)",
-      (SHOWCASE_TOOL, 'CAMERA = {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1},\n', 'CAMERA = {"exploded": {"tilt_deg": 60, "elevation_deg": 20, "front": -1},\n'),
-      killers=("test_library_showcase.", "test_library.")),
 )
 MUTANTS += VERIFY_FIX
 # The UMI pad darker in the Library's Assembled view (the user's decision of 2026-11-14, "you can do it darken"): the
@@ -3158,7 +3151,7 @@ LIBRARY_PAD = (
       (LIBRARY_WRITE, "        if not (isinstance(pad, dict) and sorted(pad) == list(PAD_KEYS) and isinstance(pad[\"color\"], str)",
        "        if False and (isinstance(pad, dict) and sorted(pad) == list(PAD_KEYS) and isinstance(pad[\"color\"], str)"), killers=("test_library.",)),
     m("S/library-pad-unrecorded", "2026-11-14 UMI pad", "part_look() without the pad (a fingertip's pictures of another tint, or of none, taken as current)",
-      (LIBRARY_WRITE, '    if rules.get("part_pad") is not None:\n        given["pad"] = rules["part_pad"]\n', ""), killers=("test_library.",)),
+      (LIBRARY_WRITE, '        if rules.get("part_pad") is not None:\n            given["pad"] = rules["part_pad"]\n', ""), killers=("test_library.",)),
     m("S/library-figure-pad-part", "2026-11-14 UMI pad", "--check-generator's fifth comparison not holding the tint off the part's pixels (a tint over the finger passes)",
       (LIBRARY_SHOTS_TOOL, '    if counts["part"]:\n        found.append(f"the pad changes', '    if False:\n        found.append(f"the pad changes'), killers=("test_library.",)),
     m("S/library-figure-pad-exploded", "2026-11-14 UMI pad", "--check-generator's fifth comparison taking a tint drawn in Exploded (the exploded top board darkened passes)",
@@ -3467,8 +3460,8 @@ MUTANTS += FIRST_PAGE_REVIEW
 # 数量；我在这里更多想要体现umi不同shape我们都可以fit"; the shapes chosen: concave arc, pointed, short taper): the UMI shelf one
 # card per finger shape (the straight finger's, then the tapered tips' family's cards), each shape's page its card's
 # axes of more than one choice and its Tip fact over the card's height; the writer's cards, their lines and the labels'
-# length; since the lead's review the same day the shelf's cards in the Assembled view (SHELF_VIEW).  Each killed alone
-# by test_library on a scratch copy.
+# length; from the lead's review the same day the shelf's cards in the Assembled view (SHELF_VIEW, retired with its two
+# mutants by CARDS_ALIGNED below).  Each killed alone by test_library on a scratch copy.
 UMI_SHAPES = (
     m("S/umi-shapes-straight-name", "2026-11-16 UMI shapes", "library.js: the UMI shelf's own card named by the gripper's title (the shelf's heading again), "
       "not by its shape, 'Straight finger'",
@@ -3504,12 +3497,6 @@ UMI_SHAPES = (
     m("S/umi-shapes-card-name", "2026-11-16 UMI shapes", "the writer: a shelved part's card name left out of entries.json (the UMI shelf's own card named "
       "'UMI Fin-Ray Gripper')",
       (LIBRARY_WRITE, '            "card": part.get("card"),\n', '            "card": None,\n'), killers=("test_library.",)),
-    m("S/umi-shapes-shelf-exploded", "2026-11-16 UMI shapes review", "library.js: the UMI shelf's cards in the Exploded view again (the tapered end "
-      "foreshortened under the exploded layers: the six shapes alike on their cards)",
-      (LIBRARY_JS, '  const SHELF_VIEW = "assembled";\n', '  const SHELF_VIEW = "exploded";\n'), killers=("test_library.",)),
-    m("S/umi-shapes-assembled-card-file", "2026-11-16 UMI shapes review", "library.js: a shelf's card sized as a card file (640 x 400) while its "
-      "Assembled picture is 1280 x 800",
-      (LIBRARY_JS, "      : assembledCard ? [image.assembled.width, image.assembled.height] : CARD;\n", "      : CARD;\n"), killers=("test_library.",)),
     m("S/umi-shapes-label-max", "2026-11-16 UMI shapes", "the writer: the labels at most 27 characters again ('UMI concave arc tip, 21.8 mm' and 'UMI short "
       "trapezoid, 21.8 mm', 28, refused though measured on one line)",
       (LIBRARY_WRITE, "LABEL_MAX = 28\n", "LABEL_MAX = 27\n"), killers=("test_library.",)),
@@ -3520,18 +3507,12 @@ MUTANTS += UMI_SHAPES
 # shapes one unit, a shape's page titled by its card and opened in its card's view (Assembled), and the tips' meshes
 # measured against tools/library_tips.py's profiles by a stdlib test (a mutant of the private tool itself is out of the
 # catalogue: two tips' meshes swapped in parts.json instead).  Each killed alone by test_library on a scratch copy;
-# library_checks part_layout, part_pictures, part_family and part_window see the page's in the browser.
+# library_checks part_layout, part_pictures, part_family and part_window see the page's in the browser.  The user's
+# request of the same day (CARDS_ALIGNED below) retired four: the shelf four to a row and a UMI page opened Exploded
+# (now the wanted behaviour), the frame on the fingertip and its rule (gone).
 LIBRARY_CSS = "web/library.css"
 PARTS_JSON = "web/library/parts.json"
 UMI_SHAPES_REVIEW = (
-    m("S/umi-shapes-four-a-row", "2026-11-16 UMI shapes review", "library.css: the UMI shelf four to a row as the grippers' (4 + 2: its second row two thirds "
-      "empty)",
-      (LIBRARY_CSS, "@media (min-width:735px) { .lib-shelf > .lib-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }\n", ""), killers=("test_library.",)),
-    m("S/umi-shapes-tip-unframed", "2026-11-16 UMI shapes review", "library.js: a shelf's card's picture the whole finger (the taper a third of its width, the "
-      "shapes alike at a card's size)",
-      (LIBRARY_JS, '    box.classList.add("lib-shot-tip");\n', ""), killers=("test_library.",)),
-    m("S/umi-shapes-tip-frame-lost", "2026-11-16 UMI shapes review", "library.css: the fingertip's frame drawn as the whole picture (the class put, no scale)",
-      (LIBRARY_CSS, ".lib-shot-tip > img { transform:scale(2.2); transform-origin:41% 3%; }\n", ""), killers=("test_library.",)),
     m("S/umi-shapes-heading-split", "2026-11-16 UMI shapes review", "library.js: the UMI shelf's count of shapes no unit (at 390 px 'Six / finger shapes,')",
       (LIBRARY_JS, 'const keep = text => String(text).replace(/\\b(\\w+) finger shapes\\b/g, "$1\\u00a0finger\\u00a0shapes")\n    .replace(',
        "const keep = text => String(text).replace("), killers=("test_library.",)),
@@ -3539,9 +3520,6 @@ UMI_SHAPES_REVIEW = (
       "title), not by its card",
       (LIBRARY_JS, "    const title = shape ? `${index.parts[home].title}, ${shape.title.toLowerCase()}` : part.title;\n",
        "    const title = part.title;\n"), killers=("test_library.",)),
-    m("S/umi-shapes-page-exploded", "2026-11-16 UMI shapes review", "library.js: a UMI shelf's sensor's page opened Exploded (its tapered end under the exploded "
-      "layers) though its card shows it Assembled",
-      (LIBRARY_JS, "    state.picture = isShelved(homeOf(id)) ? SHELF_VIEW : VIEWS[0][0];\n", "    state.picture = VIEWS[0][0];\n"), killers=("test_library.",)),
     m("S/umi-shapes-tips-swapped", "2026-11-16 UMI shapes review", "parts.json: the 9.8 mm concave and convex arc tips' meshes swapped, each record its file's "
       "hash (the hashes alone had passed it; test_each_tip_is_cut_by_its_profile measures each outline)",
       (PARTS_JSON, '    "file": "meshes/umi-concave-tip9.8.stl",\n    "name": "umi-concave-tip9.8.stl",\n'
@@ -3554,6 +3532,102 @@ UMI_SHAPES_REVIEW = (
        '    "sha256": "e2692fc9f689582d3455755757e04365bcad50eccea2f0bf42e3668d901a6fb0"\n'), killers=("test_library.",)),
 )
 MUTANTS += UMI_SHAPES_REVIEW
+# The UMI shelf's cards aligned with the grippers' (the user's request of 2026-11-16, with a screenshot of the live shelf:
+# "图一中umicard图太大，确保你要和上面的card大小保持一致；另外你这样是重新选择了一个角度，用户需要再完成一次gripper方向的空间转换，
+# 这样不好；你做成和这个finger一样的空间角度，而且可以做成exploded,这样所有card都是对齐的，大小对齐，空间朝向对齐。最上面的xarm
+# gripper的空间朝向也要跟下面的这些家爪都对齐"): the shelf the grippers' grid (4 + 2), its cards and pages Exploded, the UMI
+# finger and its tips at the grippers' homes (scenes.json's rules' part_homes: the camera's up its approach axis, the
+# rules' camera, its explode), --check-generator holding the look and the tint at the figure's homes, and the showcase
+# at the rules' camera with its own bound re-measured.  Each killed alone by its killers' module on a scratch copy;
+# library_checks part_layout, part_pictures, part_aligned and part_window and showcase_checks part_page see the page's
+# in the browser.  With it 8 retired: S/umi-shapes-shelf-exploded and -assembled-card-file (SHELF_VIEW and the
+# Assembled card's size gone), and of the review S/umi-shapes-four-a-row, -tip-unframed, -tip-frame-lost and
+# -page-exploded; S/showcase-camera-front and V/showcase-exploded-camera (the showcase's own camera gone).
+LIBRARY_VIEW_JS = "web/cad/library_view.js"
+CARDS_ALIGNED = (
+    m("S/aligned-shelf-three", "2026-11-16 cards aligned", "library.css: the UMI shelf three to a row again (its cards 418 px wide at 1440 px, the grippers' "
+      "309 px: the cards too big)",
+      (LIBRARY_CSS, ".lib-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--lib-gap); padding:8px 0 28px; }\n",
+       ".lib-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--lib-gap); padding:8px 0 28px; }\n"
+       "@media (min-width:735px) { .lib-shelf > .lib-cards { grid-template-columns:repeat(3,minmax(0,1fr)); } }\n"), killers=("test_library.",)),
+    m("S/aligned-shape-assembled", "2026-11-16 cards aligned", "library.js: a shape's card its Assembled picture again (the full file, not the grippers' "
+      "Exploded card)",
+      (LIBRARY_JS, '      slot(state.index.variants[shape.default], "card"),\n', '      slot(state.index.variants[shape.default], "detail", "assembled"),\n'),
+      killers=("test_library.",)),
+    m("S/aligned-page-assembled", "2026-11-16 cards aligned", "library.js: a UMI shelf's page opened Assembled again while its card shows it Exploded",
+      (LIBRARY_JS, "    state.picture = VIEWS[0][0];\n    setNote(\"\");", "    state.picture = isShelved(homeOf(id)) ? VIEWS[1][0] : VIEWS[0][0];\n    setNote(\"\");"),
+      killers=("test_library.",)),
+    m("S/aligned-home-unread", "2026-11-16 cards aligned", "library_view.js: the rules' home of a part without a scene never handed to the stage (the UMI "
+      "finger at Gen by Surface's angle: the eye turns it again)",
+      (LIBRARY_VIEW_JS, "partLook: own?.look ?? null, partHome: own?.home ?? null", "partLook: own?.look ?? null, partHome: null"), killers=("test_library.",)),
+    m("S/aligned-home-up", "2026-11-16 cards aligned", "library_stage.js: the aimed part's camera's up left the figure's (the face's normal), not its "
+      "approach axis (the finger lying, not upright)",
+      (LIBRARY_STAGE, "      camera.up.copy(up);\n      controls._quat.setFromUnitVectors(camera.up, new THREE.Vector3(0, 1, 0));\n      controls._quatInverse.copy(controls._quat).invert();\n"
+                      "      state.aimed = ",
+       "      controls._quat.setFromUnitVectors(camera.up, new THREE.Vector3(0, 1, 0));\n      controls._quatInverse.copy(controls._quat).invert();\n"
+       "      state.aimed = "), killers=("test_library.",)),
+    m("S/aligned-home-direction", "2026-11-16 cards aligned", "library_stage.js: the aimed part's homes the figure's directions (drape.js homeDirection), "
+      "not the rules' camera about its face",
+      (LIBRARY_STAGE, "      view.homes = {exploded: direction(home.camera.exploded, up, normal).toArray(), assembled: direction(home.camera.assembled, up, normal).toArray()};\n", ""),
+      killers=("test_library.",)),
+    m("S/aligned-explode-drape", "2026-11-16 cards aligned", "library_stage.js: the aimed part's stack at Gen by Surface's explode (the bottom FPC against "
+      "the finger's face, its outline lost)",
+      (LIBRARY_STAGE, "      const step = home.explode_share * stack.width_mm;\n", "      const step = old;\n"), killers=("test_library.",)),
+    m("S/aligned-lamp-figure", "2026-11-16 cards aligned", "library_stage.js: the aimed part's film lit by the figure's lamp, aimed from the figure's home",
+      (LIBRARY_STAGE, "          lampAt(one, new THREE.Vector3(0, 0, 1), aimed.lamp);\n", ""), killers=("test_library.",)),
+    m("S/aligned-rules-home-unchecked", "2026-11-16 cards aligned", "the writer: the rules' part_homes unchecked (no unit approach, an explode out of bounds, "
+      "the camera copied in, taken)",
+      (LIBRARY_WRITE, '    if "part_homes" in rules:\n        homes = rules["part_homes"]\n', '    if False:\n        homes = rules["part_homes"]\n'), killers=("test_library.",)),
+    m("S/aligned-home-gripper", "2026-11-16 cards aligned", "the writer: the rules' part_homes naming a gripper taken (its scene's camera and the rules' "
+      "disagreeing in silence)",
+      (LIBRARY_WRITE, '    for key in sorted(rules["part_homes"]) if isinstance(rules.get("part_homes"), dict) else ():\n        if key not in plain | families:\n',
+       '    for key in sorted(rules["part_homes"]) if isinstance(rules.get("part_homes"), dict) else ():\n        if False:\n'), killers=("test_library.",)),
+    m("S/aligned-home-unrecorded", "2026-11-16 cards aligned", "part_look() without the home (a fingertip's pictures of another home, or of the figure's, "
+      "taken as current)",
+      (LIBRARY_WRITE, '    if home is not None:\n        given["home"] = dict(home, camera=rules.get("camera"))\n', ""), killers=("test_library.",)),
+    m("S/aligned-served-home", "2026-11-16 cards aligned", "--check-generator serving the rules without the part's home (the pictures compared with the "
+      "view at the figure's homes)",
+      (LIBRARY_SHOTS_TOOL, '        if given.get("home") is not None:\n            served["rules"]["part_homes"]', '        if False:\n            served["rules"]["part_homes"]'),
+      killers=("test_library.",)),
+    m("S/aligned-figure-home", "2026-11-16 cards aligned", "--check-generator's fourth comparison at the grippers' homes (the look held to a figure at "
+      "another angle: every pixel apart)",
+      (LIBRARY_SHOTS_TOOL, 'alone = twice(identifier, lambda: viewed(without(given, "pad", "home")))', 'alone = twice(identifier, lambda: viewed(without(given, "pad")))'),
+      killers=("test_library.",)),
+    m("S/aligned-showcase-camera", "2026-11-16 cards aligned", "library_showcase.py: the showcase's own camera again (the xArm turned another way than the "
+      "grippers below it)",
+      (SHOWCASE_TOOL, '        "picture": PICTURE,\n', '        "picture": PICTURE,\n        "camera": {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1}, '
+                      '"assembled": {"tilt_deg": 60, "elevation_deg": 20, "front": -1}},\n'), killers=("test_library_showcase.", "test_library.")),
+    m("S/aligned-showcase-bound", "2026-11-16 cards aligned", "the writer: the showcase's own bound of its old camera (assembled_opaque below 0.25: the "
+      "committed shoot at the grippers' homes refused)",
+      (LIBRARY_WRITE, 'SHOWCASE_BOUNDS = (("assembled_opaque", "below", 0.65), ("opaque_max", "below", 0.55))\n',
+       'SHOWCASE_BOUNDS = (("assembled_opaque", "below", 0.25), ("opaque_max", "below", 0.55))\n'),
+      killers=("test_library.",)),
+    # The review of the cards aligned (2026-11-16, fixed the same day): the showcase's near finger see-through as every
+    # gripper's (drawn solid it hid its own pad whole from the grippers' homes, its card FlexiTac on one finger) and its
+    # pad held to the rules' near_seen_min again, and --check-generator's look and tint held at the grippers' homes too
+    # (the pictures' own; only at the figure's homes before), each killed alone by its killers' module on a scratch copy;
+    # S/showcase-see-through of 2026-11-12 (the near finger see-through again) retired: it is the wanted behaviour now,
+    # its reverse S/aligned-showcase-solid.
+    m("S/aligned-showcase-solid", "2026-11-16 cards aligned review", "library_showcase.py: the showcase's near finger solid again (its own pad hidden "
+      "whole behind it from the grippers' homes: FlexiTac on one finger of the two)",
+      (SHOWCASE_TOOL, 'SEE_THROUGH = ["mate"]\n', 'SEE_THROUGH = []\n'), killers=("test_library_showcase.", "test_library.")),
+    m("S/aligned-showcase-near-unheld", "2026-11-16 cards aligned review", "the writer: the showcase's near_seen and ghost_cover not held to the rules "
+      "(a shoot that hides the near pad, near_seen 0.002, taken)",
+      (LIBRARY_WRITE, '("card_px", "card_min_px"), ("near_seen", "near_seen_min"), ("ghost_cover", "ghost_cover_min"))\n', '("card_px", "card_min_px"))\n'),
+      killers=("test_library.",)),
+    m("S/aligned-showcase-opaque-unbound", "2026-11-16 cards aligned review", "the writer: the showcase's opaque_max unbounded again (a pad's layers "
+      "covered whole, 0.996, taken)",
+      (LIBRARY_WRITE, 'SHOWCASE_BOUNDS = (("assembled_opaque", "below", 0.65), ("opaque_max", "below", 0.55))\n', 'SHOWCASE_BOUNDS = (("assembled_opaque", "below", 0.65),)\n'),
+      killers=("test_library.",)),
+    m("S/aligned-witness-figure", "2026-11-16 cards aligned review", "--check-generator's witness at the grippers' homes drawn at the figure's (the rules "
+      "served without the home: every pixel apart, or a fault at the grippers' homes alone unseen)",
+      (LIBRARY_SHOTS_TOOL, 'aimed = twice(identifier, lambda: viewed({"home": given["home"]}))', 'aimed = twice(identifier, lambda: viewed(None))'),
+      killers=("test_library.",)),
+    m("S/aligned-witness-skipped", "2026-11-16 cards aligned review", "--check-generator without its sixth comparison (the look and the tint held at "
+      "the figure's homes alone, which no visitor sees)",
+      (LIBRARY_SHOTS_TOOL, "            if homed and other is not None:\n", "            if False:\n"), killers=("test_library.",)),
+)
+MUTANTS += CARDS_ALIGNED
 
 
 # --------------------------------------------------------------------------

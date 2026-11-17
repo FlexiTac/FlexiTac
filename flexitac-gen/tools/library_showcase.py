@@ -31,8 +31,8 @@ This tool makes its geometry, to the same bytes on every run (standard library o
   coupler; the other finger the mirror image across the gripper's middle plane.  The looks are the Library's base
   looks, each body's chosen after photos of the real gripper, and seven of the showcase's own (OWN_LOOKS: the shell's
   gloss, the printed parts' white, the pins' steel, the screws' black, the fingers' orange, the drawn boards and
-  cables); the camera is the
-  showcase's own (CAMERA), and no finger is see-through.
+  cables); the camera is the rules' (no override since 2026-11-16: the grippers' homes), and the near finger is
+  see-through, as every gripper's is (since the review of 2026-11-16).
 
 The sources are read from a folder given on the command line and never copied: the vendor's file must be the one
 whose SHA-256 is pinned (library_write.SHOWCASE_SOURCE), and so must the holder's (HOLDER_SHA256, the file of
@@ -240,18 +240,20 @@ MESH_LOOKS = {"body_shell": "shell-white-gloss", "body_frame": "print-white", "b
               "finger_r_pins": "steel-pin", "finger_l_coupler": "print-white", "finger_l_pins": "steel-pin"}
 HOLDER_LOOK = "print-white"
 PICTURE = "on both soft fingers of the open gripper"
-# The showcase's own camera (a scene's override of the rules', within their bounds; its reason in the scene's about): a
-# three-quarter view from the side of the shell's face without the logo, in which the far finger's pad is seen on its
-# face, the straps crossing both fingers' side faces, the near finger's back with the gold ends, and the gripper's body.
-# Exploded, from the same side, higher and further off the pad's normal (70 degrees, 40 up): at the Assembled camera the
-# lifted layers stood almost edge-on, a column 90 px wide, so that only 8 % of the drawing's pixels told Exploded from
-# Assembled (the verification of 2026-11-13; 46 to 70 % on the grippers' pictures); from here the boards' and the film's
-# faces are seen apart, the lift across the view.
-CAMERA = {"exploded": {"tilt_deg": 70, "elevation_deg": 40, "front": -1},
-          "assembled": {"tilt_deg": 60, "elevation_deg": 20, "front": -1}}
-# Both fingers are drawn solid: the near finger hides nothing of the far one's pad from this camera (the jaws are 55 mm
-# apart), and the showcase is the gripper as built.
-SEE_THROUGH = []
+# The camera is the rules', the grippers' homes (no override; the user's request of 2026-11-16: "最上面的xarm gripper的空间
+# 朝向也要跟下面的这些家爪都对齐"): the gripper's body at the bottom, its fingers upright, the far finger's pad turned to
+# the left and its stack exploded into the jaws' gap, seen from the front 30 degrees up, 65 degrees off the pad's normal
+# exploded and 57 assembled, as every gripper's card sees it; from the logo's side of the shell, the side the owner's
+# photo of the gripper was taken from.  Until then the showcase had a camera of its own (Assembled 60 degrees off and 20
+# up, Exploded 70 and 40, from the side of the shell's face without the logo: the straps on the fingers' side faces in
+# sight), which showed the gripper turned another way than the cards below it.
+# The near finger (the mate) is drawn see-through, as every gripper's is (the user's decision of 2026-11-06: "靠近外面的
+# finger透明"), since the review of the same day: from the grippers' homes its own pad faces away from the camera, and
+# drawn solid it hid that pad whole (near_seen 0.002), so the card showed FlexiTac on one finger of the two.  Seen
+# through it, the near pad's field and its straps show (near_seen 0.891), the rules' near_seen_min held as a gripper's
+# (library_write.SHOWCASE_RULED).  From the showcase's own camera of 2026-11-13 to 2026-11-16, the other side, both were
+# drawn solid: the near finger hid nothing of the far one's pad, the near pad's straps on its side face in sight.
+SEE_THROUGH = ["mate"]
 
 
 # -- what the project draws ----------------------------------------------------------------------------------------------
@@ -737,12 +739,12 @@ def scene_document(files: dict, parts: dict) -> dict:
         "the shell's gloss white under a sharper clear coat, the printed parts' white (the frame's channel, the couplers "
         "and the holders), the pivot pins' brushed steel, the screws' matte black, the soft fingers' orange TPU (the "
         "Library's UMI rows' own), the extender boards' yellow and the flat cables' white.  "
-        "The camera is the showcase's own, for this reason: at the rules' camera the far finger's pad is "
-        "seen edge-on and its straps are on its far side; from the side of the shell's face without the logo, 60 degrees "
-        "off the pad's normal and 20 degrees up, the pad's face, the straps crossing both fingers' side faces and the "
-        "gripper's body are all seen; exploded, from the same side 70 degrees off the normal and 40 degrees up, so that the "
-        "lifted layers are seen apart, not edge-on.  No finger is drawn see-through: the near finger hides nothing of the "
-        "far one's pad from there.  The logo on the shell's other face is not drawn.")
+        "The camera is the rules', the grippers' homes (since 2026-11-16, so that the showcase is seen as every gripper "
+        "of the Library is): from the logo's side of the shell, the side the owner's photo was taken from, the far finger's "
+        "pad turned to the left and its layers exploded into the jaws' gap; the straps cross the fingers' side faces on the "
+        "far side, seen through the fins' windows as in that photo.  The near finger is drawn see-through, as every "
+        "gripper's near finger is (since 2026-11-16): from there its own pad faces away from the camera, and drawn solid "
+        "it hid that pad whole.  The logo on the shell's face is not drawn.")
     return {
         "format": library_write.SCENE_FORMAT,
         "part": library_write.UMI_FINGER,
@@ -757,7 +759,6 @@ def scene_document(files: dict, parts: dict) -> dict:
         "bodies": bodies,
         "see_through": SEE_THROUGH,
         "picture": PICTURE,
-        "camera": CAMERA,
         "looks": LOOKS,
         "part_look": PART_LOOK,
         "smooth_deg": SMOOTH_DEG,

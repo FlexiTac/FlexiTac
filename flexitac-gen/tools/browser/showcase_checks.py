@@ -43,7 +43,7 @@ fit, no entries.json, no engine.  Its state is <pre id="showcaseState">.
   is the showcase's one card, as wide as the row, its picture (one image, the card file, 4:5, no canvas and no three.js
   on the grid) beside its label, its title and its line; reached with Tab and opened with Enter it gives the showcase's
   own page in the window over the grid (since 2026-11-15), its title focused: the 3D view drawn over the picture from the
-  placed record (no build, the scene's gripper, Assembled at its home, the scene's looks and camera, the fingers orange,
+  placed record (no build, the scene's gripper, Assembled at its home, the scene's looks and the rules' camera, the fingers orange,
   the boards amber), its box 4:5; the window's Tab order (its X first), the Exploded | Assembled control worked with the
   arrow keys, the view turned with them and brought back with 0; the tutorial's link and the two notices (each answered
   by the server); no Open in Gen by Surface, no download; the window's X back to the card, its Details focused.  At 390 px, light and dark: the card stacked within the window, nothing scrolling sideways, the
@@ -542,9 +542,14 @@ def part_page(browser, url: str, out: Path) -> None:
                  state and {key: state.get(key) for key in ("state", "note", "id", "build_id", "gripper", "mode", "drawn_mode", "moved")})
         stage = (state or {}).get("stage") or {}
         looks = stage.get("looks") or {}
-        rp.check("1440: the stage draws the scene's looks and its own camera, no finger see-through",
+        # (The rules' camera, the grippers' homes, since the user's request of 2026-11-16: "最上面的xarm gripper的空间朝向也要跟
+        # 下面的这些家爪都对齐"; a camera of its own before.)
+        rules = json.loads((ROOT / "web" / "library" / "scenes" / "scenes.json").read_text(encoding="utf-8"))["rules"]
+        # (The near finger see-through as every gripper's since the review of that day: drawn solid, it hid its own pad.)
+        rp.check("1440: the stage draws the scene's looks at the rules' camera (the grippers' homes, no camera of its own), the near finger see-through",
                  looks.get("bodies") == sorted({body["look"] for body in scene["bodies"]}) and looks.get("part") == scene["part_look"]
-                 and stage.get("camera") == scene["camera"] and stage.get("see_through") == [], (looks, stage.get("camera"), stage.get("see_through")))
+                 and "camera" not in scene and stage.get("camera") == rules["camera"] and stage.get("see_through") == ["mate"],
+                 (looks, stage.get("camera"), stage.get("see_through")))
         rp.check("1440: the view's box is 4:5 beside the page's words and within the window, its canvas filling it, the Assembled view chosen",
                  near(info["stage"][2] * 5, info["stage"][3] * 4, 4) and near(info["canvas"][2], info["stage"][2]) and near(info["canvas"][3], info["stage"][3])
                  and info["info"][0] > info["frame"][0] + info["frame"][2] and info["views"] == [["exploded", False], ["assembled", True]]
@@ -554,10 +559,21 @@ def part_page(browser, url: str, out: Path) -> None:
         # orange's): the fingers' orange 8 to 26 degrees, the boards' amber 26 to 45, both saturated and lit.
         orange = share(image, lambda r, g, b: hue_band(r, g, b, 8, 26, 0.4))
         amber = share(image, lambda r, g, b: hue_band(r, g, b, 26, 45, 0.35))
-        white = share(image, lambda r, g, b: min(r, g, b) > 190 and max(r, g, b) - min(r, g, b) < 12)
+        # The shell and the holders light and neutral: above 150 in every channel, within 12 of grey, at least 0.3 of the
+        # drawing (the review of 2026-11-16).  Near white (above 190) it had been held at 0.25, then 0.12 at the grippers'
+        # homes: from the logo's side, 30 degrees above, the shell's face turned from the key reads a light grey (a look
+        # the user is to judge), and with the near finger see-through its holder is ghosted too, so the near-white share
+        # of the Assembled picture's drawing is 0.124 (0.163 with the finger solid, 0.444 from the showcase's own camera),
+        # too near any floor to hold; the light share is 0.403 (0.493 solid, 0.538 from its own camera).
+        white = share(image, lambda r, g, b: min(r, g, b) > 150 and max(r, g, b) - min(r, g, b) < 12)
         black = share(image, lambda r, g, b: max(r, g, b) < 70)
-        rp.check("1440: the canvas shows the orange fingers, the amber boards, the white shell and holders and the black links",
-                 orange > 0.08 and amber > 0.03 and white > 0.25 and black > 0.03, f"orange {orange:.3f}, amber {amber:.3f}, white {white:.3f}, black {black:.3f}")
+        rp.check("1440: the canvas shows the orange fingers, the amber boards, the light shell and holders and the black links",
+                 orange > 0.08 and amber > 0.03 and white > 0.3 and black > 0.03, f"orange {orange:.3f}, amber {amber:.3f}, light {white:.3f}, black {black:.3f}")
+        # Both pads in sight (the review of 2026-11-16): the near finger's, on the canvas's left half, seen through that
+        # finger (its amber a 0.18 share of the half's drawing at the review; 0.07 with the finger solid, its straps alone).
+        left = share(image.crop((0, 0, image.width // 2, image.height)), lambda r, g, b: hue_band(r, g, b, 26, 45, 0.35))
+        rp.check("1440: both pads in sight, the near finger's seen through that finger (the amber boards on the canvas's left half)",
+                 left > 0.12, f"the left half's amber {left:.3f}")
         page.screenshot(path=str(out / "page.assembled.1440.light.png"))
         rp.check("1440: the page's words: the label, one line, the line of detail, the tutorial for the Gerbers (a grey pill, a new tab), the two notices",
                  (info["label"], " ".join(info["line"].split()), " ".join((info["detail"] or "").split())) == (document["label"], document["text"], document["detail"])

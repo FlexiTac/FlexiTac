@@ -69,23 +69,33 @@ Gen by Surface's figure byte for byte; Gen by Surface keeps its grey part).  For
 1. Gen by Surface's figure (gen.html?part=<id>, ./?part=<id> until 2026-11-16, the figure on its own: generator_shoot(), as the pictures were shot until the
    3D view) is the picture pinned for it in tools/browser/generator_figure.json (its three files' bytes and SHA-256, of
    the entry's fit and build: the Library's pictures of before the look, so the figure of today is the figure of then);
-2. the Library's view with the rules' looks served away is that figure, pixel for pixel (the same part, sheets, lights,
-   camera and frame: without a look the Library's view of such a part is the figure);
+2. the Library's view with the rules' looks and homes served away is that figure, pixel for pixel (the same part,
+   sheets, lights, camera and frame: without a look and a home the Library's view of such a part is the figure);
 3. the Library's view as the rules are gives the folder's three pictures, byte for byte (for a part the rules give no
-   look these are the figure's own files, the equality of before);
-4. for a part with a look, the view shot once more with that look in another colour (every channel half the range off):
+   look and no home these are the figure's own files, the equality of before; since 2026-11-16 the rules' part_homes
+   draw the UMI finger and its tips at the grippers' homes, with their explode, so its pictures are no longer at the
+   figure's angle, tilt 57 / spin -20, which Gen by Surface keeps);
+4. for a part with a look, at the figure's homes (the rules' home served away: the figure is the witness only there),
+   the view shot once more with that look in another colour (every channel half the range off):
    the drawing's alpha is the figure's at every pixel (the same outline), and every drawn pixel that the part's colour
    does not reach (the same in both colours: the sheets, and their edges on the ground) is the figure's pixel (the look
    touches the part alone); the pixels it does reach (the part's) and the others must each be PART_SHARE_MIN and
    SHEETS_SHARE_MIN of the drawing at least, so that neither statement is empty.  Where the rules also give the
    assembled pad a tint (their part_pad, since 2026-11-14), this comparison is of the view with the tint served away;
-5. and then the view with the tint (the pictures') against that view without it: the same alpha at every pixel, nothing
-   changed in Exploded, and in Assembled only pixels the part's colour does not reach (the sheets'), PAD_SHARE_MIN of
-   the drawing at least.
+5. and then the view with the tint against that view without it, at the figure's homes too: the same alpha at every
+   pixel, nothing changed in Exploded, and in Assembled only pixels the part's colour does not reach (the sheets'),
+   PAD_SHARE_MIN of the drawing at least;
+6. for a part with a look and a home (the rules' part_homes: the pictures' own homes, which a visitor sees; the review
+   of 2026-11-16 found the fourth and fifth comparisons only at the figure's homes, so a fault of the look or the tint at
+   the grippers' homes alone, aim()'s lamp, roll or tint, passed), the fourth and the fifth again at the grippers'
+   homes, the witness the part grey there (the rules' home alone served: aimed, no look): the view in its look without
+   the tint and in the other colour against that witness, and the view as the rules are (the pictures') against the
+   look without the tint.
 A gripper's sensor is refused (its picture is the whole scene).  --pin-generator [ID,...] writes the pin from Gen by
 Surface's figure as it is now, saying which pictures changed: only for a deliberate change of the figure, or a sensor's
 new build.  Four drawings a sensor: 43 to 57 s on the shared host of 2026-11-12 (a shoot's one drawing 8 to 18 s there);
-five with the pad's tint.
+five with the pad's tint, nine with the rules' home (the look and its tint at the figure's homes besides the pictures',
+and the witness, the look alone and the other colour at the grippers' homes).
 --sheet writes a contact sheet (PNG) of every sensor's Exploded card in the manifest, in the Library's order,
 each in the page's light box.  About 6 to 10 s a sensor, the art 0.6 to 1.6 s of it (the 42 in 5.4 minutes on a shared
 host, 2026-11-05, with the scenes of the design: 126 files, 3.70 MB; the first screen's cards 0.21 MB; the art 0.41 MB).
@@ -400,8 +410,9 @@ def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> di
             shots["stage"] = (stage or {}).get("numbers")
             if not shots["stage"]:
                 raise ShotError(f"the stage measured no numbers (#libViewState stage {stage!r}): is the page's ?probe=shoot honoured?")
-        elif stage:
-            raise ShotError(f"a stage on a sensor with no scene: {stage!r}")
+        elif stage and stage.get("numbers") is not None:
+            # (A part without a scene at the grippers' homes reports its home, never numbers: the rules' part_homes.)
+            raise ShotError(f"a stage's numbers on a sensor with no scene: {stage!r}")
         else:
             shots["stage"] = None
     finally:
@@ -857,26 +868,30 @@ def other_look(look: dict) -> dict:
 
 
 def served_scenes(index: dict, part_id: str, given: dict | None) -> str:
-    """scenes/scenes.json's text as --check-generator serves it: the rules without their looks (``given`` None: the part
-    as Gen by Surface draws it) or with ``given`` ({"look", "smooth_deg"} and any "pad", as library_write.part_look()
-    gives it) for ``part_id`` alone; everything else as it is."""
+    """scenes/scenes.json's text as --check-generator serves it: the rules without their looks and homes (``given``
+    None: the part as Gen by Surface draws it, at its figure's homes) or with ``given`` ({"look", "smooth_deg"} and any
+    "pad" and "home", as library_write.part_look() gives it) for ``part_id`` alone; everything else as it is."""
 
     served = json.loads(json.dumps(index))
     for key in library_write.RULES_OPTIONAL:
         served["rules"].pop(key, None)
     if given is not None:
-        served["rules"]["part_looks"] = {part_id: given["look"]}
+        if given.get("look") is not None:
+            served["rules"]["part_looks"] = {part_id: given["look"]}
         if given.get("smooth_deg") is not None:
             served["rules"]["part_smooth_deg"] = given["smooth_deg"]
         if given.get("pad") is not None:
             served["rules"]["part_pad"] = given["pad"]
+        if given.get("home") is not None:
+            served["rules"]["part_homes"] = {part_id: {key: value for key, value in given["home"].items() if key != "camera"}}
     return json.dumps(served)
 
 
-def unpadded(given: dict) -> dict:
-    """``given`` (library_write.part_look()) without its pad: the part's look alone."""
+def without(given: dict, *keys) -> dict:
+    """``given`` (library_write.part_look()) without these of its keys: "pad", the part's look alone; "home", the view at
+    Gen by Surface's figure's homes (and its explode)."""
 
-    return {key: value for key, value in given.items() if key != "pad"}
+    return {key: value for key, value in given.items() if key not in keys}
 
 
 def view_differences(figure: bytes, look: bytes, other: bytes) -> dict:
@@ -991,10 +1006,11 @@ def twice(what: str, shot):
 
 def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, index: dict, parts: dict, pin: dict) -> int:
     """--check-generator (the module's docstring): for each sensor of a part without a scene, Gen by Surface's figure
-    against its pin, the Library's view without the rules' looks against that figure, the view as the rules are against
-    the folder's pictures, and for a part with a look the view against the figure pixel by pixel (view_differences(): the
-    look without the pad) and, where the rules give the pad a tint, the view with it against the view without it
-    (pad_differences()); writes nothing."""
+    against its pin, the Library's view without the rules' looks and homes against that figure, the view as the rules
+    are against the folder's pictures, and for a part with a look, at the figure's homes (the rules' home served away),
+    the view against the figure pixel by pixel (view_differences(): the look without the pad) and, where the rules give
+    the pad a tint, the view with it against the view without it (pad_differences()); where they give the part a home,
+    both again at that home against the part drawn grey there (aimed); writes nothing."""
 
     from playwright.sync_api import Error as PlaywrightError
 
@@ -1014,9 +1030,14 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
             figure = twice(identifier, lambda: generator_shoot(browser, url, identifier, variant))
             bare = twice(identifier, lambda: viewed(None))
             looked = twice(identifier, lambda: viewed(given)) if given else bare
-            # The look alone (the pad's tint served away, where the rules give one) and in its other colour.
-            alone = twice(identifier, lambda: viewed(unpadded(given))) if given and given.get("pad") is not None else looked
-            other = twice(identifier, lambda: viewed(dict(unpadded(given), look=other_look(given["look"])))) if given else None
+            # At the figure's homes (the rules' home served away, where they give one; the pictures are at the
+            # grippers' since 2026-11-16): the look with its pad, the look alone (the pad's tint served away, where the
+            # rules give one) and in its other colour.
+            homed = given and given.get("home") is not None
+            dressed = twice(identifier, lambda: viewed(without(given, "home"))) if homed else looked
+            alone = twice(identifier, lambda: viewed(without(given, "pad", "home"))) if given and given.get("pad") is not None else dressed
+            other = (twice(identifier, lambda: viewed(dict(without(given, "pad", "home"), look=other_look(given["look"]))))
+                     if given and given.get("look") is not None else None)
             files, _ = encode(figure)
             pictures, _ = encode(looked)
             unlike = []
@@ -1028,7 +1049,7 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
                 kinds = [kind for kind, item in figure_record(variant, files)["files"].items() if item != (pinned.get("files") or {}).get(kind)]
                 if kinds:
                     unlike.append(f"Gen by Surface's figure is not the pinned one ({', '.join(kinds)})")
-            # 2. The Library's view without the rules' looks is the figure.
+            # 2. The Library's view without the rules' looks and homes is the figure.
             pixels = {mode: {"figure": rgba(figure[mode]["png"]), "bare": rgba(bare[mode]["png"])} for mode in MODES}
             for mode in MODES:
                 if pixels[mode]["bare"] != pixels[mode]["figure"]:
@@ -1040,18 +1061,33 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
                      if not (out / Path(paths[kind][0]).name).is_file() or (out / Path(paths[kind][0]).name).read_bytes() != data]
             if kinds:
                 unlike.append(f"the folder's pictures are not the Library's view ({', '.join(kinds)})")
-            # 4. In its look (without the pad's tint), the view differs from the figure on the part's pixels alone.
-            said = "no look: the pictures are the figure's"
-            if given:
+            # 4. In its look (without the pad's tint), at the figure's homes, the view differs from the figure on the part's
+            # pixels alone.
+            said = "no look: the pictures are the figure's" if not homed else "no look"
+            if other is not None:
                 counted = {mode: view_differences(pixels[mode]["figure"], rgba(alone[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}
                 unlike += [f"{mode}: {problem}" for mode in MODES for problem in view_problems(counted[mode])]
                 said = "; ".join(f"{mode} {counted[mode]['part']} of {counted[mode]['drawn']} px the part's, the other {counted[mode]['sheets']} the figure's"
                                  for mode in MODES)
-            # 5. The pad's tint changes the Assembled sheets alone: never the part, nothing in Exploded, the same outline.
-            if given and given.get("pad") is not None:
-                padded = {mode: pad_differences(rgba(alone[mode]["png"]), rgba(looked[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}
+            # 5. The pad's tint changes the Assembled sheets alone: never the part, nothing in Exploded, the same outline (at
+            # the figure's homes, as the fourth).
+            if other is not None and given.get("pad") is not None:
+                padded = {mode: pad_differences(rgba(alone[mode]["png"]), rgba(dressed[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}
                 unlike += [f"{mode}: {problem}" for mode in MODES for problem in pad_problems(mode, padded[mode])]
                 said += "; the pad " + ", ".join(f"{padded[mode]['pad']} px in {mode}" for mode in MODES)
+            # 6. At the grippers' homes, the pictures' own (the review of 2026-11-16): the fourth and the fifth again, the
+            # witness the part grey there (the rules' home alone: aimed, no look).
+            if homed and other is not None:
+                aimed = twice(identifier, lambda: viewed({"home": given["home"]}))
+                aimed_alone = twice(identifier, lambda: viewed(without(given, "pad"))) if given.get("pad") is not None else looked
+                aimed_other = twice(identifier, lambda: viewed(dict(without(given, "pad"), look=other_look(given["look"]))))
+                counted = {mode: view_differences(rgba(aimed[mode]["png"]), rgba(aimed_alone[mode]["png"]), rgba(aimed_other[mode]["png"])) for mode in MODES}
+                unlike += [f"{mode} at the grippers' homes: {problem}" for mode in MODES for problem in view_problems(counted[mode])]
+                said += "; at the grippers' homes " + "; ".join(f"{mode} {counted[mode]['part']} of {counted[mode]['drawn']} px the part's" for mode in MODES)
+                if given.get("pad") is not None:
+                    padded = {mode: pad_differences(rgba(aimed_alone[mode]["png"]), rgba(looked[mode]["png"]), rgba(aimed_other[mode]["png"])) for mode in MODES}
+                    unlike += [f"{mode} at the grippers' homes: {problem}" for mode in MODES for problem in pad_problems(mode, padded[mode])]
+                    said += ", the pad " + ", ".join(f"{padded[mode]['pad']} px in {mode}" for mode in MODES)
         except (ShotError, PlaywrightError) as error:
             failed.append(identifier)
             print(f"FAIL {identifier}: {error}", flush=True)
@@ -1059,7 +1095,8 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
         if unlike:
             differ.append(identifier)
         print(f"{'DIFFERS' if unlike else 'same'} {identifier} ({number}/{len(chosen)}, {time.monotonic() - begun:.1f} s): "
-              + ("; ".join(unlike) if unlike else f"the figure as pinned, the view without a look the figure, the pictures the view's; {said}"), flush=True)
+              + ("; ".join(unlike) if unlike else f"the figure as pinned, the view without a look or a home the figure, the pictures the view's; {said}"
+                                                     + ("; the pictures at the grippers' homes" if homed else "")), flush=True)
     print(f"library_shots: Gen by Surface's figure and the Library's view of it checked for {len(chosen) - len(failed)} of {len(chosen)} sensors in "
           f"{time.monotonic() - started:.0f} s; {len(differ)} differ" + (f": {', '.join(differ)}" if differ else ""))
     return 1 if failed or differ else 0
@@ -1297,11 +1334,9 @@ def main(argv=None) -> int:
         browser.close()
     total = sum(item["bytes"] for shot in shots.values() for item in shot["files"].values())
     arts = sum(shot["art"]["bytes"] for shot in shots.values() if shot.get("art"))
-    # The grippers' cards their Exploded card file, the UMI shelf's their Assembled picture (library.js SHELF_VIEW, the lead's
-    # review of 2026-11-16).
-    carded = sum(1 for part in entries["order"] if part != "umi-finray" and part not in {family["shelf"] for family in entries["families"].values()})
-    first = sum(shots[identifier]["files"]["assembled" if number >= carded else "card"]["bytes"]
-                for number, identifier in enumerate(grid_cards(entries)) if identifier in shots)
+    # Every card its Exploded card file (the UMI shelf's too since the user's request of 2026-11-16; their Assembled
+    # picture for part of that day, library.js SHELF_VIEW).
+    first = sum(shots[identifier]["files"]["card"]["bytes"] for identifier in grid_cards(entries) if identifier in shots)
     if timings:
         seconds = sorted(item[1] for item in timings)
         print(f"library_shots: a sensor in {seconds[0]:.1f} to {seconds[-1]:.1f} s (the art {min(item[2] for item in timings):.2f} to "

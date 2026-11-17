@@ -543,7 +543,7 @@ class DocumentTests(unittest.TestCase):
         text = " ".join((ROOT / "docs" / "LIBRARY_VIEW.md").read_text(encoding="utf-8").split())
         for words in ("## The showcase's page", library_write.SHOWCASE_FORMAT, "`library/showcase.json`", "library_shots.py --showcase",
                       "`showcase_page(parts, library)`", "./#flexitac-g1", "Original FlexiTac · Hand-designed, pre-agent", "1280 x 1600", "800 x 1000",
-                      "The part is the gripper's left finger", "Its camera is its own", "No finger is see-through", "`library/bodies/flexitac-g1/drawn-<name>.stl`",
+                      "The part is the gripper's left finger", "Its camera is the rules'", "The near finger is see-through", "`library/bodies/flexitac-g1/drawn-<name>.stl`",
                       *(f"`{key}`" for key in library_write.SHOWCASE_KEYS if key not in ("format", "title", "label", "text")), "`title`, `label`, `text`"):
             with self.subTest(words=words):
                 self.assertIn(words, text)

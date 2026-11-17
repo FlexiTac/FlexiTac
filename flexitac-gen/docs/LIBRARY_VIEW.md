@@ -352,7 +352,9 @@ one stack explodes.
   `part_looks` `{part or family: a name of looks, or a look}` and
   `part_smooth_deg`, the look of the parts that have no scene; since
   2026-11-14 `part_pad` `{color, opacity}`, the tint of their assembled
-  sensor's pad (see "Parts without a scene").
+  sensor's pad; since 2026-11-16 `part_homes` `{part or family: {approach,
+  explode_share}}`, the grippers' homes for them (see "Parts without a
+  scene").
 
 `library/scenes/<part>.json` (`"format": "flexitac-library-scene/v1"`):
 
@@ -713,27 +715,78 @@ product; Gen by Surface keeps its grey part):
   the least, the 2 mm finger's the most), and the finger's orange
   `#bc4709` (its lit quarter `#da520b`, hue 21, value 0.85) as before:
   the photo's gap of about 21 degrees of hue and half the
-  brightness.  The photo's traces are stronger than the tint leaves
+  brightness (since the grippers' homes of 2026-11-16, the Assembled
+  home 57 degrees off the face's normal where it had been 35, the tinted
+  pixels' median in the 3D view reads hue 43.7, value 0.35, the amber
+  board's under them hue 32.9, value 0.66: `library_checks.py`
+  `PAD_LOOK` holds the amber at 0.6, 0.7 before).  The photo's traces are
+  stronger than the tint leaves
   them (its copper bright between dark stripes of film; here the
   board's art, whose copper reads a little darker than its polyimide,
   at a third of its contrast).  Gen by
   Surface draws no pad: its figure is its own, and `--check-generator`
   holds the tint to the Assembled sheets (below).
+- `part_homes` (the user's request of 2026-11-16, of the UMI shelf's
+  cards: "你这样是重新选择了一个角度，用户需要再完成一次gripper方向的空间转换，这样不好；
+  你做成和这个finger一样的空间角度，而且可以做成exploded"): `{part or family:
+  {approach, explode_share}}`, the part drawn at the grippers' homes.
+  `approach` is the fingers' approach axis in the part's file axes (a unit
+  vector, as a scene's `approach`: the UMI finger's length toward its tip,
+  `[0, 0, -1]`, its tips' too); the stage (`library_stage.js` `aim()`)
+  makes it the camera's up and sets each mode's direction by the rules'
+  `camera` about the face's normal with `direction()`, a gripper's own:
+  `elevation_deg` (30) above the plane across the approach axis, turned
+  from the front (`front` 1) toward the face until it is `tilt_deg` off its
+  normal (65 Exploded, 57 Assembled).  So the finger stands as a gripper's
+  far finger stands on the cards: upright, its contact face turned to the
+  picture's left, its stack exploded to the left, seen from the front-left
+  and 30 degrees above.  The grippers' common convention, read from the
+  seven scenes: none overrides the rules' camera, every approach is a unit
+  axis of its file, and their faces lie 0 to 7.7 degrees off the plane
+  along the approach axis (`face_tilt_deg`); the UMI face lies along it
+  (0).  `explode_share` (0.3 to 1.2; 0.8) spaces its stack that share of the
+  boards' narrower side a layer along the normal (a gripper's stack is
+  spaced by its jaws' gap, which a lone finger has not): at Gen by
+  Surface's 0.55 (18.05 mm a layer on the 2 mm finger, 14.6 to 19.1 mm
+  across the 30 sensors; the probe's `drape_step_mm`) the bottom FPC lay
+  against the finger's face, seen nearly edge-on from this side, its
+  outline lost in the finger's; at 0.8 (26.26 mm on the 2 mm finger, 21.2
+  to 27.7 mm across them; `step_mm`) each sheet stands on the ground alone,
+  and the drawing is about 550 px of the picture's 1280 wide where it was
+  470 (the grippers' 570 to 840), its height bound as theirs (margins of
+  48 to 51 px of 800, theirs 49 to 52).  The drawing is framed as a gripper's
+  (`prepare()`'s points: the whole part and the sheets, `frameView` at
+  the home), the film's lamp and the studio's roll set at the camera as a
+  gripper's stack 1 has them (the figure's own lamp is aimed from its own
+  home).  The probe's `stage` then reports `{home, up, camera, approach,
+  explode_share, step_mm, drape_step_mm, numbers: null}` (no numbers: the
+  stage measures a gripper's scene alone; a gripper's report gains `up`).
+  Gen by Surface keeps its own figure (`drape.js`, `onpart.js` untouched).
 - `cad/library_view.js` reads the rules for such a part and hands the
-  stage `{look, smooth_deg, pad}`; the stage draws the part's own
-  material in it for that drawing, and the pad's tint where there is one.
-  Without a rule the part is Gen by Surface's grey.
+  stage `{look, smooth_deg, pad}` and its home `{approach, explode_share,
+  camera}`; the stage draws the part's own material in it for that
+  drawing, the pad's tint where there is one, and at the grippers' homes
+  where the rules give one.  Without a rule the part is Gen by Surface's
+  grey at its figure's homes.
 - The rules are hashed into every gripper's `scene_sha256`, and a record
   of such a part keeps `part_look_sha256`
   (`tools/library_write.py` `part_look_sha256(part_look(...))`, the pad's
-  tint among it where the rules give one): a changed look or tint makes
-  the pictures stale.
+  tint among it where the rules give one, and since 2026-11-16 its home,
+  `home`, with the rules' camera): a changed look, tint or home makes the
+  pictures stale.
 
 Until the look, the Library's pictures of these sensors were Gen by
 Surface's figure byte for byte, and `library_shots.py --check-generator`
 held the two together.  They differ now by design, so the check holds what
 still holds (for each sensor of a part without a scene, in a browser,
 writing nothing):
+
+Since 2026-11-16 the Library's pictures of these parts are at the
+grippers' homes (`part_homes`, above) and no longer at the figure's angle
+(tilt 57 / spin -20 Exploded, the left figure's, the user's decision of
+2026-11-05 for the generator, which Gen by Surface keeps): the check now
+holds that the Library's view is the figure with three things added, the
+look, the tint and the home, each served away to see the figure again.
 
 1. Gen by Surface's figure (`gen.html?part=<id>`; `./?part=<id>` until
    2026-11-16) is the picture pinned for it:
@@ -745,12 +798,15 @@ writing nothing):
    the look: the figure of today is the figure of then.
    `--pin-generator` writes it anew, only for a deliberate change of the
    figure or a sensor's new build.
-2. The Library's view with the rules' looks served away is that figure,
-   pixel for pixel: without a look, the Library's view of such a part is
-   Gen by Surface's (the same part, sheets, lights, camera and frame).
+2. The Library's view with the rules' looks and homes served away is that
+   figure, pixel for pixel: without a look and a home, the Library's view
+   of such a part is Gen by Surface's (the same part, sheets, explode,
+   lights, camera and frame).
 3. The Library's view as the rules are gives the committed pictures, byte
-   for byte.
-4. The look touches the part alone.  The view is shot once more with the
+   for byte (at the grippers' homes).
+4. The look touches the part alone, at the figure's homes (the rules' home
+   served away: the figure is the witness only there).  The view is shot
+   once more with the
    look in another colour (every channel half the range off).  Its alpha
    is the figure's at every pixel (the same outline), and every drawn
    pixel that is the same in both colours (what the part's colour does
@@ -762,12 +818,28 @@ writing nothing):
    rules give the pad a tint, this comparison is of the view with the
    tint served away (`unpadded()`).
 5. The pad's tint touches the Assembled sheets alone (since 2026-11-14;
-   `pad_differences()`, `pad_problems()`): the view with the tint (the
-   pictures') against the view without it has the same alpha at every
+   `pad_differences()`, `pad_problems()`), at the figure's homes too: the
+   view with the tint against the view without it has the same alpha at every
    pixel, changes nothing in Exploded, and in Assembled changes only
    pixels the part's colour does not reach (by the fourth comparison's
    witness in the other colour), `PAD_SHARE_MIN` (0.05) of the drawing at
-   least.  Five drawings a sensor then.
+   least.
+6. The fourth and the fifth again at the grippers' homes, the pictures'
+   own, which a visitor sees (the review of 2026-11-16: held at the
+   figure's homes alone, a fault of the look, the film's lamp, the studio's
+   roll or the tint in `aim()`'s branch alone passed both): the witness is
+   the part drawn grey there (the rules served with the part's home alone,
+   no look: `served_scenes()` of `{"home": ...}`); the view in its look
+   without the tint and in the other colour, both at that home, against it
+   (`view_differences()`: the same alpha, every pixel the part's colour
+   does not reach the witness's), and the view as the rules are (the
+   pictures') against the look without the tint (`pad_differences()`).  On
+   the 2 mm finger the part's pixels are 52 % of the Exploded drawing and
+   56 % of the Assembled one there, the pad's 23 % of the Assembled one.
+   Five drawings a sensor then; nine with the home (the look and its tint
+   at the figure's homes besides the pictures', and the witness, the look
+   alone and the other colour at the grippers' homes): about 25 s a sensor
+   on this host.
 
 `tests/test_library.py` holds, without a browser, that the pin is of
 exactly these sensors and their builds, and that the committed pictures
@@ -822,22 +894,31 @@ is written by `tools/library_showcase.py`:
   gripper as built differs in its holders: two plain printed blocks that
   read as one part used twice, the second turned half a turn about the
   gripper's axis, not HandUMI's tapered holder and its mirror image.)
-- **Its camera is its own** (`camera`, a scene's override of the rules'
-  within their bounds, its reason in `about`): 60 degrees off the pad's
-  normal, 20 degrees up, `front` -1 (with this part: the side of the
-  shell's face without the logo); Exploded from the same side 70 degrees
-  off and 40 up (since the verification of 2026-11-13: at the Assembled
-  camera the lifted layers stood edge-on, a column 90 px wide, and 8 % of
-  the drawing told the two modes apart).  At the rules' camera the
-  far finger's pad was edge-on and its straps on its far side; from here
-  the pad's face, the straps crossing both fingers' side faces, the near
-  finger's back and the gripper's body are all seen.  The logo, on the
-  shell's other face, is not drawn.
-- **No finger is see-through** (`see_through` `[]`): the jaws are 55 mm
-  apart and from this camera the near finger hides nothing of the far
-  one's pad, in either mode; the showcase is the gripper as built.  (Every
-  generated gripper keeps the near finger see-through, the user's decision
-  of 2026-11-06.)
+- **Its camera is the rules'** (no `camera` override since the user's
+  request of 2026-11-16, "最上面的xarm gripper的空间朝向也要跟下面的这些家爪都对齐":
+  the showcase seen as every gripper's card sees its gripper): the body at
+  the bottom, the fingers upright, the far finger's pad turned to the left
+  with its layers exploded into the jaws' gap, from the front 30 degrees up,
+  65 degrees off the pad's normal Exploded and 57 Assembled; with this part
+  (the left finger) the front is the logo's side of the shell, the side the
+  owner's photo was taken from, and the straps cross the fingers' side faces
+  on the far side, seen through the fins' windows as in that photo.  From
+  2026-11-12 to 2026-11-16 its camera was its own, an override from the side
+  of the shell's face without the logo (Assembled 60 degrees off the
+  normal and 20 up, Exploded 70 and 40, `front` -1), which showed the
+  straps and turned the gripper another way than the cards below it.  The
+  logo is not drawn.
+- **The near finger is see-through** (`see_through` `["mate"]`, since the
+  review of 2026-11-16), as every gripper's near finger is (the user's
+  decision of 2026-11-06, "靠近外面的finger透明"), in both modes at the rules'
+  `ghost_opacity`: from the grippers' homes the near finger's own pad faces
+  away from the camera, and the builder's solid finger hid it whole
+  (`near_seen` 0.002, `opaque_max` 0.996), so the card showed FlexiTac on
+  one finger where its alt text says both; seen through it, the near pad's
+  field and its straps show (`near_seen` 0.891, held to the rules'
+  `near_seen_min` as a gripper's).  Under the showcase's own camera of
+  2026-11-12 to 2026-11-16 both fingers were drawn solid: from the other
+  side the near finger hid nothing of either pad.
 - What the project draws (`tools/library_showcase.py` `DRAWN`; each a file
   `bodies/flexitac-g1/drawn-<name>.stl` of `tools/library_split.py`'s boxes
   and cylinders under its header of a shape the project drew): what the
@@ -1038,12 +1119,16 @@ entry's) is the Library of before.
   shoot again), or whose stage's numbers are not sound
   (`showcase_numbers(numbers, rules)`: `visible_min`, `clearance_mm`,
   `stacks_apart_px` and `card_px` at least the rules' checks, as any
-  gripper's; `assembled_opaque` below 0.25, `opaque_max` below 0.75 and
-  `near_seen` at least 0.25, `SHOWCASE_BOUNDS`, the showcase's own: both
-  its fingers are solid, so its own tails behind its finger and the near
-  finger's pad behind the near finger count as covered; each bound a
-  little past what was measured, 0.19, 0.679 and 0.321, so that a scene
-  or a camera that hides more of the pad is refused).  `older`: pictures
+  gripper's; `assembled_opaque` below 0.65, `SHOWCASE_BOUNDS`, the
+  showcase's own: both its fingers are solid, so the far finger's straps
+  on its side face away from the camera and its tails behind it count as
+  covered, its field on the face toward the camera seen whole; a little
+  past what was measured at the grippers' homes, 0.613, so that a scene or
+  a camera that hides more of the pad is refused.  `opaque_max` (0.996)
+  and `near_seen` (0.002) measure the near finger's pad, which faces away
+  from the camera at those homes behind its solid finger: reported, not
+  bounded.  From the showcase's own camera, until 2026-11-16, they had been
+  0.19, 0.679 and 0.321, held below 0.25, below 0.75 and at least 0.25).  `older`: pictures
   of older figure or view sources, a warning as a sensor's.  `showcase()`
   carries the problems, so `scenes()`, `library_write --check`,
   `tools/library_showcase.py --check` and the site build stop on them;
@@ -1166,8 +1251,9 @@ four drawn and shot (ogives over 30, 50 and 75 mm, a 75 mm wedge: the
 wedge read as the 5.8 mm trapezoid, the 75 mm ogive as the 5.8 mm convex
 arc, the 30 mm one as a rounded nose).
 
-The shelf's cards show their sensor **Assembled** (`library.js`
-`SHELF_VIEW`; the lead's review of the same day): from the Exploded home the
+From the lead's review of the same day to the user's request later that
+day ("Aligned with the grippers", below), the shelf's cards showed their
+sensor **Assembled** (`library.js` `SHELF_VIEW`): from the Exploded home the
 fingertip's tapered end is foreshortened at the top of the picture and
 partly covered by the exploded layers, so the six shapes looked alike on
 their cards; assembled, the contact face's outline is the shape.  Of the
@@ -1237,6 +1323,71 @@ them so:
   the tip, 296 against 322 taxels), but the shelf shows the Short taper's
   9.8 mm trapezoid, and framed on its tip the point reads beside the
   convex arc's round nose; a longer point was not cut.
+
+**Aligned with the grippers** (the user's request later on 2026-11-16, with
+a screenshot of the live shelf and a crop of a gripper's card: "图一中umicard图
+太大，确保你要和上面的card大小保持一致；另外你这样是重新选择了一个角度，用户需要再完成一次
+gripper方向的空间转换，这样不好；你做成和这个finger一样的空间角度，而且可以做成exploded,这样
+所有card都是对齐的，大小对齐，空间朝向对齐。最上面的xarm gripper的空间朝向也要跟下面的这些家爪都
+对齐").  The three-to-a-row grid, the frame on the fingertip and the
+Assembled cards and pages above are gone:
+
+- **The grippers' grid.**  The shelf is `.lib-cards` with no rule of its
+  own: four to a row (4 + 2) and two below 735 px, so each UMI card is a
+  gripper card's size at every width (cards 309 px wide at 1440 px, their
+  pictures 297 x 185.6 px, where the shelf's cards were 418 px; 232.5 px at
+  1100, 157.8 at 768, 167 at 390; `library_checks.py` `part_layout`
+  measures every card and its picture at every width).  From 735 to 899 px
+  and on a phone a card's name or line may take two balanced lines ("Pick
+  shape / and width"), as the grippers' names do ("Franka / Hand"), and a
+  row is as tall as its words: as the grippers' rows are of two heights
+  (246.9 and 268 px at 1100 px, "MakerMods Metal Arm" on two lines), the
+  UMI rows are a gripper row's height at 1440, 1100 and 390 px (294.7,
+  246.9, 227.1), 20 px taller at 735 to 768 px ("Pick your tip width" on
+  two lines, the grippers' lines on one) and in one row at 360 px, 21 px
+  lower at 900 px (the grippers' names on two lines, the UMI's on one; the
+  review of the same day).  The words are kept: a shorter line would make
+  the rows one height at 735 to 768 px, the user's to choose.
+- **Exploded, at the grippers' homes.**  Every card is its Exploded card
+  file (`slot()`, as a gripper's), and every page opens Exploded
+  (`showDetail()`); the pictures, the 3D view's homes, are the grippers'
+  (scenes.json's rules' `part_homes`, "Parts without a scene"): the finger
+  upright, its face to the left, its stack exploded to the left, from the
+  front-left 30 degrees up, as the gripper's far finger the user pointed
+  to.  The 30 UMI sensors were shot again (each picture new), the 28 of
+  the grippers to the same bytes (their records' `view_sha256` and, the
+  rules having changed, `scene_sha256` new).
+- **The shapes at a card's size.**  From this side the finger's own
+  outline is the same for every shape (its side, the fin-ray's ribs); the
+  shape is the sheets' outline, a face seen 65 degrees off its normal (its
+  width at cos 65 degrees, 0.42).  At 1440 px on a 2x screen each sheet's
+  tip reads: square, a short taper, a round nose, a long straight taper, a
+  slender concave point, a sharp point; on a 1x screen at 1440 px, and at
+  390 px, the straight finger and the five tapers part plainly, the five
+  tapers hardly (the review of the same day: their silhouettes at 297 px
+  differ by 5 to 8 % of the drawn pixels).  The explode (0.8 of the boards'
+  narrower side a layer, Gen by Surface's 0.55) keeps the bottom FPC's
+  outline off the finger's face.  The frame holds the whole drawing, its
+  height binding, and the tails take a quarter of that height below the
+  finger's base (162 of the 704 px of the 2 mm finger's Exploded picture:
+  the finger from 48 to 590 px, the bottom FPC's tail to 752), since the
+  explode brings the outer sheets toward the camera, which looks down 30
+  degrees.  A frame of the part and the sheets on its face alone
+  (`sheetPoints`'s `field`) enlarges the finger 1.09 times (540 to 588 px
+  tall; the outer sheet's tail on the face still binds); leaving the tails
+  out below 30 mm above the finger's base, 1.27 times (685 px), both tails
+  then running off the picture's bottom edge, and at 155 px the five
+  tapers still look alike.
+  Kept whole (the review's option, not taken): every picture of the Library
+  is its drawing whole on its ground (the shots tool refuses one its frame
+  cuts), the grippers' as these; the cut, or each taper card's default its
+  5.8 mm tip (the narrowest, its silhouette the most its own), is the
+  user's to choose.
+- **The showcase** at the top is at the grippers' homes too ("The
+  showcase's scene and files": its camera the rules'), and since the review
+  its near finger is see-through as every gripper's (drawn solid it hid its
+  own pad whole from this side).  Its card stays the Assembled picture
+  (`SHOWCASE_VIEW`); the grippers' cards are Exploded.
 
 The addresses stay: every sensor's (`#umi-finray-1mm` and the other
 pitches whose cards went open their pages), each part's, and the family's
