@@ -1,0 +1,21 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "galaxea-r1-lite",
+ "about": "drawn after Galaxea's own pictures of the G1 gripper (the G1 Gripper's product picture on galaxea-dynamics.com, the R1 Lite's product picture there, and the G1's drawings in Galaxea's A1 hardware guide), 2026-11-17: a black anodised aluminium gripper, the motor can and the plate it stands on, and two dark grey fingers of a fine grained matt finish (no page or guide of Galaxea's read gives their material: the A1 hardware guide gives the G1's sizes, stroke and rated force).  The Library's part, the finger's mesh, also holds its carriage (the block at the finger's root, standing on the plate, and the bar in the notch at the base of its face) and its rack, under the plate's slot; the pictures show the carriage black, so on the sensor's finger the project draws plain boxes in the carriage's black just over them (bodies/galaxea-r1-lite/drawn-carriage-sensor.stl, the project's own): the block, the bar and the fillet between them 0.06 mm proud, and the rack where its slot shows it (the slot's opening through the plate's 3 mm top filled to 0.06 mm over the rack, 1.5 mm under the plate's top) and where it rises under the block.  The other finger, always see-through, keeps its carriage and rack in its ghost as before: black boxes there only doubled the ghost (a lighter block on the plate, and its rack's box showed through the plate's top).  Not modelled: the fingers' steel screws, the carriage's screw holes, the plate's screws.",
+ "smooth_deg": 35,
+ "part_look": "finger-grey",
+ "looks": {
+  "finger-grey": {"base": "print-black", "color": "#6e7074", "roughness": 0.8, "env_intensity": 1.2, "evidence": "the G1 Gripper's product picture: the fingers are a dark grey with a fine grain and no sharp highlight, #939393 on the lit face, #686868 on the side turned from the light and #3e3e3e in the grooves: a matt grey well lighter than the black body it hangs from"},
+  "can-black": {"base": "anodized-black", "evidence": "the G1 Gripper's product picture: the motor can is black anodised aluminium, a satin black with soft upright highlights"},
+  "plate-black": {"base": "anodized-black", "evidence": "the G1 Gripper's and the R1 Lite's product pictures: the plate is black anodised aluminium, its chamfered edges catching the light"},
+  "carriage-black": {"base": "anodized-black", "evidence": "the G1 Gripper's product picture: the carriage the finger is screwed to, the block at its root against the plate, is satin black like the plate, never the finger's grey (the review of 2026-11-17); the rack under the plate's slot is in no picture, drawn in the same black so the slot reads dark"}
+ },
+ "bodies": {
+  "bodies/galaxea-r1-lite/left_gripper_link.stl": {"sha256": "200f6d5a5912e525c06aaf9256a29fe48d9a485be47ffd7d8f805e72afa3880f", "facets_sha256": "76806d29199c6f16ef26696bd29b8f3749e02c9404b20b18434de8380ef815ab", "weld_mm": 0.01, "components": [
+   {"name": "gripper-motor", "look": "can-black", "pick": [{"component": {"box": [[-76.71, -30.08, -30.04], [-15.65, 30.0, 29.98]], "triangles": 592}}]},
+   {"name": "gripper-plate", "look": "plate-black", "pick": "rest"}]}
+ },
+ "drawn": [
+  {"name": "carriage-sensor", "look": "carriage-black", "draw": [{"box": [[-36.55, -28.16, 6.84], [-30.43, -7.36, 21.46]]}, {"box": [[-36.55, -13.58, -5.16], [-15.43, -7.36, 5.0]]}, {"box": [[-30.86, -13.58, 4.9], [-29.2, -7.36, 6.24]]}, {"box": [[-39.9, -65.24, 12.96], [-38.43, -11.5, 21.42]]}, {"box": [[-38.43, -26.67, 13.26], [-36.43, -11.5, 21.45]]}], "finger": "sensor"}
+ ]
+}

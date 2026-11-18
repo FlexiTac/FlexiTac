@@ -290,3 +290,15 @@ def filleted_bracket(radius: float, segments: int, panel=40.0, flange=30.0, widt
             a, b, c, d = (x0, y0, z0), (x1, y0, z1), (x1, y1, z1), (x0, y1, z0)
             triangles += [(a, b, c), (a, c, d)]
     return triangles
+
+
+def roof(panels: Sequence[Sequence[float]], width: float = 30.0, height: float = 10.0) -> list:
+    """A prism (``extrude``) whose top face is flat panels, each ``(length, slope in degrees)`` from the x = 0 end
+    (``height`` high there), the slopes falling panel by panel: each crease a ridge of their difference."""
+
+    top = [(0.0, height)]
+    for length, slope in panels:
+        x, z = top[-1]
+        top.append((x + length * math.cos(math.radians(slope)), z + length * math.sin(math.radians(slope))))
+    end = top[-1][0]
+    return extrude([(0.0, 0.0), (end, 0.0)] + top[::-1], width)

@@ -14,9 +14,11 @@ facets.  Two cases are told apart:
   a sheet bent at its own minimum radius ``R`` around a crease of angle
   ``theta`` lifts off the corner by about ``R * theta**2 / 8``.  An edge
   whose lift-off exceeds ``CREASE_LIFT_OFF_MM`` counts as radius 0, so it
-  blocks a sheet of that radius: 16.7 degrees for the 4.7 mm field stack,
-  34 degrees for a single 0.11 mm FPC.  The crank pad's 1.74 and 3.6 degree
-  steps and a 30-segment cylinder's 12 degree edges stay passable.
+  blocks a sheet of that radius: 14.2 degrees for the 6.5 mm field stack
+  (surface.fit.STACK_THICKNESS_MM, 0.65 mm since 2026-11-17; 16.7 degrees at
+  the 4.7 mm of before), 25.6 degrees for a single 0.2 mm FPC (34 at 0.11 mm).
+  The crank pad's 1.74 and 3.6 degree steps and a 30-segment cylinder's 12
+  degree edges stay passable.
 
 The per-edge geometry is cached on the mesh (bounded by its edge count);
 the thresholds are applied per call.

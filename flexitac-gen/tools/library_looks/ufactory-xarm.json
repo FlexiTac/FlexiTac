@@ -1,0 +1,34 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "ufactory-xarm",
+ "about": "drawn after UFACTORY's photos and renders of the xArm Gripper (2026-11-17): the glossy white moulded shell, the black anodised aluminium links and fingers with machined edges, the turned steel pins of the links, the black anodised flange, the dark Phillips screws of the shell and the black inner chassis seen between the shell's halves.  The finger and its pad are one file, the Library's part, in the finger's black; since the user's word of 2026-11-17 (\"xarm grey pad\") the pad is drawn over it in the stock pad's light grey rubber, matte, after the same photos: on each finger a prism of the project's own (bodies/ufactory-xarm/drawn-pad-sensor.stl and drawn-pad-mate.stl, not UFACTORY's geometry) with the outline and thickness of the model's pad (left_finger.stl's facets 2900 to 2991, one connected component: a 29.5 x 37.5 mm rectangle with 3 mm round corners, 3 mm thick, 2 mm of it proud of the finger's plate), 0.02 mm larger on every side, so it covers that pad; the part's file and the sensor's fit on its face are unchanged.  The showcase draws the same housing (UFACTORY's G1 file, scenes/flexitac-g1.json) with numbers of its own, tuned on 2026-11-12/13 for the hand-designed FlexiTac beside it; this card's are the stock gripper's, after the maker's photos (the review of 2026-11-17).",
+ "smooth_deg": 35,
+ "part_look": "anodized-satin",
+ "looks": {
+  "pad-grey": {"base": "rubber-black", "color": "#a2a3a6", "env_intensity": 1.2, "evidence": "UFACTORY's shop renders (the pad's face #a7a7a7 lit, the pads #bababa from the front) and its photo of the gripper holding a rose (the pads' edges #9ea0a7 beside a #e1e0e5 wall): a light grey rubber pad, matte, on the black finger"},
+  "shell-gloss": {"base": "plastic-white-gloss", "color": "#eceef0", "env_intensity": 1.6, "evidence": "UFACTORY's renders (the manual's cover #e9e9e9, the shop's #f6f6f6) and the photos of the gripper on an xArm (window streaks along the shell's top edge): a glossy white moulding"},
+  "anodized-satin": {"base": "anodized-black", "color": "#2e2e31", "roughness": 0.42, "evidence": "the manual's cover (#333333 to #363636) and the photo of the gripper holding a red cube: black anodised links and fingers, satin, with bright machined edges"},
+  "pin-steel": {"base": "steel-polished", "roughness": 0.25, "evidence": "the manual's cover (#aeaeae) and the photo of the gripper holding a red cube: the links' pins end in bright turned steel heads"},
+  "screw-dark": {"base": "anodized-black", "color": "#3a3a3d", "metalness": 0.25, "roughness": 0.5, "env_intensity": 1.6, "evidence": "the manual's cover: the shell's six Phillips screws a face are dark grey (#656565) on the white shell"},
+  "chassis-black": {"base": "plastic-black-matte", "evidence": "the photo of the gripper holding a red cube: a black block with its screws between the shell's halves, under the links"}
+ },
+ "bodies": {
+  "bodies/ufactory-xarm/base_link.stl": {"sha256": "0ddf715a8d052074a4a3d9462183246d3a58964b3dc8b858df8f9e3809c6f8d1", "facets_sha256": "6728ee5e871673987bf5180dc104ee0962e5a41e93f5d16a7d24aba2ddefbe56", "weld_mm": 0.01, "components": [
+   {"name": "base-shell", "look": "shell-gloss", "pick": [{"component": {"box": [[-28.56, -51.14, 4.99], [25.53, 51.16, 103.15]], "triangles": 1745}}]},
+   {"name": "base-screws", "look": "screw-dark", "pick": [{"components_inside": [[19.0, -44.0, 22.0], [22.7, 44.0, 73.0]]}, {"components_inside": [[-25.7, -44.0, 22.0], [-24.0, 44.0, 81.1]]}, {"components_inside": [[-8.7, -13.0, 98.0], [8.7, 12.4, 99.1]]}, {"components_inside": [[-12.4, -37.4, 0.2], [12.4, 37.4, 2.5]]}]},
+   {"name": "base-flange", "look": "anodized-black", "pick": [{"components_inside": [[-37.6, -37.6, -9.1], [37.6, 37.6, 5.1]]}]},
+   {"name": "base-chassis", "look": "chassis-black", "pick": "rest"}]},
+  "bodies/ufactory-xarm/left_outer_knuckle.stl": {"sha256": "c9393b6c78a59b50d6cff3dabb2c25401f084f5039d9b59f0b2493ef6098596c", "look": "anodized-satin"},
+  "bodies/ufactory-xarm/right_outer_knuckle.stl": {"sha256": "e0a5402c805ed12978ab5dd6b95aef4e901fedb46f2122c139e308933f7a12e1", "look": "anodized-satin"},
+  "bodies/ufactory-xarm/left_inner_knuckle.stl": {"sha256": "96f6b2cc62ad608b4bc0545f8f9b1c464ca60632f23368a06d977a8575c1c787", "facets_sha256": "da2080bcd0b0aee523217eabab73cf1dc309e169f0a4d6eba36f77b1cd3ce43d", "weld_mm": 0.01, "components": [
+   {"name": "left-inner-pins", "look": "pin-steel", "pick": [{"components_inside": [[-14.1, 15.8, 19.9], [14.1, 25.5, 28.9]]}, {"components_inside": [[-13.1, 32.4, 39.0], [13.1, 38.5, 45.1]]}]},
+   {"name": "left-inner-links", "look": "anodized-satin", "pick": "rest"}]},
+  "bodies/ufactory-xarm/right_inner_knuckle.stl": {"sha256": "28e446f62c254eab5d73f0aaaf514aabb4d9833c4fcdde7d9b9b57ff76e2bb04", "facets_sha256": "a833619c58804d4a96fa537bf44208fa0e9b4a8edd4c2ef903b12f86050b881b", "weld_mm": 0.01, "components": [
+   {"name": "right-inner-pins", "look": "pin-steel", "pick": [{"components_inside": [[-14.1, -25.5, 19.9], [14.1, -15.8, 28.9]]}, {"components_inside": [[-13.1, -38.5, 39.0], [13.1, -32.4, 45.1]]}]},
+   {"name": "right-inner-links", "look": "anodized-satin", "pick": "rest"}]}
+ },
+ "drawn": [
+  {"name": "pad-sensor", "look": "pad-grey", "draw": [{"prism": {"axis": "y", "from": -26.0232, "to": -22.9832, "profile": [[59.7732, 11.75], [59.6254, 12.6832], [59.1964, 13.5251], [58.5283, 14.1932], [57.6864, 14.6222], [56.7532, 14.77], [25.2532, 14.77], [24.32, 14.6222], [23.4781, 14.1932], [22.81, 13.5251], [22.381, 12.6832], [22.2332, 11.75], [22.2332, -11.75], [22.381, -12.6832], [22.81, -13.5251], [23.4781, -14.1932], [24.32, -14.6222], [25.2532, -14.77], [56.7532, -14.77], [57.6864, -14.6222], [58.5283, -14.1932], [59.1964, -13.5251], [59.6254, -12.6832], [59.7732, -11.75]]}}], "finger": "sensor"},
+  {"name": "pad-mate", "look": "pad-grey", "draw": [{"prism": {"axis": "y", "from": -26.0232, "to": -22.9832, "profile": [[59.7732, 11.75], [59.6254, 12.6832], [59.1964, 13.5251], [58.5283, 14.1932], [57.6864, 14.6222], [56.7532, 14.77], [25.2532, 14.77], [24.32, 14.6222], [23.4781, 14.1932], [22.81, 13.5251], [22.381, 12.6832], [22.2332, 11.75], [22.2332, -11.75], [22.381, -12.6832], [22.81, -13.5251], [23.4781, -14.1932], [24.32, -14.6222], [25.2532, -14.77], [56.7532, -14.77], [57.6864, -14.6222], [58.5283, -14.1932], [59.1964, -13.5251], [59.6254, -12.6832], [59.7732, -11.75]]}}], "matrix": [[-1.0, 0.0, 0.0, 0.0], [0.0, -1.0, 0.0, -140.93], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]], "finger": "mate"}
+ ]
+}

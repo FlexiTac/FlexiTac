@@ -1,0 +1,61 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "leap-hand",
+ "about": "drawn after the LEAP Hand paper's own photo of the hand (Shaw, Agarwal and Pathak, RSS 2023, figure 1: the hand palm-on in white light, 2026-11-17): a hand black all over but for its four white fingertips (the paper's figure 8, the hand on an xArm, shows a build whose fingertips are printed black: the Library draws the hero photo's white).  The palm is a matte black print with a fine texture; the finger and thumb links, the Dynamixel servos in their black brackets, are one satin black (the photo shows the cases and the brackets alike, #2b2b2e to #333336); the fingertips are white soft prints, a cool matte white (#d7d7dd to #dcdce2 under the flash), no gloss.  Not modelled: the servos' cables and horns, the screws, the print's layer lines.",
+ "smooth_deg": 35,
+ "part_look": "tip-white",
+ "looks": {
+  "tip-white": {
+   "base": "plastic-white-satin",
+   "color": "#e3e4e8",
+   "roughness": 0.7,
+   "evidence": "the paper's figure 1: the four fingertips are one matte white with a cool cast, #d7d7dd in the middle of a lit tip and #dcdce2 at its brightest, a soft shade toward the edges and no highlight: rougher than the base's satin shell"
+  },
+  "servo-black": {
+   "base": "plastic-black-satin",
+   "color": "#262629",
+   "roughness": 0.55,
+   "env_intensity": 1.6,
+   "evidence": "the paper's figure 1: the servo cases and their brackets on every finger, #2b2b2e to #333336 on their lit faces, #151414 in the gaps, with a faint sheen along their edges: a little rougher than the base's moulded satin"
+  },
+  "palm-black": {
+   "base": "print-black",
+   "roughness": 0.75,
+   "evidence": "the paper's figure 1: the palm is a matte black print, #242425 to #343436 with a fine grain and no highlight anywhere on its broad face"
+  }
+ },
+ "bodies": {
+  "bodies/leap-hand/palm.stl": {
+   "sha256": "870a2186c2aabb263cd8a1c7053a553606ae254e5de6e82ab0c82282fe6b2fb5",
+   "look": "palm-black"
+  },
+  "bodies/leap-hand/base.stl": {
+   "sha256": "24fb1fc0da681f5c8fe6a7dbcb1797a48fb2f17d217ca2c910da90caf7780f3e",
+   "look": "servo-black"
+  },
+  "bodies/leap-hand/proximal.stl": {
+   "sha256": "b31d59d974f7284f98f2857ac9287df9c700584f9fc7a644fa6262134ba4e7c3",
+   "look": "servo-black"
+  },
+  "bodies/leap-hand/medial.stl": {
+   "sha256": "b006d7ac979560d25b4d9712515b034de3a86d9d4292b9ccce24ac8b2bcf7144",
+   "look": "servo-black"
+  },
+  "bodies/leap-hand/distal.stl": {
+   "sha256": "41f2ebf82ad884f0e10611c5aaf1d1746cd23371b8f1bee35db9035c0556bbaf",
+   "look": "servo-black"
+  },
+  "bodies/leap-hand/thumb_base.stl": {
+   "sha256": "64cf1e810c798a0ce6408335d8c2f376ce2c52afa37d3a32ff397d7e127bd4b4",
+   "look": "servo-black"
+  },
+  "bodies/leap-hand/thumb_proximal.stl": {
+   "sha256": "16dc4d76a36d882e42e3d2e360e69c7e4dab817922d20b039d02e7f6d482fb80",
+   "look": "servo-black"
+  },
+  "bodies/leap-hand/thumb_distal.stl": {
+   "sha256": "c71979eaa5cb78fd79f41e8a58a3861324101d2603536ed8b81932898b2723a2",
+   "look": "servo-black"
+  }
+ }
+}

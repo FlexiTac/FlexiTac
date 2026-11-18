@@ -147,11 +147,20 @@ def select_surface(header: Mapping[str, Any], mesh_bytes: bytes, cache: Any = No
     _keys(header, {"unit", "name", "selection"}, "select")
     mesh = load_mesh(header, mesh_bytes)
     facets, chart = selection_chart(mesh, header.get("selection"))
+    selection = describe_selection(mesh, facets, chart)
+    if chart.kind == "curved":
+        # How far a curved selection stretches on the part (2026-11-17): the fit refuses it beyond the strain limit
+        # (``smooth_max``, the relaxed sheet's stretch smoothed over 1 mm; ``facet_max`` its largest facet's), so the page
+        # can say so, and offer Shrink to fit, as soon as it is selected; ``centre_facet``, the facet nearest its area
+        # centroid, which the page clicks again at the other strain limit (the dome's patch from its own middle, the
+        # user's feedback of 2026-11-17: symmetric at either limit, whichever click on it made it).
+        selection["stretch"] = {"smooth_max": _r(chart_module.judged_stretch(chart, mesh), 9), "facet_max": _r(chart_module.relaxed_max(chart, mesh), 9),
+                                "centre_facet": centre_facet(mesh, chart.facets, select.click_face(mesh, header["selection"]["ops"]))}
     return {
         "ok": True,
         "format": FORMAT_VERSION,
         "mesh": {"sha256": mesh.sha256, "unit": mesh.unit, "facets": mesh.facet_count},
-        "selection": describe_selection(mesh, facets, chart),
+        "selection": selection,
     }
 
 
@@ -169,6 +178,18 @@ def map_placement(header: Mapping[str, Any], mesh_bytes: bytes, cache: Any = Non
     from . import place
 
     return place.map_route(header, mesh_bytes, cache=cache)
+
+
+def centre_facet(mesh: Mesh, facets, face=None) -> int:
+    """The facet whose centroid is nearest the facets' area centroid (the lowest id on a tie); of those in ``face`` (the
+    click's face, :func:`surface.select.click_face`) when any is: a hole the stretch selection filled with the part's
+    facets bent tighter than the face's blend radius (surface.select.fill_holes) holds none a click grows the face from."""
+
+    ordered = sorted(facets)
+    total = math.fsum(mesh.areas[f] for f in ordered)
+    mid = [math.fsum(mesh.centroids[f][k] * mesh.areas[f] for f in ordered) / total for k in range(3)]
+    candidates = [f for f in ordered if face is not None and f in face] or ordered
+    return min(candidates, key=lambda f: (math.fsum((mesh.centroids[f][k] - mid[k]) ** 2 for k in range(3)), f))
 
 
 def selection_chart(mesh: Mesh, selection: Any) -> tuple:
@@ -205,16 +226,38 @@ def describe_selection(mesh: Mesh, facets, chart) -> dict:
         "outline_uv": [[_r(x), _r(y)] for x, y in chart.outline()],
         "holes_uv": [[[_r(x), _r(y)] for x, y in hole] for hole in chart.holes()],
         "outline_xyz": [[_r(c) for c in mesh.vertices[v]] for v in chart.loops[chart.outer]],
-        "sides": boundary_sides(mesh, chart),
+        "sides": boundary_sides(mesh, chart, mirror_traces(mesh, chart)),
         "stats": _round_tree(stats),
     }
 
 
-def boundary_sides(mesh: Mesh, chart) -> list:
+def mirror_traces(mesh: Mesh, chart) -> list:
+    """A doubly curved selection's mirror planes' traces in its chart (surface.chart.mirror_traces; the review of
+    2026-11-17, findings 2 and 4), or none: only a curved chart stretched beyond the curved chart's gate
+    (surface.fit.AXIS_MIN_STRETCH, the page's own: a planar, developable or nearly flat face, every face of the Library,
+    is fitted as before) whose selection is its own mirror image (surface.select.mirror_maps).  Kept on the chart."""
+
+    from . import fit as fit_module
+
+    if chart.kind != "curved":
+        return []
+    cached = chart.stats.get("_mirror")
+    if cached is None:
+        cached = []
+        if chart_module.judged_stretch(chart, mesh) > fit_module.AXIS_MIN_STRETCH:
+            cached = chart_module.mirror_traces(mesh, chart, select.mirror_maps(mesh, chart.facets))
+        chart.stats["_mirror"] = cached
+    return cached
+
+
+def boundary_sides(mesh: Mesh, chart, traces=()) -> list:
     """The outer boundary split into straight sides (segments within 1 degree of the side's first).
 
     Each side gives its uv end points, 3D end points, length and the inward
-    unit normal in uv; a side is a candidate base (tail exit) edge.
+    unit normal in uv; a side is a candidate base (tail exit) edge.  With a
+    mirror plane's trace (:func:`mirror_traces`; of several, the one along
+    the outline's long axis) the split is symmetric about it
+    (:func:`_mirrored_runs`).
     """
 
     loop = chart.loops[chart.outer]
@@ -232,24 +275,32 @@ def boundary_sides(mesh: Mesh, chart) -> list:
         d = directions[i] - directions[i - 1]
         return abs((d + math.pi) % (2 * math.pi) - math.pi)
 
-    # Start at the first corner so no side wraps around the loop's start.  A
-    # side ends at a corner, or where its direction has drifted more than the
-    # limit from its first segment (a finely faceted fillet is many short sides,
-    # not one side that swallows the straight edges next to it).
-    corners = [i for i in range(count) if turn(i) > limit]
-    start = corners[0] if corners else 0
-    runs = []
-    for step in range(count):
-        i = (start + step) % count
-        if not runs:
-            runs.append([i])
-            continue
-        drift = directions[i] - directions[runs[-1][0]]
-        drift = abs((drift + math.pi) % (2 * math.pi) - math.pi)
-        if turn(i) > limit or drift > limit:
-            runs.append([i])
-        else:
-            runs[-1].append(i)
+    runs = None
+    if traces:
+        from . import fit as fit_module
+
+        long = fit_module.principal_axes(chart)[0]
+        trace = max(traces, key=lambda t: abs(t["direction"][0] * long[0] + t["direction"][1] * long[1]))
+        runs = _mirrored_runs(points, directions, limit, trace)
+    if runs is None:
+        # Start at the first corner so no side wraps around the loop's start.  A
+        # side ends at a corner, or where its direction has drifted more than the
+        # limit from its first segment (a finely faceted fillet is many short sides,
+        # not one side that swallows the straight edges next to it).
+        corners = [i for i in range(count) if turn(i) > limit]
+        start = corners[0] if corners else 0
+        runs = []
+        for step in range(count):
+            i = (start + step) % count
+            if not runs:
+                runs.append([i])
+                continue
+            drift = directions[i] - directions[runs[-1][0]]
+            drift = abs((drift + math.pi) % (2 * math.pi) - math.pi)
+            if turn(i) > limit or drift > limit:
+                runs.append([i])
+            else:
+                runs[-1].append(i)
     sides = []
     for indices in runs:
         first, last = points[indices[0]], points[(indices[-1] + 1) % count]
@@ -274,6 +325,100 @@ def boundary_sides(mesh: Mesh, chart) -> list:
             }
         )
     return sides
+
+
+def _mirrored_runs(points: list, directions: list, limit: float, trace: Mapping[str, Any]) -> Any:
+    """The outline's sides split symmetrically about a mirror plane's trace (the review of 2026-11-17, finding 4: the
+    Dex3-1 dome's base end was split at the plane into two halves, the auto base taking one), as runs of segment
+    indices counter-clockwise, or None when the outline does not cross the trace twice.
+
+    At each of its two crossings the segments that run within ``limit`` of square across the trace, walking out from
+    it both ways, make one side (a segment the trace crosses is one of them); between them each half of the outline
+    is split by the drift rule (:func:`boundary_sides`) walking from the first crossing, the other half the same way
+    round, so its sides are the first half's mirror images."""
+
+    count = len(points)
+    (pu, pv), (du, dv) = trace["point"], trace["direction"]
+    across = [(p[0] - pu) * dv - (p[1] - pv) * du for p in points]
+    along = [(p[0] - pu) * du + (p[1] - pv) * dv for p in points]
+    tiny = 1e-9 * max(1.0, max(abs(a) for a in along))
+    crossings = []  # (along the trace, vertex or None, segment or None)
+    for i in range(count):
+        j = (i + 1) % count
+        if abs(across[i]) <= tiny:
+            crossings.append((along[i], i, None))
+        elif abs(across[j]) > tiny and (across[i] < 0) != (across[j] < 0):
+            t = across[i] / (across[i] - across[j])
+            crossings.append((along[i] + t * (along[j] - along[i]), None, i))
+    if len(crossings) != 2:
+        return None
+    crossings.sort()
+    (_, first_vertex, first_segment), (_, last_vertex, last_segment) = crossings
+
+    def walk(step: int) -> list:
+        """The segments from the first crossing to the last, one way round, each with its direction walked that way."""
+
+        if first_vertex is not None:
+            k = first_vertex if step > 0 else (first_vertex - 1) % count
+        else:
+            k = (first_segment + step) % count
+        found = []
+        while True:
+            if last_vertex is not None and (k if step > 0 else (k + 1) % count) == last_vertex:
+                break
+            if last_segment is not None and k == last_segment:
+                break
+            if first_segment is not None and k == first_segment or len(found) > count:
+                return []
+            direction = directions[k] if step > 0 else directions[k] + math.pi
+            found.append((k, direction))
+            k = (k + step) % count
+        return found
+
+    def gap(a: float, b: float) -> float:
+        d = a - b
+        return abs((d + math.pi) % (2 * math.pi) - math.pi)
+
+    halves = [walk(1), walk(-1)]
+    if not halves[0] or not halves[1]:
+        return None
+    # Square across the trace, walking away from it: on half h at the first crossing, and towards it at the last.
+    # (across > 0 lies along (dv, -du).)
+    away = [math.atan2(-du, dv) if (across[halves[h][0][0]] + across[(halves[h][0][0] + 1) % count]) > 0 else math.atan2(du, -dv)
+            for h in (0, 1)]
+
+    def leading(half: list, reference: float) -> int:
+        n = 0
+        while n < len(half) and gap(half[n][1], reference) <= limit:
+            n += 1
+        return n
+
+    starts = [leading(halves[h], away[h]) for h in (0, 1)]
+    ends = [leading([(k, d + math.pi) for k, d in reversed(halves[h])], away[h]) for h in (0, 1)]
+    if any(starts[h] + ends[h] > len(halves[h]) for h in (0, 1)):
+        # The central sides would meet: one side per half.
+        starts = [min(starts[h], len(halves[h])) for h in (0, 1)]
+        ends = [len(halves[h]) - starts[h] for h in (0, 1)]
+    middles = []
+    for h in (0, 1):
+        runs: list = []
+        for k, direction in halves[h][starts[h]:len(halves[h]) - ends[h]]:
+            if runs and gap(direction, runs[-1][-1][1]) <= limit and gap(direction, runs[-1][0][1]) <= limit:
+                runs[-1].append((k, direction))
+            else:
+                runs.append([(k, direction)])
+        middles.append([[k for k, _ in run] for run in runs])
+    # Counter-clockwise: the first crossing's side, the first half's runs, the last crossing's side, the second half's
+    # runs (walked clockwise: each reversed, in reverse order).
+    second = [list(reversed(run)) for run in reversed(middles[1])]
+    head = [k for k, _ in reversed(halves[1][:starts[1]])] + ([first_segment] if first_segment is not None else [])
+    head += [k for k, _ in halves[0][:starts[0]]]
+    tail = [k for k, _ in halves[0][len(halves[0]) - ends[0]:]] + ([last_segment] if last_segment is not None else [])
+    tail += [k for k, _ in reversed(halves[1][len(halves[1]) - ends[1]:])]
+    runs = ([head] if head else []) + middles[0] + ([tail] if tail else []) + second
+    if sorted(k for run in runs for k in run) != list(range(count)):
+        return None
+    return runs
 
 
 # --------------------------------------------------------------------------

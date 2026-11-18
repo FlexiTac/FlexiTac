@@ -231,12 +231,12 @@ def check_match(placement: Mapping[str, Any], design: Mapping[str, Any]) -> None
         )
 
 
-def placement_record(proposal: Mapping[str, Any], mesh: Mesh, selection: Any, options: Mapping[str, Any], limited: Any = None) -> dict:
-    """The sidecar placement document of a proposal (what the browser stores and sends back)."""
+def placement_record(proposal: Mapping[str, Any], mesh: Mesh, selection: Any, options: Mapping[str, Any]) -> dict:
+    """The sidecar placement document of a proposal (what the browser stores and sends back).  A placement fitted
+    before 2026-11-17 may also hold ``strain_limited`` (the disk the fit cut a curved selection down to then), which the
+    map rebuilds."""
 
     placement = dict(proposal["placement"])
-    if limited is not None:
-        placement["strain_limited"] = dict(limited)
     placement["format"] = PLACEMENT_FORMAT
     placement["design"] = proposal["design"]
     placement["build_id"] = proposal["build_id"]
@@ -558,8 +558,8 @@ def verify(mesh: Mesh, chart: Chart, frame: BaseFrame, exits, outlines, records_
     )
     # Strain of the chart under the boards (every facet a board touches).
     limit = options["strain_limit"]
-    strain = _strain_under(chart, mesh, frame, (outlines["row"], outlines["column"]))
-    records.append(_record("strain_under_boards", limit, strain, "max<=", "ratio", "the sheet does not stretch beyond the limit"))
+    records.append(strain_record("strain_under_boards", chart, mesh, frame, (outlines["row"], outlines["column"]), limit,
+                                 "the sheet does not stretch beyond the limit"))
     # Bends under the field (stack) and under the boards (single FPC).
     field_limit = STATIC_BEND_FACTOR * STACK_THICKNESS_MM
     board_limit = STATIC_BEND_FACTOR * SINGLE_FPC_MM
@@ -568,8 +568,8 @@ def verify(mesh: Mesh, chart: Chart, frame: BaseFrame, exits, outlines, records_
         _min_bend_radius(mesh, chart, frame, outlines["row"], board_limit),
         _min_bend_radius(mesh, chart, frame, outlines["column"], board_limit),
     )
-    records.append(_record("field_bend_radius", field_limit, field_radius, "min>=", "mm", "static bend of the laminated field (10 x 0.47 mm)"))
-    records.append(_record("board_bend_radius", board_limit, board_radius, "min>=", "mm", "static bend of a single FPC (10 x 0.11 mm)"))
+    records.append(_record("field_bend_radius", field_limit, field_radius, "min>=", "mm", f"static bend of the laminated field ({FIELD_BEND})"))
+    records.append(_record("board_bend_radius", board_limit, board_radius, "min>=", "mm", f"static bend of a single FPC ({BOARD_BEND})"))
     tails = design["tail"]
     template = "surface" if design.get("template_id") == TEMPLATES["surface"] else "generic"
     low, high = TAIL_MIN_MM[template], TAIL_MAX_MM[template]
@@ -660,12 +660,32 @@ def _record(rule: str, required: float, measured: float, comparison: str, unit: 
     }
 
 
-def _strain_under(chart: Chart, mesh: Mesh, frame: BaseFrame, polygons: Sequence) -> float:
+# The bend rules' wording, from the stack (surface.fit: STATIC_BEND_FACTOR x the thickness).
+FIELD_BEND = f"{STATIC_BEND_FACTOR:g} x {STACK_THICKNESS_MM:g} mm"
+BOARD_BEND = f"{STATIC_BEND_FACTOR:g} x {SINGLE_FPC_MM:g} mm"
+
+
+def strain_record(rule: str, chart: Chart, mesh: Mesh, frame: BaseFrame, polygons: Sequence, limit: float, what: str) -> dict:
+    """A strain check: ``measured`` the largest stretch under the polygons as the fit judges it (on a curved chart the
+    relaxed sheet's, smoothed: surface.chart.stretch_values), which passes or fails it, and ``measured_facet`` the largest
+    single facet's on the part (surface.chart.relaxed_strain; the user's decisions of 2026-11-17: pass on the smoothed
+    stretch, report both)."""
+
+    from .chart import relaxed_strain, stretch_values
+
+    record = _record(rule, limit, _strain_under(chart, mesh, frame, polygons, stretch_values(chart, mesh)), "max<=", "ratio", what)
+    facet = _strain_under(chart, mesh, frame, polygons, relaxed_strain(chart, mesh))
+    record["measured_facet"] = _r(facet, 9)
+    return record
+
+
+def _strain_under(chart: Chart, mesh: Mesh, frame: BaseFrame, polygons: Sequence, values=None) -> float:
     """The largest stretch of a chart facet that a board outline (base frame) overlaps, exactly; 0 if none does.
 
-    The facets are tried from the most stretched down, so the first one under
-    a board gives the answer: the exact overlap test runs on a few facets, not
-    on every facet of a large chart.
+    ``values`` is each facet's stretch (by default its own).  The facets are
+    tried from the most stretched down, so the first one under a board gives
+    the answer: the exact overlap test runs on a few facets, not on every
+    facet of a large chart.
     """
 
     shapes = []
@@ -675,8 +695,11 @@ def _strain_under(chart: Chart, mesh: Mesh, frame: BaseFrame, polygons: Sequence
         shapes.append((polygon, (min(xs), min(ys), max(xs), max(ys)), [(polygon[k - 1], polygon[k]) for k in range(len(polygon))]))
     stretch = []
     for facet in chart.facets:
-        s1, s2 = chart.strain[facet]
-        stretch.append((max(abs(s1 - 1), abs(s2 - 1)), facet))
+        if values is None:
+            s1, s2 = chart.strain[facet]
+            stretch.append((max(abs(s1 - 1), abs(s2 - 1)), facet))
+        else:
+            stretch.append((values[facet], facet))
     stretch.sort(key=lambda item: (-item[0], item[1]))
     worst = 0.0
     for value, facet in stretch:

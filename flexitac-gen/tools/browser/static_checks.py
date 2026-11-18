@@ -10,7 +10,8 @@ GitHub Pages serves a project site, and checks it against a running app.py (FPC_
   no request reaches the file server's /api/ (the API never leaves the browser);
 * the Library (part_library_site, 2026-11-05): the Library (./, the first page since 2026-11-16) and a sensor's page
   without a 4xx or a request for the engine, files.json listing every sensor, four sensors' prebuilt ZIPs app.py's
-  exports (a tapered tip's among them), gen.html?part=<id> built from its shipped fit in the browser's engine with its
+  exports (a tapered tip's among them), the FlexiTac hardware's four files (2026-11-17: the pad's Gerber ZIPs and the
+  reading boards' bundles) served at their pins as BUILD.json records them, gen.html?part=<id> built from its shipped fit in the browser's engine with its
   own downloads the prebuilt files (three sensors, a tapered tip's among them, timed);
 * the default part's sensor is built (Gen by Surface, the shipped fit) and its downloads equal app.py's exports of
   the same design, under the same names; the sensor on the part beside the stacked view (2026-11-05) is drawn there
@@ -268,6 +269,19 @@ def part_library_site(browser, site, timings):
     check("library: the Library (./) and a sensor's page load with no 4xx and no request for the engine; its ZIPs are plain links to the prebuilt files",
           not problems and not engine and links == [[f"static/library/{record[kind]['path']}", record[kind]["name"]] for kind in ("top-gerber", "bottom-gerber")],
           (problems[:4], engine[:4], links))
+    # The FlexiTac hardware's files (2026-11-17; web/boards.js, tools/flexitac_downloads.py): served by the site's file
+    # server at their pins, each the one BUILD.json records, the reading board's link on the sensor's page among them.
+    import flexitac_downloads
+    hardware = json.loads((site / "static" / "py" / "BUILD.json").read_text(encoding="utf-8")).get("hardware") or {}
+    served = {}
+    for path, digest in hardware.items():
+        with urllib.request.urlopen(SITE_URL + path, timeout=60) as answer:
+            served[path] = (answer.status, hashlib.sha256(answer.read()).hexdigest() == digest)
+    pins = {f"static/vendor/{flexitac_downloads.FPC_FOLDER}/{name}": pin[0] for name, pin in flexitac_downloads.FPC_FILES.items()}
+    pins.update({f"static/vendor/{flexitac_downloads.READER_FOLDER}/{board['bundle'][0]}": board["bundle"][1] for board in flexitac_downloads.BOARDS.values()})
+    board = page.get_attribute(".lib-board a[download]", "href")
+    check("library: the FlexiTac hardware's four files served at their pins (BUILD.json's hardware), the sensor's reading board among them",
+          hardware == pins and served == {path: (200, True) for path in pins} and board in pins, (served, board))
     for identifier in ("widowx-250-1mm", "trossen-widowx-ai-2mm", "umi-trap-tip13.8-2mm"):
         started = time.monotonic()
         page.goto(SITE_URL + f"gen.html?part={identifier}")
@@ -334,7 +348,9 @@ def main(argv=None):
         root = Path(scratch)
         site = root / SUBPATH
         if args.site is None:
-            build_static_site.build(site, args.pyodide_archive)
+            # A local site served from a scratch folder, never published: it may hold files pending a licence (the
+            # review of 2026-11-17, the LeFlexiTac; tools/build_static_site.py --allow-pending-licences).
+            build_static_site.build(site, args.pyodide_archive, allow_pending=True)
         else:
             site.symlink_to(args.site.resolve(), target_is_directory=True)
         files = serve(root)

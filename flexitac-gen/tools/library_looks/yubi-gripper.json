@@ -1,0 +1,29 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "yubi-gripper",
+ "about": "drawn after the YUBI project's photos of the real gripper (yubi.airoa.io, 2026-11-17: the gripper on the UR5e, the Franka and the ALOHA arms, and the README's teaser) and its bill of materials (docs/BOM, YUBI Gripper Assy_DYNAMIXEL_ver.2: the case, the upper plate, the servo's bracket and the flaps printed in black PLA, the finger pads in red PLA, the finger attachments machined in A2024 or printed in black PLA, black in every photo): a matte black print all over, the two red pads.  The servo and the fisheye camera are the project's own drawing, not the model's: a plain box to the DYNAMIXEL XM430-W350-R's published size (28.5 x 46.5 x 34 mm) where the assembly STEP places it (bodies/yubi-gripper/drawn-servo.stl), and the camera's 32 mm board, its lens holder and lens to the sizes of the assembly's USB CAMERA_ELP-USBFHD01M-L180 where it places it, 10 degrees down (drawn-camera-board.stl, drawn-camera-lens.stl).  Not drawn: the black ribbed rubber sheets glued on the pads' gripping faces (cut to suit, the guide says; the sensor takes the fingertip's place), the screws, the cables.",
+ "smooth_deg": 35,
+ "part_look": "pla-red",
+ "looks": {
+  "pla-red": {"base": "plastic-white-satin", "color": "#c42a27", "roughness": 0.8, "env_intensity": 0.35, "evidence": "the photos of the pads (red PLA, the bill of materials): lit #c83e33 to #d4443a on the UR5e's (the median of the red pixels #b1352b), #b91d28 to #cf2c37 in the cup-stacking frame, #6e2124 in the shade of the Franka's; a matte print with no sheen, so little of the room, as the UMI finger's orange (a saturated colour with all of the studio reads pale)"},
+  "pcb-black": {"base": "pcb-green", "color": "#232425", "roughness": 0.55, "evidence": "the ALOHA and Franka photos: the camera's board on the upper plate's bracket is black (#1d1c1b to #2c2e2b), not the guide's blue render"},
+  "lens-glass": {"base": "plastic-black-satin", "roughness": 0.15, "env_intensity": 2.6, "evidence": "the ALOHA and Franka photos: the fisheye's black barrel ends in a glossy glass dome that catches the room's light"}
+ },
+ "bodies": {
+  "bodies/yubi-gripper/case.stl": {"sha256": "248206349accc277043777812d79c1edab5972aae5ac48fa7f8996b438626318", "look": "print-black"},
+  "bodies/yubi-gripper/bracket-dynamixel.stl": {"sha256": "ebeb7b01e3266efb7d3b2cf6be21e9853be7dd9b231f2dee8da2f1970ce40f66", "facets_sha256": "4f0ae0f54868f3f58edbf6883f1c5e432b836793b6b086ebed870f9aa11ab1e9", "weld_mm": 0.01, "components": [
+   {"name": "bracket", "look": "print-black", "pick": "rest"},
+   {"name": "servo", "look": "plastic-black-matte", "draw": [{"box": [[-35.25, -29.25, -35.0], [11.25, -0.75, -1.0]]}]}]},
+  "bodies/yubi-gripper/upper-plate.stl": {"sha256": "f4d891766b216a88a5655fdc7fa17022af34030f0e548468063ece6f18d5b5ee", "facets_sha256": "168ffadb79b9001e56d46a4dcdf1b4567c61469fbd9b912205f6a6ad60af523c", "weld_mm": 0.01, "components": [
+   {"name": "plate", "look": "print-black", "pick": "rest"},
+   {"name": "camera-board", "look": "pcb-black", "draw": [
+    {"prism": {"axis": "x", "from": 17.5, "to": 49.5, "profile": [[25.501, 17.27], [57.015, 22.826], [56.737, 24.402], [25.224, 18.845]]}}]},
+   {"name": "camera-lens", "look": "plastic-black-satin", "draw": [
+    {"prism": {"axis": "x", "from": 25.5, "to": 41.5, "profile": [[33.102, 20.234], [48.859, 23.013], [47.643, 29.907], [31.886, 27.128]]}},
+    {"cylinder": {"from": [33.5, 39.765, 28.517], "to": [33.5, 38.376, 36.396], "radius": 7.75, "segments": 32}}]},
+   {"name": "camera-glass", "look": "lens-glass", "draw": [
+    {"cylinder": {"from": [33.5, 38.376, 36.396], "to": [33.5, 38.133, 37.775], "radius": 5.0, "segments": 32}}]}]},
+  "bodies/yubi-gripper/finger-attachment.stl": {"sha256": "3979daffc4957f2070429dc8bbcf65f4a59a22028f9ac96ebd206f082caa1a71", "look": "print-black"},
+  "bodies/yubi-gripper/flap.stl": {"sha256": "bec1f7fe16faae6fdb3ce98ba7a85ef0f6b6f18ad6eb5e056cf13f42ea996254", "look": "print-black"}
+ }
+}

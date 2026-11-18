@@ -1,0 +1,27 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "leflexitac",
+ "about": "drawn after LeFlexiTac's own pictures (its project page's cover photo of the gripper on the SO-101, assets/media/hero/leflexitac-cover.jpg, and its videos of the gripper at work, 2026-11-16): a gripper black all over, its jaws and wrist roll printed in black PLA (layer lines on every face, an even matte with no highlight) round the STS3215 servo's black moulded case; the arm beyond the wrist (dark purple PLA in the photo) is not drawn.  The real gripper's grip tape, Kapton tape and ribbon cable are not drawn: the sensors are this project's generated ones.  The servo's aluminium horn lies under the moving jaw's hub, out of sight at the homes, and wears the case's black.",
+ "smooth_deg": 35,
+ "part_look": "pla-black",
+ "looks": {
+  "pla-black": {
+   "base": "print-black",
+   "roughness": 0.8,
+   "env_intensity": 2.6,
+   "evidence": "leflexitac-cover.jpg: the static jaw's paddle and spine and the wrist roll round the servo are one black PLA, layer lines on every face and no highlight, the photo's darkest tones (#0e100b at the median, backlit); the WidowX 250's printed fingers (trossen_Img0914) were matched with these numbers to #414141 under the lamp, lighter than the film beside the exploded stack, which a faithful #0e100b body would swallow"
+  },
+  "servo-black": {
+   "base": "plastic-black-satin",
+   "color": "#2e2e30",
+   "roughness": 0.7,
+   "env_intensity": 1.8,
+   "evidence": "leflexitac-cover.jpg: the STS3215's case is a smooth moulded black a shade apart from the printed wrist round it (#0d0e09 at the median, #181914 at the 90th percentile, its edges catching the window), no layer lines, a soft sheen and no mirror"
+  }
+ },
+ "bodies": {
+  "bodies/leflexitac/sts3215.stl": {"sha256": "475eddde4c84b2a207819d3d002c6cd0ced6874c83b8721b58b8f38abef6e0c4", "look": "servo-black"},
+  "bodies/leflexitac/wrist-roll.stl": {"sha256": "de8487dbafaa5defdb3f382c0ccfcc75a7a1a6d940bdf4fa7b115dc126cfc4f7", "look": "pla-black"},
+  "bodies/leflexitac/static-jaw.stl": {"sha256": "a1991511f2b08448306cce9275db464dab20228471f9a6694c5b207e1da738fc", "look": "pla-black"}
+ }
+}

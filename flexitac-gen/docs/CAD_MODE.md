@@ -31,7 +31,7 @@ chosen among its edges, are in [CAD_BORDER.md](CAD_BORDER.md).
 | --- | --- | --- |
 | Read | `surface/mesh.py` | Reads the file and builds the mesh.  See below. |
 | Select | `surface/select.py` | Replayable operations, applied in order (see below). |
-| Flatten | `surface/chart.py`, `surface/solve.py` | A planar patch is projected; otherwise the facets are unfolded rigidly across shared edges (exact on developable patches: creased pads, cylinders, cones, extrusions, with or without holes, however thin their strips; an unfolding counts when no vertex is placed twice more than 0.01 mm apart and every facet edge keeps its length to 1e-4 of it, plus the float32 spacing of the selection's coordinates); otherwise LSCM, then ARAP, measuring the stretch per facet (two sparse factorizations: about 1.5 s at 2900 vertices on Python 3.9).  A band round a part (two boundary loops) that does not unfold as it is, or whose normals cancel out (a prism's side walls, a symmetric closed cylinder), gets opened along a seam: the facets round the seam on its smaller side are left out.  A selection must be one connected piece.  Curved solves take at most 3000 vertices.  The last eight charts are cached. |
+| Flatten | `surface/chart.py`, `surface/solve.py` | A planar patch is projected; otherwise the facets are unfolded rigidly across shared edges (exact on developable patches: creased pads, cylinders, cones, extrusions, with or without holes, however thin their strips; an unfolding counts when no vertex is placed twice more than 0.01 mm apart and every facet edge keeps its length to 1e-4 of it, plus the float32 spacing of the selection's coordinates); otherwise LSCM, then ARAP, measuring the stretch per facet (two sparse factorizations: about 1.5 s at 2900 vertices on Python 3.9); a chart ARAP leaves stretched beyond 0.05 % is re-solved for the least maximum stretch (since 2026-11-17, **Gently curved faces** below).  A band round a part (two boundary loops) that does not unfold as it is, or whose normals cancel out (a prism's side walls, a symmetric closed cylinder), gets opened along a seam: the facets round the seam on its smaller side are left out.  A selection must be one connected piece.  Curved solves take at most 3000 vertices.  The last eight charts are cached. |
 | Fit | `surface/fit.py` | Chooses and places an engine design on the chart.  See below. |
 | Map | `surface/place.py` | Takes each taxel centre from the generated electrodes and maps it onto the part (barycentric in the chart).  Writes the taxel map, the 3D outlines, a 1:1 wrap template (SVG) and the verification records. |
 
@@ -96,7 +96,20 @@ chosen among its edges, are in [CAD_BORDER.md](CAD_BORDER.md).
 - `grow` from a clicked facet.  Its presets:
   - `surface` (the default): the smooth region up to 30° edges, without
     blends tighter than a 4 mm bend radius and without crossing a crease
-    a 4 mm bend cannot follow (see **Bends**);
+    a 4 mm bend cannot follow (see **Bends**); with `stretch_budget` (the
+    page's click sends the curved faces' strain limit, 1 % unless Strict
+    0.3 % is chosen, since 2026-11-17) that region on a planar or
+    developable face, and on a doubly curved one what preset `stretch`
+    selects there (**Gently curved faces**);
+  - `stretch` (2026-11-17; the page's Shrink to fit): within the Surface
+    preset's region, that region when the sheet covers it within
+    `stretch_budget` (0.003 unless named) on the part, else the largest
+    patch round the seed's dome that it covers within it, the same
+    symmetric patch from any click on that patch, or, for a click off it,
+    the largest round the click (the review of 2026-11-17); on a
+    mirror-symmetric face every patch is taken with its mirror image where
+    the two make one piece, and its holes filled: never a ring
+    (**Symmetric and larger** below);
   - `flat`: dihedral angles up to 10° within 4° of the seed;
   - `smooth`: up to 30° edges.
 - `disk`: a geodesic radius around the seed.
@@ -116,8 +129,9 @@ map).
   the triangles of a strip share it.
 - A crease (flat on both sides): a sheet of minimum radius R lifts off a
   crease of angle theta by about `R theta^2 / 8`.  Above 0.05 mm the
-  crease counts as radius 0: 16.7° for the 4.7 mm field stack, 18.1° for
-  the 4 mm preset, 34° for one 0.11 mm FPC.
+  crease counts as radius 0: 14.2° for the 6.5 mm field stack, 18.1° for
+  the 4 mm preset, 25.6° for one 0.2 mm FPC (16.7° and 34° for the 4.7 mm
+  and 1.1 mm of the stack before 2026-11-17, **Gently curved faces**).
 
 **Fit.**
 
@@ -128,10 +142,9 @@ map).
   side is shorter than 20 mm, as for a click on a rounded edge or a short
   side; or `auto` on outlines without a 20 mm side).  A side ends at a
   corner or where its direction drifts by more than 1°.  `{side: n}`
-  numbers the sides as `/select` returns them, also when a curved
-  selection is cut to its strain-limited disk: the exit is then the
-  longest part of that side on the disk (`E_SURFACE_BASE_EDGE` when less
-  than 3 mm of it is left), and `placement.base_side` stays n.
+  numbers the sides as `/select` returns them (a curved selection is
+  fitted whole since 2026-11-17, never cut to a disk with sides of its
+  own).
 - What CAD mode generates depends only on the selected area (the user's
   decision of 2026-10-26, P5-diagonal-bus.md section 26.16: "what CAD
   generates depends only on the area selected in CAD; rectangle mode is
@@ -160,8 +173,14 @@ map).
   of each width.  The usable region is the chart minus:
   - holes;
   - covered walls;
-  - facets stretched beyond the strain limit;
-  - bends tighter than 10 x 0.47 mm (the laminated field, static).
+  - facets stretched beyond the strain limit (on a curved chart, the
+    stretch the sheet keeps on the part, relaxed, each facet's averaged
+    over 1 mm);
+  - bends tighter than one board follows, 10 x 0.2 mm (static), and for
+    the taxel field F (P and its 0.5 mm margin) those tighter than the
+    laminated field, 10 x 0.65 mm (10 x 0.47 mm before 2026-11-17; the
+    whole board's rule until 2026-11-18, **Whole board on the real stack**
+    below).
 - The stack is placed 0.1 um inside the usable cells, so a board side on
   the surface's edge stays on it after rounding.
 - The best candidates are generated with `engine.generate_design`, and
@@ -173,15 +192,12 @@ map).
   `tail_extension_mm` beyond the exit's lowest point under its whole width
   (an arc exit sags between the tail's corners).  One proposal per rows x
   columns and taxel count.
-- A curved patch that stretches too much is cut to the largest geodesic
-  disk that flattens within the limit.  The radius is searched near the
-  answer: regula falsi on radius² against stretch, between the largest
-  disk within the limit and the smallest beyond it, and no trial more than
-  1.5 x the largest disk within the limit until one exceeds it.  At most 7
-  distinct trial disks are flattened (a radius that gives a disk already
-  tried costs nothing), fewer once the radius is known to 1% or a disk
-  stretches 99% of the limit, and none once the trials have flattened 6000
-  vertices.
+- A curved selection that stretches beyond the limit on the part is
+  refused whole, saying how much of it round its click fits (**Gently
+  curved faces**).  Until 2026-11-17 it was cut, unseen, to the largest
+  geodesic disk round the click that flattened within the limit (regula
+  falsi on radius² against stretch, at most 7 trial disks); a placement
+  saved then still maps on its disk.
 
 ## Options of the fit
 
@@ -202,8 +218,423 @@ map).
 | `rotation` | `auto` | `auto` (up to 30° against the base edge), `none` |
 | `template` | `surface` | fixed (section 26.16): `surface_matrix_v1` (0.5 mm margins, up to 64 columns).  A request may name `surface`; `generic` (`generic_matrix_v1`, the rectangular mode's rules, up to 32 columns, a CAD option until section 26.16) is `E_SURFACE_REQUEST`.  The browser has no Board rules control |
 | `tail_extension_mm` | 20 | 6.5-72.5 mm of tail beyond the exit (at least the 6.0 mm stiffener and its 0.5 mm clearance); tails stay within 7.5-200 mm (80 mm before P5-diagonal-bus.md section 23; the map of a placement saved from a generic-template fit before section 26.16 checks that template's 7-80 mm).  With `containment: field` both tails end on the nearest line across the boards on which each is at least the shortest tail (7.5 mm) long and ends at least this far past the surface's lowest edge under it (P5-diagonal-bus.md sections 27.3 and 27.4): the nearer end this far past that edge, or farther where the shortest tail sets the line, a tail root lying so far past the edge already that 7.5 mm reaches farther (the diagonal Row bus's tail roots, one level for both boards, lie 2.9-7.5 mm past it on the fixtures with `both`, the Row roots 4.1-10.4 mm before P5-diagonal-bus.md section 20, so 20 mm ends both tails there; the proposal's `tail_reach_mm`) |
-| `strain_limit` | 0.003 | 0.0001-0.2: largest stretch of the flattened sheet (copper's elastic limit is about 0.2-0.3%) |
+| `strain_limit` | 0.003 | 0.0001-0.2: largest stretch of the flattened sheet (copper's elastic limit is about 0.2-0.3%); on a curved chart the stretch the sheet keeps on the part: the relaxed sheet's (ARAP's chart; soft tape creeps to it), each facet's averaged over 1 mm (since the review of 2026-11-17), a curved selection beyond it refused (`E_SURFACE_NOT_DEVELOPABLE`, with how much fits round its click), not cut down to a disk (since 2026-11-17).  The page sends 0.01 on a doubly curved selection unless Strict 0.3 % is chosen, 0.003 on every other face (the user's choice of 2026-11-17, **Gently curved faces**) |
 | `max_rows`, `max_columns`, `proposals` | 64, 64, 5 | caps (masked fields and rectangles alike since P5-diagonal-bus.md section 21).  With `containment: field` a cap never moves the exit, and a capped field's rows stack from the exit (**Caps keep the exit** below) |
+
+## Gently curved faces (2026-11-17)
+
+The user's report of 2026-11-17 on the Unitree Dex3-1's fingertip (a jagged
+selection, a diamond of taxels with gaps, the purple marks inside the dome),
+the study of that day (`library-look-work/look/out/curved/`: `investigate/`,
+`prototype/`, `critique/`, `classes/classes.md`) and the user's decisions on it:
+"lets do 1 and 2；soft tapes；然后whole fingertip的话先不做；…现在我们一般是自己
+laminate；0.2mm".  So: the study's revised recommendation with 0.3 % the
+default; a 1 % tier "bonded once" offered as an explicit choice (1 % the
+default on curved faces since the user's choice later that day, **Symmetric
+and larger** below); soft tape to
+the part (it creeps, so the 1 % tier's note says to test first); no
+whole-fingertip slit (comb) boards for now; the stack laminated by the user;
+the boards 0.2 mm thick.  The prototype's options (`selection.flatten`
+`bounded` / `resample`, the fit's `curved` `disk` / `core`, `strain_measure`,
+`exit_frame`, the grow preset `dome` and its keys `cone`, `smooth_outline`)
+are gone: what they found is the code's behaviour below, the rest removed.
+
+**What was wrong** (the study's root causes):
+
+1. The presets stopped at sharp edges, not at stretch: the Surface preset
+   took the whole fingertip (with holes: refused), a cone of normals cut a
+   staircase across the hull's long facets.
+2. The fit replaced a curved selection beyond the limit by the largest
+   geodesic disk round the click that flattened within it (about a third of
+   the selection), never drawn.
+3. The disk was sized by the worst single facet of an ARAP chart, about twice
+   the least stretch possible.
+4. Its field, of whole facets, turned against the base: the diamond.
+5. The exits and the purple marks (where a board leaves the surface) were the
+   hidden disk's, inside the dome.
+
+**What it does now.**
+
+- **The chart** (`surface/solve.py` `least_stretch`, `bounded`): a curved
+  chart that ARAP leaves stretched beyond 0.05 % (`BOUNDED_FROM`) is re-solved
+  for the least maximum stretch: ARAP's global step on the same factored
+  Laplacian, its local step a projection of each triangle's Jacobian onto
+  singular values within [1 - eps, 1 + eps] (Kovalsky et al. 2015), eps 0.8 of
+  the best maximum so far, a round of 20 steps undone (and the next aiming
+  less low) when it does not lower it; the rounds stop once two in a row gain
+  under 1 % (at most 40).  On analytic caps it ends within 1.15 x the least
+  stretch a^2 / 12 (ARAP 1.5 x); on the user's selection 0.82 % against
+  ARAP's 1.79 %.  A nearly flat chart keeps ARAP's (the Franka Hand's pad,
+  0.002 %).  The lattice is laid on it.  Every sum runs in a fixed order:
+  the charts are the same on Python 3.9.25, 3.10.12, 3.11.16, 3.12.6 and in
+  Pyodide 0.27.8 (3.12.7), measured on the user's case and pinned by
+  `tests/test_surface_curved.py`.
+- **The stretch judged** (`surface/chart.py` `relaxed_strain`,
+  `smoothed_strain`, `judged_stretch`; the review's fixes below): on a
+  curved chart the stretch the sheet keeps on the part.  A sheet on soft
+  tape creeps to its elastic state whatever chart it was cut by: ARAP's
+  chart (`Chart.relaxed`; at a cap's rim a^2 / 8, 1.5 x the least-max-
+  stretch chart's a^2 / 12; twelve steps from LSCM reach it, 800 move the
+  Dex3-1's by under 1 %).  Each facet's is averaged by area over the facets
+  within 1 mm of it in that sheet (a laminated sheet does not follow a
+  stretch that changes faster; one sliver's singular values can be percents
+  off its neighbours'); planar and developable charts facet by facet as
+  before.  The fit's obstacles, its refusal, the select's trial patches and
+  the map's strain checks use it; the checks report the largest single
+  facet's on the part too (`measured_facet`).
+- **A click by stretch** (`surface/select.py` `stretch_region`): the page's
+  click with the Surface preset sends the strain limit chosen as
+  `stretch_budget`.  Where the grown region is doubly curved (its total
+  curvature, the area of its Gauss image, beyond 12 pi x 0.025 % = 0.0094 sr:
+  the region's own angle defects smoothed four times within it, so a
+  developable mesh's alternating defects cancel and a box's corners beyond
+  the region add nothing) it selects by stretch; elsewhere the region as
+  before (planar and developable faces, the LEAP tip, every face of the
+  Library).  By stretch: the face itself when the sheet covers it within
+  the budget (tried when its total curvature is within 4 x 12 pi x the
+  budget); else the widest patch round the dome within it, a cone of
+  normals round the dome's axis grown from its centre and re-centred on its
+  own mean normal (every click on that patch gives it, symmetric on a
+  symmetric face); and when that patch does not hold the click (the
+  fingertip's side, its tip end), the widest round the click, the cone
+  round its own normal.  The axis is the mean normal of the face's half in
+  front of it (from the face's own mean normal, the click's only when it
+  faces away).  The face's graph is undirected (a click on a facet tighter
+  than 4 mm, which grow enters from nowhere else, is reached).  Each
+  patch is filled to its convex outline seen along its mean normal (the
+  face's facets whose centroids lie within the hull of its vertices),
+  its outline's single-facet teeth cut and notches filled.  Its cone: the
+  widest whose total curvature is within 12 pi x the budget (a disk of
+  constant curvature flattens with a least stretch of Omega / 12 pi), then
+  three regula falsi steps on (theta^2, the judged stretch) towards the
+  budget, up to eight more while the widest patch within it stretches less
+  than 0.9 of it; a cone whose patch is one already judged at an end of the
+  bracket is moved by bisection to a patch of its own (on a coarse or
+  lat-long mesh the patch grows in steps).  The widest patch within the
+  budget is the selection, never one beyond it; the centre's facet alone
+  when nothing wider is within it.  The trial patches are charted without
+  the least-max-stretch rounds (`build_chart(least=False)`: the same
+  judged stretch, to the bit).  Preset `stretch` does the same on any face
+  (the page's Shrink to fit).
+- **The whole selection** (`surface/fit.py` `refuse_beyond_limit`): a curved
+  selection is fitted whole on its own chart, or, beyond the strain limit,
+  refused (`E_SURFACE_NOT_DEVELOPABLE`, details `stretch`,
+  `stretch_facet_max`, `strain_limit`, `selected_area_mm2` and `shrink`: the
+  seed, area and stretch of preset `stretch`'s patch at the selection's click
+  at this limit, or null when none fits).  The region fitted is the region
+  drawn, and the boards leave the surface on its own edge.  A placement
+  saved before with `strain_limited` still maps on its disk.
+- **The lattice along the axis** (`along_axis`): on a curved chart judged
+  beyond 0.05 % whose outline is elongated (its principal second moments of
+  area more than 1.3 apart) an arc exit is turned to the principal axis
+  nearest its chord and the fields are searched unturned (the options echoed
+  stay the user's).
+- **The tiers** (as built; the default changed later that day, **Symmetric
+  and larger** below): 0.3 % the default (copper's elastic limit, on the
+  part).  The page's Strain limit (Advanced Customization, More options) was
+  one select of two tiers, `0.3 %` and `1 % · bonded once` (0.01), sent as
+  numbers; its note, under 1 % only, one line: "Bonded once: test first,
+  soft tape creeps."  A tier changed selects a curved selection again at
+  once; a planar or developable face is the same at either tier, so its
+  operations take the tier and its sensor stays (Settings changed).  A
+  curved selection over the limit shows **Shrink to fit** beside Generate
+  sensor with its line ("Stretches 1.19 % on the part, over the 0.3 %
+  limit", and once the fit has refused it ": 239 mm² of it fits"); the
+  quick line offers the 1 % limit only below it.  Shrink to fit selects
+  preset `stretch` at the selection's click.
+
+**The user's case** (the Dex3-1's hull, Custom 30 / 30 / 4 from facet 10926,
+their base point, 2 mm pitch; since the review's fixes below):
+
+| | Before | 0.3 % | 1 % |
+| --- | --- | --- | --- |
+| Their selection, 431.4 mm2 (1.19 % on the part) | 31 taxels on a hidden 156.8 mm2 disk, turned 20°, marks inside | refused, 239 mm2 fits; Shrink to fit: 47 (5 x 10) | refused, 405 mm2 fits; Shrink to fit: 82 (13 x 8, symmetric; 83 before its exit was laid on the plane) |
+| A click with the Surface preset | the whole fingertip (8 boundary loops): refused | 238.8 mm2 (0.29 %): 47 | 405.1 mm2 (0.90 %): 83 |
+
+In the page, whose own base the click's exit takes, the same patches give 48
+and 82.  A Dex3-1 click takes 0.9 s to select natively (3.12.6) and 2.6 s
+in Pyodide (0.27.8, Node 18), 3.9 s at 1 %; the fit 2.6 and 2.1 s there.
+Since the review of the symmetric selections (below): 1.0 and 1.5 s
+natively at 0.3 and 1 % (the mesh read included), 2.5 and 3.5 s in
+Pyodide; the fit 1.3 and 1.75 s there; the select replies, the proposals
+and the maps the same bit for bit natively and in Pyodide (the tip end's
+click too).
+
+The Library's Dex3-1 (two 7 mm disks, 139 mm2 within 0.3 %, until
+2026-11-17) kept 110, 49, 28 and 18 taxels; its 2.5 mm sensor's build id changed (a tail 3 um shorter on
+the bounded chart).
+
+**The stack** (`surface/fit.py`): one board as ordered, the profile's
+`order.fpc_thickness_mm` (0.2 mm); the laminated field 2 x 0.2 + 0.1 mm of
+film (Velostat / Linqstat, 4 mil, the FlexiTac bill of materials) + 2 x
+0.075 mm of the user's lamination (a 3 mil self-adhesive laminating sheet on
+each side, the FlexiTac guide's step 1, as the 0.47 mm estimate of before
+counted them) = 0.65 mm.  At 10 x thickness the field bends to 6.5 mm and one
+board to 2 mm (4.7 and 1.1 mm before); creases block from 14.2° and 25.6°.
+The membrane stretch of a dome does not depend on the thickness.  On the
+Library it changes no build id: 41 fits gain one bend obstacle in their
+reply (the UMI finger's 30, the LeFlexiTac's 4, the OpenArm's 4, the default
+part's), written and shot again with the Dex3-1's 4 (38 pictures byte for
+byte as before).  Gen by Surface's samples keep their first proposals; the
+two UMI samples' fifth proposal is another.  A face bent tighter than the
+field's 6.5 mm takes no field: half cylinders of R 5 and R 6 mm (2 mm pitch)
+took 133 and 171 taxels at the 0.47 mm stack and are refused now
+(E_SURFACE_NO_FIT, its reason naming the bend: "it bends tighter than the
+field's 6.5 mm (10 x 0.65 mm), to 5.0 mm"); R 7 mm keeps its 190.  The
+lamination's 0.15 mm, the one figure not measured, is alone what moves the
+rule from 5.0 to 6.5 mm: a laminated pad measured with calipers settles it.
+
+**Whole board on the real stack (2026-11-18).**  Under `containment: board`
+the taxel field F (P and its 0.5 mm margin) keeps the laminated field's
+6.5 mm and everything outside it, the Row channel and expansion, the Column
+fan-out and the tails to the exit, takes one board's 2 mm, as Field only
+checks the routing off the field (the lead's decision: outside the field the
+board is a single FPC, not the laminate).  Since the 0.65 mm stack every
+bend under 6.5 mm had blocked the whole board: the soft finger's face, its
+6.0 mm crease 0.3 mm above its mount end, fitted nothing at side 0 ("a tail
+misses the exit"); it takes its 480 (50 x 12) at Max rows and columns 64
+again (338 at 32), the five proposals of the 0.47 mm stack byte for byte.
+The reply counts the field's bends apart (`field_bends`, "field bends" in
+the fit's account); the rectangles' raster and the masked walk keep F off
+them and a built field is checked exactly (`fit.field_bend_point`).  The
+raster moves F only up and down and the walk only from the channel's edge,
+which leaves no room beside a bend running toward the exit, so the fill
+searches once more with the boards off the field's bends too (the rule
+before that day) and takes the best of both (the review's fix): a roof
+whose two 18-degree creases run to the exit keeps its 182 taxels, not 132.
+The second search costs time only where such bends are (the soft finger's
+Whole-board fit 0.9 -> 2.4 s natively, its proposals the same).
+Field only, the Library's 98 fits and Gen by Surface's samples are
+unchanged.
+
+**The review's fixes (2026-11-17).**  The independent review of the build
+(verdict sound-with-fixes) found:
+
+1. The stretch click could return a patch beyond the limit (its first guess
+   over, the next cone giving the same patch: a 24 x 72 cap at 0.32 %, the
+   AgileX Piper's facets 60 and 920, 8 of the study's 34 synthetic clicks),
+   the fit refusing it and Shrink to fit selecting it again.  Now a cone
+   repeating an end's patch is moved to a patch of its own, the search goes
+   on while the best within the limit is under 0.9 of it, and never a patch
+   beyond it comes back (`test_a_patch_is_never_beyond_the_limit`, both
+   tiers, Surface and Shrink to fit).
+2. The gate read the least-max-stretch chart (a^2 / 12 on a cap), the sheet
+   on the part relaxes to a^2 / 8: the 0.3 % default left about 0.45 % on
+   the part, the 1 % tier 1.6 %.  Now the gate reads the relaxed sheet
+   (above): the default keeps the copper elastic on the part as the gate
+   of before did (ARAP's facets, 0.386 % on a 10-degree cap of R 20 mm,
+   0.257 % smoothed now), and the user's selection stretches 1.19 % on the
+   part (0.79 % on the chart), over both tiers.
+3. A click on the fingertip's side or tip end selected the palmar patch,
+   which did not hold it.  Now the patch round the click.
+4. A face within the limit whole (the AgileX Piper's facet 1008, 24 facets)
+   came back as 4 facets elsewhere (grow's bend test directed).  Now the
+   face whole when it fits, its graph undirected.
+5. The outline kept the cone's staircase across the hull's long strips (six
+   inner corners at 0.3 %).  Now filled to its convex outline: two, the tip
+   end's step (`test_the_outline_is_drawn_clean`, cad_checks).
+6. The refusal of a face bent tighter than the field did not say why
+   (above).
+7. A tier changed re-selected a flat face (the LEAP tip), dropping its
+   sensor for the same region; the quick line offered the 1 % tier at 1 %.
+
+**Surfaces by class** (the study's classification, `classes/classes.md`: seven
+classes and four modifiers, with criteria and the strain law; the Library: 39
+planar, 6 developable, 1 gentle dome, the Dex3-1):
+
+| Class | What | What the code does |
+| --- | --- | --- |
+| P planar | within 0.05 mm of a plane | projection, strained facets as obstacles facet by facet: as before |
+| F creased | flat panels at folds | exact unfold; a fold beyond R t^2 / 8 = 0.05 mm at 6.5 mm (14.2°) blocks the field |
+| B blended | fillets tighter than the field follows | the Surface preset leaves blends under 4 mm out; bends under 6.5 mm are obstacles |
+| D developable | cylinders, cones, passable folds | exact unfold, never by stretch (total curvature about 0): as before |
+| G+ gentle dome | K > 0, 90 % within 1 % | by stretch: the face when it fits, else the patch within the limit on the part (relaxed; 1 % by default, Strict 0.3 %), symmetric on a symmetric face, the lattice on the least-max-stretch chart, fitted whole |
+| G- gentle saddle | K < 0, the same | the same (the law with abs K) |
+| S strongly curved | under 90 % within 1 % | by stretch: a patch round the dome or the click within the tier; petals and slit boards not built (the user's decision) |
+| H holes | more boundary loops | planar and developable: obstacles as before; a curved selection with holes refused (by stretch the patch is a disk, never a ring: its holes filled where the part has facets in them, the Dex3-1's two slivers on its mid-plane by the tip end; a hole without facets never enclosed) |
+| Q poor tessellation | slivers, fans | the stretch judged over 1 mm; no remesh (the AgileX Piper's 7-facet face of 164 mm2 stretches 1.4 % on the part at its one interior vertex: its click selects the facet alone) |
+| T texture | ridges below the stack's scale | not handled: select the hull's face (the Library's Dex3-1 is its hull) |
+| V concave | dishes, channels | the strain law unchanged; no mounting note |
+
+Why 0.3 % and 1 % (the classification report, `classes.md` section 5, in
+`library-look-work/look/out/curved/classes/classes.md` beside the
+worktrees): 0.3 % keeps the copper elastic; 1 % is a third of standard ED
+copper's 3 % elongation and the polyimide's 3 % yield, for a sheet bent once
+to shape and never flexed again.  The user's facts of 2026-11-17 move it
+further from the copper's limit: JLCPCB makes every FPC of rolled-annealed
+(RA) copper (ED copper only for rigid FR4 boards), whose elongation is higher
+again; the user laminates the stack themselves; the boards are 0.2 mm; the
+sensor goes on the part with soft tape.  So the copper is not what limits 1 %
+(the default on curved faces since then, below).  A dome's chart leaves the
+sheet compressed along its rim (about a^2 / 8) and stretched in its middle:
+wrinkles and a lifting rim are the risk, the more so on soft tape, which
+creeps (and which is why the gate reads the relaxed sheet); the page's note
+under 1 % says so in one line, and the study's printed-cap test (caps of R
+20 mm at 8 to 20°) says whether 1 % holds.
+
+**Symmetric and larger (the user's feedback and choice of 2026-11-17).**  On
+the preview (the build before the review's fixes) a click on the Dex3-1's
+dome at 0.3 % selected a stepped, lopsided patch with a lopsided field, the
+dome's flatter middle only (279 mm2, 55 taxels, its face not symmetric to the
+fit): "finger应该是对称的，但是你select的面不对称，而且更大的curved surface应该也是
+可以选取的，你好像只是选取最平的一部分".  Asked how, the user chose "1% default
+on curves".  So:
+
+- **Mirror planes** (`surface/select.py` `mirror_maps`): a face's mirror
+  planes are found on the mesh, through its area centroid, across the
+  coordinate axes and then its principal axes (Jacobi, in a fixed order): a
+  plane counts when 99 % of the face's area mirrors onto it, each facet's
+  centroid mirrored lying on a facet of the face within 0.05 mm (the
+  symmetric-face rule's tolerance) whose normal is the mirrored normal within
+  10°.  A tessellation that is not itself symmetric (a quad grid's diagonals
+  all one way) passes; its facets pair with the facets their images fall on.
+  The Dex3-1's hull: z = 0, its 2338 facets paired one to one (0.06 s).
+- **Symmetric patches** (`mirror_closure`): every patch the stretch search
+  tries is taken with its mirror image where the two make one piece (before
+  and after its outline is drawn clean), and the dome's axis is laid on the
+  plane; so the dome's patch is symmetric (a cone of normals alone left 3 to
+  8 facets of a synthetic dome's rim without their image), the same from
+  every click on it, and a click's own patch that reaches the plane (the tip
+  end) is symmetric too.  A click on one side, whose patch does not reach the
+  plane (the fingertip's sides), selects round itself: its mirror click
+  selects the mirror image.  The stretch is judged on the symmetric patch,
+  so it stays within the limit.
+- **1 % on curved faces by default**: the page's strain limit is 1 % on a
+  doubly curved selection (G+ and G-: its stretch on the part, the select
+  reply's, beyond the curved chart's 0.05 % gate, `fit.AXIS_MIN_STRETCH`)
+  and 0.3 % on every other face (planar, developable, the Franka Hand's
+  nearly flat pad at 0.002 %), so their requests stay as they were.  The
+  select (`#cadStrainLimit`, Advanced Customization, More options):
+  `1 % on curved faces` (0.01, the default) or `Strict 0.3 %` (0.003), its
+  `data-flat` 0.003 the limit sent off a curved face (main.js `strainLimit`,
+  `readOptions`); a click's `stretch_budget` is the curved limit (the server
+  applies it on a doubly curved face only).  Its note, while 1 % is in
+  effect, one line: "Test first: rim may wrinkle or lift on tape."  The
+  choice changed selects a curved selection again at once from its middle
+  (the select reply's `stretch.centre_facet`: the dome's patch at the other
+  limit, whichever click on it made it); on any other face nothing changes
+  (no select, the sensor kept).
+- **The Dex3-1** (`tests/fixtures/unitree-dex3.stl` since the hand left the
+  Library; the Library's part again since 2026-11-18, below): a click inside the dome's patch (its middle band, within
+  about 6 mm of the mid-plane, from the root to about 45 mm out) selects 405.1 mm2 (788 facets,
+  0.90 % on the part), its own mirror image, and a click on the flanks or the tip end a smaller patch round itself, on its
+  side (152.9 mm2 from facet 11794; the review of 2026-11-18); Generate sensor fits 82 taxels
+  (13 x 8, masked) at the page's own base, the field symmetric and centred on
+  the dome's plane (its face's deviation 0.0002 mm).  Under Strict 0.3 %:
+  238.8 mm2, 48 taxels (10 x 5), symmetric.  Screenshots:
+  `library-look-work/look/out/curved/followup/`.
+- **Unchanged**: the Library's 98 fits refitted at the page's defaults give
+  the same requests, replies and build ids byte for byte (`library_write
+  --check`; every one 0.3 %: no Library face was doubly curved then, which
+  the writer checked on every fit, `curved_face`; since 2026-11-18 the
+  Dex3-1's dome is one, below); Gen by Surface's samples the
+  same (`test_samples`); a flat gripper (the Robotiq 2F-85's sensor), the
+  LEAP tip and a cylinder of R 12 mm in the page: the same request at
+  0.3 %, the same build, the same pixels as the mainline's (a23e36c).
+
+**The review of the symmetric, larger selections (2026-11-17).**  The
+independent review of the above (verdict sound-with-fixes) found, and the
+code now does:
+
+1. **A click's patch is a disk** (`select.fill_holes`, `stretch_region`):
+   a plain click by the Dex3-1's rounded tip end (facet 8817, the real
+   click of the review's screenshot) gave a ring round two slivers on the
+   mid-plane (left out of the face as bent tighter than 4 mm by their width
+   alone, 0.003 mm2), and the chart opened that ring along a seam on one
+   side: a lopsided, slit selection (125 mm2, 30 facets without their
+   mirror image; of 150 random clicks on the face, 17 at 1 % and 12 at
+   0.3 % crossed the plane and came back so).  Each patch the search
+   tries now has the holes it encloses filled (the part's facets in them;
+   the piece beyond its outer edge, larger or reaching an open mesh's edge,
+   is not a hole), and a curved patch that is still not a disk (an open
+   mesh's own hole) is judged beyond any limit, so the widest disk is
+   taken.  8817: 98.4 mm2, a disk,
+   its own mirror image, 15 taxels symmetric (Generate sensor fits it as
+   drawn); none of the 150 clicks crosses the plane lopsided now.  The same
+   rings were behind the LEAP Hand's refused clicks (finding 6,
+   `E_SURFACE_NOT_DISK` on 9 of its 593 curved-face clicks at 1 %, 2 at
+   0.3 %): each selects a disk now.  A patch that ends as nothing but its
+   centre's, not a sheet, is the click's facet alone.  The select reply's
+   `stretch.centre_facet` (the tier change's click) is the click's face's
+   own facet nearest the patch's centroid (`select.click_face`): a filled
+   hole's facet there would grow a face of its own.
+2. **A tessellation that is not itself symmetric** (finding 2; a CAD
+   exporter's often is not): the selection is its own mirror image facet
+   by facet, but its outline follows the mesh's edges, so it lies off its
+   mirror image by up to a facet (a quad grid's diagonals all one way: a
+   notch on one side only, 0.76 mm), and the fit's symmetric-face rule read
+   the outline alone: no symmetric field.  Now a doubly curved selection
+   that is its own mirror image (`select.mirror_maps` on the selection
+   itself) carries its planes' traces in its chart (`chart.mirror_traces`,
+   `api.mirror_traces`: the line through the points where the chart's edges
+   cross the plane), and an exit square across a trace (within 0.1°) takes
+   the trace as its axis, the outline allowed the longest segment of the
+   outline off its mirror image (`fieldfit.mirror_axis`): the symmetric
+   lattice's runs need both mirror cells free, so the field stays on the
+   surface.  The synthetic dome (40 x 15 mm radii, 1 mm quads split one
+   way) at 1 %: 59 taxels, the field symmetric and centred.
+3. **The mirror plane fitted** (finding 3): the planes tried passed
+   through the face's area centroid, which a small feature on one side
+   moves off the plane (a hole of 4 mm2, 0.4 % of the dome, lost a plane).
+   A plane that fails there is now fitted to the face (`_fitted_plane`:
+   Gauss-Newton steps on each facet's mirrored centroid's distance to the
+   plane of the facet it falls on, within 0.5 mm; first moved along its
+   normal, then turned) and tested again as before.  The dome with a hole
+   of 4 or 8 mm2 keeps both planes, square as drawn; the Dex3-1 with a
+   1.5 mm hole on one side keeps its mid-plane; a feature beyond 1 % of the
+   face's area still loses it (the share the plane needs).
+4. **The sides and the exits laid on the plane** (finding 4): the select
+   reply's sides split the dome's base end at the plane into two halves,
+   so the base edge drawn under Auto before Generate covered one half, and
+   after it the exit's edges ran farther up one long side.  Now, with a
+   trace, the outline's sides are split symmetrically about it
+   (`api._mirrored_runs`: at each crossing the segments within 1° of
+   square across the trace make one side, the rest of each half split from
+   the first crossing, the other half the same way round), and the auto
+   arcs turned onto the plane (`fit.axis_exit`) are centred where the
+   trace leaves the outline, the chord centred on the trace (duplicates
+   dropped).  The Dex3-1 at 1 %: the base end one side of 10.96 mm across
+   the plane, drawn before Generate; Generate sensor fits 82 taxels on it,
+   its exit's edges each other's mirror image (48 at Strict 0.3 %, its base
+   end one side of 12.36 mm).
+5. **A Library sensor keeps the limit** (finding 5): opening one
+   (`gen.html?part=...`) wrote its request's 0.003 into the select, where
+   0.003 is Strict 0.3 %, so a curved click on that part then used 0.3 %.
+   The data-flat value now leaves the select as it is (main.js
+   `applyLibraryOptions`); the Library's requests and shipped fits are the
+   same (a click on the LEAP Hand's curved fingertip from
+   `?part=leap-hand-2mm` selects 255.7 mm2 at 1 %, as its own file does).
+6. Tests (finding 7): `test_surface_curved`'s `SymmetricFollowupTests`
+   (9), the dome's axis exactly on its planes, the closure before the
+   outline is drawn, a lopsided dome's one plane; `test_surface_web`'s
+   strain-limit test the Library's limit and the tier change; twelve
+   mutants (`S/holes-unfilled` to `S/library-strict-chosen`).
+
+The Library is unchanged: its 98 fits refitted give the same requests,
+replies and build ids (no Library face was doubly curved then; the traces
+are a doubly curved chart's only).
+
+**The Library's Dex3-1 back on its dome (2026-11-18).**  After trying the
+above the user wrote "挺好的，这样你就可以把dex3加回去，然后可以push一版本":
+the Unitree Dex3-1 is back in the Library (docs/LIBRARY_VIEW.md "The
+Unitree Dex3-1"), its fingertip fitted as the page fits it.  Its selection
+is one click on the dome (grow, the Surface preset, `stretch_budget` 0.01
+from the patch's middle, facet 9267: the same 405.1 mm2 from any click
+inside the patch, a smaller one-sided patch from a click on the dome's
+flanks or tip end) and its request carries the curved 1 %: `library_write.py` composes a
+Library request as readOptions sends it after the select
+(`page_options(curved=True)`, `part_options()`: the strain limit's own
+value on a doubly curved selection, `curved_face`, data-flat's 0.3 % on
+every other), where until that day it refused a doubly curved face, and
+refuses a `stretch_budget` other than the select's own
+(`stretch_problem()`).  At 1, 1.5, 2 and 2.5 mm: 26 x 15 (332 taxels), 18
+x 10 (146), 13 x 8 (82) and 11 x 6 (52), each symmetric and centred, the
+tails toward the finger's root, where the two 7 mm disks at 0.3 % gave
+110, 49, 28 and 18.  3 mm keeps every rule too (9 x 5, 35).  The 98 other
+fits keep their requests, replies and build ids byte for byte
+(`library_write --check`, 102 current).  `gen.html?part=unitree-dex3-2mm`
+takes the shipped fit (the page's request the shipped one, the select at
+1 %) and shows the 82 taxels on the dome, as the user's own click does.
 
 ## Masked fields (`shape: fill`)
 
@@ -390,7 +821,7 @@ option `row_sides`), which builds any row- and column-convex field:
   F lies inside the surface's outline less `edge_margin_mm`, the exit
   edge included (P may come up to the exit at the margin), outside the
   holes, covered walls and strained facets, and off bends tighter than the
-  laminated stack may follow (4.7 mm), but for its **corner zones** (the
+  laminated stack may follow (6.5 mm; 4.7 mm before 2026-11-17), but for its **corner zones** (the
   user's corner tolerance, P5-diagonal-bus.md section 16, at every convex
   corner since section 24): at each convex corner of F (a run's end that
   the neighbouring row's run does not reach, and the outer ends of the
@@ -932,7 +1363,8 @@ proposal's files:
   stack) and adds `readout`: `{rows, columns, positions, active,
   row_spans, inactive: "always 0"}`, the matrix the reader scans.
   The board glued to the part is the bottom board of the role mapping; the
-  sensor's outer surface lies about 0.47 mm further out along the normal.
+  sensor's outer surface lies about 0.65 mm further out along the normal (`stack.contact_offset_mm`, the
+  laminated field's thickness; 0.47 mm before 2026-11-17).
 - **Verification** records, in the style of the DRC records (a missing
   measurement is `null`):
   - `taxels_on_surface`: every taxel maps onto the selection;
@@ -941,10 +1373,16 @@ proposal's files:
     of its distance to the surface);
   - `neighbour_spacing_error`: neighbour spacing along the surface against
     the pitch, within 0.5% or, when larger, the strain limit plus 0.2%;
-  - `board_clearance`: the fit's containment check on the real outlines;
-  - `strain_under_boards`: the stretch of every facet a board overlaps;
+  - `board_clearance`: the fit's containment check on the real outlines
+    (the boards off the bends one board does not follow since 2026-11-18;
+    the field's are `field_bend_radius`'s);
+  - `strain_under_boards`: the stretch of every facet a board overlaps,
+    as the fit judges it (on a curved chart smoothed over 1 mm, which
+    passes or fails it), with `measured_facet`, the largest single
+    facet's (since 2026-11-17);
   - `field_bend_radius`, `board_bend_radius`: the bend model above, under
-    the field (4.7 mm) and under the boards (1.1 mm);
+    the field (6.5 mm) and under the boards (2 mm; 4.7 and 1.1 mm before
+    2026-11-17);
   - `tail_top_length_mm`, `tail_bottom_length_mm`: within the template's
     limits;
   - `row_tail_reach`, `column_tail_reach`: at least 6.5 mm of each tail
@@ -975,14 +1413,14 @@ proposal's files:
   `bend_radius_min_mm` under the boards, and `warnings`:
   `W_BAND_EDGE_RADIUS` per board that crosses an edge of the surface, a
   side or the base edge, that bends tighter than a single FPC may
-  (10 x 0.11 mm; a plate's square edge is 0): `side_mm` and `base_mm` the
+  (10 x 0.2 mm; a plate's square edge is 0): `side_mm` and `base_mm` the
   tightest of each kind it crosses (null for none), measured on the mesh
   edge across the boundary and up to 3 facets beyond it (a R0.8 fillet's
   first edge measures 1.59 mm, its inner ones 0.795 mm), with what to do
   in the message (keep the board flat where it leaves the surface, or
   round the part's edge); `W_ROUTING_HOLE` and `W_ROUTING_COVERED` over a
   hole or a covered wall, `W_ROUTING_BEND` over a bend tighter than
-  1.1 mm, `W_ROUTING_STRAIN` over facets stretched beyond the strain
+  2 mm, `W_ROUTING_STRAIN` over facets stretched beyond the strain
   limit.
 - **Readout.**  A diagonal Row bus folds its Row pins (ROW_01, 03, ...,
   04, 02 with `both`): its map's `readout` (also for a full field) lists
@@ -1033,8 +1471,11 @@ proposal's files:
   less than one grown cell by cell).  `max_taxels` breaks a tie by the larger pitch
   only among its four 0.01 mm steps, the quarter phases at its best pitch.
 - Curved patches are flattened up to 3000 vertices (pure Python: about
-  1.5 s to select and 3 s more for a strain-limited fit at 2900 vertices
-  on Python 3.9).  Select a smaller area on large dense meshes.
+  1.5 s to select at 2900 vertices on Python 3.9, the least-max-stretch
+  rounds about as long again).  A click on a doubly curved face charts
+  three to four patches (the Dex3-1's dome: 2 s at 0.3 %, 3.6 s at 1 % on
+  Python 3.12; about 2.6 times that in Pyodide, the static site).  Select a
+  smaller area on large dense meshes.
 - The meshes are taken as they are.  A coarse tessellation of a curved
   part flattens exactly (its facets are flat) and hides the real curvature;
   the chart then reports the spread of its normals as a warning.
@@ -1101,6 +1542,25 @@ gripper, 2 Generate the sensor and 3 Send to manufacture, each with one
 short line, marked done or next and the one whose part is in view lit
 (main.js `renderGuide`, `markGuideHere`); a step scrolls to its part on the
 right (the workspace, Generate sensor under the view, the downloads).
+Step 3's downloads end, over the Ordering notes (the user's answer of
+2026-11-17, "gen也加入reading board"), with two rows, as a Library
+sensor's window has them: "Ordering and fabrication", the FlexiTac
+fabrication guide in a new tab (the Ordering notes' own line linking it,
+of 2026-11-06, went with the review of 2026-11-17: the guide once in the
+step), and "Reading board", the FlexiTac reading board the design's tails
+plug into (`web/boards.js` `tailsBoard`): while each tail is one pin per
+line (Reader None, the connector pins empty) the board of the form's rows
+and columns (32 x 16 for at most 32 lines on the larger side and 16 on the
+smaller, else 32 x 32 for at most 32 on each, else none); tails sized to a
+reader's connectors (the Reader option, or Rectangular's connector pins)
+the board with those connectors (16 and 32 pins the 32 x 16 board, 32 and
+32 the 32 x 32; the 16 x 16 and 48 x 48 readers' tails `none (tails for
+another reader)`: the review of 2026-11-17, before which the 32 x 32
+reader's tails were named the 32 x 16 board), with its ZIP (its Gerbers,
+BOM and pick-and-place, CC BY-NC 4.0) and notice; `app.js` `showBoard`
+sets it with each refresh of the controls, so a fit applied or an edit
+changes it at once, in Gen by Surface and Rectangular alike
+([LIBRARY_VIEW.md](LIBRARY_VIEW.md), "Ordering and the reading boards").
 Under step 2 a small "Advanced Customization" switch (so named at the
 user's request of 2026-11-04; "Customize the sensor" before) is one with the fold on
 the right (main.js `syncGuideCustomize`): either one opens both, the
@@ -1176,7 +1636,17 @@ the bands they cover at the view's top and sides; farther than before by as
 much); on the view's left, a column of tools: Select a surface,
 Base edge, Edit border, Undo, Clear and Remove model (the model off the
 view with its selection, border, proposals and map; a build already
-generated stays, the default part does not come back); under the view the
+generated stays, the default part does not come back).  The column tells
+the order of work (the user's request of 2026-11-17, "select a surface标注一个
+1, select a base 标注一个 2； edit board 显示optional"): Select a surface is
+numbered 1 and Base edge 2, small circles before their labels in the
+guide's steps' style (a ring, the chosen tool's the blue circle), and
+Edit border has "Optional" after it in the secondary grey (gone while the
+border is edited, the button then Done editing); the numbers and the word
+are aria-hidden, so the controls keep their names (main.js renames Edit
+border in its first span).  On a phone the column is about 17 px wider for them
+and the camera's buttons 2 px narrower a side, so it keeps its two rows
+beside the column.  Under the view the
 sensor's line and its Gerber ZIPs, then Advanced Customization with the base
 edge's choices across its top.  The file step hints that an STL can also
 be dragged onto the view.  While a model loads, a veil over the view says

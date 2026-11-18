@@ -12,7 +12,13 @@ is developable (zero Gaussian curvature).  The chart is built in this order:
    Gauss image is then a curve: normals vary in one direction only).
    Covers creased pads, extrusions, cylinders and cones.
 3. **curved**: least-squares conformal map (LSCM), then as-rigid-as-possible
-   (ARAP) iterations, which leave a measured stretch per facet.
+   (ARAP) iterations, which leave a measured stretch per facet; beyond
+   ``solve.BOUNDED_FROM`` the chart of least maximum stretch
+   (:func:`surface.solve.bounded`, since 2026-11-17), on which the lattice
+   is laid.  A curved chart is judged by the stretch the sheet keeps on the
+   part, relaxed (ARAP's chart, ``Chart.relaxed``: soft tape creeps), each
+   facet's averaged over ``SMOOTH_RADIUS_MM`` (:func:`smoothed_strain`,
+   :func:`judged_stretch`).
 
 The chart frame is the patch frame of the plan: seen from outside (looking
 against the outward normal) ``u`` points right and ``v`` up.  Per facet the
@@ -61,6 +67,8 @@ MAX_CHART_VERTICES = 200_000
 # up to seven smaller disks again, about twice that.  The factors fill in faster
 # than the vertex count grows, so larger curved selections are refused.
 MAX_SOLVE_VERTICES = 3000
+# A mirror plane's trace in a chart (mirror_traces): its crossings within this (mm) of one line.
+TRACE_STRAIGHT_MM = 0.05
 
 
 @dataclass
@@ -79,6 +87,9 @@ class Chart:
     outer: int
     strain: dict
     stats: dict = field(default_factory=dict)
+    # A curved chart's relaxed sheet (uv by vertex, ARAP's chart as solved, surface.solve RELAXED): the stretch the sheet
+    # keeps on the part; None on a planar or developable chart, which is exact.
+    relaxed: Any = None
 
     def facet_uv(self, facet: int, mesh: Mesh) -> list:
         return [self.uv[v] for v in mesh.facets[facet]]
@@ -281,7 +292,8 @@ _CHART_CACHE: "OrderedDict[tuple, Chart]" = OrderedDict()
 _CHART_LOCK = threading.Lock()
 
 
-def build_chart(mesh: Mesh, facets: Iterable[int], *, allow_curved: bool = True, seed: Any = None, initial: Any = None) -> Chart:
+def build_chart(mesh: Mesh, facets: Iterable[int], *, allow_curved: bool = True, seed: Any = None, initial: Any = None,
+                least: bool = True) -> Chart:
     """The chart of a selection (see the module docstring), from a small cache.
 
     Select, fit and map flatten the same selection of the same mesh, and the
@@ -292,21 +304,27 @@ def build_chart(mesh: Mesh, facets: Iterable[int], *, allow_curved: bool = True,
     ``initial`` (uv by vertex id, e.g. a larger chart's) starts a curved
     solve's ARAP from there instead of from LSCM.  Such a chart is neither
     taken from nor put in the cache, which holds charts built from scratch.
+
+    ``least`` false skips the least-max-stretch rounds (a curved chart is then
+    ARAP's): enough to judge a selection's stretch (:func:`judged_stretch`
+    reads the relaxed sheet, the same either way), as the select's trial
+    patches do; a full chart of the region, when cached, serves too.
     """
 
     region = tuple(sorted(set(facets)))
     if not region:
         raise SurfaceError("E_SURFACE_SELECTION_EMPTY")
     digest = hashlib.sha256(array("q", region).tobytes()).hexdigest()
-    key = (mesh.sha256, mesh.unit, digest, bool(allow_curved), seed if isinstance(seed, int) and seed in region else None)
+    key = (mesh.sha256, mesh.unit, digest, bool(allow_curved), seed if isinstance(seed, int) and seed in region else None, bool(least))
     if initial is not None:
-        return _build_chart(mesh, region, allow_curved=allow_curved, seed=key[4], initial=initial)
+        return _build_chart(mesh, region, allow_curved=allow_curved, seed=key[4], initial=initial, least=least)
     with _CHART_LOCK:
-        chart = _CHART_CACHE.get(key)
-        if chart is not None:
-            _CHART_CACHE.move_to_end(key)
-            return chart
-    chart = _build_chart(mesh, region, allow_curved=allow_curved, seed=key[4])
+        for wanted in (key,) if least else (key[:5] + (True,), key):
+            chart = _CHART_CACHE.get(wanted)
+            if chart is not None:
+                _CHART_CACHE.move_to_end(wanted)
+                return chart
+    chart = _build_chart(mesh, region, allow_curved=allow_curved, seed=key[4], least=least)
     with _CHART_LOCK:
         _CHART_CACHE[key] = chart
         while len(_CHART_CACHE) > 1 and (
@@ -316,7 +334,7 @@ def build_chart(mesh: Mesh, facets: Iterable[int], *, allow_curved: bool = True,
     return chart
 
 
-def _build_chart(mesh: Mesh, region: tuple, *, allow_curved: bool, seed: Any, initial: Any = None) -> Chart:
+def _build_chart(mesh: Mesh, region: tuple, *, allow_curved: bool, seed: Any, initial: Any = None, least: bool = True) -> Chart:
     pieces = _pieces(mesh, region)
     if len(pieces) > 1:
         areas = sorted((round(math.fsum(mesh.areas[f] for f in piece), 3) for piece in pieces), reverse=True)
@@ -358,6 +376,7 @@ def _build_chart(mesh: Mesh, region: tuple, *, allow_curved: bool, seed: Any, in
     if attempt["conflict"] is not None:
         stats["unfold_conflict_mm"] = attempt["conflict"]
     uv = attempt["uv"]
+    relaxed = None
     if uv is not None:
         kind, method = attempt["kind"], attempt["method"]
         if kind == "developable" and gauss["rank_ratio"] > GAUSS_RANK_RATIO and gauss["spread"] > GAUSS_HIDDEN_SPREAD:
@@ -381,12 +400,9 @@ def _build_chart(mesh: Mesh, region: tuple, *, allow_curved: bool, seed: Any, in
                 f"The curved selection has {len(vertex_ids)} vertices; curved surfaces are flattened up to "
                 f"{MAX_SOLVE_VERTICES} vertices. Select a smaller area (for example with the disk tool).",
             )
-        if initial is not None and all(v in initial for v in vertex_ids):
-            uv = solve.conformal_then_rigid(mesh, region, vertex_ids, topology["loops"][0], initial=initial)
-            kind, method = "curved", "arap"
-        else:
-            uv = solve.conformal_then_rigid(mesh, region, vertex_ids, topology["loops"][0])
-            kind, method = "curved", "lscm+arap"
+        start = initial if initial is not None and all(v in initial for v in vertex_ids) else None
+        uv, method, relaxed = solve.least_stretch(mesh, region, vertex_ids, topology["loops"][0], initial=start, least=least)
+        kind = "curved"
     uv = _orient(uv, mesh, region, vertex_ids, origin, u_axis, v_axis)
     strain = {f: singular_values(mesh, f, uv) for f in region}
     loops = topology["loops"]
@@ -408,7 +424,7 @@ def _build_chart(mesh: Mesh, region: tuple, *, allow_curved: bool, seed: Any, in
             "flipped_facets": sum(1 for f in region if _tri_area(*[uv[v] for v in oriented_facet(mesh, f)]) <= 0),
         }
     )
-    return Chart(
+    chart = Chart(
         facets=region,
         vertices=vertex_ids,
         uv=uv,
@@ -421,7 +437,9 @@ def _build_chart(mesh: Mesh, region: tuple, *, allow_curved: bool, seed: Any, in
         outer=outer,
         strain=strain,
         stats=stats,
+        relaxed=relaxed,
     )
+    return chart
 
 
 def _pieces(mesh: Mesh, region: Sequence[int]) -> list:
@@ -840,3 +858,166 @@ def _grid(chart: Chart, mesh: Mesh) -> dict:
     index = {"x0": x0, "y0": y0, "cell": cell, "buckets": buckets}
     chart.stats["_grid"] = index
     return index
+
+
+# --------------------------------------------------------------------------
+# The stretch a sheet feels (2026-11-17)
+# --------------------------------------------------------------------------
+# The fit judges a curved selection by the stretch the sheet keeps on the part:
+# the relaxed sheet's (Chart.relaxed, ARAP's chart; surface.solve RELAXED: soft
+# tape creeps to it, whatever chart the lattice was laid on).  A CAD exporter's
+# facets (long thin strips, fans of slivers) make a facet's stretch the
+# triangle's rather than the surface's: one sliver's singular values can be
+# percents off where its neighbours' are not.  A laminated sheet (two 0.2 mm
+# FPCs, the film and the lamination, surface.fit.STACK_THICKNESS_MM) does not
+# follow a stretch that changes over less than about a taxel's half, so each
+# facet's stretch is averaged, by area, over the facets whose centroids lie
+# within SMOOTH_RADIUS_MM of its own in the relaxed sheet.
+
+SMOOTH_RADIUS_MM = 1.0
+
+
+def facet_stretch(chart: Chart, facet: int) -> float:
+    """The facet's stretch in the chart (the lattice's map)."""
+
+    s1, s2 = chart.strain[facet]
+    return max(abs(s1 - 1), abs(s2 - 1))
+
+
+def relaxed_strain(chart: Chart, mesh: Mesh) -> dict:
+    """Per facet, the stretch the sheet keeps on the part: the relaxed sheet's on a curved chart, the chart's own on a
+    planar or developable one (cached)."""
+
+    cached = chart.stats.get("_relaxed")
+    if cached is not None:
+        return cached
+    if chart.relaxed is None:
+        values = {f: facet_stretch(chart, f) for f in chart.facets}
+    else:
+        values = {}
+        for f in chart.facets:
+            s1, s2 = singular_values(mesh, f, chart.relaxed)
+            values[f] = max(abs(s1 - 1), abs(s2 - 1))
+    chart.stats["_relaxed"] = values
+    return values
+
+
+def smoothed_strain(chart: Chart, mesh: Mesh, radius: float = SMOOTH_RADIUS_MM) -> dict:
+    """Per facet, the area-weighted mean of :func:`relaxed_strain` over the facets whose centroid lies within ``radius``
+    in the relaxed sheet (the chart itself on a planar or developable chart; cached).
+
+    The sums run over the facets in a fixed order (buckets of the radius, facets by id), so the values are the same
+    on every Python."""
+
+    cached = chart.stats.get("_smooth")
+    if cached is not None and cached[0] == radius:
+        return cached[1]
+    sheet = chart.relaxed if chart.relaxed is not None else chart.uv
+    stretch = relaxed_strain(chart, mesh)
+    centres = {}
+    for f in chart.facets:
+        (ax, ay), (bx, by), (cx, cy) = (sheet[v] for v in mesh.facets[f])
+        centres[f] = ((ax + bx + cx) / 3, (ay + by + cy) / 3)
+    buckets: dict = {}
+    for f in chart.facets:
+        x, y = centres[f]
+        buckets.setdefault((math.floor(x / radius), math.floor(y / radius)), []).append(f)
+    smooth = {}
+    r2 = radius * radius
+    for f in chart.facets:
+        x, y = centres[f]
+        i, j = math.floor(x / radius), math.floor(y / radius)
+        total = weight = 0.0
+        for di in (-1, 0, 1):
+            for dj in (-1, 0, 1):
+                for g in buckets.get((i + di, j + dj), ()):
+                    gx, gy = centres[g]
+                    if (gx - x) * (gx - x) + (gy - y) * (gy - y) <= r2:
+                        a = mesh.areas[g]
+                        total += a * stretch[g]
+                        weight += a
+        smooth[f] = total / weight if weight > 0 else stretch[f]
+    chart.stats["_smooth"] = (radius, smooth)
+    return smooth
+
+
+def stretch_values(chart: Chart, mesh: Mesh) -> dict:
+    """Each facet's stretch as the fit and the map judge it: on a curved chart the relaxed sheet's, smoothed; the facet's
+    own on a planar or developable one (exact up to the projection's tilt, which the strained-facet obstacles catch
+    facet by facet)."""
+
+    if chart.kind == "curved":
+        return smoothed_strain(chart, mesh)
+    return {f: facet_stretch(chart, f) for f in chart.facets}
+
+
+def judged_stretch(chart: Chart, mesh: Mesh) -> float:
+    """The chart's largest stretch as the fit judges it (:func:`stretch_values`)."""
+
+    if chart.kind == "curved":
+        return max(smoothed_strain(chart, mesh).values(), default=0.0)
+    return chart.stats["strain_max"]
+
+
+def relaxed_max(chart: Chart, mesh: Mesh) -> float:
+    """The largest single facet's stretch on the part (:func:`relaxed_strain`): what the checks report beside the
+    judged, smoothed one."""
+
+    return max(relaxed_strain(chart, mesh).values(), default=0.0)
+
+
+# --------------------------------------------------------------------------
+# Mirror planes in the chart (the review of 2026-11-17, findings 2 and 4)
+# --------------------------------------------------------------------------
+# A doubly curved selection that is its own mirror image (surface.select.mirror_maps, the stretch selection's closure) is
+# flattened to a chart that is its own mirror image about the plane's trace, a line; its outline follows the mesh's edges,
+# so on a tessellation that is not itself symmetric it deviates from its mirror image by up to a facet (a quad grid's
+# diagonals all one way: a notch on one side only).  The fit's exits and sides are laid on the trace and the symmetric-face
+# rule allows the outline that facet (surface.fieldfit.exit_symmetry), so the field is symmetric about the plane.
+
+
+def mirror_traces(mesh: Mesh, chart: Chart, planes: Sequence) -> list:
+    """Each mirror plane's trace in the chart, ``{"point": (u, v), "direction": (du, dv), "allowance_mm"}``: the line
+    fitted through the points where the chart's edges cross the plane (the direction's larger component positive),
+    ``allowance_mm`` the longest segment of the outline (how far a tessellation that is not symmetric may move it from its
+    mirror image).  A plane whose crossings do not lie on one line within TRACE_STRAIGHT_MM is left out."""
+
+    outline = chart.outline()
+    count = len(outline)
+    allowance = max((dist2(outline[i], outline[(i + 1) % count]) for i in range(count)), default=0.0)
+    edges = sorted({(min(a, b), max(a, b)) for f in chart.facets for a, b in _facet_edges(mesh.facets[f])})
+    traces = []
+    for point, normal, _ in planes:
+        side = {v: dot(sub(mesh.vertices[v], point), normal) for v in chart.vertices}
+        found = set()
+        for a, b in edges:
+            sa, sb = side[a], side[b]
+            if sa == 0.0:
+                found.add(chart.uv[a])
+            if sb == 0.0:
+                found.add(chart.uv[b])
+            if (sa < 0.0 < sb) or (sb < 0.0 < sa):
+                t = sa / (sa - sb)
+                ua, ub = chart.uv[a], chart.uv[b]
+                found.add((ua[0] + t * (ub[0] - ua[0]), ua[1] + t * (ub[1] - ua[1])))
+        crossings = sorted(found)
+        if len(crossings) < 2:
+            continue
+        cu = math.fsum(p[0] for p in crossings) / len(crossings)
+        cv = math.fsum(p[1] for p in crossings) / len(crossings)
+        suu = math.fsum((p[0] - cu) ** 2 for p in crossings)
+        svv = math.fsum((p[1] - cv) ** 2 for p in crossings)
+        suv = math.fsum((p[0] - cu) * (p[1] - cv) for p in crossings)
+        angle = 0.5 * math.atan2(2 * suv, suu - svv)
+        du, dv = math.cos(angle), math.sin(angle)
+        if abs(du) < abs(dv) and dv < 0 or abs(du) >= abs(dv) and du < 0:
+            du, dv = -du, -dv
+        if max(abs((p[0] - cu) * dv - (p[1] - cv) * du) for p in crossings) > TRACE_STRAIGHT_MM:
+            continue
+        traces.append({"point": (cu, cv), "direction": (du, dv), "allowance_mm": allowance})
+    return traces
+
+
+def _facet_edges(facet: Sequence[int]) -> tuple:
+    a, b, c = facet
+    return ((a, b), (b, c), (c, a))

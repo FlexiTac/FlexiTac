@@ -121,8 +121,9 @@ While it is on:
   on the surface, and the exit edge.  The fit note starts with "Inside your
   border".
 - The flat preview under Proposals draws the border in blue, hatched beyond the
-  surface.  It is left out on a strain-limited curved fit, whose chart is
-  another one.
+  surface.  (It was left out on a strain-limited curved fit, whose chart was
+  another one; since 2026-11-17 a curved selection is fitted whole on its own
+  chart, or refused.)
 - On the part, the exit of a border fit is the border's edge
   (`placement.base_kind === "border"`), drawn from the border that was
   fitted.
@@ -209,10 +210,12 @@ the browser map uv to the part and back.
 
 - `border.js` maps with the mesh's `scale_to_mm`: an STL in metres is
   scaled like the server's mesh.
-- The border always lives in the `/select` chart.  A strain-limited fit
-  works on a disk's chart of its own; the server carries the border there
-  by a least-squares rigid fit.  So the mapped taxels may sit slightly off
-  the drawn border.  The map's check uses the carried border.
+- The border always lives in the `/select` chart, the chart the fit uses
+  since 2026-11-17 (a curved selection is fitted whole or refused).  A
+  placement saved from a strain-limited fit of before works on its disk's
+  chart; the server carries the border there by a least-squares rigid fit,
+  so its mapped taxels may sit slightly off the drawn border, and the map's
+  check uses the carried border.
 
 **Off.**  The border is not drawn and Edit border is disabled in three
 cases:

@@ -278,21 +278,37 @@ class FitTests(unittest.TestCase):
             fit.fit_route({"selection": selection, "base": {"side": short["index"]}}, data)
         self.assertEqual(raised.exception.code, "E_SURFACE_BASE_EDGE")
 
-    def test_a_dome_is_cut_down_to_the_disk_that_flattens_within_the_strain_limit(self) -> None:
+    def test_a_dome_beyond_the_strain_limit_is_refused_whole_saying_how_much_fits(self) -> None:
+        # Before 2026-11-17 the fit cut such a selection down to a geodesic disk round the click that was never drawn
+        # (strain_limited); now it is refused, naming the patch round the click that flattens within the limit, and
+        # that patch (the page's Shrink to fit: preset stretch) is fitted whole.
         triangles = F.sphere_cap(60.0, 25.0, rings=8, segments=32)
         data = F.stl_bytes(triangles)
         mesh = F.mesh(triangles)
         seed = select.nearest_facet(mesh, (0.0, 0.0, 60.0))
-        result = fit.fit_route({"selection": {"ops": [{"op": "grow", "seed_facet": seed, "preset": "smooth"}]}, "options": {"pitch_mm": 1.5, "rotation": "none"}}, data)
-        limited = result["selection"]["strain_limited"]
-        self.assertLessEqual(limited["strain_max"], 0.003)
-        self.assertLess(limited["area_mm2"], limited["selected_area_mm2"])
+        selection = {"ops": [{"op": "grow", "seed_facet": seed, "preset": "smooth"}]}
+        options = {"pitch_mm": 1.5, "rotation": "none"}
+        with self.assertRaises(SurfaceError) as raised:
+            fit.fit_route({"selection": selection, "options": options}, data)
+        error = raised.exception
+        self.assertEqual(error.code, "E_SURFACE_NOT_DEVELOPABLE")
+        self.assertGreater(error.details["stretch"], 0.003)
+        self.assertGreaterEqual(error.details["stretch_facet_max"], error.details["stretch"])
+        shrink = error.details["shrink"]
+        self.assertEqual(shrink["seed_facet"], seed)
+        self.assertLessEqual(shrink["stretch"], 0.003)
+        self.assertLess(shrink["area_mm2"], error.details["selected_area_mm2"])
+        self.assertIn(f"{shrink['area_mm2']:.0f} of its", error.message)
+        smaller = {"ops": [{"op": "grow", "seed_facet": seed, "preset": "stretch", "stretch_budget": 0.003}]}
+        drawn = api.select_surface({"selection": smaller}, data)["selection"]
+        self.assertAlmostEqual(drawn["area_mm2"], shrink["area_mm2"], places=5)
+        result = fit.fit_route({"selection": smaller, "options": options}, data)
+        self.assertEqual(result["selection"]["facets"], drawn["facets"])  # the region fitted is the region drawn
+        self.assertNotIn("strain_limited", result["selection"])
         proposal = result["proposals"][0]
         self.assertGreater(proposal["metrics"]["taxels"], 0)
-        # The map rebuilds the same strain-limited chart from the placement.
-        self.assertEqual(proposal["placement"]["strain_limited"], limited)
-        selection = {"ops": [{"op": "grow", "seed_facet": seed, "preset": "smooth"}]}
-        mapped = place.map_route({"selection": selection, "placement": proposal["placement"], "design": proposal["design"]}, data)
+        self.assertNotIn("strain_limited", proposal["placement"])
+        mapped = place.map_route({"selection": smaller, "placement": proposal["placement"], "design": proposal["design"]}, data)
         self.assertTrue(mapped["ok"], [r for r in mapped["verification"] if not r["passed"]])
 
 
@@ -437,6 +453,14 @@ class MapTests(unittest.TestCase):
             moved = copy.deepcopy(proposal["placement"])
             moved["field_origin_base"] = [moved["field_origin_base"][0] + dx, moved["field_origin_base"][1] + dy]
             self.assertEqual("board_clearance" in failed(moved, proposal["design"]), leaves, (dx, dy))
+        # Moved 20 mm along the exit both tails miss it: their reach is no measurement, null (never -inf) and failed (the
+        # verification of 2026-11-17: no test had a tail miss the exit since the fill default moved the fits).
+        along = copy.deepcopy(proposal["placement"])
+        along["field_origin_base"] = [along["field_origin_base"][0] + 20.0, along["field_origin_base"][1]]
+        mapped = place.map_route({"selection": selection, "placement": along, "design": proposal["design"]}, data)
+        json.dumps(mapped, allow_nan=False)
+        self.assertEqual({r["rule"]: (r["measured"], r["passed"]) for r in mapped["verification"] if r["rule"].endswith("_tail_reach")},
+                         {"row_tail_reach": (None, False), "column_tail_reach": (None, False)})
         # Tails cut to the template's minimum end on the face, short of the exit.
         short = copy.deepcopy(proposal["design"])
         short["tail"]["top_length_mm"] = short["tail"]["bottom_length_mm"] = 7.5
@@ -489,12 +513,13 @@ class MapTests(unittest.TestCase):
             self.assertEqual(raised.exception.code, "E_SURFACE_REQUEST", k)
 
     def test_spacing_is_measured_along_curved_surfaces(self) -> None:
-        # Pitch 2 on a radius of 5 mm: the 3D chord is 0.67% shorter than the pitch,
-        # the path along the surface is not.
-        triangles = F.cylinder_band(5.0, 40.0, segments=72, closed=False, sweep_deg=180.0)
+        # Pitch 2 on a radius of 7 mm: the 3D chord is 0.34% shorter than the pitch,
+        # the path along the surface is not.  (A radius of 5 mm since the field's
+        # 6.5 mm bend of 2026-11-17 bends too tightly for the field: 0.67 % there.)
+        triangles = F.cylinder_band(7.0, 40.0, segments=96, closed=False, sweep_deg=180.0)
         data = F.stl_bytes(triangles)
         mesh = F.mesh(triangles)
-        seed = select.nearest_facet(mesh, (5.0, 0.05, 20.0))
+        seed = select.nearest_facet(mesh, (7.0, 0.05, 20.0))
         selection = {"ops": [{"op": "grow", "seed_facet": seed, "preset": "smooth"}]}
         result = fit.fit_route({"selection": selection, "options": {"pitch_mm": 2.0, "proposals": 2}}, data)
         for proposal in result["proposals"]:
@@ -679,6 +704,20 @@ class ReviewFixTests(unittest.TestCase):
         self.assertAlmostEqual(clearance, 5.0, places=9)
         self.assertLess(calls[0], 200)
 
+    def test_an_obstacle_blocks_every_raster_cell_it_touches(self) -> None:
+        # The contract tests of 2026-10-20 (claude/specs/cad-mode/PROGRESS.md): the raster blocked only the cells an
+        # obstacle's centre line crossed, so a board overlapped its edges.  An obstacle whose bottom and top edges lie in
+        # the lower and upper halves of two rows of cells blocks those rows too (the verification of 2026-11-17: since the
+        # fill default no test placed a rectangle beside an obstacle).
+        outline = [(-20.0, 0.0), (20.0, 0.0), (20.0, 30.0), (-20.0, 30.0)]
+        chart = types.SimpleNamespace(outline=lambda: outline)
+        frame = fit.BaseFrame({"from_uv": [-20.0, 0.0], "to_uv": [20.0, 0.0], "inward_uv": [0.0, 1.0]})
+        h = fit.UsableRaster(chart, frame, self.NONE, 0.0, [0]).h
+        block = [(-20.0 + 5.3 * h, 2.7 * h), (-20.0 + 7.6 * h, 2.7 * h), (-20.0 + 7.6 * h, 4.3 * h), (-20.0 + 5.3 * h, 4.3 * h)]
+        raster = fit.UsableRaster(chart, frame, dict(self.NONE, covered=[block]), 0.0, [0])
+        self.assertEqual(sorted((j, i) for j in range(raster.ny) for i in range(raster.nx) if not raster.free[j][i]),
+                         [(j, i) for j in (2, 3, 4) for i in (5, 6, 7)])
+
     def test_the_raster_lists_each_outline_segment_on_its_own_lines_only(self) -> None:
         # R5.1: the raster scanned every outline segment on every line (fan exports: 16000 segments).
         unpacked = [0]
@@ -710,66 +749,6 @@ class ReviewFixTests(unittest.TestCase):
             )
             expected = [(crossings[k], crossings[k + 1]) for k in range(0, len(crossings) - 1, 2)]
             self.assertEqual(fit._scanlines(polygons, [y - 1e-3, y])[1], expected, y)
-
-    def test_a_picked_side_keeps_its_number_on_the_strain_limited_disk(self) -> None:
-        # R2.1: {side: n} was read from the sides of the strain-limited disk, not the selection's.
-        data, mesh = self._saddle()
-        selection = {"ops": [{"op": "grow", "seed_facet": 256, "preset": "smooth"}]}  # at the y = -20 side
-        selected = api.select_surface({"selection": selection}, data)["selection"]
-        bottom = next(s for s in selected["sides"] if s["from_xyz"][1] == s["to_xyz"][1] == -20.0 and s["chord_mm"] > 20)
-        top = next(s for s in selected["sides"] if s["from_xyz"][1] == s["to_xyz"][1] == 20.0 and s["chord_mm"] > 20)
-        options = {"pitch_mm": 2.0, "rotation": "none", "proposals": 1}
-        result = fit.fit_route({"selection": selection, "base": {"side": bottom["index"]}, "options": options}, data)
-        self.assertIn("strain_limited", result["selection"])
-        placement = result["proposals"][0]["placement"]
-        self.assertEqual(placement["base_side"], bottom["index"])
-        _, chart = fit.limited_chart(mesh, api.selection_chart(mesh, selection)[0], placement["strain_limited"])
-        loop = chart.loops[chart.outer]
-        for edge in placement["exit_edges"]:
-            for v in (loop[edge], loop[(edge + 1) % len(loop)]):
-                self.assertEqual(mesh.vertices[v][1], -20.0)  # on the picked side
-        mapped = place.map_route({"selection": selection, "placement": placement, "design": result["proposals"][0]["design"]}, data)
-        self.assertTrue(mapped["ok"], [r for r in mapped["verification"] if not r["passed"]])
-        # The far side lies outside the disk: no exit there (and no other side in its place).
-        with self.assertRaises(SurfaceError) as raised:
-            fit.fit_route({"selection": selection, "base": {"side": top["index"]}, "options": options}, data)
-        self.assertEqual(raised.exception.code, "E_SURFACE_BASE_EDGE")
-        self.assertIn(f"Side {top['index']} ", raised.exception.message)
-
-    def test_the_strain_limit_tries_disks_near_the_answer(self) -> None:
-        # R5.0: the bisection's first trials were half and a quarter of the selection, each a cold solve.
-        triangles = F.sphere_cap(60.0, 35.0, rings=12, segments=36)
-        mesh = F.mesh(triangles)
-        selection = {"ops": [{"op": "grow", "seed_facet": select.nearest_facet(mesh, (0.0, 0.0, 60.0)), "preset": "smooth"}]}
-        facets, chart = api.selection_chart(mesh, selection)
-        trials = []
-        original = chart_module.build_chart
-
-        def recording(mesh_, region, **kwargs):
-            built = original(mesh_, region, **kwargs)
-            trials.append(len(built.vertices))
-            return built
-
-        chart_module.build_chart = recording
-        try:
-            region, limited, info = fit.limit_strain(mesh, facets, chart, selection, 0.003)
-        finally:
-            chart_module.build_chart = original
-        self.assertLessEqual(limited.stats["strain_max"], 0.003)
-        self.assertLessEqual(len(trials), fit.STRAIN_BISECTIONS + 1)
-        self.assertLessEqual(max(trials), 1.5 * len(limited.vertices), trials)
-        # A fine scan of the radius finds 223.00 mm2 on this (welded) cap.
-        self.assertGreater(info["area_mm2"], 220.0)
-        # A coarse dome grows its disk in steps, and trials that repeat a disk are free.
-        # On this (welded) dome the largest disk within 2% is 209.34 mm2; the next one,
-        # 272.08 mm2 at a radius of about 4.1 mm, stretches 2.25%.
-        mesh = F.mesh(F.sphere_cap(30.0, 40.0, rings=3, segments=6))
-        selection = {"ops": [{"op": "grow", "seed_facet": select.nearest_facet(mesh, (0.0, 0.0, 30.0)), "preset": "smooth"}]}
-        facets, chart = api.selection_chart(mesh, selection)
-        region, limited, info = fit.limit_strain(mesh, facets, chart, selection, 0.02)
-        self.assertLessEqual(limited.stats["strain_max"], 0.02)
-        self.assertGreater(info["area_mm2"], 209.0)
-
 
 @unittest.skipUnless((ASSETS / "crank_gripper" / "tip_left.stl").exists(), "asset/ meshes are not committed")
 class AssetFitTests(unittest.TestCase):

@@ -72,10 +72,23 @@ Against a running app.py (FPC_PORT) with the example meshes in asset/ (skipped w
 - The Library (part_library, 2026-11-05): every sensor of web/library/entries.json opens at gen.html?part=<id> from its
   shipped fit with its build id, the file note naming it; gen.html?part=<part>, an unknown id, the mode switch, the user's
   own file and Remove model (?part and the options it set dropped, the user's own edits kept), a click and Undo.
+- Step 3's reading board (part_reading_board, the user's answer of 2026-11-17: "gen也加入reading board"): under the
+  downloads, over the Ordering notes, "Ordering and fabrication" (the FlexiTac fabrication guide, a new tab) and "Reading
+  board", web/boards.js tailsBoard on the form's rows, columns and connector pins: the default UMI sensor (12 x 32) the
+  32 x 16 board, its bundle downloaded as served, the guide linked once in step 3; in Rectangular each edit at once, with
+  no Generate (32 columns the 32 x 32 board, then 16 rows the 32 x 16, 17 and 32 rows the 32 x 32, 33 columns none,
+  "none (more than 32 lines)", 16 the 32 x 16, an empty field "—"; the connector pins 32 and 32 the 32 x 32 board, 32 and
+  16 the 32 x 16, 32 and 20 "none (tails for another reader)", empty again the lines' board); a Library sensor of 32 x 32
+  lines (?part=i2rt-yam-2mm) the 32 x 32 board; Gen by Surface's Reader (the review of 2026-11-17): the default sensor
+  generated for the 32 x 32 reader the 32 x 32 board, for the 16 x 16 and 48 x 48 readers none, for the FlexiTac's and
+  none the 32 x 16; no console error.
 - A browser without Element.checkVisibility (part_older_browser, the review of 2026-11-06: iOS and iPadOS before 17.4):
   Rectangular's Generate and Gen by Surface's default build shown as with it, at 1440 and 390 px.
 - The stacked card's foot (part_stack_feet, the verification of 2026-11-06): in both modes, at 1440 and 390 px, light and
   dark, the last row's figures rounded as the card's foot (17 px inside its 18 px), the others square.
+- The tool menu's order of work (part_tool_menu, the user's request of 2026-11-17): Select a surface numbered 1, Base
+  edge 2 and Edit border marked Optional, aria-hidden (the controls' names as before), at 1440 and 390 px; the word gone
+  while the border is edited.
 Screenshots go to $FPC_BROWSER_OUT/shots (cad_*.png).
 """
 from __future__ import annotations
@@ -217,11 +230,11 @@ def open_cad(page, caps=64, default_part=False):
         set_caps(page, caps)
 
 
-# One step (gen.html #cadQuick, #cadCustomize): what the row under the view holds (Generate sensor alone since the
-# user's request of 2026-11-02), whether the button is in sight and enabled and its title, whether Advanced Customization is open and
+# One step (gen.html #cadQuick, #cadCustomize): what the row under the view holds, shown (Generate sensor alone since the
+# user's request of 2026-11-02; Shrink to fit beside it only while a curved selection is over the strain limit, 2026-11-17), whether the button is in sight and enabled and its title, whether Advanced Customization is open and
 # whether its controls are in sight.
 QUICK = """() => { const button = document.getElementById('cadQuickGenerate');
-    return {row: [...document.getElementById('cadQuick').querySelectorAll('button, p, a')].map(node => node.textContent.trim()),
+    return {row: [...document.getElementById('cadQuick').querySelectorAll('button, p, a')].filter(node => !node.hidden).map(node => node.textContent.trim()),
             shown: button.checkVisibility(), generate: !button.disabled, title: button.title, customize: document.getElementById('cadCustomize').open,
             hidden: Object.fromEntries(['cadSides', 'cadPitch', 'cadFit', 'cadProposalWrap', 'cadGenerate'].map(id => [id, document.getElementById(id).checkVisibility()]))}; }"""
 # The 3D view's status and loading veil (gen.html #cadStatus, #cadLoading): the status's text (None when hidden),
@@ -298,6 +311,95 @@ def part_remove_model(browser):
           and s["default_build"] == "stopped" and page.is_visible("#cadDrop"), (enabled, veil, s["mesh"], s["default_build"], s["default_part"]))
     check("remove while loading: no console errors", not errors_of(page), errors_of(page))
     page.close()
+
+
+# The 3D view's tool menu (the user's request of 2026-11-17): each row's name (its text less the aria-hidden number or
+# word), its number and word with their boxes and colours, its label's text box, the menu's and the camera's boxes and
+# the camera's rows.
+TOOL_MENU = """() => {
+  const box = n => { const r = n.getBoundingClientRect(); return {left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height}; };
+  const text = n => { const own = [...n.childNodes].find(c => c.nodeType === 3 && c.textContent.trim()) || n.querySelector('.cad-edit-border-name');
+    const range = document.createRange(); range.selectNodeContents(own); return box(range); };
+  return {rows: [...document.querySelectorAll('#cadViewTools label > span, #cadViewTools > button')].map(n => {
+      const named = n.cloneNode(true); named.querySelectorAll('[aria-hidden="true"]').forEach(h => h.remove());
+      const no = n.querySelector('.cad-tool-no'), word = n.querySelector('.cad-tool-optional');
+      return {name: named.textContent.trim(), box: box(n), label: text(n), size: parseFloat(getComputedStyle(n).fontSize),
+              no: no && {text: no.textContent, box: box(no), fill: getComputedStyle(no).backgroundColor},
+              word: word && {shown: word.checkVisibility(), box: box(word), color: getComputedStyle(word).color, size: parseFloat(getComputedStyle(word).fontSize)}}; }),
+    hidden: [...document.querySelectorAll('#cadViewTools [aria-hidden="true"]')].map(n => n.textContent),
+    menu: box(document.getElementById('cadViewTools')), camera: box(document.querySelector('.cad-views')),
+    cameraRows: new Set([...document.querySelectorAll('.cad-views button')].map(b => Math.round(b.getBoundingClientRect().top))).size};
+}"""
+TOOL_NAMES = ["Select a surface", "Base edge", "Edit border", "Undo", "Clear", "Remove model"]
+BLUE_FILL = "rgb(0, 113, 227)"
+
+
+def part_tool_menu(browser):
+    """The 3D view's tool menu tells the order of work (the user's request of 2026-11-17, "select a surface标注一个 1,
+    select a base 标注一个 2； edit board 显示optional"): Select a surface numbered 1 and Base edge 2, small circles
+    before their labels (centred on their rows, left of the labels, the two labels aligned, the numbers in the column of
+    the other rows' labels), the chosen tool's the blue circle; Edit border with "Optional" after it on its line, smaller
+    and in the secondary grey; the controls' names as before (the radios and the button by role and name); every row on
+    one line, the rows 150 px at 1440 px as before.  At 390 px the menu clear of the camera, which keeps its two rows.
+    With the soft finger (asset/): the chosen tool's number blue for Base edge too, and while the border is edited the
+    word gone and the chosen number a ring again, back on Done editing."""
+    for width in (1440, 390):
+        page = new_page(browser, width=width, height=900 if width == 1440 else 844, folded=True)  # as a visitor sees it
+        open_cad(page)
+        page.locator("#cadView").scroll_into_view_if_needed()
+        menu = page.evaluate(TOOL_MENU)
+        rows = menu["rows"]
+        names = [row["name"] for row in rows]
+        roles = [page.get_by_role("radio", name=name, exact=True).count() for name in TOOL_NAMES[:2]] + \
+                [page.get_by_role("button", name=name, exact=True).count() for name in TOOL_NAMES[2:]]
+        check(f"tool menu {width}: the rows' names as before, the numbers and the word aria-hidden (the radios and the buttons found by role and name)",
+              names == TOOL_NAMES and roles == [1] * 6 and menu["hidden"] == ["1", "2", "Optional"], (names, roles, menu["hidden"]))
+        numbered = [(row["no"]["text"], row["no"]["box"], row["label"], row["box"]) for row in rows[:2] if row["no"]]
+        column = min(row["label"]["left"] for row in rows[2:])
+        check(f"tool menu {width}: Select a surface numbered 1 and Base edge 2, each a circle centred on its row before its label, "
+              "the two labels aligned and the numbers in the other rows' labels' column (within 3 px)",
+              [text for text, *_ in numbered] == ["1", "2"] and not any(row["no"] for row in rows[2:])
+              and all(abs(no["width"] - no["height"]) < 0.5 and 12 <= no["width"] <= 18 and no["right"] + 3 <= label["left"]
+                      and abs((no["top"] + no["bottom"]) / 2 - (row["top"] + row["bottom"]) / 2) <= 1 and no["left"] >= row["left"]
+                      for _, no, label, row in numbered)
+              and abs(numbered[0][2]["left"] - numbered[1][2]["left"]) < 0.5 and abs(numbered[0][1]["left"] - numbered[1][1]["left"]) < 0.5
+              and abs(numbered[0][1]["left"] - column) <= 3, (numbered, column))
+        check(f"tool menu {width}: the chosen tool's number the blue circle, the other's not",
+              rows[0]["no"]["fill"] == BLUE_FILL and rows[1]["no"]["fill"] != BLUE_FILL, [row["no"]["fill"] for row in rows[:2]])
+        edit = rows[2]
+        word = edit["word"]
+        check(f"tool menu {width}: Edit border with Optional after it on its line, smaller, in the secondary grey; the other rows without it",
+              word and word["shown"] and word["box"]["left"] >= edit["label"]["right"] + 3 and word["box"]["right"] <= edit["box"]["right"]
+              and edit["label"]["top"] - 1 <= word["box"]["top"] and word["box"]["bottom"] <= edit["label"]["bottom"] + 1
+              and word["size"] < edit["size"] and word["color"] == "rgb(110, 110, 115)" and not any(row["word"] for i, row in enumerate(rows) if i != 2),
+              (edit, word))
+        heights = {round(row["box"]["height"], 1) for row in rows}
+        widths = {round(row["box"]["width"], 1) for row in rows}
+        if width == 1440:
+            check("tool menu 1440: every row on one line, 36 px, and 150 px wide as before", heights == {36.0} and widths == {150.0}, (heights, widths))
+        else:
+            check("tool menu 390: every row on one line, 32 px; the menu clear of the camera (4 px or more), which keeps its two rows",
+                  heights == {32.0} and len(widths) == 1 and menu["menu"]["right"] + 4 <= menu["camera"]["left"] and menu["cameraRows"] == 2,
+                  (heights, widths, menu["menu"], menu["camera"], menu["cameraRows"]))
+        if width == 1440 and SOFT.exists():
+            load(page, SOFT)
+            candidate(page, 1)
+            page.click('#cadTools label:has(input[value="edge"])'); page.wait_for_timeout(100)
+            edge = page.evaluate(TOOL_MENU)["rows"]
+            page.click('#cadTools label:has(input[value="grow"])'); page.wait_for_timeout(100)
+            page.click("#cadEditBorder"); page.wait_for_timeout(200)
+            editing = page.evaluate(TOOL_MENU)["rows"]
+            named = page.get_by_role("button", name="Done editing", exact=True).count()
+            page.click("#cadEditBorder"); page.wait_for_timeout(200)
+            done = page.evaluate(TOOL_MENU)["rows"]
+            check("tool menu 1440: Base edge chosen, its number the blue circle; while the border is edited Done editing without the word "
+                  "and the chosen number a ring, the word back on Done editing",
+                  [row["no"]["fill"] == BLUE_FILL for row in edge[:2]] == [False, True]
+                  and editing[2]["name"] == "Done editing" and named == 1 and not editing[2]["word"]["shown"] and editing[0]["no"]["fill"] != BLUE_FILL
+                  and done[2]["name"] == "Edit border" and done[2]["word"]["shown"] and done[0]["no"]["fill"] == BLUE_FILL,
+                  ([row["no"]["fill"] for row in edge[:2]], editing[2], editing[0]["no"], done[2]))
+        check(f"tool menu {width}: no console errors", not errors_of(page), errors_of(page))
+        page.close()
 
 
 # At rest: nothing in flight, Generate sensor not at work, no model loading, the default part's build over.
@@ -731,10 +833,12 @@ def part_soft(browser):
           s["selection"] and abs(s["selection"]["area_mm2"] - 3087.7) < 0.05 and s["selection"]["kind"] == "planar" and s["selection"]["facets"] == 34, s["selection"])
     # The tools in the 3D view's window, on its left, larger than before (the user's requests of 2026-10-30): Select a
     # surface, Base edge, Edit border, Undo and Clear in a column over the view, Remove model under them (2026-10-31); no
-    # Add / Subtract switch, no Disk tool, no Clean up and no candidate list.
+    # Add / Subtract switch, no Disk tool, no Clean up and no candidate list.  Each row's name its text less the
+    # numbers and the word Optional (aria-hidden, 2026-11-17; part_tool_menu checks them).
     tools = page.evaluate("""() => { const view = document.getElementById('cadView').getBoundingClientRect();
-        return [...document.querySelectorAll('#cadViewTools label span, #cadViewTools button')].map(node => { const r = node.getBoundingClientRect();
-          return [node.textContent.trim(), Math.round(r.left - view.left), Math.round(r.top - view.top), Math.round(r.height),
+        return [...document.querySelectorAll('#cadViewTools label > span, #cadViewTools > button')].map(node => { const r = node.getBoundingClientRect();
+          const named = node.cloneNode(true); named.querySelectorAll('[aria-hidden="true"]').forEach(hidden => hidden.remove());
+          return [named.textContent.trim(), Math.round(r.left - view.left), Math.round(r.top - view.top), Math.round(r.height),
                   r.right <= view.left + view.width / 3 && r.bottom <= view.bottom]; }); }""")
     check("soft: Select a surface, Base edge, Edit border, Undo, Clear and Remove model stand in a column on the 3D view's left, "
           "at least 32 px tall (no Disk, no Clean up, no candidate list)",
@@ -1143,6 +1247,9 @@ def part_field_soft(browser):
           and (s["proposal"]["rows"], s["proposal"]["columns"], board) == (50, 12, 480) and s["fit_options"].get("containment") == "board", s["proposal"])
     check("field soft: a whole-board proposal's card says so and shows no Row bus", "whole board" in page.inner_text("#cadProposalCard")
           and "straight Row channel" in page.inner_text("#cadProposalCard"), page.inner_text("#cadProposalCard"))
+    facts = page.text_content("#cadFitFacts") or ""
+    check("field soft: the fit's account names the bend only the taxel field keeps off (the 6.0 mm crease by the mount end, Whole board on "
+          "the real stack of 2026-11-18) in words, not by the reply's key", "Obstacles: 1 field bends." in facts and "_" not in facts, facts)
     page.select_option("#cadContainment", "field")
     page.wait_for_timeout(100)
     check("field soft: Field only enables Row traces (Both) and says that only the taxel field stays on the surface",
@@ -3058,6 +3165,13 @@ OPTIONS = "() => ['cadPitch', 'cadFill', 'cadRotation'].map(id => document.getEl
 # The Library's sensors whose figure part_library compares with the left figure's (on_part_aligned): a gripper's tip
 # whose part reaches far beside the stack, a curved sock, a tapered tip.
 LIBRARY_ALIGNED = ("i2rt-yam-1mm", "trossen-widowx-ai-2mm", "umi-trap-tip13.8-2mm")
+# The Library's parts whose figure may run off the pane's bottom at the Exploded home (the verification of the merge of
+# 2026-11-17): drape.js frames the sheets and the part's points within PART_FRAME_SHARE (3) times the sheets' radius, "a
+# larger part cut where it reaches farther than that", and the OpenArm 1.0's finger (its mounting plate) and the YUBI
+# Gripper's pad on its base plate reach farther below the stack.  Their cut is held to the bottom edge, 20 px or more
+# undrawn on the other three (the stack whole); framing these parts whole instead is the user's call (the handoff's
+# Open items).
+LIBRARY_CUT_BELOW = ("enactic-openarm", "yubi-gripper")
 
 
 def open_part(page, query):
@@ -3069,6 +3183,116 @@ def open_part(page, query):
     wait_until(page, DEFAULT_SETTLED, 180)
     page.wait_for_timeout(200)
     return state(page)
+
+
+# Step 3's ordering rows (2026-11-17): the labels, the board's text, its links [href, download, target], its key.
+BOARD_ROWS = """() => ({labels: [...document.querySelectorAll('#orderBoard dt')].map(dt => dt.textContent),
+    guide: [...document.querySelectorAll('#orderBoard dd:first-of-type a, #orderBoard div:first-child a')].map(a => [a.getAttribute('href'), a.target, a.textContent])[0],
+    text: document.getElementById('readingBoard').textContent, key: document.getElementById('readingBoard').dataset.board,
+    links: [...document.querySelectorAll('#readingBoard a')].map(a => [a.getAttribute('href'), a.getAttribute('download'), a.getAttribute('target')]),
+    shown: document.getElementById('orderBoard').checkVisibility(),
+    before: Boolean(document.getElementById('orderBoard').compareDocumentPosition(document.getElementById('manufacturingNote')) & Node.DOCUMENT_POSITION_FOLLOWING)})"""
+BOARD_GUIDE = "https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db"
+
+
+def board_links(board):
+    folder = "static/vendor/flexitac-reader/"
+    return [[f"{folder}FlexiTac_reading_board_{board}.zip", f"FlexiTac_reading_board_{board}.zip", None], [f"{folder}NOTICE.md", None, "_blank"]]
+
+
+def part_reading_board(browser):
+    """Step 3's Ordering and fabrication and Reading board (the user's answer of 2026-11-17, "gen也加入reading board"; web/boards.js,
+    app.js showBoard): in both modes, from the form's rows, columns and connector pins (the review of 2026-11-17: the
+    board the tails plug into), following each change."""
+    page = new_page(browser, folded=True)
+    open_cad(page, caps=None, default_part=True)
+    settle(page)
+    seen = page.evaluate(BOARD_ROWS)
+    check("reading board: Gen by Surface's default sensor (12 x 32): over the Ordering notes, 'Ordering and fabrication' (the FlexiTac "
+          "fabrication guide, a new tab) and 'Reading board' '32 × 16 · ZIP, 50 kB · CC BY-NC 4.0', its bundle and notice",
+          seen == {"labels": ["Ordering and fabrication", "Reading board"], "guide": [BOARD_GUIDE, "_blank", "FlexiTac fabrication guide"],
+                   "text": "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0", "key": "32x16", "links": board_links("32x16"), "shown": True, "before": True}, seen)
+    # The review of 2026-11-17: the Ordering notes' own link to the guide (2026-11-06) is the row now, the guide linked once.
+    linked = page.evaluate("(href) => [...document.querySelectorAll('.downloads a')].filter(a => a.getAttribute('href') === href).length", BOARD_GUIDE)
+    check("reading board: the guide linked once in step 3 (the row; the Ordering notes no longer repeat it)", linked == 1, linked)
+    with page.expect_download(timeout=60000) as info:
+        page.click("#readingBoard a[download]")
+    download = info.value
+    path = DOWNLOADS / f"cad-{download.suggested_filename}"
+    download.save_as(path)
+    check("reading board: its ZIP is the 32 x 16 bundle as served, under its name",
+          path.read_bytes() == (ROOT / "web" / "vendor" / "flexitac-reader" / "FlexiTac_reading_board_32x16.zip").read_bytes()
+          and download.suggested_filename == "FlexiTac_reading_board_32x16.zip", download.suggested_filename)
+    # Rectangular: the same section; each edit of rows names its board at once (no Generate).
+    page.click("#modeRect")
+    page.wait_for_timeout(300)
+    walked = []
+    kept = page.evaluate("() => [document.getElementById('rows').value, document.getElementById('columns').value]")
+    for field, value in (("columns", "32"), ("rows", "16"), ("rows", "17"), ("rows", "32"), ("columns", "33"), ("columns", "16"), ("columns", "")):
+        page.fill(f"#{field}", value)
+        page.dispatch_event(f"#{field}", "input")
+        page.wait_for_timeout(150)
+        walked.append([field, value, page.evaluate(f"() => [({BOARD_ROWS})().key, document.getElementById('readingBoard').textContent]")])
+    check("reading board: Rectangular (the form the default sensor's, 32 x 12), each edit names its board at once with no Generate: 32 columns "
+          "the 32 x 32 board, then 16 rows the 32 x 16, 17 and 32 rows the 32 x 32, 33 columns none, 16 the 32 x 16 again, an empty field none",
+          kept == ["32", "12"] and [entry[2] for entry in walked] == [
+              ["32x32", "32 × 32\u00a0· ZIP, 93 kB\u00a0· CC BY-NC 4.0"], ["32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"],
+              ["32x32", "32 × 32\u00a0· ZIP, 93 kB\u00a0· CC BY-NC 4.0"], ["32x32", "32 × 32\u00a0· ZIP, 93 kB\u00a0· CC BY-NC 4.0"],
+              ["none: more than 32 lines", "none (more than 32 lines)"], ["32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"], ["", "—"]], (kept, walked))
+    for field, value in zip(("rows", "columns"), kept):
+        page.fill(f"#{field}", value)
+        page.dispatch_event(f"#{field}", "input")
+    # The connector pins (More options' Connector size; the review of 2026-11-17): tails sized to 32 and 32 pins plug into
+    # the 32 x 32 board, to 32 and 16 into the 32 x 16, to 32 and 20 into none; empty again, the lines' board.
+    page.evaluate("() => ['formCustomize', 'formAdvanced'].forEach(id => { document.getElementById(id).open = true; })")
+    pinned = []
+    for field, value in (("rowPins", "32"), ("columnPins", "32"), ("columnPins", "16"), ("columnPins", "20"), ("columnPins", ""), ("rowPins", "")):
+        page.fill(f"#{field}", value)
+        page.dispatch_event(f"#{field}", "input")
+        page.wait_for_timeout(150)
+        pinned.append([field, value, page.evaluate(f"() => [({BOARD_ROWS})().key, document.getElementById('readingBoard').textContent]")])
+    check("reading board: Rectangular's connector pins (32 x 12 lines): 32 row pins alone the lines' 32 x 16 (one pin per line), 32 and 32 the "
+          "32 x 32 board, 32 and 16 the 32 x 16, 32 and 20 none (tails for another reader), empty again the 32 x 16",
+          [entry[2] for entry in pinned] == [
+              ["32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"], ["32x32", "32 × 32\u00a0· ZIP, 93 kB\u00a0· CC BY-NC 4.0"],
+              ["32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"], ["none: tails for another reader", "none (tails for another reader)"],
+              ["32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"], ["32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"]], pinned)
+    check("reading board: no console error", not errors_of(page), errors_of(page)[:5])
+    page.context.close()
+    # A Library sensor of 32 x 32 lines (I2RT YAM's 2 mm), built from its shipped fit.
+    page = new_page(browser, folded=True)
+    page.goto(GEN_URL + "?part=i2rt-yam-2mm")
+    wait_until(page, DONE, 60)
+    wait_until(page, DEFAULT_SETTLED, 180)
+    settle(page)
+    seen = page.evaluate(BOARD_ROWS)
+    check("reading board: ?part=i2rt-yam-2mm (32 x 32 lines) the 32 x 32 board", (seen["key"], seen["links"]) == ("32x32", board_links("32x32"))
+          and page.evaluate("() => [document.getElementById('rows').value, document.getElementById('columns').value]") == ["32", "32"], seen)
+    check("reading board: no console error on ?part", not errors_of(page), errors_of(page)[:5])
+    page.context.close()
+    # Gen by Surface's Reader (Advanced Customization, More options; the review of 2026-11-17): the default sensor fitted
+    # and generated for each reader, its tails sized to the reader's connectors, step 3 the board with those connectors.
+    page = new_page(browser, folded=True)
+    open_cad(page, caps=None, default_part=True)
+    settle(page)
+    page.evaluate("() => ['cadCustomize', 'cadConfigMore'].forEach(id => { document.getElementById(id).open = true; })")
+    readers = {}
+    for name in ("32x32", "16x16", "48x48", "32x16", "none"):
+        page.select_option("#cadReader", name)
+        page.click("#cadFit"); settle(page, 180)
+        page.click("#cadGenerate")
+        at_rest(page, 180)
+        readers[name] = page.evaluate(f"""() => [document.getElementById('rowPins').value, document.getElementById('columnPins').value,
+            ({BOARD_ROWS})().key, document.getElementById('readingBoard').textContent]""")
+    check("reading board: Gen by Surface's Reader: the default sensor's tails for the 32 x 32 reader (32 + 32 pins) on the 32 x 32 board, for the "
+          "16 x 16 and 48 x 48 readers none (tails for another reader), for the FlexiTac's (32 + 16) and none (one pin per line) the 32 x 16",
+          readers == {"32x32": ["32", "32", "32x32", "32 × 32\u00a0· ZIP, 93 kB\u00a0· CC BY-NC 4.0"],
+                      "16x16": ["16", "16", "none: tails for another reader", "none (tails for another reader)"],
+                      "48x48": ["48", "48", "none: tails for another reader", "none (tails for another reader)"],
+                      "32x16": ["32", "16", "32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"],
+                      "none": ["", "", "32x16", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0"]}, readers)
+    check("reading board: no console error with the readers", not errors_of(page), errors_of(page)[:5])
+    page.context.close()
 
 
 def part_library(browser):
@@ -3086,20 +3310,24 @@ def part_library(browser):
     page = new_page(browser, folded=True)
     page.refused = []
     page.on("response", lambda response: page.refused.append((response.status, response.url)) if "/api/" in response.url and response.status >= 400 else None)
-    misses, timings, figures, cut = [], [], [], []
+    misses, timings, figures, cut, below = [], [], [], [], []
     for identifier, variant in LIBRARY_ENTRIES["variants"].items():
         started = time.monotonic()
         s = open_part(page, f"?part={identifier}&debug&probe")
         timings.append((identifier, round(time.monotonic() - started, 1)))
         # The sensor on the part (fpc-stack-on-part, merged with the Library on 2026-11-05) drawn for the entry's build,
         # framed whole at its Exploded home (the left figure's since the user's decision of 2026-11-05; the Library's cards
-        # will show it).
+        # will show it); LIBRARY_CUT_BELOW's parts may run off the pane's bottom only.
         wait_until(page, ON_PART_SETTLED, 60)
         figure = state(page)["on_part"]
+        pixels = figure.get("pixels") or {}
+        margin = pixels.get("margin_px") or [0, 0, 0, 0]  # left, top, right, bottom
         if (figure["state"], figure["build_id"]) != ("drawn", variant["build_id"]):
             figures.append([identifier, figure["state"], figure["build_id"], figure["note"]])
-        elif (figure.get("pixels") or {}).get("edge_px") != 0:
-            cut.append([identifier, (figure.get("pixels") or {}).get("edge_px"), (figure.get("pixels") or {}).get("margin_px")])
+        elif pixels.get("edge_px") != 0 and variant["part"] in LIBRARY_CUT_BELOW and margin[3] == 0 and min(margin[:3]) >= 20:
+            below.append([identifier, pixels.get("edge_px"), margin])
+        elif pixels.get("edge_px") != 0:
+            cut.append([identifier, pixels.get("edge_px"), pixels.get("margin_px")])
         if identifier in LIBRARY_ALIGNED:
             on_part_aligned(page, f"library: {identifier}")
             on_part_film(figure.get("pixels") or {}, f"library: {identifier}: Exploded home")
@@ -3118,8 +3346,11 @@ def part_library(browser):
           "the Library at it in the same tab", misses == [], misses[:6])
     check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors drawn on its part beside the stacked view (on_part drawn for its build)",
           figures == [], figures[:6])
+    print(f"    run off the pane's bottom (LIBRARY_CUT_BELOW: {', '.join(LIBRARY_CUT_BELOW)}): {len(below)} sensors:",
+          ", ".join(f"{name} {edge} px {margin}" for name, edge, margin in below), flush=True)
     check(f"library: each of the {len(LIBRARY_ENTRIES['variants'])} sensors framed whole on its part at the Exploded home, 1440 px "
-          "(no drawn pixel on the pane's edge)", cut == [], cut[:6])
+          f"(no drawn pixel on the pane's edge; {', '.join(LIBRARY_CUT_BELOW)}'s parts on its bottom edge only, the stack 20 px or more "
+          "from the others)", cut == [], cut)
     widest = max(LIBRARY_ENTRIES["variants"], key=lambda key: len(LIBRARY_ENTRIES["variants"][key]["label"]))
     open_part(page, f"?part={widest}")
     note = page.evaluate(FILE_NOTE)
@@ -3227,7 +3458,291 @@ def part_library(browser):
     check("library: on the WidowX 250 (eight disk operations) a click on the face and Undo behave, no request refused",
           s["ops"] == 8 and clicked["selection"] is not None and clicked["error"] is None and undone["ops"] == 8
           and undone["selection"]["facets"] == facets and not page.refused, (s["ops"], clicked["ops"], clicked["error"], undone["ops"], page.refused[:4]))
+    # A Library sensor's 0.3 % (every Library request's but the Unitree Dex3-1's, 1 % on its dome since 2026-11-18)
+    # leaves the strain limit as it is (the review of 2026-11-17's follow-up, finding 5: it chose Strict 0.3 %): the
+    # select at '1 % on curved faces', the sensor the shipped one, and a click on the LEAP Hand's doubly curved
+    # fingertip sends 1 % (255.7 mm2, as the user's own file of the part selects).
+    s = open_part(page, "?part=leap-hand-2mm")
+    limit = page.evaluate("() => { const c = document.getElementById('cadStrainLimit'); return [c.value, c.selectedOptions[0].textContent]; }")
+    shipped = s["fit_source"] == "shipped" and (s["proposal"] or {}).get("build_id") == LIBRARY_ENTRIES["variants"]["leap-hand-2mm"]["build_id"]
+    pick(page, 0, "surface")
+    clicked = state(page)
+    check("library: ?part=leap-hand-2mm keeps the strain limit at '1 % on curved faces' (its sensor the shipped one, 0.3 % sent), "
+          "a click on its doubly curved fingertip sending 1 % (255.7 mm2)",
+          limit == ["0.01", "1 % on curved faces"] and shipped and clicked["select_ops"][0].get("stretch_budget") == 0.01
+          and round(clicked["selection"]["area_mm2"], 1) == 255.7 and clicked["strain_limit"] == 0.01,
+          (limit, s["fit_source"], clicked["select_ops"], clicked["selection"] and clicked["selection"]["area_mm2"]))
     check("library: no console errors", not errors_of(page), errors_of(page)[:5])
+    page.close()
+
+
+# Gently curved faces (the user's decisions of 2026-11-17, docs/CAD_MODE.md "Gently curved faces"): the Dex3-1's fingertip.
+DEX3 = ROOT / "tests" / "fixtures" / "unitree-dex3.stl"  # a fixture since the hand left the Library (2026-11-17)
+LEAP = ROOT / "web" / "library" / "meshes" / "leap-hand.stl"
+DEX3_DOME = (10926, 8826)  # two clicks on the palmar dome (its tip side, its base side)
+DEX3_SIDE = 7888  # a click on the fingertip's side, off the dome's patch (the review of 2026-11-17)
+DEX3_TIP = 8817  # a click by the tip end whose patch was a ring (the review of 2026-11-17's follow-up)
+SHRINK = """() => { const button = document.getElementById('cadShrink'); const note = document.getElementById('cadShrinkNote');
+    const quick = document.getElementById('cadQuickGenerate').getBoundingClientRect(); const box = button.getBoundingClientRect();
+    return {shown: !button.hidden && button.checkVisibility(), enabled: !button.disabled, text: button.textContent.trim(), note: note.hidden ? null : note.textContent,
+            beside: !button.hidden && Math.abs((box.top + box.bottom) / 2 - (quick.top + quick.bottom) / 2) < 2 && box.left > quick.right,
+            lines: note.hidden ? 0 : Math.round(note.getBoundingClientRect().height / parseFloat(getComputedStyle(note).lineHeight))}; }"""
+
+
+def set_tier(page, value):
+    page.evaluate("""value => { const c = document.getElementById('cadStrainLimit'); c.value = value; c.dispatchEvent(new Event('change', {bubbles: true})); }""", value)
+    page.wait_for_timeout(200)
+    at_rest(page)
+
+
+def set_custom(page, theta_d, theta_c, min_radius):
+    page.evaluate("""([d, c, r]) => { const p = document.getElementById('cadPreset'); p.value = 'custom'; p.dispatchEvent(new Event('change', {bubbles: true}));
+        for (const [id, v] of [['cadThetaD', d], ['cadThetaC', c], ['cadMinRadius', r]]) { const e = document.getElementById(id); e.value = v;
+        e.dispatchEvent(new Event('input', {bubbles: true})); e.dispatchEvent(new Event('change', {bubbles: true})); } }""", [str(theta_d), str(theta_c), str(min_radius)])
+
+
+def inner_corners(outline, degrees=30.0):
+    """A counter-clockwise outline's turns inwards of more than ``degrees`` (its staircase's inner corners)."""
+
+    count = 0
+    for k in range(len(outline)):
+        a, b, c = outline[k - 1], outline[k], outline[(k + 1) % len(outline)]
+        u, v = (b[0] - a[0], b[1] - a[1]), (c[0] - b[0], c[1] - b[1])
+        if math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]) < -math.radians(degrees):
+            count += 1
+    return count
+
+
+def mirror_gap(outline):
+    """How far the outline's mirror image across z = 0 (the Dex3-1 hull's mid-plane) lies from the outline (mm)."""
+
+    def to_outline(p):
+        best = math.inf
+        for a, b in zip(outline, outline[1:] + outline[:1]):
+            ab = [b[k] - a[k] for k in range(3)]
+            length2 = sum(x * x for x in ab)
+            t = 0.0 if length2 == 0 else max(0.0, min(1.0, sum(ab[k] * (p[k] - a[k]) for k in range(3)) / length2))
+            best = min(best, math.dist(p, [a[k] + t * ab[k] for k in range(3)]))
+        return best
+    return max(to_outline((x, y, -z)) for x, y, z in outline)
+
+
+def part_curved(browser):
+    """Gently curved faces (the user's decisions of 2026-11-17, the review's fixes, and the user's feedback and choice of
+    that day: the finger symmetric, the selection too; 1 % by default on curved faces) on the Dex3-1's fingertip,
+    Advanced Customization folded: the strain limit one select ('1 % on curved faces' first, then 'Strict 0.3 %',
+    numbers sent; data-flat 0.3 % off a doubly curved face), its note one line, shown while 1 % is in effect; a click with
+    the Surface preset sends 1 % as stretch_budget and selects the dome's patch within it (405.1 mm2, the stretch the
+    sheet keeps on the part, relaxed), mirror-symmetric (its outline its own mirror image across the hull's mid-plane),
+    the same from other clicks on the dome, at most four inner corners on its outline, no Shrink to fit; Generate sensor
+    fits that patch whole at 1 % (82 taxels at the page's own base, the field symmetric and centred) and the boards
+    leave the surface on its outline; Strict 0.3 % selects again at once (238.8 mm2, symmetric, 48 taxels, the note
+    hidden); a click off the patch (the fingertip's side) selects round itself; the user's Custom 30 / 30 / 4 (1.19 % on
+    the part) under Strict: Shrink to fit beside Generate sensor with its line at once, the quick line offering 1 %,
+    Generate sensor refused saying how much fits, Shrink to fit selecting the stretch preset at the click and Generate
+    sensor fitting it, every check passing; at 1 % the same, the quick line not offering 1 % again (405 mm2 fits, 82
+    taxels); the LEAP tip's flat face (Surface) as before at 0.3 % whichever choice, no Shrink to fit, and its sensor
+    kept when the choice changes (no select sent: the face the same either way); no console error but the refusals'."""
+    page = new_page(browser, folded=True)
+    replies = {"select": [], "fit": [], "map": []}
+
+    def on_response(response):
+        for route in replies:
+            if response.url.endswith(f"/api/surface/{route}") and response.request.method == "POST":
+                try:
+                    body = response.request.post_data_buffer
+                    size = struct.unpack(">I", body[:4])[0]
+                    replies[route].append((json.loads(body[4:4 + size]), response.json() if response.ok else None))
+                except Exception as error:  # noqa: BLE001 - diagnostics only
+                    replies[route].append((None, {"error": str(error)}))
+    page.on("response", on_response)
+    open_cad(page, caps=None)
+    # The strain limit's control.
+    tier = page.evaluate("""() => { const c = document.getElementById('cadStrainLimit'); return {tag: c.tagName, number: c.hasAttribute('data-number'),
+        flat: c.dataset.flat, options: [...c.options].map(o => [o.value, o.textContent]), value: c.value, note: document.getElementById('cadTierNote').hidden,
+        label: document.querySelector('label[for="cadStrainLimit"]').textContent}; }""")
+    check("curved: the strain limit is one select, 1 % on curved faces first, Strict 0.3 % the other, 0.3 % off them, its note hidden",
+          tier == {"tag": "SELECT", "number": True, "flat": "0.003", "options": [["0.01", "1 % on curved faces"], ["0.003", "Strict 0.3 %"]], "value": "0.01",
+                   "note": True, "label": "Strain limit"}, tier)
+
+    def note_now():
+        page.evaluate("() => { document.getElementById('cadCustomize').open = true; document.getElementById('cadConfigMore').open = true; }")
+        note = page.evaluate("() => { const n = document.getElementById('cadTierNote'); return n.hidden ? null : n.textContent; }")
+        lines = page.evaluate("() => { const n = document.getElementById('cadTierNote'); return Math.round(n.getBoundingClientRect().height / parseFloat(getComputedStyle(n).lineHeight)); }")
+        page.evaluate("() => { document.getElementById('cadConfigMore').open = false; document.getElementById('cadCustomize').open = false; }")
+        return note, lines
+
+    load(page, DEX3)
+    at_rest(page)
+    pick(page, DEX3_DOME[0], "surface")
+    at_rest(page)
+    s = state(page)
+    sent = s["select_ops"]
+    check("curved: a click with the Surface preset sends the curved faces' 1 % as stretch_budget",
+          sent == [{"op": "grow", "mode": "add", "seed_facet": DEX3_DOME[0], "preset": "surface", "stretch_budget": 0.01}], sent)
+    first = replies["select"][-1][1]["selection"]
+    note, note_lines = note_now()
+    check("curved: it selects the dome's patch within 1 % on the part (405.1 mm2, curved, the limit 1 %), its note one line, no Shrink to fit",
+          round(first["area_mm2"], 1) == 405.1 and first["kind"] == "curved" and first["stretch"]["smooth_max"] <= 0.01 and s["shrink"] is None
+          and s["strain_limit"] == 0.01 and not page.evaluate(SHRINK)["shown"]
+          and note == "Test first: rim may wrinkle or lift on tape." and note_lines == 1,
+          (first["area_mm2"], first.get("stretch"), s["shrink"], s["strain_limit"], note, note_lines))
+    check("curved: the patch is its own mirror image across the hull's mid-plane, its outline clean (at most four inner corners)",
+          mirror_gap(first["outline_xyz"]) < 0.01 and inner_corners(first["outline_uv"]) <= 4, (mirror_gap(first["outline_xyz"]), inner_corners(first["outline_uv"])))
+    # The base edge drawn under Auto before Generate (the review of 2026-11-17's follow-up, finding 4: half the base end):
+    # the base end's one side across the plane, its ends each other's mirror image.
+    shown = first["sides"][s["default_edge"]] if s["default_edge"] is not None else None
+    check("curved: the base edge shown before Generate is the base end's one side across the plane, symmetric",
+          shown is not None and math.dist(shown["from_xyz"], (shown["to_xyz"][0], shown["to_xyz"][1], -shown["to_xyz"][2])) < 0.05 and shown["chord_mm"] > 10,
+          shown and (shown["from_xyz"], shown["to_xyz"], shown["chord_mm"]))
+    for seed in DEX3_DOME[1:] + (7891,):
+        pick(page, seed, "surface")
+        at_rest(page)
+    second = replies["select"][-1][1]["selection"]
+    check("curved: other clicks on the dome select the same patch", second["facets"] == first["facets"]
+          and all(reply[1]["selection"]["facets"] == first["facets"] for reply in replies["select"][-3:]), len(second["facets"]))
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    s = state(page)
+    request, fitted = replies["fit"][-1]
+    symmetry = fitted["proposals"][0]["metrics"]["symmetry"] if fitted else {}
+    check("curved: Generate sensor fits the patch drawn, whole, at 1 %: 82 taxels, the field symmetric and centred, every check passing",
+          fitted is not None and fitted["selection"]["facets"] == second["facets"] and "strain_limited" not in fitted["selection"]
+          and request["options"]["strain_limit"] == 0.01 and s["proposal"]["taxels"] == 82 and symmetry.get("field") is True
+          and symmetry.get("field_offset_mm") == 0.0 and s["verification"]["ok"],
+          (request["options"].get("strain_limit"), s["proposal"] and s["proposal"]["taxels"], symmetry, s["verification"]))
+    mapped = replies["map"][-1][1]
+    outline = second["outline_xyz"]
+
+    def to_outline(p):
+        best = math.inf
+        for a, b in zip(outline, outline[1:] + outline[:1]):
+            ab = [b[k] - a[k] for k in range(3)]
+            length2 = sum(x * x for x in ab)
+            t = 0.0 if length2 == 0 else max(0.0, min(1.0, sum(ab[k] * (p[k] - a[k]) for k in range(3)) / length2))
+            best = min(best, math.dist(p, [a[k] + t * ab[k] for k in range(3)]))
+        return best
+    ends = [p for key in ("row", "column") for run in mapped["overlay"][key] if run[0] != run[-1] for p in (run[0], run[-1])]
+    check("curved: the boards leave the surface on the selection's own outline (no mark inside it)",
+          ends and max(to_outline(p) for p in ends) < 0.6, max((to_outline(p) for p in ends), default=None))
+    # Where the tails may leave (the exit's edges, drawn in magenta after Generate): each other's mirror image.
+    exits = [outline[k % len(outline)] for e in fitted["proposals"][0]["placement"]["exit_edges"] for k in (e, e + 1)]
+    exit_gap = max(min(math.dist((x, y, -z), q) for q in exits) for x, y, z in exits)
+    check("curved: the exit's edges after Generate are each other's mirror image across the plane", exit_gap < 0.05, exit_gap)
+    # A click by the tip end (8817, the review's real click: a ring round two slivers on the plane, its chart slit on one
+    # side): a disk, its own mirror image, the region fitted the region drawn.
+    pick(page, DEX3_TIP, "surface")
+    at_rest(page)
+    tip = replies["select"][-1][1]["selection"]
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    tip_fit = replies["fit"][-1][1]
+    check("curved: a click by the tip end selects a disk (98.4 mm2), its own mirror image, fitted whole as drawn, the field symmetric",
+          round(tip["area_mm2"], 1) == 98.4 and tip["stats"]["seam"] is None and mirror_gap(tip["outline_xyz"]) < 0.01 and len(tip["holes_uv"]) == 0
+          and tip_fit is not None and tip_fit["selection"]["facets"] == tip["facets"] and tip_fit["proposals"][0]["metrics"]["symmetry"]["field"] is True,
+          (tip["area_mm2"], tip["stats"]["seam"], mirror_gap(tip["outline_xyz"]), tip_fit and tip_fit["proposals"][0]["metrics"]["symmetry"]))
+    for seed in DEX3_DOME:
+        pick(page, seed, "surface")
+        at_rest(page)
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    # Strict 0.3 %: the selection made again at once, narrower, still symmetric; the note hidden.
+    set_tier(page, "0.003")
+    s = state(page)
+    narrow = replies["select"][-1][1]["selection"]
+    note, _ = note_now()
+    check("curved: Strict 0.3 % selects the dome again at once from its middle (238.8 mm2, though the last click lies outside it), symmetric, its note hidden",
+          s["select_ops"][0]["stretch_budget"] == 0.003 and s["select_ops"][0]["seed_facet"] == second["stretch"]["centre_facet"]
+          and round(narrow["area_mm2"], 1) == 238.8 and s["proposals"] == 0 and s["strain_limit"] == 0.003
+          and mirror_gap(narrow["outline_xyz"]) < 0.01 and note is None, (s["select_ops"], narrow["area_mm2"], note))
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    s = state(page)
+    request, fitted = replies["fit"][-1]
+    symmetry = fitted["proposals"][0]["metrics"]["symmetry"] if fitted else {}
+    check("curved: Strict 0.3 % fits 48 taxels, the field symmetric and centred",
+          request["options"]["strain_limit"] == 0.003 and s["proposal"]["taxels"] == 48 and symmetry.get("field") is True and s["verification"]["ok"],
+          (s["proposal"] and s["proposal"]["taxels"], symmetry))
+    # A click off the dome's patch (the fingertip's side) selects round the click, which the patch holds.
+    pick(page, DEX3_SIDE, "surface")
+    at_rest(page)
+    side = replies["select"][-1][1]["selection"]
+    check("curved: a click on the fingertip's side selects round the click (the patch holds it), within 0.3 %",
+          DEX3_SIDE in side["facets"] and side["facets"] != first["facets"] and side["stretch"]["smooth_max"] <= 0.003,
+          (len(side["facets"]), side.get("stretch")))
+    # The user's selection (Custom 30 / 30 / 4), over 0.3 % (1.19 % on the part).
+    set_custom(page, 30, 30, 4)
+    pick(page, DEX3_DOME[0], "custom")
+    at_rest(page)
+    shrink = page.evaluate(SHRINK)
+    s = state(page)
+    check("curved: the user's selection under Strict 0.3 %: Shrink to fit beside Generate sensor at once, its line how far, 1 % offered",
+          shrink["shown"] and shrink["enabled"] and shrink["beside"] and shrink["text"] == "Shrink to fit"
+          and shrink["note"] == "Stretches 1.19 % on the part, over the 0.3 % limit." and shrink["lines"] == 1 and s["quick"]["kind"] == "problem"
+          and s["quick"]["text"].endswith("Shrink to fit, or the 1 % limit."), (shrink, s["quick"]))
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    s = state(page)
+    shrink = page.evaluate(SHRINK)
+    check("curved: Generate sensor refused, saying how much fits round the click",
+          s["proposals"] == 0 and s["error"] == "E_SURFACE_NOT_DEVELOPABLE" and shrink["note"] == "Stretches 1.19 % on the part, over the 0.3 % limit: 239 mm² of it fits."
+          and s["status"]["shown"] == "Not fitted: over the 0.3 % strain limit.", (shrink["note"], s["status"]))
+    page.click("#cadShrink")
+    at_rest(page)
+    s = state(page)
+    shrunk = replies["select"][-1][1]["selection"]
+    check("curved: Shrink to fit selects the stretch preset at the click (238.8 mm2), Shrink to fit gone",
+          s["select_ops"] == [{"op": "grow", "mode": "add", "seed_facet": DEX3_DOME[0], "preset": "stretch", "stretch_budget": 0.003}]
+          and shrunk["facets"] == narrow["facets"] and not page.evaluate(SHRINK)["shown"], (s["select_ops"], shrunk["area_mm2"]))
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    s = state(page)
+    check("curved: Generate sensor then fits it, every check passing", s["proposal"] and s["verification"]["ok"], s["verification"])
+    # At 1 % the user's selection is over too: Shrink to fit, the quick line not offering the limit it is at.
+    set_tier(page, "0.01")
+    pick(page, DEX3_DOME[0], "custom")
+    at_rest(page)
+    s = state(page)
+    check("curved: at 1 % the user's selection over the limit, the quick line offering Shrink to fit alone",
+          s["quick"]["kind"] == "problem" and s["quick"]["text"].endswith("over the 1 % limit: Shrink to fit.") and page.evaluate(SHRINK)["shown"], s["quick"])
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    check("curved: Generate sensor refused at 1 %, saying 405 mm² fits",
+          page.evaluate(SHRINK)["note"] == "Stretches 1.19 % on the part, over the 1 % limit: 405 mm² of it fits.", page.evaluate(SHRINK))
+    page.click("#cadShrink")
+    at_rest(page)
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    s = state(page)
+    request, fitted = replies["fit"][-1]
+    check("curved: at 1 % Shrink to fit then fitted (405.1 mm2, 82 taxels), every check passing",
+          request["options"]["strain_limit"] == 0.01 and fitted and round(fitted["selection"]["area_mm2"], 1) == 405.1
+          and s["proposal"]["taxels"] == 82 and s["verification"]["ok"], (request["options"].get("strain_limit"), s["proposal"]))
+    # A flat face: as before, at 0.3 % whichever choice, and its sensor kept when the choice changes.
+    page.evaluate("() => { const p = document.getElementById('cadPreset'); p.value = 'surface'; p.dispatchEvent(new Event('change', {bubbles: true})); }")
+    load(page, LEAP)
+    at_rest(page)
+    pick(page, 1124, "surface")
+    at_rest(page)
+    flat = replies["select"][-1][1]["selection"]
+    note, _ = note_now()
+    check("curved: the LEAP tip's flat face (Surface) selected as before (387.0 mm2, no stretch, 0.3 %), no Shrink to fit, no note",
+          round(flat["area_mm2"], 1) == 387.0 and "stretch" not in flat and not page.evaluate(SHRINK)["shown"] and state(page)["strain_limit"] == 0.003
+          and note is None, (flat["area_mm2"], flat["kind"], note))
+    page.click("#cadQuickGenerate")
+    at_rest(page)
+    selects = len(replies["select"])
+    built = state(page)["proposal"]
+    flat_request = replies["fit"][-1][0]
+    set_tier(page, "0.003")
+    s = state(page)
+    check("curved: on the flat face Strict 0.3 % sends no select and keeps the sensor current (its fit was at 0.3 % already)",
+          built and flat_request["options"]["strain_limit"] == 0.003 and len(replies["select"]) == selects and s["proposal"]
+          and s["proposal"]["build_id"] == built["build_id"] and s["select_ops"][0]["stretch_budget"] == 0.003 and s["quick"]["kind"] == "ok",
+          (len(replies["select"]) - selects, s["proposal"], s["quick"]))
+    set_tier(page, "0.01")
+    # The refusals are the fit's 422s (expected); nothing else.
+    check("curved: no console errors but the refusals' 422", not errors_of(page, allowed=("status of 422",)), errors_of(page, allowed=("status of 422",)))
     page.close()
 
 
@@ -3245,6 +3760,9 @@ def main():
         parts += (part_figure_controls,)  # the figures' controls in their frames (2026-11-06)
         parts += (part_older_browser,)  # a browser without Element.checkVisibility (the review of 2026-11-06)
         parts += (part_stack_feet,)  # the stacked card's figures rounded at its foot (the verification of 2026-11-06)
+        parts += (part_tool_menu,)  # the tool menu's numbers and Optional (the user's request of 2026-11-17)
+        parts += (part_reading_board,)  # step 3's reading board (2026-11-17)
+        parts += (part_curved,)  # gently curved faces: the tier, a click by stretch, Shrink to fit (2026-11-17)
         chosen = [part for part in parts if len(sys.argv) < 2 or part.__name__ in sys.argv[1:]]
         for part in chosen:
             print(f"--- {part.__name__}", flush=True)

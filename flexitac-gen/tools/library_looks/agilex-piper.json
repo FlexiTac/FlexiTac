@@ -1,0 +1,19 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "agilex-piper",
+ "about": "drawn after AgileX's own photo of the PiPER at its zero pose (agilexrobotics/Piper_ros, asserts/pictures/piper_zero.png, 2026-11-17: the gripper side on, in white light) and AgileX's product pictures of the PiPER gripper (the three-quarter view from above with the jaws closed, as its resellers show it): a gripper black all over but for its guide rail.  The fingers are a matte black that is not metal (their material non-slip rubber in the gripper's listings, e.g. Generation Robots' and MyBotShop's, 2026-11-17; one flat black with no highlight in the photo), the cross plate with its end blocks as dark but bead-blasted black anodising, a metal with a soft sheen along its edges, the motor can below them a glossier, darker black that mirrors the room, and the ground steel guide rail on the plate the one bright part (its end shows at the end block in the photo, its length on the plate in the product pictures).  No screw, belt, pulley, cable or lettering is modelled.",
+ "smooth_deg": 35,
+ "part_look": "finger-black",
+ "looks": {
+  "finger-black": {"base": "rubber-black", "color": "#2a2a2c", "roughness": 0.7, "env_intensity": 1.4, "evidence": "the gripper's listings give the finger's material as non-slip rubber (Generation Robots: 'Finger material: Non-slip rubber'; MyBotShop: 'Material: Rubber'), a non-metal; AgileX's photo of the PiPER at zero: the finger's side and upper faces are one flat black, #313637 to #33383b, the 5th to 95th percentile of their luminance 49 to 57 (no highlight), as the product pictures' matte fingers, so lighter and less rough than the base rubber's flattest black (the ARX X5's matte finger's numbers)"},
+  "frame-blasted": {"base": "anodized-black", "roughness": 0.7, "env_intensity": 3.0, "evidence": "AgileX's photo of the PiPER at zero: the end block's face is the fingers' black, #343a3d, with one soft highlight along its edge (luminance up to 108), and the plate's ribs #192126 in their shade; the product pictures show the plate bead-blasted, a soft sheen with no mirror image of the room"},
+  "rail-ground": {"base": "steel-ground", "color": "#c9cbcd", "roughness": 0.45, "env_intensity": 1.12, "evidence": "AgileX's photo of the PiPER at zero: the rail's end in the end block is bright steel, #888781 in its middle and near white (luminance 239) in its highlight; the product pictures: one even bright strip along the plate, a ground face, not a polished one"}
+ },
+ "bodies": {
+  "bodies/agilex-piper/link6.stl": {"sha256": "9dc21a950fbbf6ad72b4d0cd18419de8834de39bea6ef9f9f2b26bab0244ab41", "facets_sha256": "55008100cd4fd7e69e289fc0acccd289dd835b6bde2e85a433a7f940facdc112", "weld_mm": 0.01, "components": [
+   {"name": "link6-rail", "look": "rail-ground", "pick": [{"component": {"box": [[-72.5, -3.5, 62.0], [72.5, 3.5, 66.8]], "triangles": 1034}}]},
+   {"name": "link6-plate", "look": "frame-blasted", "pick": [{"box": [[-72.6, -30.6, 47.9], [72.6, 40.1, 67.1]]}]},
+   {"name": "link6-can", "look": "anodized-black", "pick": "rest"}
+  ]}
+ }
+}

@@ -4,6 +4,7 @@ browser checks, ``tools/browser/static_checks.py``, run the built site)."""
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import io
 import json
@@ -255,8 +256,61 @@ class SiteBuildTests(unittest.TestCase):
                     mock.patch.object(build_static_site, "copy_web", side_effect=copied), \
                     mock.patch.object(build_static_site, "library", side_effect=refused):
                 with self.assertRaisesRegex(build_static_site.BuildError, "scenes are stale"):
-                    build_static_site.build(earlier, github=False)
+                    build_static_site.build(earlier, github=False, allow_pending=True)
             self.assertEqual(list(earlier.iterdir()), [])
+
+    def test_files_stating_no_licence_are_built_only_for_a_local_preview(self) -> None:
+        # The review of 2026-11-17 (the LeFlexiTac): files whose source states no licence and whose authors' permission is
+        # not recorded (tools/library_write.py unlicensed(): a PENDING_LICENCES entry's) are refused before the build
+        # downloads or writes anything, naming them, unless --allow-pending-licences asks for a local preview; the pages
+        # workflow never asks.  The LeFlexiTac's, shared with its authors' permission since 2026-11-17 (PERMITTED_LICENCES),
+        # are built; the fixture is its entry made pending again.
+        import library_write
+
+        entry = library_write.PERMITTED_LICENCES["TNA001-AI/LeFlexiTac"]
+        pending = dict({key: value for key, value in entry.items() if key not in ("permitted", "by")}, pending="its authors' word")
+        with tempfile.TemporaryDirectory() as folder:
+            earlier = Path(folder) / "site"
+            earlier.mkdir()
+            (earlier / build_static_site.BUILD_MARKER).write_text("", encoding="utf-8")
+            (earlier / "kept.js").write_text("", encoding="utf-8")
+            with mock.patch.object(build_static_site, "pyodide_archive", side_effect=AssertionError("downloaded")):
+                # The permission recorded: past the gate without the flag (the Library as committed).
+                self.assertIsNone(build_static_site.unlicensed_gate(False))
+                with self.assertRaisesRegex(AssertionError, "downloaded"):
+                    build_static_site.build(earlier, github=False)
+                with mock.patch.dict(library_write.PERMITTED_LICENCES, clear=True), \
+                        mock.patch.dict(library_write.PENDING_LICENCES, {"TNA001-AI/LeFlexiTac": pending}):
+                    with self.assertRaisesRegex(build_static_site.BuildError, r"the Library holds files whose source states no licence "
+                                                r"\(bodies/leflexitac/static-jaw\.stl, bodies/leflexitac/wrist-roll\.stl, meshes/leflexitac\.stl; "
+                                                r"no permission in tools/library_write\.py PERMITTED_LICENCES\): not to be published; "
+                                                r"--allow-pending-licences builds a local preview"):
+                        build_static_site.build(earlier, github=False)
+                    with self.assertRaisesRegex(AssertionError, "downloaded"):
+                        build_static_site.build(earlier, github=False, allow_pending=True)  # past the gate
+            self.assertEqual(sorted(path.name for path in earlier.iterdir()), sorted([build_static_site.BUILD_MARKER, "kept.js"]))
+            # The command line: refused (exit 1, said), and the flag passed through.
+            with mock.patch.object(build_static_site, "pyodide_archive", side_effect=AssertionError("downloaded")), \
+                    mock.patch("sys.stderr", new_callable=io.StringIO) as said, \
+                    mock.patch.dict(library_write.PERMITTED_LICENCES, clear=True), \
+                    mock.patch.dict(library_write.PENDING_LICENCES, {"TNA001-AI/LeFlexiTac": pending}):
+                self.assertEqual(build_static_site.main(["--out", str(earlier), "--no-github"]), 1)
+            self.assertIn("build_static_site: the Library holds files whose source states no licence", said.getvalue())
+            record = {"github": None, "generator_version": "v", "engine_zip_sha256": "0" * 64,
+                      "library": {"variants": 0, "pictured": 0, "viewed": 0, "showcase": None}}
+            for flags, allowed in (([], False), (["--allow-pending-licences"], True)):
+                with mock.patch.object(build_static_site, "build", return_value=record) as built, mock.patch("sys.stdout", new_callable=io.StringIO):
+                    self.assertEqual(build_static_site.main(["--out", str(earlier), "--no-github", *flags]), 0)
+                self.assertIs(built.call_args.kwargs["allow_pending"], allowed)
+        # Without such files the gate is silent (a Library whose sources all state an open licence).
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder)
+            (source / "parts.json").write_text(json.dumps({"parts": {"a": {"mesh": {"file": "meshes/a.stl"}, "license": {"spdx": "MIT"}}}}), encoding="utf-8")
+            (source / "NOTICE.md").write_text("| `meshes/a.stl` | a `0123456`, a.stl | MIT, A, `licenses/a.txt` | unchanged | `" + "0" * 64 + "` |\n", encoding="utf-8")
+            self.assertIsNone(build_static_site.unlicensed_gate(False, source))
+        workflow = (ROOT / "tools" / "public" / "pages-workflow.yml").read_text(encoding="utf-8")
+        self.assertIn("python -B flexitac-gen/tools/build_static_site.py --out site\n", workflow)
+        self.assertNotIn("allow-pending", workflow)
 
 
 # web/counts.js run under node on a page (the static site's mark, web/forward.js's, a count kept in this tab, GitHub's
@@ -384,6 +438,64 @@ class PublicExportTests(unittest.TestCase):
             self.assertTrue(covered(shipped), shipped)
             self.assertTrue((ROOT / shipped).is_file(), shipped)
 
+    def test_the_tests_ask_for_a_private_file_before_reading_it(self) -> None:
+        # The verification of the merge of 2026-11-17: test_library read tools/library_scenes.py (the private scene
+        # builder) without asking whether it was there, so the public copy's suite, the test job its publish waits on,
+        # failed.  Every path under tools/ or claude/ outside export_public.PUBLIC that a test names (ROOT / "tools" /
+        # "<file>") is asked for, exists() or is_file(), in the same function: the path itself or a name bound to it
+        # (assigned, or looped over in a tuple that holds it).
+        public = export_public.PUBLIC
+
+        def covered(relative: str) -> bool:
+            return any(relative == path or relative.startswith(path + "/") for path in public)
+
+        def named(node) -> str | None:
+            parts = []
+            while isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+                if not (isinstance(node.right, ast.Constant) and isinstance(node.right.value, str)):
+                    return None
+                parts.append(node.right.value)
+                node = node.left
+            return "/".join(reversed(parts)) if isinstance(node, ast.Name) and node.id == "ROOT" and parts else None
+
+        def own(scope):
+            # The scope's nodes, not those of the functions inside it (each its own scope).
+            stack = list(ast.iter_child_nodes(scope))
+            while stack:
+                node = stack.pop()
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    yield node
+                    stack.extend(ast.iter_child_nodes(node))
+
+        private, unasked = set(), []
+        for module in sorted((ROOT / "tests").glob("*.py")):
+            tree = ast.parse(module.read_text(encoding="utf-8"))
+            for scope in [tree] + [node for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]:
+                nodes = list(own(scope))
+                inner = {id(node.left) for node in nodes if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div)}
+                asked_names, asked = set(), set()
+                for node in nodes:
+                    if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in ("exists", "is_file"):
+                        receiver = node.func.value
+                        if isinstance(receiver, ast.Name):
+                            asked_names.add(receiver.id)
+                        else:
+                            asked.add(ast.dump(receiver))
+                for node in nodes:
+                    relative = named(node) if isinstance(node, ast.BinOp) and id(node) not in inner else None
+                    if not relative or not relative.startswith(("tools/", "claude/")) or covered(relative):
+                        continue
+                    private.add(relative)
+                    text = ast.dump(node)
+                    bound = {target.id for other in nodes if isinstance(other, ast.Assign) and ast.dump(other.value) == text
+                             for target in other.targets if isinstance(target, ast.Name)}
+                    bound |= {other.target.id for other in nodes if isinstance(other, ast.For) and isinstance(other.target, ast.Name)
+                              and isinstance(other.iter, (ast.Tuple, ast.List)) and text in map(ast.dump, other.iter.elts)}
+                    if text not in asked and not bound & asked_names:
+                        unasked.append(f"{module.name}:{node.lineno} {relative}")
+        self.assertEqual(sorted(private), ["tools/library_import.py", "tools/library_scenes.py", "tools/library_tips.py", "tools/sample_grippers.py"])
+        self.assertEqual(unasked, [], "read in the public copy, where the file is not")
+
     def test_an_export_writes_the_commits_public_files_and_the_workflow(self) -> None:
         def run(*args: str, cwd: Path) -> None:
             subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)
@@ -420,6 +532,48 @@ class PublicExportTests(unittest.TestCase):
                 export_public.export(repo, "HEAD", source=project)
             with self.assertRaisesRegex(export_public.ExportError, "not a git clone"):
                 export_public.export(Path(folder), "HEAD", source=project)
+            # The review of 2026-11-17 (the LeFlexiTac): a commit whose web/library/ holds files whose source states no
+            # licence and whose authors' permission is not recorded (tools/library_write.py unlicensed(): a PENDING_LICENCES
+            # entry's) is not exported at all: the clone keeps its earlier export and workflow.  The fixture: the LeFlexiTac
+            # as it was before the user's word (its licence and rows saying no permission).
+            (target / export_public.MARKER).write_text("earlier\n", encoding="utf-8")
+            library = project / "web" / "library"
+            library.mkdir(parents=True)
+            licence = json.loads((WEB / "library" / "parts.json").read_text(encoding="utf-8"))["parts"]["leflexitac"]["license"]
+            words = ", " + licence["permission"]
+            rows = "".join(line + "\n" for line in (WEB / "library" / "NOTICE.md").read_text(encoding="utf-8").splitlines()
+                           if line.startswith("| `bodies/leflexitac/") or line.startswith("| `meshes/leflexitac.stl`"))
+            self.assertEqual(rows.count(words), 3)
+            bare = {key: value for key, value in licence.items() if key != "permission"}
+            (library / "parts.json").write_text(json.dumps({"parts": {"leflexitac": {"mesh": {"file": "meshes/leflexitac.stl"}, "license": bare}}}),
+                                                encoding="utf-8")
+            (library / "NOTICE.md").write_text(rows.replace(words, ""), encoding="utf-8")
+            run("add", "-A", cwd=source)
+            run("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "pending", cwd=source)
+            refused = (r"web/library holds files whose source states no licence \(bodies/leflexitac/static-jaw\.stl, "
+                       r"bodies/leflexitac/wrist-roll\.stl, meshes/leflexitac\.stl; no permission in tools/library_write\.py PERMITTED_LICENCES")
+            with self.assertRaisesRegex(export_public.ExportError, refused):
+                export_public.export(repo, "HEAD", source=project)
+            # Its entry pending (the fixture: the same entry made pending again): refused too.
+            import library_write
+
+            entry = library_write.PERMITTED_LICENCES["TNA001-AI/LeFlexiTac"]
+            pending = dict({key: value for key, value in entry.items() if key not in ("permitted", "by")}, pending="its authors' word")
+            with mock.patch.dict(library_write.PERMITTED_LICENCES, clear=True), \
+                    mock.patch.dict(library_write.PENDING_LICENCES, {"TNA001-AI/LeFlexiTac": pending}), \
+                    self.assertRaisesRegex(export_public.ExportError, refused):
+                export_public.export(repo, "HEAD", source=project)
+            self.assertEqual((target / export_public.MARKER).read_text(encoding="utf-8"), "earlier\n")
+            self.assertEqual((repo / export_public.WORKFLOW).read_text(encoding="utf-8"), "name: site\n")
+            # The permission recorded (2026-11-17, PERMITTED_LICENCES: the part's licence and its rows say it): exported.
+            (library / "parts.json").write_text(json.dumps({"parts": {"leflexitac": {"mesh": {"file": "meshes/leflexitac.stl"}, "license": licence}}}),
+                                                encoding="utf-8")
+            (library / "NOTICE.md").write_text(rows, encoding="utf-8")
+            run("add", "-A", cwd=source)
+            run("-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "permitted", cwd=source)
+            self.assertEqual((target / export_public.MARKER).read_text(encoding="utf-8"), "earlier\n")
+            commit = export_public.export(repo, "HEAD", source=project)
+            self.assertEqual((target / export_public.MARKER).read_text(encoding="utf-8"), commit + "\n")
 
 
 if __name__ == "__main__":

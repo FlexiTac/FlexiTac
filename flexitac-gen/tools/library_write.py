@@ -14,7 +14,9 @@ by key).  So each fit here is made from the request the page sends for it, not f
 - every other option is the page's default, read from web/gen.html's Resolution step (the generator's page,
   web/index.html until 2026-11-16) as main.js readOptions reads
   it (each [data-option] control of #cadConfig, a disabled one sending nothing: under the default objective
-  fixed_pitch that is Smallest pitch); numbers are written as the browser writes them (2, not 2.0), no unit is sent
+  fixed_pitch that is Smallest pitch), the strain limit the one readOptions sends after the select (part_options():
+  data-flat's 0.3 % on a face that is not doubly curved, the select's 1 % on a doubly curved one, the Unitree
+  Dex3-1's fingertip since 2026-11-18); numbers are written as the browser writes them (2, not 2.0), no unit is sent
   (the page's Auto) and the name is the mesh's file name, as a dropped file's;
 - surface.api.fit gives the reply, round-tripped through JSON as the server sends it; its proposal #1 (the page
   chooses proposal 0 after every fit) must keep the product rules (rules(): one tail pin per line, field-only
@@ -115,7 +117,8 @@ ENTRIES_ABOUT = ("The Library's index (the first page, index.html; Gen by Surfac
 # 2026-11-05: the importer's own copy, outside export_public.PUBLIC, broke the public copy's mutation --check).
 # Since the project owner's decision of 2026-11-12 one vendor model is shown, in one place: UFACTORY's Gripper G1 in
 # the Library's showcase (SHOWCASE_* below, web/vendor/ufactory-g1/ with its own notice).  Nothing else changes: the
-# names stay refused in every part, entry, fit and sample, and the Robotiq models, the MakerMods body and the seven
+# names stay refused in every part, entry, fit and sample (but, since 2026-11-17, the xArm Gripper card's own names:
+# DENIED_NAME below), and the Robotiq models, the MakerMods body and the seven
 # meshes of the video's split of the xArm file stay denied by SHA-256; so do, since the review of that day, the
 # pieces of the same file before any decimation (the FlexiTac Tactile Demo's split: together they are the whole file).
 DENIED_SHA256 = {
@@ -159,7 +162,52 @@ DENIED_SHA256 = {
     "3c813623f4c273bfb6f4fd483fc8ee23dc4325de32e9d89d7c44cb1a0e97c033": "MakerMods Metal Arm (link7.STL): not cleared",
     "62d0ed4072aea7e4d0655e16edbf8243317e3e106996f00f06e72afc78d091ec": "MakerMods Metal Arm (link8.STL): not cleared",
 }
-DENIED_NAME = re.compile(r"robotiq|xarm|ufactory", re.IGNORECASE)
+# 2026-11-16, the user's decision ("Menagerie model", asked which Robotiq 2F-85 to add: "是不是可以加一个 robotiq的gripper
+# card"): the Library shows MuJoCo Menagerie's robotiq_2f85, a model published under BSD-2-Clause (ROS-Industrial,
+# derived from ros-industrial/robotiq's description), so its part may carry its name: "robotiq" is refused unless "2F-85"
+# follows it ('Robotiq 2F-85', robotiq-2f-85, robotiq_2f85).  This lifts the decision of 2026-11-05 ("Robotiq 2F-85,
+# Robotiq 3F and xArm stay off the public site") for that one model only: the user's own 2F-85 file stays refused by its
+# SHA-256 above and, since this day, by its name (2F85_Opened), and every other Robotiq model by name (the 3F's
+# ROBOTIQ_AGS-001-XXXX.stl, 'Robotiq 3-Finger', robotiq_3f, any 2F-140 or Hand-E) and by SHA-256 where the file is known.
+# The user's word of 2026-11-17 ("xarm原装夹爪", the xArm's own gripper) lets one card pass: the xArm Gripper of MuJoCo
+# Menagerie's ufactory_xarm7 (BSD-3-Clause, Copyright (c) 2018, UFACTORY Inc.), by its names alone: the part's id and
+# its files' and sensors' (ufactory-xarm, ufactory-xarm-<pitch>mm, then the end, "/" or one of the extensions the
+# Library writes: .stl, .json, .json.gz, .exploded.webp, .assembled.webp, .exploded.card.webp; since the review of
+# 2026-11-17 no other "." after them), its title (the whole name "xArm Gripper") and Menagerie's model folder
+# (ufactory_xarm7, then "/" in its sources' addresses or .txt at the end of its licence text's name).  Every other name
+# with xarm or ufactory stays denied (e.g. "UFACTORY xArm Gripper", xarm-gripper, "xArm Gripper G1", ufactory-xarm.g1.stl,
+# ufactory_xarm7.g1.stl, ufactory-g1, the arms); the Robotiq names are the first line's alone (its first alternative,
+# the 2F-85's, above: the merge of 2026-11-17 joined the two lines' expressions into one).
+DENIED_NAME = re.compile(r"robotiq(?![ _-]?2f-?85)|2f-?85[ _-]?opened"
+                         r"|(?!(?<![\w-])ufactory-xarm(?:-\d+(?:\.\d+)?mm)?(?=\Z|/|\.(?:stl|json(?:\.gz)?|(?:exploded|assembled)(?:\.card)?\.webp)\Z)"
+                         r"|(?<![\w.])ufactory_xarm7(?=/|\.txt\Z))ufactory"
+                         r"|(?<!ufactory-)(?<!ufactory_)(?!^xarm gripper\Z)xarm", re.IGNORECASE)
+# The review of 2026-11-16 of the Robotiq 2F-85: with "robotiq" taken before "2F-85", a copy of the user's own
+# 2F85_Opened.stl under another 80-byte header (so another SHA-256) and a 2F-85 name would pass both the name and the
+# hash.  The user's file is never read, so its triangles are not hashed here as the showcase source's are; the name is
+# held instead: a 3D model anywhere under web/ whose path names the 2F-85 is one of these files, at its SHA-256 (keyed
+# by the path under web/): MuJoCo Menagerie's silicone pad unchanged, its bodies decimated and split by look, and the
+# pins the project drew (showcase()'s walk of web/; tests/test_library.py holds the same table).  A body built anew from
+# the Menagerie's files is pinned anew here, on purpose.
+MENAGERIE_2F85_NAME = re.compile(r"robotiq[ _-]?2f-?85", re.IGNORECASE)
+MODEL_SUFFIXES = (".stl", ".obj", ".ply", ".3mf", ".glb", ".gltf", ".step", ".stp")
+MENAGERIE_2F85_MODELS = {
+    "library/meshes/robotiq-2f-85.stl": "ca20c0fa61e6d3ce7b04bed25360e048e31dfd88ace04187aa6d9e8f4ca3fd0f",
+    "library/bodies/robotiq-2f-85/base-housing.stl": "10d076752f8342ddfbcb5e457a39ffe463c9d75af4d1635eb7afab06156f6a37",
+    "library/bodies/robotiq-2f-85/base-palm.stl": "34402c00f6ddcab95365effe67956ed395a646a0902a54049580ee926b1d2836",
+    "library/bodies/robotiq-2f-85/base-screws.stl": "2f8372e89470951284b07dc2dc3b98308542537950051711f7eb371cc2c31158",
+    "library/bodies/robotiq-2f-85/base_mount.stl": "8fd8796a29801361d2b418d71e60207b545c1c945e0a24e87227f97fd520a522",
+    "library/bodies/robotiq-2f-85/coupler-link.stl": "3b1c077e6613a0047c4d71086d1b6a76230bd84f563625242395c8fd7c456421",
+    "library/bodies/robotiq-2f-85/drawn-coupler-pins.stl": "92759fbca8d0af7c5f3727350ba09b2096b83a5d18b6090fa0087d1c43b24fe2",
+    "library/bodies/robotiq-2f-85/drawn-spring-link-caps.stl": "acb4a2ce6f2d20a40ab78f1a6ac5a1fa3f75b99c5c8f8c9a46f97929949167b7",
+    "library/bodies/robotiq-2f-85/drawn-spring-link-pins.stl": "a7c42e47721e925c64157a12ba4d69c7e327c94b1b6e1cc67c48e5120d2e3b7b",
+    "library/bodies/robotiq-2f-85/driver.stl": "612d798e7d0425e4ba9e0b97aeb4f9cf586a30da277778aebf8b319617dcfba8",
+    "library/bodies/robotiq-2f-85/follower-pins.stl": "45440bef98962e1bf7a36b96790e9468f30b248e507ac32a2d77c89e22e41a03",
+    "library/bodies/robotiq-2f-85/follower-tip.stl": "19a9b43ee9c2d772b0269fab0b05a48d27c5bda3d66f548279ccac50a1d8a0ce",
+    "library/bodies/robotiq-2f-85/pad.stl": "0a16b432f97e7fbfc160e6e18c356567c31d556ab428c31bf102964559398ce4",
+    "library/bodies/robotiq-2f-85/spring-link-far-pins.stl": "d110d548ce8f5973d3a86a4983f3149636d896c1e30ad7ad30372e99cfc13413",
+    "library/bodies/robotiq-2f-85/spring-link.stl": "20dbf70b890999ba9e62e8ddf990fc073a1e553818cc8fc636fee44dd6197a4b",
+}
 # The Library's showcase (the project owner's decision of 2026-11-12; the lead's spec of that day): the hand-designed
 # FlexiTac sensor on the xArm Gripper G1 with UMI soft fingers, at the top of the Library.  It is not a part or an
 # entry (no fit, no build, none of the generator's Gerbers): it has one scene of its own, scenes/flexitac-g1.json, in
@@ -244,10 +292,12 @@ SHOWCASE_PLACED = "vendor/flexitac-v2/umi-finray.placed.json"
 SHOWCASE_PAD_NOTICE = "vendor/flexitac-v2/NOTICE.md"
 SHOWCASE_SHOT_SIZE = (1280, 1600)
 SHOWCASE_CARD_SIZE = (800, 1000)
-# kind: (the file relative to web/library/, its size, the mode it shows).
+# kind: (the file relative to web/library/, its size, the mode it shows).  The card is the Exploded drawing, as every
+# gripper's card is, since the user's decision of 2026-11-16 ("Switch to exploded"; the Assembled one, the gripper as
+# built, before).
 SHOWCASE_SHOTS = {"exploded": (f"showcase/{SHOWCASE_ID}.exploded.webp", SHOWCASE_SHOT_SIZE, "exploded"),
                   "assembled": (f"showcase/{SHOWCASE_ID}.assembled.webp", SHOWCASE_SHOT_SIZE, "assembled"),
-                  "card": (f"showcase/{SHOWCASE_ID}.card.webp", SHOWCASE_CARD_SIZE, "assembled")}
+                  "card": (f"showcase/{SHOWCASE_ID}.card.webp", SHOWCASE_CARD_SIZE, "exploded")}
 SHOWCASE_SHOT_KEYS = ("art_sha256", "figure_sha256", "look", "margins_px", "numbers", "placed_sha256", "scene", "scene_sha256", "view_sha256")
 # The label's words (the user's request of 2026-11-12: "这个版本是人手design的不是autogenerate"; worded again on 2026-11-15:
 # "pre-agent hand design version, original flexitac") and the sources' notices, in the page's order: the gripper's (the
@@ -350,7 +400,10 @@ def controls(index_html: str) -> dict:
     readOptions).
 
     An input's default is Number(value), rounded when its step is 1, as the browser sends it; a select's default is its
-    selected option, else its first one that is not disabled (a disabled option is a display state, never sent).
+    selected option, else its first one that is not disabled (a disabled option is a display state, never sent), a
+    number when the select is marked data-number (the strain limit since 2026-11-17: Number(value), as readOptions
+    sends it), with ``flat`` its data-flat number (the strain limit off a doubly curved face, 0.3 %, since the user's
+    choice of 2026-11-17 "1% default on curves": readOptions sends it there, main.js strainLimit).
     disabled: the control itself is disabled in the page (readOptions sends nothing for it, unless main.js turns it on:
     page_options)."""
 
@@ -366,7 +419,12 @@ def controls(index_html: str) -> dict:
         if control["tag"] == "select":
             choices = [option.get("value") for option in control["options"] if "disabled" not in option]
             chosen = [option.get("value") for option in control["options"] if "selected" in option]
+            if "data-number" in attributes:
+                choices = [js(float(choice)) for choice in choices]
+                chosen = [js(float(choice)) for choice in chosen]
             out[key] = {"tag": "select", "default": (chosen or choices)[0], "choices": choices}
+            if "data-flat" in attributes:
+                out[key]["flat"] = js(float(attributes["data-flat"]))
         else:
             value = float(attributes["value"])
             step = attributes.get("step", "")
@@ -381,15 +439,40 @@ def controls(index_html: str) -> dict:
 SYNCED = ("pitch_mm", "min_pitch_mm", "row_sides")
 
 
-def page_options(index_html: str) -> dict:
+def page_options(index_html: str, curved: bool = False) -> dict:
     """The options the page sends untouched: each control's default, but the one syncObjective disables (Smallest
     pitch under Resolution (pitch), the default objective; Pitch under the others) and any other control disabled in
-    gen.html (readOptions skips it; the review of 2026-11-05)."""
+    gen.html (readOptions skips it; the review of 2026-11-05); a control with a data-flat number (the strain limit) its
+    flat one, as the page sends it for a face that is not doubly curved, or, ``curved``, its own value, as the page
+    sends it for a doubly curved selection (main.js strainLimit: 1 % on curved faces, the user's choice of 2026-11-17).
+    Which of the two a part's request takes is its selection's (part_options())."""
 
     found = controls(index_html)
     disabled = "min_pitch_mm" if found["objective"]["default"] == "fixed_pitch" else "pitch_mm"
-    return {key: control["default"] for key, control in found.items()
+    return {key: control["default"] if curved else control.get("flat", control["default"]) for key, control in found.items()
             if key != disabled and (key in SYNCED or not control["disabled"])}
+
+
+def part_options(part: dict, mesh: bytes, flat: dict, curved: dict) -> dict:
+    """The options the page sends with this part's selection: main.js readOptions reads the strain limit after the
+    select (strainLimit), so ``curved`` (page_options(curved=True)) when the selection is doubly curved on the part
+    (curved_face(): the Unitree Dex3-1's fingertip, the Library's one such face since 2026-11-18), else ``flat``
+    (page_options(): data-flat's 0.3 %, every other part's request as before)."""
+
+    selection = {"name": part["mesh"]["name"][:200], "selection": part["setup"]["selection"]}
+    return curved if curved_face(selection, mesh) is not None else flat
+
+
+def stretch_problem(part: dict, found: dict) -> str | None:
+    """Why the page would not send this part's selection, or None: a click's stretch_budget is the strain limit's own
+    value (main.js growOp and shrinkToFit send curvedLimit(), the select's value: its default for a Library sensor,
+    which applyLibraryOptions leaves as it is), so a stretch_budget of another number is not a click of the page's."""
+
+    limit = found["strain_limit"]["default"]
+    for op in part["setup"]["selection"].get("ops") or []:
+        if isinstance(op, dict) and "stretch_budget" in op and op["stretch_budget"] != limit:
+            return f"its selection's stretch_budget {op['stretch_budget']!r} is not the page's {limit!r} (main.js growOp: curvedLimit())"
+    return None
 
 
 def round6(number: float) -> float:
@@ -417,6 +500,87 @@ def variant_id(part_id: str, variant: dict) -> str:
     return f"{part_id}-{js_string(variant['pitch_mm'])}mm"
 
 
+# The page's checks of a border before every fit (the review of 2026-11-17 of the Allegro Hand, removed since: its border ran
+# clockwise; surface/border.py takes that, so the writer's fit and every check passed, and main.js runFit refused it,
+# "Not fitted: E_CLIENT_BORDER", no sensor built at gen.html?part=<id>): web/cad/border.js validate() (MIN_AREA_MM2,
+# MIN_EDGE_MM, its TOUCH_MM for a simple polygon, counter-clockwise) and main.js runFit (an exit of EXIT_MIN_MM,
+# BORDER_MAX_VERTICES).  The border's overlap with the surface is the server's own check.
+BORDER_MIN_AREA_MM2 = 1
+BORDER_MIN_EDGE_MM = 1e-3
+BORDER_TOUCH_MM = 1e-9
+BORDER_EXIT_MIN_MM = 3
+BORDER_MAX_VERTICES = 2048
+
+
+def _segment_distance(p, a, b) -> float:
+    """border.js segmentDistance: the distance of p to the segment ab."""
+
+    d = (b[0] - a[0], b[1] - a[1])
+    l2 = d[0] * d[0] + d[1] * d[1]
+    t = ((p[0] - a[0]) * d[0] + (p[1] - a[1]) * d[1]) / l2 if l2 > 0 else 0
+    point = a if not t > 0 else b if t >= 1 else (a[0] + t * d[0], a[1] + t * d[1])
+    return math.hypot(p[0] - point[0], p[1] - point[1])
+
+
+def _segments_touch(a, b, c, d) -> bool:
+    """border.js segmentsTouch at TOUCH_MM: the segments ab and cd cross or come within it."""
+
+    def cross(o, p, q):
+        return (p[0] - o[0]) * (q[1] - o[1]) - (p[1] - o[1]) * (q[0] - o[0])
+
+    o1, o2, o3, o4 = cross(a, b, c), cross(a, b, d), cross(c, d, a), cross(c, d, b)
+    if ((o1 > 0 > o2) or (o1 < 0 < o2)) and ((o3 > 0 > o4) or (o3 < 0 < o4)):
+        return True
+    return min(_segment_distance(a, c, d), _segment_distance(b, c, d), _segment_distance(c, a, b), _segment_distance(d, a, b)) <= BORDER_TOUCH_MM
+
+
+def border_problem(uv) -> str | None:
+    """Why the page refuses this border before a fit (border.js validate, main.js runFit), or None: at least 3 finite
+    vertices, at most BORDER_MAX_VERTICES; simple (no edge crosses or touches another but its neighbours at their
+    shared ends); no edge under BORDER_MIN_EDGE_MM; an area of BORDER_MIN_AREA_MM2; counter-clockwise; an edge of
+    BORDER_EXIT_MIN_MM, the tails' exit."""
+
+    if not isinstance(uv, list) or len(uv) < 3:
+        return "the border needs at least 3 vertices"
+    if not all(isinstance(p, list) and len(p) == 2 and all(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) for v in p)
+               for p in uv):
+        return "every border vertex must be a pair of finite numbers [u, v]"
+    if len(uv) > BORDER_MAX_VERTICES:
+        return f"the border has {len(uv)} corners; the page takes at most {BORDER_MAX_VERTICES}"
+    n = len(uv)
+    edges = [(uv[i], uv[(i + 1) % n]) for i in range(n)]
+    lengths = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in edges]
+    simple = all(length > BORDER_TOUCH_MM for length in lengths)
+    for i in range(n if simple else 0):
+        a, b = edges[i]
+        for j in range(i + 1, n):
+            c, d = edges[j]
+            if j == i + 1:
+                touch = _segment_distance(d, a, b) <= BORDER_TOUCH_MM or _segment_distance(a, c, d) <= BORDER_TOUCH_MM
+            elif i == 0 and j == n - 1:
+                touch = _segment_distance(c, a, b) <= BORDER_TOUCH_MM or _segment_distance(b, c, d) <= BORDER_TOUCH_MM
+            else:
+                touch = _segments_touch(a, b, c, d)
+            if touch:
+                simple = False
+                break
+        if not simple:
+            break
+    if not simple:
+        return "the border is not a simple polygon: its edges cross or touch"
+    short = [i for i, length in enumerate(lengths) if length < BORDER_MIN_EDGE_MM]
+    if short:
+        return f"border edge {short[0]} is shorter than {BORDER_MIN_EDGE_MM:g} mm"
+    area = sum(a[0] * b[1] - a[1] * b[0] for a, b in edges) / 2
+    if abs(area) < BORDER_MIN_AREA_MM2:
+        return f"the border's area is under {BORDER_MIN_AREA_MM2} mm2"
+    if area < 0:
+        return "the border runs clockwise; the page wants it counter-clockwise (E_CLIENT_BORDER)"
+    if max(lengths) < BORDER_EXIT_MIN_MM:
+        return f"no edge of the border is {BORDER_EXIT_MIN_MM} mm or longer: the tails have no exit"
+    return None
+
+
 def compose(part: dict, variant: dict, options: dict) -> dict:
     """The fit request the page sends for one variant: the part's selection, base and border, the page's options
     (``options``, page_options()) with the part's and the variant's over them, the mesh's file name, no unit.
@@ -424,8 +588,9 @@ def compose(part: dict, variant: dict, options: dict) -> dict:
     What main.js buildDefaultSensor would send otherwise is refused (LibraryError), not composed (the review of
     2026-11-05: parts.json is edited by hand, and only the browser checks would see the difference): a base other than
     "auto" or {point_xyz} (it chooses a point only), a base point with a border (the border's edge is the base), a
-    point whose coordinates choosePoint's round6 changes, and an objective other than Resolution (pitch) (a variant's
-    pitch is sent only under it).  Under Whole board the page disables Row traces (syncContainment), so none is sent."""
+    point whose coordinates choosePoint's round6 changes, a border the page refuses before it fits (border_problem(),
+    the review of 2026-11-17: a clockwise one), and an objective other than Resolution (pitch) (a variant's pitch is
+    sent only under it).  Under Whole board the page disables Row traces (syncContainment), so none is sent."""
 
     setup = part["setup"]
     sent = dict(options)
@@ -445,6 +610,9 @@ def compose(part: dict, variant: dict, options: dict) -> dict:
     request = {"name": part["mesh"]["name"][:200], "selection": copy.deepcopy(setup["selection"]),
                "base": copy.deepcopy(base), "options": sent}
     if setup.get("border"):
+        problem = border_problem(setup["border"].get("uv") if isinstance(setup["border"], dict) else None)
+        if problem:
+            raise LibraryError(f"border: {problem}")
         # readOptions: with a border, field-only containment is sent (the select is held at Field only).
         request["border"] = copy.deepcopy(setup["border"])
         sent["containment"] = "field"
@@ -742,6 +910,30 @@ CARD_SIZE = (640, 400)
 SHOT_KINDS = {"exploded": ("exploded.webp", SHOT_SIZE), "assembled": ("assembled.webp", SHOT_SIZE),
               "card": ("exploded.card.webp", CARD_SIZE)}
 SHOT_NAME = re.compile(r"^[a-z0-9.-]+\.(exploded|assembled|exploded\.card)\.webp$")
+# The cards zoomed on the tip (the user's decisions of 2026-11-16 on the UMI shelf's cards, whose five tapered tips looked
+# alike at a card's size: "你可以show gripper的angle但是zoom in了，就是方向还是那个方向，但是用zoom in +exploded,那就可以tell
+# 了", then, of zoom 2, "你现在zoom in 的太过了，tactile的tail都看不到"; docs/LIBRARY_VIEW.md "Zoomed on the tip"): {part or
+# family (parts.json's): {"zoom", "top"}}, only for a part the rules draw at the grippers' homes (their part_homes).
+# Such a sensor's card file is its Exploded home (the 3D view's camera: its direction, up, explode and lens, the whole
+# drawing framed as the home frames it) drawn "zoom" times larger (the view's pane zoom x 640 x 400 CSS px at DPR 2),
+# and of that drawing the window of SHOT_SIZE (1/zoom of the home's width and height) whose top edge lies "top" of its
+# height above the drawing's highest pixel (the finger's tip) and whose middle across is the middle of the pixels drawn
+# in its rows (an odd difference left of it); downscaled to CARD_SIZE as every card.  The drawing runs off its bottom
+# edge (the tails' ends: its margin there 0), never off its top or sides (each side's margin at least CARD_SIDE_MIN of
+# its width), and the finger (the window's rightmost drawn columns, clear of the sheets) ends at least the top margin
+# above its bottom edge: only the tails run off.  The manifest's record keeps "card_frame": {zoom, top, window_px: [x, y]
+# in the larger drawing, margins_px: the drawing's [left, top, right, bottom] in the window, base_px: the rows between the
+# finger's base and the window's bottom edge}.  The pictures (Exploded, Assembled) and the 3D view stay the whole
+# drawing: the card is the home's direction and explode, framed on the tip.  "top" 0.06 is the grippers' drawings' own
+# top margin (49 to 52 px of 800), so the tips stand on the grippers' cards' top line.  The zoom: 2 at first (the tips
+# largest, the tails cut at their roots); the user's second word asked for the tails, and 1.35 (the window to 557 px of
+# the whole drawing's 704 below the tip) put the finger's base on the card's bottom edge (0 of 800 px on two cards, at
+# most 28 on the rest: the review of 2026-11-16; the base lies 536 to 557 px below the tip); 1.25 keeps every base at least
+# the top margin above it (55 px of 800 at the least, 7 %) and the tails' roots and most of their length in (the
+# window to 602 px below the tip: the top FPC's tail 97 % in, the bottom FPC's 70 %).
+CARD_FRAMES = {"umi-finray": {"zoom": 1.25, "top": 0.06}, "umi-tapers": {"zoom": 1.25, "top": 0.06}}
+CARD_FRAME_KEYS = ("base_px", "margins_px", "top", "window_px", "zoom")
+CARD_SIDE_MIN = 0.04
 # The figure's sources: web/cad/onpart.js and the web/cad modules it imports, transitively (drape.js, studio.js,
 # viewer.js for the part's grey, border.js under drape.js).  main.js, which calls it, and app.js, which gives the boards'
 # art, are left out: both change for much else, and a picture of older sources is only a warning.
@@ -754,6 +946,48 @@ def shot_files(identifier: str) -> dict:
     """{kind: (the file relative to web/library/, its (width, height))} of one sensor's pictures."""
 
     return {kind: (f"shots/{identifier}.{name}", size) for kind, (name, size) in SHOT_KINDS.items()}
+
+
+def card_frame(parts: dict, part_id: str):
+    """The framing of a part's cards on the tip (CARD_FRAMES: by the part's id, else its family's), or None (the card the
+    whole Exploded drawing)."""
+
+    family = ((parts or {}).get("parts") or {}).get(part_id, {}).get("family")
+    return CARD_FRAMES.get(part_id, CARD_FRAMES.get(family) if family else None)
+
+
+def card_frame_problems(record, frame) -> list:
+    """Why a record's "card_frame" is not a card framed by ``frame`` (card_frame(); None: the record has none), one line
+    each (none: []): its keys, its zoom and top other than the frame's, a window outside the larger drawing, the drawing
+    off the window's top (its margin there not ``top`` of its height), within CARD_SIDE_MIN of either side or whole above
+    its bottom edge (the tails' ends run off it), the finger's base within the top margin of the bottom edge."""
+
+    if frame is None:
+        return [] if record is None else ["its card is framed on the tip, but its part's cards are the whole drawing (CARD_FRAMES)"]
+    if not isinstance(record, dict) or sorted(record) != list(CARD_FRAME_KEYS):
+        return [f"its card is not framed on the tip as CARD_FRAMES has it (no card_frame of {', '.join(CARD_FRAME_KEYS)})"]
+    if (record["zoom"], record["top"]) != (frame["zoom"], frame["top"]):
+        return [f"its card is framed at zoom {record['zoom']!r}, top {record['top']!r}, not CARD_FRAMES's {frame['zoom']}, {frame['top']}"]
+    width, height = SHOT_SIZE
+    window, margins = record["window_px"], record["margins_px"]
+    if not (isinstance(window, list) and len(window) == 2 and all(isinstance(value, int) and not isinstance(value, bool) for value in window)
+            and 0 <= window[0] <= round(frame["zoom"] * width) - width and 0 <= window[1] <= round(frame["zoom"] * height) - height):
+        return [f"its card's window {window!r} is not [x, y] within the drawing {frame['zoom']} times larger"]
+    if not (isinstance(margins, list) and len(margins) == 4 and all(isinstance(value, int) and not isinstance(value, bool) and value >= 0 for value in margins)):
+        return [f"its card's margins {margins!r} are not four whole pixels"]
+    base = record["base_px"]
+    if not (isinstance(base, int) and not isinstance(base, bool) and 0 <= base <= height):
+        return [f"its card's finger base {base!r} is not whole pixels within the window"]
+    found = []
+    if margins[1] != round(frame["top"] * height):
+        found.append(f"its card's tip is {margins[1]} px below the window's top, not {round(frame['top'] * height)} ({frame['top']} of its height)")
+    if min(margins[0], margins[2]) < CARD_SIDE_MIN * width:
+        found.append(f"its card's drawing lies {min(margins[0], margins[2])} px from a side of the window, under {CARD_SIDE_MIN} of its width")
+    if margins[3] != 0:
+        found.append(f"its card's drawing ends {margins[3]} px above the window's bottom, not running off it (the tails' ends)")
+    if base < round(frame["top"] * height):
+        found.append(f"its card's finger ends {base} px above the window's bottom, under its top margin's {round(frame['top'] * height)} (the base on the edge)")
+    return found
 
 
 def image_record(identifier: str, label_text: str, picture: str | None = None) -> dict:
@@ -879,6 +1113,8 @@ def pictures(variants: dict, library: Path = LIBRARY, figure: str | None = None,
         expected = part_look_sha256(part_look(index, families, variant["part"]))
         if shot.get("part_look_sha256") != expected:
             broken.append(f"its pictures are of another look of its part than {SCENES_INDEX}'s rules give now (part_looks): {fix}")
+        # Its card zoomed on the tip where CARD_FRAMES frames its part's cards (card_frame_problems()).
+        broken += [f"{message}: {fix}" for message in card_frame_problems(shot.get("card_frame"), card_frame(families, variant["part"]))]
         if stage is not None and scene is None:
             broken.append(f"its record has a stage, but its part {variant['part']} keeps the fingertip scene (no scene in {SCENES_INDEX}): {fix}")
         elif stage is not None:
@@ -996,7 +1232,42 @@ OWN_BODIES = ("bodies/makermods-metal/rail.stl",)
 OWN_BODY = re.compile(r"bodies/[a-z0-9-]+/drawn-[a-z0-9-]+\.stl")
 OWN_HEADER = b"FlexiTac-Gen: "
 OWN_WORDS = b"drawn by the project"
-OPEN_LICENCES = ("Apache-2.0", "MIT", "BSD-3-Clause")
+# BSD-2-Clause since 2026-11-16: MuJoCo Menagerie's robotiq_2f85 (ROS-Industrial's licence of the model it derives from)
+# and, on 2026-11-17 until the hand was removed that day, its wonik_allegro (the Allegro Hand, SimLab).
+# CERN-OHL-W-2.0 since 2026-11-17: the YUBI Gripper, Toyota/yubi-hw's CERN Open Hardware Licence v2, weakly reciprocal
+# (redistribution with its notices, the licence, the source location and each change dated: web/library/NOTICE.md).
+# One tuple since the merge of that day.
+OPEN_LICENCES = ("Apache-2.0", "MIT", "BSD-3-Clause", "BSD-2-Clause", "CERN-OHL-W-2.0")
+# Files whose source states no licence (no LICENSE file in the repository, none on its pages), accepted only through
+# two tables of dated entries (the user's request of 2026-11-16, the LeFlexiTac: LeFlexiTac's project page links its jaw
+# and wrist roll as STL downloads with no licence): PENDING_LICENCES, an entry pending its authors' word (shown in a local
+# preview only: the site build and the public export refuse its files, unlicensed()), and PERMITTED_LICENCES, an entry
+# whose files its authors let the project publish (the permission recorded, dated: still no licence).  An entry names its
+# source (the repository at its commit, NOTICE.md's short name for it) and the files of it the Library holds, and its
+# note, licenses/<name>.txt, the project's own words saying so (no licence text, tabled as the project's).  A NOTICE.md
+# row of such a file names NO_LICENCE and the note; a part's licence has spdx NO_LICENCE, the note as its text and its
+# source at that commit (pending_licence(), pending_row(); permitted_licence(), permitted_row()).
+NO_LICENCE = "NOASSERTION"
+# (The review of 2026-11-17) An entry's files remodelled from an open part carry that part's credit and licence text
+# (Apache-2.0 section 4(a), (c)): "remodelled", the upstream at its commit and each file's upstream file (remodelled()).
+# None pending since 2026-11-17 (the LeFlexiTac's entry of 2026-11-16 is PERMITTED_LICENCES' now); a pending entry has
+# "entered" and "pending" (whose word is awaited), as pending_note() says them.
+PENDING_LICENCES: dict = {}
+# An entry permitted (the user's word of 2026-11-17, "leflexitac, i am the author, so its ok to use it in public": the
+# user is a co-author of LeFlexiTac): "permitted" its day, "by" who gave it, both needed (an entry without them is no
+# permission: the review of 2026-11-17).  Its rows and its part's licence say permission() (the part's licence as its
+# "permission"; the page's link "Shared with the authors' permission").
+PERMITTED_LICENCES = {
+    "TNA001-AI/LeFlexiTac": {"name": "LeFlexiTac", "commit": "b61259fdea21bf8b0b5193fb3d373e71e5e5be81", "entered": "2026-11-16",
+                             "permitted": "2026-11-17", "by": "a co-author of LeFlexiTac", "note": "licenses/leflexitac.txt",
+                             "files": ("assets/models/Moving_Jaw_08d.stl", "assets/models/Wrist_Roll_08c.stl"),
+                             "remodelled": {"name": "SO-ARM100", "commit": "a758567c3978dfeefe282ede0500085a48fe8f78",
+                                            "licence": "Apache-2.0, TheRobotStudio", "text": "licenses/so-arm100.txt",
+                                            "files": {"assets/models/Moving_Jaw_08d.stl": "STL/SO101/Individual/Moving_Jaw_SO101.stl",
+                                                      "assets/models/Wrist_Roll_08c.stl": "STL/SO101/Individual/Wrist_Roll_Follower_SO101.stl"}}},
+}
+# The words of a permission (permission()); a pending entry's rows never say them.
+SHARED = "shared with the authors' permission"
 # NOTICE.md's tables: | `file` | source at commit | licence and holder | change | `sha256` |.
 NOTICE_ROW = re.compile(r"^\| `([\w./-]+)` \|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\| `([0-9a-f]{64})` \|$", re.MULTILINE)
 REBUILD = "rebuild the scenes with the private tools/library_scenes.py"
@@ -1017,6 +1288,11 @@ SCENE_FRAME = "the part's file axes, mm"
 # front, which side of the gripper is its front, a sign) and an explode override's.
 CAMERA_BOUNDS = {"tilt_deg": (45, 70), "elevation_deg": (15, 45)}
 EXPLODE_BOUNDS = {"gap_share": (0.25, 0.45)}
+# A scene's "checks" override (2026-11-17, a hand: a fingertip's sensor on a hand framed whole, the LEAP Hand's and the
+# Unitree Dex3-1's of that day, is 14 px wide on its card at the grippers' homes; the Dex3-1's 19 px on its dome's fit since
+# 2026-11-18): only card_min_px, within these bounds, its reason in about,
+# and only in a hand's scene (one with extra_fingers; the review of 2026-11-17: no two-finger gripper may loosen it).
+CHECKS_OVERRIDE_BOUNDS = {"card_min_px": (12, 20)}
 BODY_KEYS = ("bytes", "finger", "matrix", "mesh", "sha256", "triangles")
 FINGERS = ("sensor", "mate")
 # The looks (docs/LIBRARY_VIEW.md "The looks"; the amendment of 2026-11-12, the user's request that every gripper be
@@ -1030,8 +1306,14 @@ FINGERS = ("sensor", "mate")
 # fingers are, "这样所有card都是对齐的，大小对齐，空间朝向对齐") is {part or family: HOME_KEYS}: the part drawn at the
 # grippers' homes (the rules' camera), its camera's up "approach" (a unit vector in the part's file axes, the fingers'
 # approach axis as a scene's), its stack exploded "explode_share" (HOME_EXPLODE_BOUNDS) of the boards' narrower side a
-# layer; without it the part is at Gen by Surface's figure's homes.
-SCENE_OPTIONAL = ("camera", "explode", "looks", "part_look", "smooth_deg")
+# layer; without it the part is at Gen by Surface's figure's homes.  A scene's "extra_fingers" (2026-11-17, a hand: the
+# LEAP Hand's middle and ring fingertips, the Unitree Dex3-1's middle fingertip (removed that day at the user's word,
+# back since 2026-11-18); the Allegro Hand's, removed that day) is a list of at most EXTRA_FINGERS_MAX {kind, matrix}, each a rigid matrix taking the sensor finger onto a
+# further finger (its kind its determinant's sign, as the mate's), where the stage draws the part again with a still
+# copy of the stack, never see-through; a body may be a further finger's own ("extra<k>").  One mechanism for the hands
+# since their merge of 2026-11-17 (the Allegro Hand's line's own key, "fingers", not taken).
+SCENE_OPTIONAL = ("camera", "explode", "looks", "part_look", "smooth_deg", "extra_fingers", "checks")
+EXTRA_FINGERS_MAX = 4
 BODY_OPTIONAL = ("look",)
 RULES_OPTIONAL = ("looks", "part_looks", "part_smooth_deg", "part_pad", "part_homes")
 PAD_KEYS = ("color", "opacity")
@@ -1053,6 +1335,131 @@ ORTHONORMAL_TOL = 1e-6
 # may name them): its asset folders, the recipes and an absolute path; a part's id with underscores is its recipe's key.
 PRIVATE_TEXT = re.compile(r"(?<![\w-])asset/|(?<![\w-])outputs/|gripper_recipes|\brecipes?\b"
                           r"|(?<![\w.~-])/(?:home|Users|tmp|root|mnt|opt|var|private|srv|media)/|\b[A-Za-z]:[\\/]|~/")
+
+
+def remodelled(entry: dict, path) -> str | None:
+    """The credit a file ``path`` of an entry (PENDING_LICENCES', PERMITTED_LICENCES') carries for the open part it was
+    remodelled from (the review of 2026-11-17), as NOTICE.md's row and the part's holder say it, or None (a file
+    remodelled from none)."""
+
+    upstream = entry.get("remodelled")
+    if not upstream or path not in upstream["files"]:
+        return None
+    return (f"remodelled from {upstream['name']} `{upstream['commit'][:7]}`, `{upstream['files'][path]}` "
+            f"({upstream['licence']}, `{upstream['text']}`)")
+
+
+def permission(entry: dict) -> str | None:
+    """The words an entry's NOTICE.md rows and its part's licence ("permission") say of its authors' permission, dated
+    and naming who gave it (PERMITTED_LICENCES, 2026-11-17), or None: a pending entry's, or one whose permission is not
+    recorded with its day (YYYY-MM-DD) and who gave it (the review of 2026-11-17)."""
+
+    permitted, by = entry.get("permitted"), entry.get("by")
+    if not (isinstance(permitted, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", permitted) and isinstance(by, str) and by.strip()):
+        return None
+    return f"{SHARED} (given by {by}, {permitted})"
+
+
+def _entries(table: dict, permitted: bool):
+    """The (repository, entry, words) of ``table``: a permitted entry's words its permission(), a pending entry's None.
+    (The review of 2026-11-17) A PERMITTED_LICENCES entry without its day and who gave it is no permission: taken by
+    neither table, its files held by unlicensed() (never published saying nothing of it)."""
+
+    for repository, entry in table.items():
+        words = permission(entry) if permitted else None
+        if permitted and words is None:
+            continue
+        yield repository, entry, words
+
+
+def _licence_entry(licence, table: dict, permitted: bool) -> dict | None:
+    if not (isinstance(licence, dict) and licence.get("spdx") == NO_LICENCE):
+        return None
+    for repository, entry, words in _entries(table, permitted):
+        sources = {f"https://github.com/{repository}/blob/{entry['commit']}/{path}": path for path in entry["files"]}
+        if licence.get("text") == entry["note"] and licence.get("source") in sources:
+            credit = remodelled(entry, sources[licence["source"]])
+            if credit is None or credit in str(licence.get("holder")):
+                # The permission's words, a permitted entry's; none for a pending one (2026-11-17).
+                if licence.get("permission") == words:
+                    return entry
+    return None
+
+
+def _row_entry(row, table: dict, permitted: bool) -> dict | None:
+    for _, entry, words in _entries(table, permitted):
+        sources = {f"{entry['name']} `{entry['commit'][:7]}`, `{path}`": path for path in entry["files"]}
+        credit = remodelled(entry, sources.get(row[1].strip()))
+        if (row[1].strip() in sources and NO_LICENCE in row[2]
+                and (credit is None or credit in row[2])
+                and (words in row[2] if permitted else SHARED not in row[2])
+                and re.findall(r"`(licenses/[\w.-]+)`", row[2]) == [entry["note"]] + ([entry["remodelled"]["text"]] if credit else [])):
+            return entry
+    return None
+
+
+def pending_licence(licence) -> dict | None:
+    """The PENDING_LICENCES entry a part's licence ({spdx, holder, text, source, change}) is accepted by, or None: its spdx
+    NO_LICENCE, its text the entry's note, its source one of the entry's files at its commit, its holder the credit of
+    the open part that file was remodelled from (remodelled(), the review of 2026-11-17) and no "permission"."""
+
+    return _licence_entry(licence, PENDING_LICENCES, False)
+
+
+def permitted_licence(licence) -> dict | None:
+    """The PERMITTED_LICENCES entry a part's licence is accepted by, or None: as pending_licence(), with its "permission"
+    the entry's permission() (2026-11-17)."""
+
+    return _licence_entry(licence, PERMITTED_LICENCES, True)
+
+
+def pending_row(row) -> dict | None:
+    """The PENDING_LICENCES entry a NOTICE.md row (file, source, licence, change, SHA-256) is accepted by, or None: its
+    source one of the entry's files at its commit, its licence column NO_LICENCE with the entry's note and the credit of
+    the open part the file was remodelled from with that part's licence text (remodelled(), 2026-11-17), and no other,
+    never saying SHARED."""
+
+    return _row_entry(row, PENDING_LICENCES, False)
+
+
+def permitted_row(row) -> dict | None:
+    """The PERMITTED_LICENCES entry a NOTICE.md row is accepted by, or None: as pending_row(), saying the entry's
+    permission() (2026-11-17)."""
+
+    return _row_entry(row, PERMITTED_LICENCES, True)
+
+
+def unlicensed(parts: dict, notice: str) -> list:
+    """The Library's files whose source states no licence and whose authors' permission is not recorded (the review of
+    2026-11-17: never published before their authors' word): each part's mesh whose licence is NO_LICENCE but not a
+    permitted entry's (permitted_licence()) and each NOTICE.md row naming NO_LICENCE but not a permitted entry's
+    (permitted_row(); a licenses/ note's aside); the site build refuses them but for a local preview
+    (--allow-pending-licences), the public export always.  A pending entry's files are among them."""
+
+    held = {part["mesh"]["file"] for part in (parts.get("parts") or {}).values()
+            if (part.get("license") or {}).get("spdx") == NO_LICENCE and permitted_licence(part["license"]) is None}
+    held |= {row[0] for row in NOTICE_ROW.findall(notice)
+             if NO_LICENCE in row[2] and not row[0].startswith("licenses/") and permitted_row(row) is None}
+    return sorted(held)
+
+
+def pending_note(parts: dict, identifiers) -> str | None:
+    """The site build's warning for the sensors ``identifiers`` of parts whose licence is a pending entry's (pending_licence():
+    none is stated, the user's word is awaited), or None: what is built of them is a local preview, not for publishing."""
+
+    owner = {variant_id(part_id, variant): part_id for part_id, part in parts["parts"].items() for variant in part["variants"]}
+    pending = {}
+    for identifier in identifiers:
+        part_id = owner.get(identifier)
+        entry = pending_licence(parts["parts"][part_id]["license"]) if part_id else None
+        if entry is not None:
+            pending.setdefault(part_id, entry)
+    if not pending:
+        return None
+    sources = sorted({f"{repository}, entered {entry['entered']}, pending {entry['pending']}" for repository, entry in PENDING_LICENCES.items()
+                      if entry in pending.values()})
+    return (f"the files of {', '.join(sorted(pending))} state no licence (PENDING_LICENCES: {'; '.join(sources)}): not to be published "
+            "until then")
 
 
 def look_problem(look, coat: bool = True) -> str | None:
@@ -1215,9 +1622,23 @@ def _number(value) -> bool:
 # The stage's numbers a record keeps (docs/LIBRARY_VIEW.md, measured by the stage with ?probe=shoot).
 STAGE_NUMBERS = ("jaw_gap_mm", "step_mm", "drape_step_mm", "face_tilt_deg", "visible_min", "opaque_max", "assembled_opaque",
                  "ghost_cover", "clearance_mm", "card_px", "band_css", "near_seen", "stacks_apart_px")
+# A hand's (a scene with extra_fingers, the review of 2026-11-17): the least share of its further stacks' top FPCs (each
+# one's face toward the camera, assembled in both modes) that nothing opaque and no other layer hides, at least
+# near_seen_min; a record has it exactly when its scene has further fingers.
+STAGE_HAND_NUMBERS = ("extra_seen",)
 
 
-def stage_problems(numbers, checks: dict, see_through=(), explode_stacks=("sensor",)) -> list:
+def scene_checks(rules: dict, own=None) -> dict:
+    """The checks a scene's stage is held to: scenes.json's rules' "checks", with the scene's own "checks" override over
+    them (2026-11-17: card_min_px alone, CHECKS_OVERRIDE_BOUNDS, scene_problems() refusing anything else)."""
+
+    checks = dict(rules.get("checks") or {}) if isinstance(rules, dict) else {}
+    if isinstance(own, dict):
+        checks.update({key: value for key, value in own.items() if key in CHECKS_OVERRIDE_BOUNDS})
+    return checks
+
+
+def stage_problems(numbers, checks: dict, see_through=(), explode_stacks=("sensor",), extras=0) -> list:
     """The rules of scenes.json's "checks" that a gripper's recorded stage numbers break, each named: every exploding
     layer (the stacks of ``explode_stacks``: the sensor finger's) at least ``layer_visible_min`` visible in Exploded, the
     bodies and the other finger covering less than ``opaque_cover_max`` of a layer drawn there (and of stack 1's top FPC
@@ -1225,10 +1646,13 @@ def stage_problems(numbers, checks: dict, see_through=(), explode_stacks=("senso
     ``stacks_apart_min_g`` of the jaw gap and ``stacks_apart_min_mm`` from the other finger's stack, their silhouettes
     ``stacks_apart_min_px`` apart on screen, the card's top FPC ``card_min_px`` wide and tall, a see-through finger
     veiling at least ``ghost_cover_min`` (and none without one), and the near stack, assembled when the mate's stack
-    does not explode, at least ``near_seen_min`` seen in both modes (null exactly when it explodes)."""
+    does not explode, at least ``near_seen_min`` seen in both modes (null exactly when it explodes); with ``extras``
+    further fingers (a hand's scene, 2026-11-17) their stacks' top FPCs at least ``near_seen_min`` seen too (extra_seen,
+    STAGE_HAND_NUMBERS: a record has it exactly then)."""
 
-    if not isinstance(numbers, dict) or sorted(numbers) != sorted(STAGE_NUMBERS):
-        return [f"its stage's numbers are not {', '.join(STAGE_NUMBERS)}"]
+    keys = STAGE_NUMBERS + (STAGE_HAND_NUMBERS if extras else ())
+    if not isinstance(numbers, dict) or sorted(numbers) != sorted(keys):
+        return [f"its stage's numbers are not {', '.join(keys)}"]
     clearance = numbers["clearance_mm"] if isinstance(numbers["clearance_mm"], dict) else {}
     card = numbers["card_px"] if isinstance(numbers["card_px"], list) and len(numbers["card_px"]) == 2 else [None]
     gap, share = numbers["jaw_gap_mm"], checks.get("stacks_apart_min_g")
@@ -1248,6 +1672,8 @@ def stage_problems(numbers, checks: dict, see_through=(), explode_stacks=("senso
             found.append(f"near_seen is {numbers['near_seen']}, with the mate's stack exploding")
     else:
         rules.append(("near_seen", numbers["near_seen"], ">=", "near_seen_min", checks.get("near_seen_min")))
+    if extras:
+        rules.append(("extra_seen", numbers["extra_seen"], ">=", "near_seen_min", checks.get("near_seen_min")))
     if see_through:
         rules.append(("ghost_cover", numbers["ghost_cover"], ">=", "ghost_cover_min", checks.get("ghost_cover_min")))
     elif numbers["ghost_cover"] is not None:
@@ -1273,13 +1699,15 @@ def staging(identifier: str, stage, scene: str, index: dict, library: Path = LIB
         data = (library / scene).read_bytes()
         document = json.loads(data.decode("utf-8"))
         picture, see_through = document.get("picture"), document.get("see_through")
+        own = document.get("checks") if isinstance(document.get("checks"), dict) else {}
+        extras = len(document["extra_fingers"]) if isinstance(document.get("extra_fingers"), list) else 0
     except (OSError, ValueError, AttributeError):
         return [f"its scene {scene} cannot be read: {REBUILD}, then {fix}"], None
     rules = index.get("rules") or {}
     if stage.get("scene_sha256") != scene_sha256(data, rules):
         return [f"its stage is of another scene or other rules than {scene} and {SCENES_INDEX}'s now: {fix}"], None
     found = [f"its stage breaks a rule of {SCENES_INDEX}: {message}: {fix}"
-             for message in stage_problems(stage.get("numbers"), rules.get("checks") or {}, see_through, rules.get("explode_stacks"))]
+             for message in stage_problems(stage.get("numbers"), scene_checks(rules, own), see_through, rules.get("explode_stacks"), extras)]
     return found, picture if isinstance(picture, str) and picture else None
 
 
@@ -1457,8 +1885,25 @@ def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dic
             found.append(f"{name}: its mate's part is not true or false")
         elif not mate["part"] and not any(isinstance(body, dict) and body.get("finger") == "mate" for body in bodies or []):
             found.append(f"{name}: its mate draws no part and no body is the mate's finger")
+    if "extra_fingers" in document:
+        extra = document["extra_fingers"]
+        if not (isinstance(extra, list) and 1 <= len(extra) <= EXTRA_FINGERS_MAX
+                and all(isinstance(finger, dict) and sorted(finger) == ["kind", "matrix"] for finger in extra)):
+            found.append(f"{name}: its extra_fingers is not a list of 1 to {EXTRA_FINGERS_MAX} {{kind, matrix}}")
+        else:
+            for number, finger in enumerate(extra):
+                problem = _rigid(finger["matrix"])
+                if problem:
+                    found.append(f"{name}: its extra finger {number + 1}'s matrix {problem}")
+                elif finger["kind"] != ("turned" if determinant(finger["matrix"]) > 0 else "mirror"):
+                    found.append(f"{name}: its extra finger {number + 1} is {finger['kind']!r}, but its matrix's determinant is "
+                                 f"{determinant(finger['matrix']):+.0f}")
     if bodies is None or not bodies:
         found.append(f"{name}: its bodies are not a list of bodies")
+    # A body's finger: the sensor's, the mate's, none, or a further finger's own ("extra<k>", k one of the scene's
+    # extra_fingers: a hand's links, the LEAP Hand's, 2026-11-17).
+    extras = len(document["extra_fingers"]) if isinstance(document.get("extra_fingers"), list) else 0
+    owners = FINGERS + tuple(f"extra{k}" for k in range(1, extras + 1))
     for number, body in enumerate(bodies or []):
         label = f"{name}: body {number + 1}"
         if not isinstance(body, dict) or not set(BODY_KEYS) <= set(body) <= set(BODY_KEYS) | set(BODY_OPTIONAL):
@@ -1485,14 +1930,16 @@ def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dic
             row = rows.get(mesh)
             if row is None or row[4] != digest:
                 found.append(f"{label}: {mesh} has no row of NOTICE.md with its SHA-256")
-            elif not any(licence in row[2] for licence in OPEN_LICENCES) or not re.findall(r"`(licenses/[\w.-]+)`", row[2]) or not all(
+            # (A row saying NO_LICENCE only by its entry, pending or permitted, though it names an open part it was
+            # remodelled from too: the review of 2026-11-17.)
+            elif not ((pending_row(row) or permitted_row(row)) if NO_LICENCE in row[2] else any(licence in row[2] for licence in OPEN_LICENCES)) or not re.findall(r"`(licenses/[\w.-]+)`", row[2]) or not all(
                     (library / text).is_file() for text in re.findall(r"`(licenses/[\w.-]+)`", row[2])):
                 found.append(f"{label}: {mesh}'s NOTICE row names no open licence ({', '.join(OPEN_LICENCES)}) with its text")
         problem = _rigid(body["matrix"])
         if problem:
             found.append(f"{label}'s matrix {problem}")
-        if body["finger"] is not None and body["finger"] not in FINGERS:
-            found.append(f"{label}'s finger {body['finger']!r} is not sensor, mate or null")
+        if body["finger"] is not None and body["finger"] not in owners:
+            found.append(f"{label}'s finger {body['finger']!r} is not sensor, mate or null" + (f" or a further finger's (extra1 to extra{extras})" if extras else ""))
     see_through = document["see_through"]
     if not (isinstance(see_through, list) and len(set(see_through)) == len(see_through) and set(see_through) <= set(FINGERS)):
         found.append(f"{name}: its see_through {see_through!r} is not a subset of {list(FINGERS)}")
@@ -1500,7 +1947,7 @@ def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dic
         found.append(f"{name}: its picture (the alt text's words) is empty")
     if not isinstance(document["about"], str) or not document["about"].strip():
         found.append(f"{name}: its about is empty")
-    overrides = [key for key in ("camera", "explode") if key in document]
+    overrides = [key for key in ("camera", "explode", "checks") if key in document]
     camera = document.get("camera")
     if "camera" in overrides and not (isinstance(camera, dict) and camera and set(camera) <= set(CAMERA_MODES)
                                       and all(_camera(camera[mode], whole=False) for mode in camera)):
@@ -1510,6 +1957,14 @@ def scene_problems(part_id: str, document, parts: dict, library: Path, rows: dic
     if "explode" in overrides and not (isinstance(explode, dict) and sorted(explode) == ["gap_share"] and _number(explode["gap_share"])
                                        and EXPLODE_BOUNDS["gap_share"][0] <= explode["gap_share"] <= EXPLODE_BOUNDS["gap_share"][1]):
         found.append(f"{name}: its explode override {explode!r} is not {{gap_share}} within 0.25 to 0.45")
+    checks = document.get("checks")
+    if "checks" in overrides and not (isinstance(checks, dict) and checks and set(checks) <= set(CHECKS_OVERRIDE_BOUNDS)
+                                      and all(_number(value) and CHECKS_OVERRIDE_BOUNDS[key][0] <= value <= CHECKS_OVERRIDE_BOUNDS[key][1]
+                                              for key, value in checks.items())):
+        found.append(f"{name}: its checks override {checks!r} is not {{card_min_px}} within "
+                     f"{CHECKS_OVERRIDE_BOUNDS['card_min_px'][0]} to {CHECKS_OVERRIDE_BOUNDS['card_min_px'][1]}")
+    elif "checks" in overrides and "extra_fingers" not in document:
+        found.append(f"{name}: its checks override is a hand's alone (a scene with extra_fingers)")
     if overrides and "reason" not in str(document["about"]):
         found.append(f"{name}: its override ({', '.join(overrides)}) has no reason in its about")
     return found
@@ -1583,7 +2038,8 @@ def showcase(parts: dict, library: Path = LIBRARY, rows: dict | None = None) -> 
     - the notice not the decision's (showcase_notice_problems());
     - the vendor's file itself (SHOWCASE_SOURCE: its SHA-256, or its size and its triangles' under another header),
       a model of the deny-list (DENIED_SHA256) or a copy of one of the folder's meshes outside its place, anywhere
-      under ``library``/../ (every file there is hashed);
+      under ``library``/../ (every file there is hashed); since the review of 2026-11-16 a 3D model there whose path
+      names the Robotiq 2F-85 that is not one of MENAGERIE_2F85_MODELS at its SHA-256;
     - a part, entry, fit, picture record, sample or other scene naming the folder (SHOWCASE_REFERENCE);
     - the scene (scenes/flexitac-g1.json) missing or not drawable: a scene of the UMI finger as scene_problems() has
       every scene, its own bodies in bodies/flexitac-g1/ (tabled in NOTICE.md with an open licence, or a shape the
@@ -1630,6 +2086,10 @@ def showcase(parts: dict, library: Path = LIBRARY, rows: dict | None = None) -> 
             found.append(f"web/{relative} is {SHOWCASE_SOURCE[0]} itself, unsplit and undecimated: never published: {REMOVE_FILE}")
         if digest in DENIED_SHA256:
             found.append(f"web/{relative} is a vendor model of the deny-list ({DENIED_SHA256[digest]}): never published: {REMOVE_FILE}")
+        if path.suffix.lower() in MODEL_SUFFIXES and MENAGERIE_2F85_NAME.search(relative) and MENAGERIE_2F85_MODELS.get(relative) != digest:
+            found.append(f"web/{relative} names the Robotiq 2F-85 but is no file of MuJoCo Menagerie's model at its pinned SHA-256 "
+                         f"(MENAGERIE_2F85_MODELS; the user's own 2F-85 file is never published): {REMOVE_FILE}, or pin a body "
+                         f"built anew from the Menagerie's files there")
         if digest in places and relative != places[digest]:
             found.append(f"web/{relative} is a copy of web/{places[digest]}: the vendor's 3D model is shown in web/{SHOWCASE_VENDOR}/ alone: "
                          f"{REMOVE_FILE}")
@@ -1942,9 +2402,16 @@ def scenes(parts: dict, library: Path = LIBRARY) -> tuple:
         if key not in plain | families:
             problems.append((None, f"{SCENES_INDEX}: its rule part_homes names {key!r}, not a part without a scene or its family "
                                    f"(a gripper's home is its scene's)"))
+    # A card zoomed on the tip is its part's home zoomed (CARD_FRAMES): only of a part the rules draw at the grippers' homes.
+    for key in sorted(set(CARD_FRAMES) - set(rules["part_homes"])) if isinstance(rules.get("part_homes"), dict) else ():
+        problems.append((None, f"CARD_FRAMES zooms the cards of {key!r} on the tip, but {SCENES_INDEX}'s rule part_homes gives it no home"))
     notice = (library / "NOTICE.md").read_text(encoding="utf-8") if (library / "NOTICE.md").is_file() else ""
     rows = {row[0]: row for row in NOTICE_ROW.findall(notice)}
-    keys = re.compile(r"\b(" + "|".join(re.escape(part_id.replace("-", "_")) for part_id in parts["parts"]) + r")\b")
+    # (A one-word id, the LeFlexiTac's leflexitac of 2026-11-16, is its own recipe key: the Library names it everywhere.)
+    # A key followed by "/" or after "-" is an upstream model's folder, not a recipe (2026-11-17, the AgileX Piper:
+    # menagerie's agilex_piper/ and its licence text mujoco_menagerie-agilex_piper.txt carry the part agilex-piper's key;
+    # a recipe is <key>.json, and the private folders are PRIVATE_TEXT's).
+    keys = re.compile(r"(?<![\w-])(" + "|".join(re.escape(part_id.replace("-", "_")) for part_id in parts["parts"] if "-" in part_id) + r")\b(?!/)")
     texts = [(None, SCENES_INDEX, (library / SCENES_INDEX).read_text(encoding="utf-8") if (library / SCENES_INDEX).is_file() else "")]
     named, used = {SCENES_INDEX}, set()
     for part_id in grippers:
@@ -2018,18 +2485,36 @@ def view_note(identifiers: list) -> str:
 # -- the writer -----------------------------------------------------------------------------------------------------
 
 def _fit_job(job: tuple) -> tuple:
-    """(id, the reply, the broken rules) of one variant: a worker process's job."""
+    """(id, the request, the reply, the broken rules) of one variant: a worker process's job.  The request is the one
+    the page sends (compose() with part_options(): the select first, then the strain limit it calls for)."""
 
-    identifier, request, mesh_path = job
-    reply = fit(request, Path(mesh_path).read_bytes())
-    return identifier, reply, rules(reply)
+    identifier, part, variant, flat, curved, mesh_path = job
+    data = Path(mesh_path).read_bytes()
+    request = compose(part, variant, part_options(part, data, flat, curved))
+    reply = fit(request, data)
+    return identifier, request, reply, rules(reply)
+
+
+def curved_face(request: dict, mesh: bytes):
+    """How far the request's selection stretches on the part when it is doubly curved, else None: beyond
+    surface.fit.AXIS_MIN_STRETCH (0.05 %) the page sends the strain limit's value (1 % on curved faces, the user's choice
+    of 2026-11-17) in place of its data-flat 0.3 % (main.js strainLimit), and so does this writer (part_options()).
+    The Unitree Dex3-1's fingertip, back in the Library since 2026-11-18, is its one doubly curved face (its dome's
+    patch 0.90 %); the Franka Hand's nearly flat pad (0.002 %) is not one."""
+
+    from surface import api
+    from surface import fit as fit_module
+
+    selection = api.select_surface({"name": request["name"], "selection": request["selection"]}, mesh)["selection"]
+    stretch = (selection.get("stretch") or {}).get("smooth_max")
+    return stretch if stretch is not None and stretch > fit_module.AXIS_MIN_STRETCH else None
 
 
 def run(only=None, check: bool = False, jobs: int = 1, library: Path = LIBRARY, index: Path = INDEX, out=print) -> int:
     parts = json.loads((library / "parts.json").read_text(encoding="utf-8"))
     html = index.read_text(encoding="utf-8")
     found = controls(html)
-    options = page_options(html)
+    options, curved = page_options(html), page_options(html, curved=True)
     table = plan(parts)
     known = {row[0] for row in table}
     chosen = known if only is None else set(only)
@@ -2044,6 +2529,9 @@ def run(only=None, check: bool = False, jobs: int = 1, library: Path = LIBRARY, 
         for key in ("pitch_mm", "fill"):
             if not valid(found[key], variant[key]):
                 problems.append(f"{identifier}: the page does not take {key} {variant[key]}")
+        stretch = stretch_problem(part, found)
+        if stretch:
+            problems.append(f"{identifier}: {stretch}")
         if identifier not in chosen:
             continue
         mesh_path = library / part["mesh"]["file"]
@@ -2052,11 +2540,11 @@ def run(only=None, check: bool = False, jobs: int = 1, library: Path = LIBRARY, 
             if meshes[part_id] != part["mesh"]["sha256"]:
                 problems.append(f"{part_id}: {part['mesh']['file']} is not the file parts.json names (SHA-256)")
         try:
-            requests[identifier] = compose(part, variant, options)
+            compose(part, variant, options)
         except LibraryError as error:
             problems.append(f"{identifier}: {error}")
             continue
-        work.append((identifier, requests[identifier], str(mesh_path)))
+        work.append((identifier, part, variant, options, curved, str(mesh_path)))
     if problems:
         out("\n".join(problems))
         return 1
@@ -2067,7 +2555,8 @@ def run(only=None, check: bool = False, jobs: int = 1, library: Path = LIBRARY, 
         results = [_fit_job(job) for job in work]
     rows = {row[0]: row for row in table}
     rejected, stale, fits, writes = [], [], {}, {}
-    for identifier, reply, broken in results:
+    for identifier, request, reply, broken in results:
+        requests[identifier] = request
         _, part_id, part, variant = rows[identifier]
         if broken:
             rejected.append(f"{identifier}: rejected, {'; '.join(broken)}")

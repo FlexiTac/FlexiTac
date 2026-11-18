@@ -10,12 +10,16 @@ outputs and the video tools stay out.  Only committed files are written (git arc
 folder flexitac-gen/ is replaced as a whole (only when an earlier export wrote it: it holds SOURCE_COMMIT), and
 .github/workflows/flexitac-gen.yml (tools/public/pages-workflow.yml) tests the copy, builds the static site and
 publishes it to https://flexitac.github.io/flexitac-gen/.  Nothing is committed or pushed: review, commit and push
-the clone yourself.
+the clone yourself.  A commit whose web/library/ holds files whose source states no licence and whose authors'
+permission is not recorded (tools/library_write.py unlicensed(): a PENDING_LICENCES entry's) is not exported at all
+(the review of 2026-11-17): settle the entry first.  Files shared with their authors' permission (PERMITTED_LICENCES:
+the LeFlexiTac's since 2026-11-17) are exported.
 """
 from __future__ import annotations
 
 import argparse
 import io
+import json
 import shutil
 import subprocess
 import sys
@@ -44,6 +48,9 @@ PUBLIC = (
     "tools/library_showcase.py", "tools/mesh_decimate.py",
     # The showcase's sensor (2026-11-12): the reader of the original FlexiTac pad's Gerbers (web/vendor/flexitac-v2/).
     "tools/flexitac_v2.py",
+    # The FlexiTac hardware's own files the site serves (2026-11-17: the pad's Gerber ZIPs, the reading boards' bundles):
+    # their pins and --check, which the site build runs (standard library only).
+    "tools/flexitac_downloads.py",
 )
 
 
@@ -58,6 +65,27 @@ def git(source: Path, *args: str) -> bytes:
     return done.stdout
 
 
+def unlicensed(archive: bytes) -> list:
+    """The files of an archive's web/library/ whose source states no licence and whose authors' permission is not
+    recorded (tools/library_write.py unlicensed(): a PENDING_LICENCES entry's; the review of 2026-11-17): never
+    exported."""
+
+    texts = {}
+    with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
+        for name in ("web/library/parts.json", "web/library/NOTICE.md"):
+            try:
+                texts[name] = tar.extractfile(tar.getmember(name)).read().decode("utf-8")
+            except KeyError:
+                continue
+    if not texts:
+        return []
+    if str(ROOT / "tools") not in sys.path:
+        sys.path.insert(0, str(ROOT / "tools"))
+    import library_write
+
+    return library_write.unlicensed(json.loads(texts.get("web/library/parts.json", "{}")), texts.get("web/library/NOTICE.md", ""))
+
+
 def export(repo: Path, rev: str = "HEAD", source: Path = ROOT) -> str:
     """Write the public files of ``source`` (this project) at ``rev`` into ``repo``/flexitac-gen and the workflow;
     the commit's SHA."""
@@ -69,6 +97,10 @@ def export(repo: Path, rev: str = "HEAD", source: Path = ROOT) -> str:
     # From the top level: git archive reads the paths in the commit's tree of this folder.
     top = Path(git(source, "rev-parse", "--show-toplevel").decode().strip())
     archive = git(top, "archive", "--format=tar", f"{commit}:{prefix}", *PUBLIC)
+    held = unlicensed(archive)
+    if held:
+        raise ExportError(f"{commit[:12]}'s web/library holds files whose source states no licence ({', '.join(held)}; "
+                          "no permission in tools/library_write.py PERMITTED_LICENCES): nothing exported until it is settled")
     target = repo / FOLDER
     if target.exists():
         if not (target / MARKER).is_file():

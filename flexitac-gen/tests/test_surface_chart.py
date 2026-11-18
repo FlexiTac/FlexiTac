@@ -174,11 +174,13 @@ class ChartTests(unittest.TestCase):
         mesh = F.mesh(F.sphere_cap(20.0, 40.0, rings=6, segments=20))
         seed = select.nearest_facet(mesh, (0.0, 0.0, 20.0))
         chart = chart_module.build_chart(mesh, select.grow(mesh, seed, 40.0, 180.0))
-        self.assertEqual((chart.kind, chart.method), ("curved", "lscm+arap"))
+        # ARAP leaves it stretched beyond solve.BOUNDED_FROM: re-solved for the least max stretch (2026-11-17).
+        self.assertEqual((chart.kind, chart.method), ("curved", "lscm+arap+bounded"))
         self.assertEqual(chart.stats["flipped_facets"], 0)
         self.assertGreater(chart.stats["strain_max"], 0.005)
         self.assertLess(chart.stats["strain_max"], 0.2)
-        self.assertAlmostEqual(chart.stats["chart_area_mm2"] / chart.stats["area_mm2"], 1.0, delta=0.02)
+        # A 40-degree cap stretches by about a^2 / 12 = 4 % at least: the least-max-stretch chart's area within 5 %.
+        self.assertAlmostEqual(chart.stats["chart_area_mm2"] / chart.stats["area_mm2"], 1.0, delta=0.05)
 
     def test_a_closed_band_is_opened_along_a_seam(self) -> None:
         mesh = F.mesh(F.cylinder_band(10.0, 20.0, segments=24, closed=True))
@@ -399,7 +401,8 @@ class ChartTests(unittest.TestCase):
 class SolveTests(unittest.TestCase):
     def test_a_curved_solve_factors_each_matrix_once(self) -> None:
         # LSCM and ARAP factor their matrices once each, ARAP for all its global
-        # steps; conjugate gradients alone took 8-12 s at 2,900 vertices.
+        # steps and the least-max-stretch rounds after it (2026-11-17) sharing
+        # ARAP's; conjugate gradients alone took 8-12 s at 2,900 vertices.
         mesh = F.mesh(_welded_cap(20.0, 40.0, 6, 24))
         calls = []
         factor = solve._factor
@@ -415,9 +418,8 @@ class SolveTests(unittest.TestCase):
         self.assertEqual(calls, [2 * vertices - 4, vertices - 1])  # two vertices pinned, then one
 
     def test_a_curved_chart_can_start_from_a_larger_charts_uv(self) -> None:
-        # The fit's strain limit flattens disks of a curved selection again: their
-        # ARAP can start from the selection's chart instead of from LSCM.  Such
-        # charts stay out of the cache, which holds charts built from scratch.
+        # A curved chart's ARAP can start from a larger chart's uv instead of from LSCM (the fit's strain-limited disks
+        # did, until 2026-11-17).  Such charts stay out of the cache, which holds charts built from scratch.
         mesh = F.mesh(_welded_cap(20.0, 40.0, 6, 24))
         whole = chart_module.build_chart(mesh, range(mesh.facet_count))
         disk = select.disk(mesh, 0, 8.0, 180.0)
@@ -425,7 +427,7 @@ class SolveTests(unittest.TestCase):
         warm = chart_module.build_chart(mesh, disk, initial=whole.uv)
         self.assertEqual(list(chart_module._CHART_CACHE), cached)
         cold = chart_module.build_chart(mesh, disk)
-        self.assertEqual((warm.kind, warm.method, cold.method, warm.stats["flipped_facets"]), ("curved", "arap", "lscm+arap", 0))
+        self.assertEqual((warm.kind, warm.method, cold.method, warm.stats["flipped_facets"]), ("curved", "arap+bounded", "lscm+arap+bounded", 0))
         self.assertAlmostEqual(warm.stats["strain_max"], cold.stats["strain_max"], delta=0.1 * cold.stats["strain_max"])
 
     def test_the_factorization_solves_a_pinned_laplacian(self) -> None:

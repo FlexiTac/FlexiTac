@@ -9,6 +9,7 @@ replies, build ids and file bytes as app.py's (tools/browser/static_checks.py co
 
     python3 tools/build_static_site.py --out site/            # downloads Pyodide, checks its SHA-256
     python3 tools/build_static_site.py --out site/ --pyodide-archive pyodide-core-0.27.8.tar.bz2
+    python3 tools/build_static_site.py --out site/ --allow-pending-licences   # a local preview (below)
 
 The output:
 
@@ -29,6 +30,11 @@ The output:
     static/library/art/, scenes/, bodies/
                                each sensor's 3D view: its boards' art, the grippers' scenes and their bodies (web/library/,
                                docs/LIBRARY_VIEW.md), with web/
+    static/vendor/flexitac-v2/Gerber_*.zip, static/vendor/flexitac-reader/
+                               the FlexiTac hardware's own files (2026-11-17): the original pad's two FPC Gerber ZIPs and
+                               the reading boards' bundles, with web/, each checked against its pin and every bundle
+                               re-derived from its members (tools/flexitac_downloads.py; a file of other bytes fails the
+                               build), their SHA-256s in BUILD.json
     static/library/showcase.json, showcase/
                                the showcase (the Library's first card and its page): its document and its pictures, with
                                web/; its scene is one of scenes/, its gripper static/vendor/ufactory-g1/, its pad
@@ -56,6 +62,12 @@ that is not the one the manifest gives, or a gripper's scene that library_write.
 does a picture with no 3D view (its record without its art, a gripper's without its stage: library_write.VIEW_REQUIRED,
 set by the shoot of 2026-11-06 that wrote every sensor's art; while it is false such a picture is published with a
 warning, its page showing the picture only).
+
+A Library holding files whose source states no licence and whose authors' permission is not recorded
+(tools/library_write.py unlicensed(): a PENDING_LICENCES entry's, pending its authors' word) is refused before anything
+is written, the files named, unless --allow-pending-licences asks for a local preview (the review of 2026-11-17; the
+pages workflow never passes it, and tools/export_public.py refuses such a Library outright).  Files shared with their
+authors' permission (PERMITTED_LICENCES: the LeFlexiTac's since 2026-11-17) are built.
 """
 from __future__ import annotations
 
@@ -190,6 +202,24 @@ def copy_web(static: Path) -> None:
     shutil.copytree(WEB, static, ignore=shutil.ignore_patterns(*PAGES, "*.py", "__pycache__"))
 
 
+def hardware(static: Path) -> dict:
+    """The FlexiTac hardware's own files as published (the user's request of 2026-11-17; tools/flexitac_downloads.py):
+    static/vendor/flexitac-v2/'s two Gerber ZIPs and static/vendor/flexitac-reader/'s bundles each at its pin, each
+    bundle re-derived from its members, the two folders within their budgets; their SHA-256s by path (BUILD.json), or
+    BuildError."""
+
+    if str(ROOT / "tools") not in sys.path:
+        sys.path.insert(0, str(ROOT / "tools"))
+    import flexitac_downloads
+
+    problems = flexitac_downloads.check(vendor=static / "vendor")
+    if problems:
+        raise BuildError("the FlexiTac hardware's files are not the pinned ones (tools/flexitac_downloads.py --check): " + "; ".join(problems))
+    paths = [f"{flexitac_downloads.FPC_FOLDER}/{name}" for name in flexitac_downloads.FPC_FILES]
+    paths += [f"{flexitac_downloads.READER_FOLDER}/{record['bundle'][0]}" for record in flexitac_downloads.BOARDS.values()]
+    return {f"static/vendor/{path}": hashlib.sha256((static / "vendor" / path).read_bytes()).hexdigest() for path in paths}
+
+
 def _library_write():
     """tools/library_write.py (the request the page sends, the fit), imported from beside this file."""
 
@@ -248,12 +278,20 @@ def library(static: Path, source: Path = WEB / "library", only=None, jobs: int =
     if unknown:
         raise BuildError(f"the library has no sensor named {', '.join(unknown)}")
     # Each sensor's request as the page sends it now: parts.json's setup and variant over gen.html's defaults (the
-    # generator's page; index.html until 2026-11-16).
-    options = library_write.page_options(index.read_text(encoding="utf-8"))
+    # generator's page; index.html until 2026-11-16), the strain limit the one the page sends with the part's selection
+    # (library_write.part_options: 1 % on a doubly curved face, the Unitree Dex3-1's fingertip since 2026-11-18).
+    html = index.read_text(encoding="utf-8")
+    flat, curved = library_write.page_options(html), library_write.page_options(html, curved=True)
     parts = json.loads((source / "parts.json").read_text(encoding="utf-8"))
+    shown, options_of = set(chosen), {}
     try:
-        sent = {identifier: library_write.canonical(library_write.compose(part, variant, options))
-                for identifier, _, part, variant in library_write.plan(parts)}
+        sent = {}
+        for identifier, part_id, part, variant in library_write.plan(parts):
+            if identifier in shown and part_id not in options_of:
+                mesh = source / part["mesh"]["file"]
+                # (A missing mesh: the job below says the library is stale.)
+                options_of[part_id] = library_write.part_options(part, mesh.read_bytes(), flat, curved) if mesh.is_file() else flat
+            sent[identifier] = library_write.canonical(library_write.compose(part, variant, options_of.get(part_id, flat)))
     except library_write.LibraryError as error:
         # A setup the page would send otherwise (compose refuses it): the writer says the same.
         raise BuildError(f"the library is stale ({error}): run tools/library_write.py") from error
@@ -289,6 +327,10 @@ def library(static: Path, source: Path = WEB / "library", only=None, jobs: int =
     unviewed = [identifier for identifier in chosen if images[identifier] is not None and views[identifier] is None]
     if unviewed:
         print(f"build_static_site: warning: {library_write.view_note(unviewed)}", file=sys.stderr, flush=True)
+    # (2026-11-16, the LeFlexiTac) A part whose files state no licence is built for a local preview only: said, not hidden.
+    pending = library_write.pending_note(parts, chosen)
+    if pending:
+        print(f"build_static_site: warning: {pending}", file=sys.stderr, flush=True)
     # The showcase (the Library's first card and its page, 2026-11-12: showcase.json, its pictures, its scene and the
     # vendor's folder; copy_web publishes them): its problems stopped the build above (scenes() carries
     # library_write.showcase()'s, with no part); pictures of older figure or view sources are published with a warning.
@@ -339,7 +381,21 @@ def prepare(out: Path) -> None:
     out.mkdir(parents=True, exist_ok=True)
 
 
-def build(out: Path, archive: Path | None = None, github: bool = True, jobs: int = 1) -> dict:
+def unlicensed_gate(allow: bool, source: Path = WEB / "library") -> None:
+    """(The review of 2026-11-17, the LeFlexiTac) A Library holding files whose source states no licence and whose
+    authors' permission is not recorded (library_write.unlicensed(): a PENDING_LICENCES entry's, pending its authors'
+    word; PERMITTED_LICENCES' are taken) is not built for publishing: BuildError naming them before anything is written,
+    unless ``allow`` (--allow-pending-licences: a local preview, never the pages workflow's)."""
+
+    held = _library_write().unlicensed(json.loads((source / "parts.json").read_text(encoding="utf-8")),
+                                       (source / "NOTICE.md").read_text(encoding="utf-8"))
+    if held and not allow:
+        raise BuildError(f"the Library holds files whose source states no licence ({', '.join(held)}; no permission in "
+                         "tools/library_write.py PERMITTED_LICENCES): not to be published; --allow-pending-licences builds a local preview")
+
+
+def build(out: Path, archive: Path | None = None, github: bool = True, jobs: int = 1, allow_pending: bool = False) -> dict:
+    unlicensed_gate(allow_pending)
     pyodide = pyodide_files(pyodide_archive(archive))
     engine = engine_zip()
     counts = github_counts() if github else None
@@ -371,6 +427,7 @@ def write(out: Path, pyodide: dict, engine: bytes, counts, jobs: int) -> dict:
     static = out / "static"
     copy_web(static)
     shelf = library(static, jobs=jobs)
+    served = hardware(static)
     (static / "py" / "engine.zip").write_bytes(engine)
     folder = static / "py" / "pyodide"
     folder.mkdir()
@@ -384,6 +441,9 @@ def write(out: Path, pyodide: dict, engine: bytes, counts, jobs: int) -> dict:
         # The Library's sensors, each fitted again and its Gerber ZIPs built (static/library/files.json), how many
         # pictured and how many with a 3D view (entries.json's image and view).
         "library": shelf,
+        # The FlexiTac hardware's own files (2026-11-17): the original pad's Gerber ZIPs and the reading boards' bundles,
+        # checked against their pins (tools/flexitac_downloads.py), by their SHA-256s.
+        "hardware": served,
         "pyodide": {"version": PYODIDE_VERSION, "archive": PYODIDE_URL, "archive_sha256": PYODIDE_SHA256,
                     "files": {name: hashlib.sha256(data).hexdigest() for name, data in pyodide.items()}},
     }
@@ -402,9 +462,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pyodide-archive", type=Path, default=None,
                         help=f"a local pyodide-core-{PYODIDE_VERSION}.tar.bz2 (default: download it); checked by its SHA-256 either way")
     parser.add_argument("--jobs", type=int, default=max(1, min(8, os.cpu_count() or 1)), help="the Library's fits in parallel processes")
+    parser.add_argument("--allow-pending-licences", action="store_true",
+                        help="build a local preview that holds files whose source states no licence and whose authors' "
+                             "permission is not recorded (tools/library_write.py PENDING_LICENCES); never for publishing")
     args = parser.parse_args(argv)
     try:
-        record = build(args.out.resolve(), args.pyodide_archive, github=not args.no_github, jobs=args.jobs)
+        record = build(args.out.resolve(), args.pyodide_archive, github=not args.no_github, jobs=args.jobs,
+                       allow_pending=args.allow_pending_licences)
     except (BuildError, OSError) as error:
         print(f"build_static_site: {error}", file=sys.stderr)
         return 1

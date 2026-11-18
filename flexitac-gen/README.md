@@ -89,16 +89,27 @@ the same query and hash, and `library.html#<id>` to `./#<id>`, by
 Library (the header's Library link, in the same tab since 2026-11-15:
 leaving the generator leaves its page, a loaded model and a sensor generated
 with it) lists sensors
-already fitted to open-source gripper fingers, grouped by gripper: seven
-gripper parts (Franka Hand, WidowX 250, Trossen WidowX AI, ARX X5, I2RT YAM,
-Unitree Dex1-1, MakerMods Metal Arm), each at four pitches from a fine 1 mm,
+already fitted to open-source gripper fingers (but the LeFlexiTac's, whose
+files state no licence: shared with its authors' permission, given by a
+co-author on 2026-11-17), grouped by gripper: eighteen
+gripper parts (LeFlexiTac; Robotiq 2F-85, since 2026-11-16, MuJoCo Menagerie's model;
+Franka Hand, WidowX 250, Trossen WidowX AI, ARX X5, I2RT YAM, MakerMods
+Metal Arm; since 2026-11-17, AgileX Piper, its
+real finger from MuJoCo Menagerie, and the Galaxea R1 Lite's G1 gripper
+from GalaxeaManipSim, Apache-2.0, the Seeed reBot DevArm, UFACTORY's xArm
+Gripper from MuJoCo Menagerie's BSD-3-Clause model, the Rainbow RB-Y1,
+Enactic's OpenArm 1.0, on its fingertip pad, and the YUBI Gripper's fingertip;
+then the Unitree Dex1-1, the Unitree Dex3-1, back since 2026-11-18 on its
+fingertip's dome, a doubly curved face fitted at the curved faces' 1 %, and
+the LEAP Hand: two dexterous hands with a sensor on every finger), each at
+four pitches from a fine 1 mm,
 and the UMI fin-ray finger in six shapes: straight, at four pitches, and
 five tapered tips at 2 mm pitch, each a card of its own (since 2026-11-16):
 a short taper (the last 40 mm narrowed as a trapezoid or a convex arc), a
 convex arc, a trapezoid and a concave arc tip (the last 75 mm), each to a
 tip of 21.8 to 5.8 mm, and a pointed tip (two arcs over the last 50 mm
-meeting at a 2 mm point).  The seven grippers
-come first, one card each, four to a row (two on a phone), each with its
+meeting at a 2 mm point).  The grippers and the hands
+come first (the LeFlexiTac first, since 2026-11-16), one card each, four to a row (two on a phone), each with its
 pitch range ("1 to 3 mm") and "Pick your pitch": it opens the gripper's
 2 mm sensor, whose Pitch switch offers the others.  The UMI finger's shelf
 follows ("Six finger shapes, straight to pointed."), its six cards in the
@@ -107,7 +118,7 @@ same side as the grippers' fingers (the finger upright, its sensor's
 layers apart beside it): the straight finger's
 card, like a gripper's, then a card per tip shape with its tip widths
 ("5.8 to 21.8 mm", "Pick your tip width"), whose page's Tip width switch
-(and the short taper's Shape) offers the others; 58 sensors in all.
+(and the short taper's Shape) offers the others; 102 sensors in all.
 Each sensor has its own address,
 `./#<id>` (for example `./#widowx-250-1mm`; `#<part>`
 shows its 2 mm sensor), with its Top and Bottom FPC Gerber ZIPs, the part's
@@ -115,17 +126,28 @@ STL and its licence, and opens in Gen by Surface at `gen.html?part=<id>`, built 
 once from its shipped fit and editable from there (on a phone the sensor's
 page shows its picture as a 3:1 band, so Open in Gen by Surface is in a
 390 x 844 phone's first screen).  The pictures are the generator's figure
-of the sensor on its part: the seven grippers drawn whole, a sensor on both
-fingers and the jaws fully open (the other finger is the same part turned,
+of the sensor on its part: the grippers drawn whole, a sensor on both
+fingers and the jaws fully open (a hand open and ready to grasp, a sensor on
+every finger, the index finger's exploded, the thumb across from it
+see-through, the other fingers' assembled; the LeFlexiTac's rotary jaw 39 degrees, as
+far as its sensors read from the grippers' angle; the YUBI Gripper's rotary fingers 11
+degrees open, so that the near fingertip's sensor reads as a face; the other finger is the same part turned,
 carrying the same board, or a mirror-image part carrying the mirror-image
-board, which is not the sensor's Gerbers; the finger nearer the viewer is
+board, which is not the sensor's Gerbers, or the LeFlexiTac's static jaw,
+carrying the same board turned onto its face; the finger nearer the viewer is
 see-through in both views and its sensor stays assembled, the other
 finger's sensor explodes into the gap; the MakerMods Metal Arm's two tips
 stand on a plain rail drawn by this project, not MakerMods hardware, and
 the rest of its body, the guide rail, housing and camera, is drawn by eye
-after the maker's photos too), the
-UMI finger and its tapered tips as the fingertip.  A gripper's card shows
-it exploded, a UMI shelf's card assembled (its page opens so too); a
+after the maker's photos too; the Seeed reBot DevArm's finger has the two
+shallow pockets of its contact face capped, which a laminated sensor
+bridges, and its RS-00 actuator is drawn by this project as plain shapes to
+the model's sizes; the YUBI Gripper is Toyota's open hardware,
+CERN-OHL-W-2.0, its parts placed as its assembly places them, its servo
+and camera drawn by this project as plain shapes), the
+UMI finger and its tapered tips as the fingertip.  Every card shows its
+sensor exploded from the grippers' side, the UMI shelf's cards closer, on
+the fingertip's shape, and every page opens so, the whole drawing; a
 sensor's page shows its picture and, drawn over it, the same
 scene in 3D to turn (drag it, or the arrow keys; 0 or a double click
 brings it back; the Exploded | Assembled switch under it drives both)
@@ -134,7 +156,14 @@ when a file does not load the picture stays.  Every sensor has its
 picture, and where its file does not load a drawing of the sensor's taxel
 grid takes its place.  On the static site the ZIPs are built with the
 site; under `app.py` the page asks the server for them.  The page loads no
-engine or Pyodide, and three.js only on a sensor's page.
+engine or Pyodide, and three.js only on a sensor's page.  Under each
+sensor's facts (since the user's request of 2026-11-17) "Ordering and
+fabrication" links the FlexiTac fabrication guide and "Reading board" names
+the FlexiTac reading board its lines take, with its ZIP (the board's
+Gerbers, BOM and pick-and-place, unchanged, CC BY-NC 4.0): the 32 x 16
+board for at most 32 lines on the larger side and 16 on the smaller, else
+the 32 x 32 board for at most 32 on each (`web/boards.js`, from the
+sensor's rows and columns; the sensor's tails stay one pin per line).
 
 The sensors are data in `web/library/`: `parts.json` (each part's mesh,
 licence, the face the page selects and its pitches; edited by hand, the
@@ -195,7 +224,11 @@ gripper from the same side as the grippers' cards below it, its near
 finger see-through as theirs, so both sensors show.  Its card has two pills
 (since the user's decision of 2026-11-16): the grey Details opens its page,
 and the blue Design your own opens Gen by Surface (`gen.html`) in the same
-tab, to fit a sensor to one's own 3D model.
+tab, to fit a sensor to one's own 3D model.  Its page offers the original
+pad's Top and Bottom FPC Gerber ZIPs and its reading board (32 x 16) for
+download, the guide's own files served unchanged (`web/vendor/flexitac-v2/`,
+`web/vendor/flexitac-reader/`; `tools/flexitac_downloads.py` pins them and
+the site build checks them).
 
 ## What it does
 
@@ -245,8 +278,13 @@ tab, to fit a sensor to one's own 3D model.
     finger's facets first; their sources, changes and licences are in
     [web/samples/NOTICE.md](web/samples/NOTICE.md).
   - The surface may be flat, creased or singly curved (cylinders, cones,
-    extrusions, bands opened along a seam).  A doubly curved surface is cut
-    down to the disk a flat sheet covers within 0.3% stretch.
+    extrusions, bands opened along a seam).  On a doubly curved surface (a
+    fingertip's dome) a click selects the patch a flat sheet covers within
+    the strain limit on the part (since 2026-11-17; the sheet relaxed, as
+    soft tape lets it), 1 % on such a face unless Strict 0.3 % is chosen,
+    symmetric on a symmetric face; a selection beyond it is refused, with
+    Shrink to fit
+    ([docs/CAD_MODE.md](docs/CAD_MODE.md#gently-curved-faces-2026-11-17)).
   - The fit chooses rows, columns (up to 64 x 64), pitch, routing, role
     mapping and tail lengths, on the engine's `surface_matrix_v1`
     template, whose margins are tighter.  The field follows the selected
@@ -469,6 +507,13 @@ tab, to fit a sensor to one's own 3D model.
   stays empty, as the
   [FlexiTac fabrication guide](https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db)
   orders them (0.2 mm, since 2026-11-06; 0.11 mm 1-layer before).
+  Step 3 links the guide ("Ordering and fabrication") and names the
+  FlexiTac reading board the sensor's tails plug into, with its ZIP (since
+  2026-11-17, in both modes, following each change of the design): the
+  Library's rule on its rows and columns while each tail is one pin per
+  line, the board with those connectors when a Reader or connector pins
+  sized the tails (16 and 32 pins the 32 x 16 board, 32 and 32 the 32 x 32,
+  else none).
   By JLC's rule the thickness with a stiffener is the FPC's plus the
   stiffener's, so the 0.2 mm FPC takes the 0.1 mm stiffener (0.225 mm until
   the user's decision of 2026-11-06, JLC's choice for a 0.11 mm FPC).
@@ -493,8 +538,9 @@ narrower than 0.1016 mm (accepted down to 0.1 mm before) are now rejected.
 ## Limits
 
 - CAD mode works on STL only.  A flat sheet covers doubly curved surfaces
-  (domes, fingertips) only over small disks; slit (comb) boards are
-  planned; see [docs/CAD_MODE.md](docs/CAD_MODE.md#limits).  Its masked
+  (domes, fingertips) only over the patch it flattens within the strain
+  limit; slit (comb) boards for whole fingertips are not built (the user's
+  decision of 2026-11-17); see [docs/CAD_MODE.md](docs/CAD_MODE.md#limits).  Its masked
   fields ([`matrix.mask`](docs/API.md#field-mask-matrixmask): the polygon
   coverlay window in the GTS, a `taxels.csv` map of the active positions in
   the review bundle) are at most 64 x 64 (`max_rows` x `max_columns`, as
@@ -562,12 +608,17 @@ owner's decision of 2026-11-12, and this repository's Apache License 2.0
 does not cover them ([web/vendor/ufactory-g1/NOTICE.md](web/vendor/ufactory-g1/NOTICE.md)).
 Another is not free for commercial use: `web/vendor/flexitac-v2/`,
 the original hand-designed FlexiTac sensor's geometry and art for the
-Library's showcase, is CC BY-NC 4.0 material of Columbia University
+Library's showcase and its two FPC Gerber ZIPs, is CC BY-NC 4.0 material of Columbia University
 (non-commercial, not Apache-2.0;
 [web/vendor/flexitac-v2/NOTICE.md](web/vendor/flexitac-v2/NOTICE.md)), and
 it is published with `web/` by the static site and the public export.
+So is `web/vendor/flexitac-reader/`, the FlexiTac reading boards' Gerber,
+BOM and pick-and-place files that the Library's windows and the
+generator's step 3 offer (since 2026-11-17), CC BY-NC 4.0 material of
+Columbia University too, unchanged
+([web/vendor/flexitac-reader/NOTICE.md](web/vendor/flexitac-reader/NOTICE.md)).
 The Library's gripper parts, the bodies of its 3D view's grippers and their
-licence texts (Apache-2.0, MIT and BSD-3-Clause, from their pinned upstream
+licence texts (Apache-2.0, MIT, BSD-3-Clause and BSD-2-Clause, from their pinned upstream
 commits; the Franka pad's hull, the UMI finger's tapered tips and the
 decimated bodies are modified files, so stated; the MakerMods rail and
 body drawn round it are this project's own) are listed with

@@ -196,8 +196,10 @@ class PageTests(unittest.TestCase):
     def test_scripts(self) -> None:
         scripts = [(attributes.get("src"), attributes.get("type")) for tag, attributes, _ in self.page.elements if tag == "script"]
         # The look's choice first, in <head> before the style sheets (web/theme.js, 2026-11-06: no flash of the light page);
-        # the header's counts refreshed on the static site by web/counts.js, the Library's too (the review of 2026-11-16).
-        self.assertEqual(scripts, [("static/theme.js", None), ("static/counts.js", None), ("static/backend.js", None), ("static/app.js", None), ("static/cad/main.js", "module")])
+        # the header's counts refreshed on the static site by web/counts.js, the Library's too (the review of 2026-11-16);
+        # web/boards.js before app.js (step 3's reading board, 2026-11-17).
+        self.assertEqual(scripts, [("static/theme.js", None), ("static/counts.js", None), ("static/backend.js", None), ("static/boards.js", None),
+                                   ("static/app.js", None), ("static/cad/main.js", "module")])
 
     def test_cad_controls_stay_out_of_the_design_form(self) -> None:
         for tag, attributes, ancestors in self.page.elements:
@@ -1078,7 +1080,16 @@ class FitOptionTests(unittest.TestCase):
         self.assertFalse(set(options) & set(fit.CAD_ONLY), sorted(set(options) & set(fit.CAD_ONLY)))
         for key, (tag, attributes) in options.items():
             with self.subTest(option=key):
-                if tag == "select":
+                if tag == "select" and "data-number" in attributes:
+                    # A select of numbers (the strain limit, 2026-11-17: main.js readOptions sends a number): each one a
+                    # number the fit takes; its data-flat, sent off a doubly curved face (the user's choice of
+                    # 2026-11-17, "1% default on curves"), the server's default, its first choice 1 % on curved faces.
+                    self.assertEqual(float(attributes["data-flat"]), fit.DEFAULT_OPTIONS[key], "data-flat is the server's default")
+                    for choice in choices[key] + [attributes["data-flat"]]:
+                        self.assertEqual(fit.parse_options({key: float(choice)})[key], float(choice))
+                    self.assertEqual([float(choice) for choice in choices[key]], [0.01, 0.003])
+                    self.assertIn('control.hasAttribute("data-flat") ? strainLimit() : control.hasAttribute("data-number") ? Number(control.value) : control.value', main)
+                elif tag == "select":
                     try:
                         fit.parse_options({key: "__not_a_choice__"})
                     except Exception as error:  # noqa: BLE001 - the message names the choices
@@ -1177,8 +1188,39 @@ class ServerCopyTests(unittest.TestCase):
         literal = _js_constant(self.main, "PRESETS")
         found = {name: [float(value) for value in values.split(",")] for name, values in re.findall(r"(\w+): \[([^\]]+)\]", literal)}
         self.assertEqual(found, expected)
-        self.assertEqual(sorted(value for value in self._options("cadPreset") if value != "custom"), sorted(select.PRESETS))
+        # Every preset is a choice of the page's but stretch, which Shrink to fit sends (2026-11-17).
+        self.assertEqual(sorted(value for value in self._options("cadPreset") if value != "custom"), sorted(set(select.PRESETS) - {"stretch"}))
         self.assertIn("custom", self._options("cadPreset"))
+        main = self.main
+        self.assertIn('preset: "stretch", stretch_budget: curvedLimit()', main)
+        self.assertIn('if (preset === "surface") return {op: "grow", mode, seed_facet: seed, preset, stretch_budget: curvedLimit()};', main)
+
+    def test_the_strain_limit_is_one_percent_on_curved_faces(self) -> None:
+        # The user's choice of 2026-11-17 ("1% default on curves"): on a doubly curved selection (its stretch on the part
+        # beyond the curved chart's 0.05 % gate, fit.AXIS_MIN_STRETCH) the select's value, 1 % unless Strict 0.3 % is
+        # chosen; on any other face data-flat's 0.3 %, so the Library's requests and every flat face's stay as they were.
+        from surface import fit, solve
+
+        self.assertEqual(float(_js_constant(self.main, "CURVED_FROM")), fit.AXIS_MIN_STRETCH)
+        self.assertEqual(fit.AXIS_MIN_STRETCH, solve.BOUNDED_FROM)
+        self.assertEqual(self._options("cadStrainLimit"), ["0.01", "0.003"])
+        control = next(attributes for _, attributes, _ in self.page.elements if attributes.get("id") == "cadStrainLimit")
+        self.assertEqual((control.get("data-option"), control.get("data-flat")), ("strain_limit", "0.003"))
+        self.assertIn("data-number", control)
+        self.assertIn("const strainLimit = () => doublyCurved() ? curvedLimit() : flatLimit();", self.main)
+        self.assertIn("cad.selection.stretch?.smooth_max > CURVED_FROM", self.main)
+        self.assertIn('control.hasAttribute("data-flat") ? strainLimit()', self.main)
+        # The 1 % limit's note while it is in effect only.
+        self.assertIn('$("cadTierNote").hidden = !(doublyCurved() && curvedLimit() > flatLimit());', self.main)
+        # A Library sensor's 0.3 % (data-flat, every Library request's but the Unitree Dex3-1's, whose dome sends 1 %)
+        # leaves the select as it is: writing it chose Strict 0.3 % for the user's own curved clicks on the part (the
+        # review of 2026-11-17's follow-up, finding 5).
+        library = re.search(r"function applyLibraryOptions\(options\) \{(.*?)\n\}", self.main, re.S).group(1)
+        self.assertIn('if (control.hasAttribute("data-flat") && Number(options[key]) === Number(control.dataset.flat)) continue;', library)
+        # The choice changed selects a doubly curved selection again from its middle (the select reply's centre_facet).
+        tier = re.search(r"function onTierChange\(\) \{(.*?)\n\}", self.main, re.S).group(1)
+        self.assertIn("doublyCurved() ? cad.selection.stretch.centre_facet : null", tier)
+        self.assertIn("seed_facet: middle", tier)
 
     def test_candidate_lists_are_the_inspect_candidates(self) -> None:
         from surface import api
@@ -1413,6 +1455,74 @@ class AccessibilityTests(unittest.TestCase):
         state = [(tag, attributes) for tag, attributes, _ in self.page.elements if attributes.get("id") == "cadState"][0]
         self.assertEqual(state[0], "pre")
         self.assertIn("hidden", state[1])
+
+
+class ToolMenuTests(unittest.TestCase):
+    """The 3D view's tool menu tells the order of work (the user's request of 2026-11-17: "select a surface标注一个 1,
+    select a base 标注一个 2； edit board 显示optional"): Select a surface numbered 1 and Base edge 2, Edit border marked
+    Optional, all three for the eye alone (aria-hidden: the controls' names as before); main.js renames Edit border in
+    its first span, so the word stays, and theme.css hides the word while the border is edited.
+    tools/browser/cad_checks.py part_tool_menu sees them on the page."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        tree = _Tree()
+        tree.feed((WEB / "gen.html").read_text(encoding="utf-8"))
+        cls.menu = _one(tree.root, lambda node: node["attrs"].get("id") == "cadViewTools")
+
+    @staticmethod
+    def named(node) -> str:
+        # Its text as a screen reader takes it: less its aria-hidden descendants'.
+        text = node["text"]
+        for child in _nodes(node):
+            if child["attrs"].get("aria-hidden") == "true":
+                text = text.replace(child["text"], "", 1)
+        return " ".join(text.split())
+
+    @staticmethod
+    def shape(node) -> tuple:
+        return node["tag"], sorted(_classes(node)), node["attrs"].get("aria-hidden"), node["text"]
+
+    def test_the_click_tools_are_numbered_1_and_2(self) -> None:
+        rows = []
+        for label in [node for node in _nodes(self.menu) if node["tag"] == "label"]:
+            radio, face = _elements(label)
+            rows.append((radio["attrs"].get("value"), face["tag"], [self.shape(child) for child in _elements(face)],
+                         face["text"].startswith(_elements(face)[0]["text"]), self.named(face)))
+        # Each label's face: its number first, then its text, which names the radio as before.
+        self.assertEqual(rows, [("grow", "span", [("span", ["cad-tool-no"], "true", "1")], True, "Select a surface"),
+                                ("edge", "span", [("span", ["cad-tool-no"], "true", "2")], True, "Base edge")])
+
+    def test_edit_border_is_marked_optional_and_the_rest_unchanged(self) -> None:
+        buttons = [node for node in _elements(self.menu) if node["tag"] == "button"]
+        self.assertEqual([(node["attrs"]["id"], self.named(node)) for node in buttons],
+                         [("cadEditBorder", "Edit border"), ("cadUndo", "Undo"), ("cadClear", "Clear"), ("cadRemove", "Remove model")])
+        self.assertEqual([self.shape(child) for child in _elements(buttons[0])],
+                         [("span", ["cad-edit-border-name"], None, "Edit border"), ("span", ["cad-tool-optional"], "true", "Optional")])
+        # Undo, Clear and Remove model their text alone; nothing else of the menu hidden from a screen reader.
+        self.assertEqual([_elements(node) for node in buttons[1:]], [[], [], []])
+        self.assertEqual([node["text"] for node in _nodes(self.menu) if node["attrs"].get("aria-hidden") == "true"], ["1", "2", "Optional"])
+
+    def test_main_js_renames_edit_border_in_its_first_span(self) -> None:
+        main = (CAD / "main.js").read_text(encoding="utf-8")
+        bar = main[main.index("function renderBorderBar("):]
+        bar = bar[:bar.index("\n}\n")]
+        self.assertIn('button.querySelector(".cad-edit-border-name").textContent = cad.editing ? "Done editing" : "Edit border";', bar)
+        # The button's own text is never set (it would drop the word), here or anywhere by its id.
+        self.assertNotRegex(bar, r"button\.(textContent|innerText|innerHTML)\s*=")
+        self.assertNotRegex(main, r'\$\("cadEditBorder"\)\.(textContent|innerText|innerHTML)\s*=')
+
+    def test_the_word_goes_while_the_border_is_edited(self) -> None:
+        theme = _strip_css_comments((WEB / "theme.css").read_text(encoding="utf-8"))
+        self.assertIn('.cad-edit-border[aria-pressed="true"] .cad-tool-optional { display:none; }', theme)
+        # The chosen tool's number the blue circle, a ring again while the border is edited (as its row).
+        self.assertIn(".cad-tools input:checked + span .cad-tool-no { border-color:var(--accent); background:var(--accent); color:#fff; }", theme)
+        self.assertIn('.cad-view-tools:has(.cad-edit-border[aria-pressed="true"]) .cad-tools input:checked + span .cad-tool-no '
+                      '{ border-color:var(--separator); background:var(--surface); color:var(--text-2); }', theme)
+
+
+def _strip_css_comments(text: str) -> str:
+    return re.sub(r"/\*.*?\*/", "", text, flags=re.S)
 
 
 class LibraryViewTests(unittest.TestCase):

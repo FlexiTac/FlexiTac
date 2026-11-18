@@ -1,6 +1,6 @@
 """The Library's pictures and each sensor's art: every sensor of web/library/entries.json shot from the Library's own 3D
 view (the user's requests of 2026-11-05: "卡片上的图为手指+传感器叠加", the cards show the finger with the sensor on it;
-the seven grippers that are not UMI fingers shown whole, a sensor on both fingers, the jaws open; and "lib 点进去具体的每个
+the grippers that are not UMI fingers shown whole, a sensor on both fingers, the jaws open; and "lib 点进去具体的每个
 夹爪的时候, 那个图也做成可以三维旋转的", each sensor's page a 3D view to turn, its picture that view at its homes) into
 web/library/shots/ with shots/manifest.json, and the generator's art of each sensor's two boards, which that view draws,
 into web/library/art/<id>.json.gz (docs/LIBRARY_VIEW.md).  tools/library_write.py writes each variant's "image" and
@@ -43,7 +43,12 @@ request at a time):
    method 6): <id>.exploded.webp and <id>.assembled.webp at 1280 x 800, <id>.exploded.card.webp at 640 x 400 for the
    grid's cards (the Exploded drawing downscaled, Lanczos on premultiplied alpha: finer than the view drawn at 640 x 400).
    The visitor's view moves its drawing to the middle by the same whole pixels (a lens shift), so the page's live view
-   stands where its picture stood;
+   stands where its picture stood.  A part whose cards are zoomed on the tip (library_write.CARD_FRAMES: the UMI finger
+   and its tips, since the user's decision of 2026-11-16: "你可以show gripper的angle但是zoom in了，就是方向还是那个方向，
+   但是用zoom in +exploded,那就可以tell了") is read once more at the Exploded home, its pane "zoom" times larger (the same
+   camera, direction, up, explode and lens, drawn with that many more pixels), and its card is the window of that
+   drawing on the tip (card_window()), downscaled as every card; its record keeps the window ("card_frame").  Its
+   Exploded and Assembled pictures are the whole drawing as before;
 5. for a gripper, the stage's numbers (#libViewState stage.numbers, docs/LIBRARY_VIEW.md) checked against the rules of
    scenes/scenes.json ("checks": rule_breaches()); a sensor whose numbers break one is refused.
 manifest.json (library_write.SHOTS_FORMAT) holds for each sensor each file's path (relative to web/library/, as the
@@ -52,14 +57,16 @@ fits'), bytes and SHA-256, the entry's fit_sha256 and build_id it was shot from,
 (view_sha256: library_write.VIEW_SOURCES), both as the server served them, the look, the drawings' margins in px [left,
 top, right, bottom], the art (its path, bytes, SHA-256, the SHA-256 of its document's canonical JSON, json_sha256, and
 its build id) and, for a gripper, its stage (the scene's path, library_write.scene_sha256 of the scene and the rules,
-and the numbers); for a part without a scene that the rules give a look (their part_looks), part_look_sha256.  A sensor shot from another fit, or with art of another build, is the wrong sensor pictured, which
+and the numbers); for a part without a scene that the rules give a look (their part_looks), part_look_sha256; for a part
+whose cards are zoomed on the tip, its card's frame (card_frame: zoom, top, window_px, margins_px).  A sensor shot from
+another fit, or with art of another build, is the wrong sensor pictured, which
 library_write --check, the site build and tests/test_library.py refuse; one shot from older figure or view sources is
 only a warning there (the public CI runs no browser): re-shoot it here.
 
 The same code gives the same bytes (SwiftShader draws the same pixels, Pillow's libwebp writes them the same way, the
 stage's measures are a software raster): --check shoots again and compares every picture with the manifest's, the art's
 document by json_sha256 (never its gzip bytes, which another zlib may write otherwise) with the manifest's and with the
-art file's, and each gripper's stage (its scene hash and numbers), writing nothing.  The art goes into web/library/art/,
+art file's, each gripper's stage (its scene hash and numbers) and each card's frame, writing nothing.  The art goes into web/library/art/,
 or with --out into an art/ folder beside that folder (the manifest's paths stay relative to their parent: shots/...,
 art/...).  A full run removes the pictures and the art of sensors no longer listed; --only keeps the others' records.
 --check-generator [ID,...] is the proof that Gen by Surface is as it was and that the Library's view of a part without a
@@ -74,7 +81,8 @@ Gen by Surface's figure byte for byte; Gen by Surface keeps its grey part).  For
 3. the Library's view as the rules are gives the folder's three pictures, byte for byte (for a part the rules give no
    look and no home these are the figure's own files, the equality of before; since 2026-11-16 the rules' part_homes
    draw the UMI finger and its tips at the grippers' homes, with their explode, so its pictures are no longer at the
-   figure's angle, tilt 57 / spin -20, which Gen by Surface keeps);
+   figure's angle, tilt 57 / spin -20, which Gen by Surface keeps; and its card is zoomed on the tip as the shoot takes
+   it, library_write.CARD_FRAMES);
 4. for a part with a look, at the figure's homes (the rules' home served away: the figure is the witness only there),
    the view shot once more with that look in another colour (every channel half the range off):
    the drawing's alpha is the figure's at every pixel (the same outline), and every drawn pixel that the part's colour
@@ -104,7 +112,8 @@ host, 2026-11-05, with the scenes of the design: 126 files, 3.70 MB; the first s
 entries.json): its own page, ?probe=shoot#<its id> (library.html?probe=shoot#<its id> until 2026-11-16), with web/library/showcase.json served by this tool (the
 pad's placed record fresh, with the showcase's scene), the view's pane 640 x 800 CSS px (4:5: a 1280 x 1600 buffer, so
 the upright gripper fills the picture), each mode read, checked whole and centred as a sensor's; written to
-web/library/showcase/ (<id>.exploded.webp, <id>.assembled.webp, and <id>.card.webp, the Assembled drawing at 800 x 1000)
+web/library/showcase/ (<id>.exploded.webp, <id>.assembled.webp, and <id>.card.webp, the Exploded drawing at 800 x 1000,
+as every gripper's card, since the user's decision of 2026-11-16, "Switch to exploded"; the Assembled one before)
 with showcase.json's "placed", "image" (each file's bytes and SHA-256) and "shot" (the hashes of the scene with the
 rules, the art, the placed record, the figure's and the view's sources, the look, the margins and the stage's numbers);
 --check shoots again and compares the three keys and every file's bytes, writing nothing.  tools/library_write.py
@@ -349,20 +358,26 @@ def art_record(identifier: str, data: bytes, document: dict) -> dict:
 
 # -- 2. the pictures, from the Library's 3D view ---------------------------------------------------------------------
 
-def rule_breaches(numbers: dict, checks: dict, see_through, explode_stacks=("sensor",)) -> list:
+def rule_breaches(numbers: dict, checks: dict, see_through, explode_stacks=("sensor",), extras=0) -> list:
     """The rules of scenes/scenes.json's "checks" that a gripper's stage numbers break, one line each (none: []):
     library_write.stage_problems(), the one copy of the rules (docs/LIBRARY_VIEW.md; the review of 2026-11-06: a copy of
     its own here had taken a jaw gap of 0 or below and an extra number, which the writer's --check and the site's gate
-    then refused), so the shots tool refuses exactly the sensors whose record the writer would refuse."""
+    then refused), so the shots tool refuses exactly the sensors whose record the writer would refuse (``extras``: a
+    hand's further fingers, its scene's extra_fingers, 2026-11-17)."""
 
-    return library_write.stage_problems(numbers, checks, see_through or (), explode_stacks)
+    return library_write.stage_problems(numbers, checks, see_through or (), explode_stacks, extras)
 
 
 def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> dict:
-    """{mode: the Library view's PNG at its home, "stage": the stage's numbers or None} of one sensor (a new context,
-    closed after).  ``served``: {"entries": entries.json's text with every view, "art": this sensor's art file (None:
-    the server's own), "gripper": whether its part has a scene, "scenes": scenes/scenes.json's text in place of the
-    server's (--check-generator: the rules with another look for the part, or none)}."""
+    """{mode: the Library view's PNG at its home, "stage": the stage's numbers or None, and with a card frame "card":
+    {"png", "frame"}} of one sensor (a new context, closed after).  ``served``: {"entries": entries.json's text with every
+    view, "art": this sensor's art file (None: the server's own), "gripper": whether its part has a scene, "scenes":
+    scenes/scenes.json's text in place of the server's (--check-generator: the rules with another look for the part, or
+    none), "card": the part's card frame (library_write.card_frame(); None or absent: the card the whole Exploded
+    drawing)}.  With a card frame the Exploded home is read once more, last, its pane "zoom" times PANE_CSS: the same
+    camera, framed as the home frames it at the same aspect, drawn with that many more pixels (card_window() takes the
+    card from it); the stage's report there (the homes' directions, the camera's up and explode) must be the Exploded
+    read's, word for word."""
 
     context = browser.new_context(viewport=VIEWPORT, device_scale_factor=DPR, color_scheme="light")
     page = context.new_page()
@@ -392,7 +407,7 @@ def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> di
         if size != list(PANE_CSS) or not poll(page, BUFFER, list(library_write.SHOT_SIZE), 30):
             raise ShotError(f"the view's pane is {size} CSS px, its buffer not {library_write.SHOT_SIZE}")
         page.evaluate(TWO_FRAMES)
-        shots, state = {}, {}
+        shots, state, homes = {}, {}, {}
         for mode in MODES:
             read = page.evaluate(SHOT, mode)
             if "error" in read:
@@ -403,6 +418,30 @@ def shoot(browser, url: str, identifier: str, variant: dict, served: dict) -> di
                     list(offset[:2])) != ("drawn", build, mode, mode, False, list(library_write.SHOT_SIZE), [0, 0]):
                 raise ShotError(f"{mode}: not at its home as drawn, unmoved: {dict(state, stage=None)} buffer {read['buffer']}")
             shots[mode] = {"png": base64.b64decode(read["url"].split(",", 1)[1])}
+            homes[mode] = state.get("stage")
+        frame = served.get("card")
+        if frame is not None:
+            # The card zoomed on the tip (library_write.CARD_FRAMES): the Exploded home again in a pane zoom times larger.
+            pane = [round(PANE_CSS[0] * frame["zoom"]), round(PANE_CSS[1] * frame["zoom"])]
+            buffer = [pane[0] * DPR, pane[1] * DPR]
+            size = page.evaluate(PANE, pane)
+            if size != pane or not poll(page, BUFFER, buffer, 30):
+                raise ShotError(f"the view's pane for the card is {size} CSS px, its buffer not {buffer}")
+            page.evaluate(TWO_FRAMES)
+            read = page.evaluate(SHOT, "exploded")
+            if "error" in read:
+                raise ShotError(f"card: {read['error']}")
+            state = json.loads(read["state"])
+            offset = state.get("offset") or [0, 0]
+            if (state.get("state"), state.get("build_id"), state.get("mode"), state.get("drawn_mode"), state.get("moved"), read["buffer"],
+                    list(offset[:2])) != ("drawn", build, "exploded", "exploded", False, buffer, [0, 0]):
+                raise ShotError(f"card: not at the Exploded home as drawn, unmoved: {dict(state, stage=None)} buffer {read['buffer']}")
+            # The Exploded home's direction exactly (the review of 2026-11-16: a pixel likeness let a degree through): the
+            # stage's report at this read (its homes' directions, the camera's up, the rules' camera and the explode) the
+            # Exploded read's, word for word.
+            if not homes["exploded"] or not homes["exploded"].get("home") or state.get("stage") != homes["exploded"]:
+                raise ShotError(f"card: not at the Exploded home's direction, up and explode: {state.get('stage')!r}, the Exploded read's {homes['exploded']!r}")
+            shots["card"] = {"png": base64.b64decode(read["url"].split(",", 1)[1]), "frame": frame}
         if bool(state.get("gripper")) != served["gripper"]:
             raise ShotError(f"the view {'drew no' if served['gripper'] else 'drew a'} gripper's scene (its part {variant['part']})")
         stage = state.get("stage") or None
@@ -491,7 +530,7 @@ def showcase_shoot(browser, url: str, document: dict) -> dict:
         if pane != list(SHOWCASE_PANE_CSS) or not poll(page, BUFFER, size, 60):
             raise ShotError(f"the view's pane is {pane} CSS px, its buffer not {size}")
         page.evaluate(TWO_FRAMES)
-        shots, state = {}, {}
+        shots, state, homes = {}, {}, {}
         for mode in MODES:
             read = page.evaluate(SHOT, mode)
             if "error" in read:
@@ -516,7 +555,8 @@ def showcase_shoot(browser, url: str, document: dict) -> dict:
 
 def showcase_encode(shots: dict) -> tuple:
     """({kind: WebP bytes}, {mode: margins px}) of the showcase's drawings, each checked whole and centred as a sensor's
-    (encode()); the card the Assembled drawing downscaled (library_write.SHOWCASE_SHOTS)."""
+    (encode()); the card the Exploded drawing downscaled (library_write.SHOWCASE_SHOTS; the Assembled one until
+    2026-11-16)."""
 
     from PIL import Image
 
@@ -622,12 +662,82 @@ def showcase_run(url: str, port: int, check: bool, out: Path) -> int:
     return 0
 
 
-def encode(shots: dict) -> tuple:
-    """({kind: WebP bytes}, {mode: margins px}) of one sensor's drawings, each checked whole and centred."""
+def card_top(box: tuple, frame: dict) -> int:
+    """The top edge (px) of a card's window on the tip in its drawing zoomed (card_window()): ``frame["top"]`` of the
+    window's height (SHOT_SIZE's) above the drawing's highest pixel (``box``, its alpha's bounding box: the finger's
+    tip); below 0, the tip lies too near the drawing's top edge."""
+
+    return box[1] - round(frame["top"] * library_write.SHOT_SIZE[1])
+
+
+def card_left(band: tuple, size: tuple) -> int:
+    """The left edge (px) of a card's window on the tip in its drawing zoomed (card_window()): its middle across at the
+    middle of the pixels drawn in its rows (``band``, their bounding box; an odd difference left of it), within the
+    drawing's ``size``."""
+
+    return min(max((band[0] + band[2] - library_write.SHOT_SIZE[0]) // 2, 0), size[0] - library_write.SHOT_SIZE[0])
+
+
+def card_base(alpha) -> int:
+    """The rows between the finger's base and the bottom edge of a card's window (card_window(); ``alpha``, the window's
+    alpha): the finger the rightmost run of drawn columns (the UMI finger stands right of its sheets, exploded to its
+    left, clear of them), its base the lowest pixel drawn in it; 0 where it reaches the edge (or a sheet's tail runs
+    into its columns, which then reach it)."""
+
+    columns, _ = alpha.getprojection()
+    right = max(x for x, drawn in enumerate(columns) if drawn) + 1
+    left = right - 1
+    while left > 0 and columns[left - 1]:
+        left -= 1
+    return alpha.size[1] - alpha.crop((left, 0, right, alpha.size[1])).getbbox()[3]
+
+
+def card_window(png: bytes, frame: dict) -> tuple:
+    """(the card's picture at CARD_SIZE, its "card_frame" record) of a sensor whose cards are zoomed on the tip
+    (library_write.CARD_FRAMES; shoot()'s "card": its Exploded home drawn ``frame["zoom"]`` times larger): the window of
+    SHOT_SIZE of that drawing whose top edge lies ``frame["top"]`` of its height above the drawing's highest pixel and
+    whose middle across is the middle of the pixels drawn in its rows (an odd difference left of it), downscaled as
+    every card (Lanczos on premultiplied alpha).  The drawing runs off the window's bottom edge (the tails' ends), never
+    off the larger drawing's edges (it is the home, framed whole), the window's top or its sides, and the finger ends
+    the top margin above its bottom edge at least (card_base(); library_write.card_frame_problems(): each side's margin
+    CARD_SIDE_MIN of its width at least)."""
 
     from PIL import Image
 
-    files, margins = {}, {}
+    image = Image.open(io.BytesIO(png))
+    image.load()
+    size = (round(library_write.SHOT_SIZE[0] * frame["zoom"]), round(library_write.SHOT_SIZE[1] * frame["zoom"]))
+    if (image.mode, image.size) != ("RGBA", size):
+        raise ShotError(f"card: the canvas read as {image.mode} {image.size}, not RGBA {size}")
+    alpha = image.getchannel("A")
+    box = alpha.getbbox()
+    if box is None:
+        raise ShotError("card: nothing drawn")
+    if min(box[0], box[1], size[0] - box[2], size[1] - box[3]) == 0:
+        raise ShotError(f"card: the drawing {frame['zoom']} times larger reaches its frame's edge ({box}): the home is not the whole drawing")
+    width, height = library_write.SHOT_SIZE
+    top = card_top(box, frame)
+    if top < 0:
+        raise ShotError(f"card: the tip lies {box[1]} px below the top of the drawing, under the window's {round(frame['top'] * height)} px")
+    left = card_left(alpha.crop((0, top, size[0], min(size[1], top + height))).getbbox(), size)
+    window = image.crop((left, top, left + width, top + height))
+    drawn = window.getchannel("A").getbbox()
+    record = {"zoom": frame["zoom"], "top": frame["top"], "window_px": [left, top],
+              "margins_px": [drawn[0], drawn[1], width - drawn[2], height - drawn[3]], "base_px": card_base(window.getchannel("A"))}
+    problems = library_write.card_frame_problems(record, frame)
+    if problems:
+        raise ShotError(f"card: {'; '.join(problems)}")
+    return window.resize(library_write.CARD_SIZE, Image.LANCZOS), record
+
+
+def encode(shots: dict) -> tuple:
+    """({kind: WebP bytes}, {mode: margins px}, the card's "card_frame" record or None) of one sensor's drawings, each
+    checked whole and centred; the card the Exploded drawing downscaled, or with shoot()'s "card" (a part whose cards
+    are zoomed on the tip: library_write.CARD_FRAMES) its window (card_window())."""
+
+    from PIL import Image
+
+    files, margins, framed = {}, {}, None
     for mode in MODES:
         image = Image.open(io.BytesIO(shots[mode]["png"]))
         image.load()
@@ -642,12 +752,15 @@ def encode(shots: dict) -> tuple:
             raise ShotError(f"{mode}: the drawing reaches the frame's edge (margins {drawn} px): the part is cut")
         image, margins[mode] = centred(image, box, drawn)
         files[mode] = webp(image)
-        if mode == "exploded":
+        if mode == "exploded" and "card" not in shots:
             files["card"] = webp(image.resize(library_write.CARD_SIZE, Image.LANCZOS))
+    if "card" in shots:
+        card, framed = card_window(shots["card"]["png"], shots["card"]["frame"])
+        files["card"] = webp(card)
     for kind, (_, size) in library_write.SHOT_KINDS.items():
         if library_write.webp_info(files[kind]) != (size[0], size[1], True):
             raise ShotError(f"{kind}: Pillow wrote {library_write.webp_info(files[kind])}, not a {size} WebP with alpha")
-    return files, margins
+    return files, margins, framed
 
 
 def centring(margins: list) -> tuple:
@@ -688,10 +801,11 @@ def webp(image) -> bytes:
 
 
 def record(identifier: str, variant: dict, files: dict, margins: dict, figure: str, look: str, *, art=None, view=None,
-           stage=None, part_look=None) -> dict:
+           stage=None, part_look=None, card_frame=None) -> dict:
     """The manifest's record of one sensor's pictures; shot from the Library's 3D view, with ``view`` (view_sha256 of
     its modules), ``art`` (art_record()) and, for a gripper, ``stage`` ({scene, scene_sha256, numbers}); for a part
-    without a scene that scenes.json's rules give a look, ``part_look`` (library_write.part_look_sha256())."""
+    without a scene that scenes.json's rules give a look, ``part_look`` (library_write.part_look_sha256()); for a part
+    whose cards are zoomed on the tip (library_write.CARD_FRAMES), ``card_frame`` (card_window()'s record)."""
 
     paths = library_write.shot_files(identifier)
     entry = {"fit_sha256": variant["fit_sha256"], "build_id": variant["build_id"], "figure_sha256": figure, "look": look,
@@ -706,6 +820,8 @@ def record(identifier: str, variant: dict, files: dict, margins: dict, figure: s
         entry["stage"] = stage
     if part_look is not None:
         entry["part_look_sha256"] = part_look
+    if card_frame is not None:
+        entry["card_frame"] = card_frame
     return entry
 
 
@@ -1022,14 +1138,16 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
         variant = entries["variants"][identifier]
         given = library_write.part_look(index, parts, variant["part"])
 
-        def viewed(look, identifier=identifier, variant=variant):
+        def viewed(look, card=None, identifier=identifier, variant=variant):
             return shoot(browser, url, identifier, variant, {"entries": entries_text, "art": None, "gripper": False,
-                                                              "scenes": served_scenes(index, variant["part"], look)})
+                                                              "scenes": served_scenes(index, variant["part"], look), "card": card})
 
         try:
             figure = twice(identifier, lambda: generator_shoot(browser, url, identifier, variant))
             bare = twice(identifier, lambda: viewed(None))
-            looked = twice(identifier, lambda: viewed(given)) if given else bare
+            # As the rules are, with the card zoomed on the tip where the part's cards are (library_write.CARD_FRAMES).
+            framing = library_write.card_frame(parts, variant["part"])
+            looked = twice(identifier, lambda: viewed(given, framing)) if given else bare
             # At the figure's homes (the rules' home served away, where they give one; the pictures are at the
             # grippers' since 2026-11-16): the look with its pad, the look alone (the pad's tint served away, where the
             # rules give one) and in its other colour.
@@ -1038,8 +1156,8 @@ def check_generator(browser, url: str, out: Path, entries: dict, chosen: list, i
             alone = twice(identifier, lambda: viewed(without(given, "pad", "home"))) if given and given.get("pad") is not None else dressed
             other = (twice(identifier, lambda: viewed(dict(without(given, "pad", "home"), look=other_look(given["look"]))))
                      if given and given.get("look") is not None else None)
-            files, _ = encode(figure)
-            pictures, _ = encode(looked)
+            files, _, _ = encode(figure)
+            pictures, _, _ = encode(looked)
             unlike = []
             # 1. Gen by Surface's figure is its pin.
             pinned = (pin.get("shots") or {}).get(identifier) or {}
@@ -1113,7 +1231,7 @@ def pin_generator(browser, url: str, entries: dict, chosen: list, pin: dict, fig
     for number, identifier in enumerate(chosen, 1):
         variant = entries["variants"][identifier]
         try:
-            files, _ = encode(twice(identifier, lambda: generator_shoot(browser, url, identifier, variant)))
+            files, _, _ = encode(twice(identifier, lambda: generator_shoot(browser, url, identifier, variant)))
         except (ShotError, PlaywrightError) as error:
             failed.append(identifier)
             print(f"FAIL {identifier}: {error}", flush=True)
@@ -1225,7 +1343,11 @@ def main(argv=None) -> int:
         except OSError as error:
             print(f"library_shots: the server does not serve {relative}: {error}", file=sys.stderr)
             return 2
-        scene_files[part] = {"path": relative, "bytes": data, "see_through": json.loads(data.decode("utf-8")).get("see_through")}
+        document = json.loads(data.decode("utf-8"))
+        # (A scene's own "checks" override, 2026-11-17: library_write.scene_checks() holds its stage to it; a hand's further
+        # fingers, whose stacks' extra_seen the rules hold.)
+        scene_files[part] = {"path": relative, "bytes": data, "see_through": document.get("see_through"), "checks": document.get("checks"),
+                             "extras": len(document["extra_fingers"]) if isinstance(document.get("extra_fingers"), list) else 0}
     entries_text = viewed_entries(entries, scenes.get("scenes") or {})
     path = out / "manifest.json"
     known = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {"format": library_write.SHOTS_FORMAT, "shots": {}}
@@ -1257,12 +1379,14 @@ def main(argv=None) -> int:
                         art = library_write.art_bytes(document)
                         art_s = time.monotonic() - art_begun
                     shot_begun = time.monotonic()
-                    drawn = shoot(browser, url, identifier, variant, {"entries": entries_text, "art": art, "gripper": scene is not None})
+                    drawn = shoot(browser, url, identifier, variant, {"entries": entries_text, "art": art, "gripper": scene is not None,
+                                                                      "card": None if scene is not None else library_write.card_frame(parts, variant["part"])})
                     if scene is not None:
-                        broken = rule_breaches(drawn["stage"], rules.get("checks") or {}, scene["see_through"], rules.get("explode_stacks"))
+                        broken = rule_breaches(drawn["stage"], library_write.scene_checks(rules, scene.get("checks")), scene["see_through"],
+                                               rules.get("explode_stacks"), scene["extras"])
                         if broken:
                             raise ShotError(f"the stage breaks scenes.json's rules: {'; '.join(broken)}")
-                    files, margins = encode(drawn)
+                    files, margins, framed = encode(drawn)
                     shot_s = time.monotonic() - shot_begun
                     break
                 except (ShotError, PlaywrightError) as error:
@@ -1277,7 +1401,8 @@ def main(argv=None) -> int:
             stage = None if scene is None else {"scene": scene["path"], "scene_sha256": library_write.scene_sha256(scene["bytes"], rules),
                                                 "numbers": drawn["stage"]}
             fresh = record(identifier, variant, files, margins, figure, document["look"], art=art_record(identifier, art, document),
-                           view=view, stage=stage, part_look=library_write.part_look_sha256(library_write.part_look(scenes, parts, variant["part"])))
+                           view=view, stage=stage, part_look=library_write.part_look_sha256(library_write.part_look(scenes, parts, variant["part"])),
+                           card_frame=framed)
             timings.append((identifier, time.monotonic() - begun, art_s, shot_s))
             sizes = " ".join(f"{kind} {len(data) / 1024:.1f} KB" for kind, data in files.items()) + f", art {len(art) / 1024:.1f} KB"
             took = f"{time.monotonic() - begun:.1f} s: art {art_s:.2f} s, view {shot_s:.1f} s"
@@ -1292,7 +1417,8 @@ def main(argv=None) -> int:
                             == {key: fresh["art"][key] for key in ("path", "json_sha256", "build_id")}
                             and art_file.is_file() and json_sha256(library_write.read_art(art_file.read_bytes())) == fresh["art"]["json_sha256"])
                 same_stage = kept.get("stage") == fresh.get("stage") and kept.get("part_look_sha256") == fresh.get("part_look_sha256")
-                unlike = [name for name, same in (("pictures", same_files), ("art", same_art), ("stage", same_stage)) if not same]
+                same_frame = kept.get("card_frame") == fresh.get("card_frame")
+                unlike = [name for name, same in (("pictures", same_files), ("art", same_art), ("stage", same_stage), ("card frame", same_frame)) if not same]
                 if unlike:
                     differ.append(identifier)
                 print(f"{'DIFFERS' if unlike else 'same'} {identifier} ({number}/{len(chosen)}, {took}): {sizes}"
@@ -1308,8 +1434,8 @@ def main(argv=None) -> int:
             if not target.is_file() or target.read_bytes() != art:
                 target.write_bytes(art)
             shots[identifier] = fresh
-            print(f"shot {identifier} ({number}/{len(chosen)}, {took}): {sizes}, margins {margins['exploded']} / {margins['assembled']} px",
-                  flush=True)
+            print(f"shot {identifier} ({number}/{len(chosen)}, {took}): {sizes}, margins {margins['exploded']} / {margins['assembled']} px"
+                  + (f", the card zoomed {framed['zoom']} at {framed['window_px']}, its margins {framed['margins_px']} px" if framed else ""), flush=True)
         generator.context.close()
         if not args.check:
             if args.only is None:

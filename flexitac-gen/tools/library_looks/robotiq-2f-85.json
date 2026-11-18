@@ -1,0 +1,35 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "robotiq-2f-85",
+ "about": "drawn after Robotiq's studio photos of the 2F-85 (robotiq.com, the 2F-85 and 2F-140 product page: 2F_Adaptive_Grippers_White.png, the open grippers side by side; 2F-84 2F-140 montage.png, seen from below), 2026-11-16: the satin black anodised housing and coupling, the bead-blasted aluminium palm block between the fingers with its screws, the black anodised links of each finger's four-bar linkage (the inner link, spring_link.stl, and the outer one, coupler.stl), the aluminium driver inside them, the bright machined aluminium fingertip (follower.stl and the pad's plate, pad.stl) and the black silicone pad (the Library's part).  The pins' heads in the outer links' pivots and the cap and pin of the inner link's bore are the project's own drawing, plain cylinders (bodies/robotiq-2f-85/drawn-coupler-pins.stl, drawn-spring-link-pins.stl and drawn-spring-link-caps.stl), where the model leaves the holes open; the inner link's far pins are the model's own.  Not modelled: the ROBOTIQ lettering, the coupling's status light, the screws of the links' faces.",
+ "smooth_deg": 35,
+ "part_look": "rubber-black",
+ "looks": {
+  "housing-black": {"base": "anodized-black", "metalness": 0.5, "roughness": 0.5, "env_intensity": 2.8, "evidence": "the side-by-side studio photo: the housing and the coupling under it are one satin black, #202020 to #242424 on the faces turned from the light and #585858 where a face takes the broad soft highlight (luminance 32 to 88), softer than the links' anodised sheen.  With the base anodised black the housing and coupling below the palm read 16 at the 2nd percentile and 44 at the median (the Exploded home, 2 mm), darker than the film; less metal and more of the room: 25 and 55 (the 98th percentile 119)"},
+  "tip-aluminium": {"base": "anodized-natural", "color": "#cfd1d4", "roughness": 0.3, "evidence": "the side-by-side studio photo and the montage: each fingertip, the L-shaped part the pad is screwed to, is bright machined aluminium, #b8b9ba to #d1d2d3 on its faces with sharp dark bands of reflection (#515151): smoother and lighter than the bead-blasted palm block"}
+ },
+ "bodies": {
+  "bodies/robotiq-2f-85/base_mount.stl": {"sha256": "8fd8796a29801361d2b418d71e60207b545c1c945e0a24e87227f97fd520a522", "look": "housing-black"},
+  "bodies/robotiq-2f-85/base.stl": {"sha256": "7e11b11cf50048f258c770353188071108684b7da746de0688473c5cfd6bd095", "facets_sha256": "f84d4847593d0b89fe9dc9a262089ccb864c40e01819fd02fa0256f2838a8b54", "weld_mm": 0.01, "components": [
+   {"name": "base-palm", "look": "anodized-natural", "pick": [{"component": {"box": [[-10.0, -15.5, 86.0], [10.0, 15.5, 90.0]], "triangles": 438}}]},
+   {"name": "base-screws", "look": "steel-polished", "pick": [{"components_inside": [[-9.0, -14.5, 77.9], [9.0, 14.5, 90.1]]}]},
+   {"name": "base-housing", "look": "housing-black", "pick": "rest"}
+  ]},
+  "bodies/robotiq-2f-85/driver.stl": {"sha256": "612d798e7d0425e4ba9e0b97aeb4f9cf586a30da277778aebf8b319617dcfba8", "look": "anodized-natural"},
+  "bodies/robotiq-2f-85/coupler.stl": {"sha256": "e1c20b6ff259a4c828c0d105a3826055c93820349d592eee5a420bfaa0479836", "facets_sha256": "9f49c062badc0c30a6246f1a54bcf0d78c2765a2669ceaf211f2b36767f711d4", "weld_mm": 0.01, "components": [
+   {"name": "coupler-link", "look": "anodized-black", "pick": "rest"},
+   {"name": "coupler-pins", "look": "steel-polished", "draw": [{"cylinder": {"from": [12.7, 0.0, 0.0], "to": [13.55, 0.0, 0.0], "radius": 2.45, "segments": 16}}, {"cylinder": {"from": [-12.7, 0.0, 0.0], "to": [-13.55, 0.0, 0.0], "radius": 2.45, "segments": 16}}, {"cylinder": {"from": [12.7, 6.1, 47.1], "to": [13.55, 6.1, 47.1], "radius": 2.45, "segments": 16}}, {"cylinder": {"from": [-12.7, 6.1, 47.1], "to": [-13.55, 6.1, 47.1], "radius": 2.45, "segments": 16}}]}
+  ]},
+  "bodies/robotiq-2f-85/spring_link.stl": {"sha256": "4f322b0d8b73a24909ba20e0e7f275636b8b19716bf94e5449afed2653e7b591", "facets_sha256": "f717031ae3bed06885c4e1660c28eb803b5306dbdba542ba28488a023d891971", "weld_mm": 0.01, "components": [
+   {"name": "spring-link-far-pins", "look": "steel-polished", "pick": [{"box": [[12.6, 34.5, 40.9], [13.6, 39.7, 46.1]]}, {"box": [[-13.6, 34.5, 40.9], [-12.6, 39.7, 46.1]]}]},
+   {"name": "spring-link", "look": "anodized-black", "pick": "rest"},
+   {"name": "spring-link-caps", "look": "anodized-black", "draw": [{"cylinder": {"from": [18.6, 0.0, 0.0], "to": [19.1, 0.0, 0.0], "radius": 5.95, "segments": 24}}, {"cylinder": {"from": [-18.6, 0.0, 0.0], "to": [-19.1, 0.0, 0.0], "radius": 5.95, "segments": 24}}]},
+   {"name": "spring-link-pins", "look": "steel-polished", "draw": [{"cylinder": {"from": [19.1, 0.0, 0.0], "to": [19.55, 0.0, 0.0], "radius": 2.6, "segments": 16}}, {"cylinder": {"from": [-19.1, 0.0, 0.0], "to": [-19.55, 0.0, 0.0], "radius": 2.6, "segments": 16}}]}
+  ]},
+  "bodies/robotiq-2f-85/follower.stl": {"sha256": "0cfd6585d5c1f9c068f7c8f25f2991e372356cc3b3acde50a3b0e79903b7d85e", "facets_sha256": "16e44854e00f50ee4d5099c292251835b957df5f3106b5aa9bc1f0cdc1e264c4", "weld_mm": 0.01, "components": [
+   {"name": "follower-pins", "look": "steel-polished", "pick": [{"component": {"box": [[-7.0, -3.58, -3.55], [7.0, 3.55, 3.57]], "triangles": 96}}, {"component": {"box": [[-7.0, -21.42, 3.03], [7.0, -14.38, 10.04]], "triangles": 96}}]},
+   {"name": "follower-tip", "look": "tip-aluminium", "pick": "rest"}
+  ]},
+  "bodies/robotiq-2f-85/pad.stl": {"sha256": "0a16b432f97e7fbfc160e6e18c356567c31d556ab428c31bf102964559398ce4", "look": "tip-aluminium"}
+ }
+}

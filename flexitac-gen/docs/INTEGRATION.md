@@ -203,8 +203,8 @@ It needs no request of its own.  Once the build is mapped (`cad.map` of the
 shown build: the same `build_id`, mesh and unit) it is built from what the
 page holds:
 
-- the fit's chart (`selection.facets` and `facets_uv` of the fit reply,
-  the strain-limited disk's when limited);
+- the fit's chart (`selection.facets` and `facets_uv` of the fit reply:
+  the selection's own since 2026-11-17, a strain-limited disk's before);
 - the STL's corners;
 - the mapped placement's field frame (`field_origin_base`, `field_origin_uv`,
   `field_x_uv`, `field_y_uv`);
@@ -235,7 +235,7 @@ the page's CSS nor its `<defs>`.  The SVGs are rasterised through `data:`
 URLs, as the page's CSP (`img-src 'self' data:`) allows.
 
 The exploded spacing is visual only: on the part the stack is
-`stack.contact_offset_mm` (0.47 mm) thick.  The layers are shifted rigidly
+`stack.contact_offset_mm` (0.65 mm since 2026-11-17: two 0.2 mm boards, the film and the user's lamination; 0.47 mm before) thick.  The layers are shifted rigidly
 along the normal (on a face whose normals spread more than 60 degrees, along
 their own normals), and **Assembled** lays them on the part.  The figure turns
 with the mouse.  The arrow keys turn it by 5 degrees; 0, a double click or
@@ -725,12 +725,12 @@ whole.  The Library's pictures and its sensor pages' 3D views are that
 figure (`web/cad/onpart.js`), drawn from the Library's own files with no
 engine or API (the user's requests of 2026-11-05;
 [LIBRARY_VIEW.md](LIBRARY_VIEW.md)): the sensor's fit and part, the art of
-its two boards (`web/library/art/<id>.json.gz`) and, for the seven
+its two boards (`web/library/art/<id>.json.gz`) and, for the eight
 grippers, the gripper drawn whole (`web/library/scenes/<part>.json`, its
 bodies in `web/library/bodies/`): a sensor on both fingers, the jaws fully
 open, the far finger's stack exploding into the gap, the near finger
 see-through in both views with its stack assembled (the user's decision of
-2026-11-06).  On a turned pair (Franka Hand,
+2026-11-06).  On a turned pair (Robotiq 2F-85, Franka Hand,
 WidowX 250, Unitree Dex1, MakerMods) the other finger is the same part and
 carries the same boards; on a mirror pair (Trossen WidowX AI, ARX X5, I2RT
 YAM) it is the mirror-image part and carries the mirror-image boards,

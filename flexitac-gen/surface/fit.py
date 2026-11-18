@@ -31,7 +31,23 @@ the settings allow, with the smallest margins:
 - **Usable region.**  The chart outline inset by ``edge_margin_mm``
   (default 0: the board edges may reach the surface's edges), minus holes,
   partly covered facets, facets stretched beyond ``strain_limit`` and bends
-  tighter than the stack may follow.
+  tighter than the stack may follow: under ``containment: board`` the
+  taxel field F (P and its field margin) those tighter than the laminated
+  field may (``STATIC_BEND_FACTOR`` x ``STACK_THICKNESS_MM``), everything
+  outside it (the Row channel and expansion, the Column fan-out, the tails)
+  those tighter than one board may (x ``SINGLE_FPC_MM``), as field-only
+  containment treats the routing off the field (2026-11-18,
+  :func:`surface_obstacles`).
+- **The whole selection** (the user's decisions of 2026-11-17).  A curved
+  selection is fitted whole, on its least-max-stretch chart, or refused
+  (``E_SURFACE_NOT_DEVELOPABLE``) when it stretches beyond ``strain_limit``
+  on the part (the relaxed sheet's stretch, smoothed over 1 mm:
+  :func:`surface.chart.judged_stretch`; soft tape creeps to it, since the
+  review of 2026-11-17), the refusal saying how much of it round the
+  click fits by stretch (the
+  page's Shrink to fit, preset ``stretch``).  Before, the fit cut such a
+  selection down to a geodesic disk round the click that was never drawn
+  (:func:`limited_chart` maps a placement saved then).
 - **Search.**  A raster of the usable region (at most ``MAX_CELLS``) gives,
   for every width, the tallest base-anchored rectangle; rows 1..64,
   columns 1..64 (``MAX_COLUMNS``), both role mappings and both routings
@@ -88,9 +104,34 @@ def tails_too_long(template: str) -> str:
 
 
 ROUTINGS = {"default": (0.127, 0.127), "tight": (0.1016, 0.1016)}
-STACK_THICKNESS_MM = 0.47  # estimated laminated field (two FPCs, film, laminate)
-SINGLE_FPC_MM = 0.11
+
+
+def _ordered_board_mm() -> float:
+    """One board as ordered: the surface profile's order.fpc_thickness_mm (JLC's 2-layer 0.2 mm FPC since the profile
+    revision of 2026-11-06)."""
+
+    return float(load_profile("surface_matrix_v1")["order"]["fpc_thickness_mm"])
+
+
+# The stack a sensor bends with (the user's answers of 2026-11-17: "现在我们一般是自己laminate；0.2mm", the boards 0.2 mm
+# and the field laminated by the user; 0.11 mm boards and a 0.47 mm field before):
+# - a single FPC (the routing, the tails): one board as ordered, 0.2 mm;
+# - the laminated taxel field: both boards, the piezoresistive film between them (Velostat / Linqstat, 4 mil, 0.1 mm; the
+#   FlexiTac bill of materials, confirmed by the user on 2026-10-21) and the user's lamination, a clear self-adhesive
+#   laminating sheet on each side (3 mil, 0.075 mm each; the FlexiTac guide's step 1, the thickness the 0.47 mm estimate
+#   already gave them): 2 x 0.2 + 0.1 + 2 x 0.075 = 0.65 mm.
+# A static bend (bent once to install) takes STATIC_BEND_FACTOR x thickness: 6.5 mm for the field, 2 mm for one board
+# (4.7 and 1.1 mm before).  The bend rules of the fit and the map (bend_segments, the creases of surface.bend, the
+# map's field_bend_radius and board_bend_radius) follow from these; the stretch a doubly curved face leaves does not
+# depend on the thickness (a membrane strain).
+SINGLE_FPC_MM = _ordered_board_mm()
+FILM_MM = 0.1
+LAMINATE_MM = 0.075
+STACK_THICKNESS_MM = round(2 * SINGLE_FPC_MM + FILM_MM + 2 * LAMINATE_MM, 6)
 STATIC_BEND_FACTOR = 10.0  # JLC: 6-10 x thickness for a static bend
+# Whole board (containment board, 2026-11-18): the boards take the single board's rule, F the laminated field's (the fit's
+# rejection of a field over such a bend: evaluate, realize, field_bend_point).
+FIELD_BEND_REASON = f"the taxel field over a bend tighter than the field's {STATIC_BEND_FACTOR * STACK_THICKNESS_MM:g} mm"
 PITCH_STEP_MM = 0.01
 MAX_AREA_PITCH_RATIO = 1.15  # objective max_area: the pitches searched, min_pitch_mm x 1.15^k
 MAX_AREA_TURNED_PITCHES = 4  # ... and in the turned frames, those of the best 4 candidates unturned
@@ -105,10 +146,15 @@ MIN_SIDE_MM = 3.0
 ARC_HALF_LENGTH_MM = 15.0
 ARC_WHEN_SIDES_SHORTER_MM = 20.0
 AUTO_ARCS = 8
-STRAIN_BISECTIONS = 7  # distinct trial disks of the strain limit (limit_strain), at most
-STRAIN_TOLERANCE = 0.01  # ... fewer once the radius is known to 1% or a disk stretches 99% of the limit
-STRAIN_GROWTH = 1.5  # ... and until one exceeds the limit, at most 1.5 x the radius of the largest within it
-STRAIN_SOLVE_VERTICES = 6000  # ... and none once the trials have flattened this many vertices
+# A curved chart whose outline is elongated (its principal second moments of area apart by more than AXIS_MOMENT_RATIO)
+# and that stretches beyond AXIS_MIN_STRETCH (a doubly curved face, not a nearly flat pad: the Franka Hand's, 0.002 %,
+# keeps the chord, whose frame holds more taxels there) lays its lattice along its long axis: an arc exit turned to the
+# principal axis nearest its chord (axis_exit) and no turned fields (rotation none), so the taxels run along a
+# fingertip whatever point of its base was clicked (the user's decisions of 2026-11-17).
+AXIS_MIN_STRETCH = 5e-4
+AXIS_MOMENT_RATIO = 1.3
+# ... an exit turned to an axis within this of a mirror plane's trace is turned to the trace and centred on it (axis_exit).
+MIRROR_AXIS_DEG = 5.0
 
 DEFAULT_OPTIONS: dict = {
     "objective": "fixed_pitch",  # fixed_pitch | max_taxels | max_area
@@ -135,7 +181,9 @@ DEFAULT_OPTIONS: dict = {
     "placement": "far",  # far | near | center
     "rotation": "auto",  # auto (turn up to 30 degrees against the base side) | none
     "tail_extension_mm": 20.0,
-    "strain_limit": 0.003,  # copper's elastic limit (0.2-0.3 %); the research gate
+    # copper's elastic limit (0.2-0.3 %); the research gate.  The page offers 0.01 as its second tier, "1 % bonded once"
+    # (the user's decision of 2026-11-17: a sheet bonded once, after a test: soft tape creeps), never the default.
+    "strain_limit": 0.003,
     "proposals": 5,
 }
 # What CAD mode fits with, no longer a choice (the user's decision of 2026-10-26, P5-diagonal-bus.md section 26.16: "what CAD
@@ -177,32 +225,33 @@ def fit_route(header: Mapping[str, Any], mesh_bytes: bytes, cache: Any = None) -
     if given is not None:
         options = border_options(options)
     border = given
-    limited = None
-    picked = None
-    if chart.kind == "curved" and chart.stats["strain_max"] > options["strain_limit"]:
-        if isinstance(base, Mapping) and set(base) == {"side"}:
-            # {side: n} numbers the sides of the selection the client was shown
-            # (/select): pick it there, then find it on the strain-limited disk.
-            loop = chart.loops[chart.outer]
-            side = choose_bases(base, api_module.boundary_sides(mesh, chart), mesh, chart)[0]
-            picked = (side, {frozenset((loop[i], loop[(i + 1) % len(loop)])) for i in side["edges"]})
-        whole = chart
-        facets, chart, limited = limit_strain(mesh, facets, chart, header.get("selection"), options["strain_limit"])
-        if given is not None:
-            # The border is drawn on the selection's chart: carried onto the disk's.
-            border = border_module.carry(given, whole, chart)
-    sides = api_module.boundary_sides(mesh, chart)
+    if chart.kind == "curved":
+        refuse_beyond_limit(mesh, facets, chart, header.get("selection"), options["strain_limit"])
+    # A doubly curved selection that is its own mirror image: its sides split symmetrically (as the select reply's), its
+    # auto exits laid on the plane and the symmetric-face rule about it (the review of 2026-11-17, findings 2 and 4).
+    traces = api_module.mirror_traces(mesh, chart)
+    sides = api_module.boundary_sides(mesh, chart, traces)
     report = None
     if border is not None:
         report = border_module.on_surface(border, chart)
         base_choices = border_module.bases(base, border, chart)
-    elif picked is not None:
-        base_choices = [side_on_chart(picked[0], picked[1], mesh, chart)]
     else:
         base_choices = choose_bases(base, sides, mesh, chart)
+    searched = options
+    if border is None and along_axis(mesh, chart):
+        # An elongated doubly curved selection: its lattice along its long axis, unturned (AXIS_MIN_STRETCH).
+        base_choices = [axis_exit(chart, side, traces, recentre=base == "auto") if side.get("kind") == "arc" else side for side in base_choices]
+        searched = dict(options, rotation="none")
+    if border is None and traces:
+        unique: list = []
+        for side in base_choices:
+            if not any((side["from_uv"], side["to_uv"], side["edges"]) == (seen["from_uv"], seen["to_uv"], seen["edges"]) for seen in unique):
+                unique.append(side)
+        base_choices = unique
+        searched = dict(searched, mirror=traces)
     try:
         # The search reads the border from the obstacles (surface_obstacles); the options echoed stay the user's.
-        result = fit_chart(mesh, chart, sides, base_choices, dict(options, border=border) if border is not None else options, cache=cache)
+        result = fit_chart(mesh, chart, sides, base_choices, dict(searched, border=border) if border is not None else searched, cache=cache)
     except SurfaceError as error:
         if border is None or error.code != "E_SURFACE_NO_FIT":
             raise
@@ -212,12 +261,10 @@ def fit_route(header: Mapping[str, Any], mesh_bytes: bytes, cache: Any = None) -
     from .place import placement_record
 
     for proposal in result["proposals"]:
-        proposal["placement"] = placement_record(proposal, mesh, header.get("selection"), options, limited)
+        proposal["placement"] = placement_record(proposal, mesh, header.get("selection"), options)
         if given is not None:
             proposal["placement"]["border"] = border_module.echo(given)
     result["selection"] = api_module.describe_selection(mesh, facets, chart)
-    if limited is not None:
-        result["selection"]["strain_limited"] = limited
     result["mesh"] = {"sha256": mesh.sha256, "unit": mesh.unit, "facets": mesh.facet_count, "name": mesh.name}
     result["request"] = {"selection": header.get("selection"), "base": header.get("base", "auto"), "options": options}
     if given is not None:
@@ -262,116 +309,71 @@ def _border_proposals(result: dict, border: Sequence, report: Mapping[str, Any])
     result["obstacles"].pop("border", None)
 
 
-def limit_strain(mesh: Mesh, facets, chart: Chart, selection: Any, limit: float) -> tuple:
-    """The largest geodesic disk of a curved selection that flattens within the strain limit.
+def refuse_beyond_limit(mesh: Mesh, facets, chart: Chart, selection: Any, limit: float) -> None:
+    """E_SURFACE_NOT_DEVELOPABLE for a curved selection that stretches beyond ``limit`` flat, saying how much fits.
 
-    A flat sheet on a doubly curved surface stretches by about K rho^2 / 6
-    over a patch of radius rho, so the sensor can only cover a disk around a
-    centre.  The centre is the selection's first seed (or the facet nearest
-    the selection's area centroid).  Every new trial disk is a curved solve,
-    whose cost grows faster than its vertex count, so the radius is searched
-    near the answer: regula falsi on (rho^2, strain) between the largest
-    disk within the limit and the smallest beyond it (at first a disk of
-    radius 0 and the whole selection), with the Illinois step against
-    stagnation.  Until a trial disk exceeds the limit, a trial is at most
-    STRAIN_GROWTH x the largest disk within it (no trial much larger than
-    the answer); a trial outside these bounds halves them instead.  At most
-    STRAIN_BISECTIONS distinct disks, fewer once STRAIN_TOLERANCE is reached,
-    and no more once the trials have flattened STRAIN_SOLVE_VERTICES vertices.
-    A trial radius that gives a disk already tried reuses its chart and does
-    not count: on a coarse mesh the disk grows in steps, and a step can lie
-    in a narrow band of radii.
+    The stretch is the one the sheet keeps on the part (surface.chart.judged_stretch: the relaxed sheet's, smoothed over
+    1 mm).  The refusal names the selection's click (its first seed, else the facet nearest its area centroid) and the
+    patch round it that preset ``stretch`` selects at this limit (``details.shrink``: its seed, area and stretch, or null
+    when none there flattens within the limit): the page's Shrink to fit selects it.
     """
 
     from . import chart as chart_module
-    from .select import disk
+    from . import select as select_module
 
-    centre = None
+    stretch = chart_module.judged_stretch(chart, mesh)
+    if stretch <= limit:
+        return
+    seed = None
     ops = selection.get("ops") if isinstance(selection, Mapping) else None
     for op in ops or []:
         if isinstance(op, Mapping) and op.get("op") in ("grow", "disk") and op.get("mode", "add") == "add" and op.get("seed_facet") in facets:
-            centre = op["seed_facet"]
+            seed = op["seed_facet"]
             break
-    if centre is None:
-        total = math.fsum(mesh.areas[f] for f in facets)
-        mid = tuple(math.fsum(mesh.centroids[f][k] * mesh.areas[f] for f in facets) / total for k in range(3))
-        centre = min(sorted(facets), key=lambda f: norm(sub(mesh.centroids[f], mid)))
-    far = max(norm(sub(mesh.vertices[v], mesh.centroids[centre])) for f in facets for v in mesh.facets[f])
-    low, high = 0.0, far
-    # How far each end's strain is from the limit (a disk of radius 0 does not
-    # stretch); None when the disk beyond did not flatten at all.
-    low_gap, high_gap = limit, chart.stats["strain_max"] - limit
-    whole = True  # no trial disk beyond the limit yet: high is the whole selection
-    kept = None  # the end the last trial left in place
-    best = None
-    solved: dict = {}  # region -> (vertices, chart or None), the distinct disks flattened
-    for _ in range(3 * STRAIN_BISECTIONS):  # repeated disks cost no solve; this bounds the loop
-        if len(solved) >= STRAIN_BISECTIONS or high - low <= STRAIN_TOLERANCE * high or (
-            best is not None and best[3] >= (1 - STRAIN_TOLERANCE) * limit
-        ):
-            break
-        radius = None
-        if high_gap is not None:
-            x = low * low + (high * high - low * low) * low_gap / (low_gap + high_gap)
-            radius = math.sqrt(x)
-        # Inside the bracket, half a percent clear of both ends, and while the whole
-        # selection bounds it, at most STRAIN_GROWTH x the largest disk within the
-        # limit (a trial beyond the limit bounds the cost itself); else halve that range.
-        upper = min(high, STRAIN_GROWTH * low) if whole and low > 0 else high
-        step = STRAIN_TOLERANCE * high / 2
-        if radius is None or not low + step <= radius <= upper - step:
-            radius = (low + upper) / 2
-        region = disk(mesh, centre, radius, 180.0) & set(facets)
-        if len(region) < 2:
-            low, low_gap = radius, limit
-            continue
-        key = tuple(sorted(region))
-        if key not in solved:
-            vertices = len({v for f in region for v in mesh.facets[f]})
-            if best is not None and math.fsum(v for v, _ in solved.values()) + vertices > STRAIN_SOLVE_VERTICES:
-                break
-            try:
-                solved[key] = (vertices, chart_module.build_chart(mesh, region))
-            except SurfaceError:
-                solved[key] = (vertices, None)
-        candidate = solved[key][1]
-        if candidate is None:
-            # No strain to interpolate from: the next trial halves the bracket.
-            high, high_gap, whole, kept = radius, None, False, "low"
-            continue
-        strain = candidate.stats["strain_max"]
-        # Illinois: an end kept twice in a row counts half as far from the limit, so
-        # that a strain convex in rho^2 does not leave the other end creeping up to it.
-        if strain <= limit:
-            best = (region, candidate, radius, strain)
-            if kept == "high" and high_gap is not None:
-                high_gap /= 2
-            low, low_gap, kept = radius, limit - strain, "high"
-        else:
-            if kept == "low":
-                low_gap /= 2
-            high, high_gap, whole, kept = radius, strain - limit, False, "low"
-    if best is None:
-        raise SurfaceError(
-            "E_SURFACE_NOT_DEVELOPABLE",
-            f"No part of the selection flattens within the strain limit {limit:g} (the full selection reaches "
-            f"{chart.stats['strain_max']:.4f}); select a flatter or smaller area, or raise the limit.",
-        )
-    region, candidate, radius, _ = best
-    info = {
-        "centre_facet": centre,
-        "radius_mm": round(radius, 6),
-        "area_mm2": round(candidate.stats["area_mm2"], 6),
-        "selected_area_mm2": round(chart.stats["area_mm2"], 6),
-        "strain_max": round(candidate.stats["strain_max"], 9),
-    }
-    # Rebuild from the rounded radius, exactly as the map route will.
-    region, candidate = limited_chart(mesh, facets, info)
-    return region, candidate, info
+    if seed is None:
+        total = math.fsum(mesh.areas[f] for f in sorted(facets))
+        mid = tuple(math.fsum(mesh.centroids[f][k] * mesh.areas[f] for f in sorted(facets)) / total for k in range(3))
+        seed = min(sorted(facets), key=lambda f: norm(sub(mesh.centroids[f], mid)))
+    preset = select_module.PRESETS["stretch"]
+    region = select_module.stretch_region(mesh, seed, preset["theta_d_deg"], preset["theta_c_deg"], preset["min_radius_mm"], limit)
+    shrink = None
+    try:
+        smaller = chart_module.build_chart(mesh, region, least=False)
+        fits = chart_module.judged_stretch(smaller, mesh) if smaller.kind == "curved" else 0.0
+        if fits <= limit:
+            shrink = {"seed_facet": seed, "area_mm2": round(smaller.stats["area_mm2"], 6), "stretch": round(fits, 9)}
+    except SurfaceError:
+        pass
+    selected = chart.stats["area_mm2"]
+    if shrink is None:
+        tail = "no patch round the click flattens within it."
+    else:
+        tail = f"{shrink['area_mm2']:.0f} of its {selected:.0f} mm2 round the click do (Shrink to fit: preset stretch)."
+    raise SurfaceError(
+        "E_SURFACE_NOT_DEVELOPABLE",
+        f"The selection stretches {stretch * 100:.2f} % on the part, beyond the {limit * 100:g} % strain limit; " + tail,
+        stretch=round(stretch, 9),
+        stretch_facet_max=round(chart_module.relaxed_max(chart, mesh), 9),
+        strain_limit=limit,
+        selected_area_mm2=round(selected, 6),
+        shrink=shrink,
+    )
+
+
+def along_axis(mesh: Mesh, chart: Chart) -> bool:
+    """Whether a chart lays its lattice along its long axis: curved, stretched beyond AXIS_MIN_STRETCH (as the fit judges
+    it) and elongated (principal second moments of its outline's area apart by more than AXIS_MOMENT_RATIO)."""
+
+    from . import chart as chart_module
+
+    if chart.kind != "curved" or chart_module.judged_stretch(chart, mesh) <= AXIS_MIN_STRETCH:
+        return False
+    return principal_axes(chart)[3] > AXIS_MOMENT_RATIO
 
 
 def limited_chart(mesh: Mesh, facets, info: Mapping[str, Any]) -> tuple:
-    """The chart of a strain-limited disk, from the placement's record (fit and map share it)."""
+    """The chart of a strain-limited disk, from the placement's record: the map of a placement fitted before 2026-11-17,
+    when the fit cut a curved selection beyond the strain limit down to such a disk (refused since: refuse_beyond_limit)."""
 
     from . import chart as chart_module
     from .select import disk
@@ -507,56 +509,6 @@ def choose_bases(base: Any, sides: Sequence[Mapping[str, Any]], mesh: Mesh, char
     raise SurfaceError("E_SURFACE_BASE_EDGE", "base must be 'auto', {'side': n}, {'point_xyz': [x, y, z]} or {'arc': {...}}.")
 
 
-def side_on_chart(side: Mapping[str, Any], mesh_edges: set, mesh: Mesh, chart: Chart) -> dict:
-    """A side of the whole selection on a chart of part of it (the strain-limited disk).
-
-    The exit is the longest run of the chart's outer-boundary segments that
-    are mesh edges of the side (``mesh_edges``: frozensets of two vertices);
-    it keeps the side's number.  E_SURFACE_BASE_EDGE when the disk keeps less
-    than MIN_SIDE_MM of it.
-    """
-
-    loop = chart.loops[chart.outer]
-    n = len(loop)
-    on_side = [frozenset((loop[k], loop[(k + 1) % n])) in mesh_edges for k in range(n)]
-    runs = []
-    for k in range(n):
-        if on_side[k] and not on_side[k - 1]:
-            run = [k]
-            while on_side[(run[-1] + 1) % n] and len(run) < n:
-                run.append((run[-1] + 1) % n)
-            runs.append(run)
-    if not runs and all(on_side):
-        runs = [list(range(n))]
-    points = [chart.uv[v] for v in loop]
-    lengths = [dist2(points[k], points[(k + 1) % n]) for k in range(n)]
-    best = max(runs, key=lambda run: (math.fsum(lengths[k] for k in run), -run[0]), default=None)
-    first, last = (points[best[0]], points[(best[-1] + 1) % n]) if best else ((0.0, 0.0), (0.0, 0.0))
-    dx, dy = last[0] - first[0], last[1] - first[1]
-    chord = hypot2(dx, dy)
-    if best is None or chord < MIN_SIDE_MM:
-        kept = f"keeps {chord:.3g} mm of it" if best else "does not reach it"
-        raise SurfaceError(
-            "E_SURFACE_BASE_EDGE",
-            f"Side {side['index']} of the selection: the disk that flattens within the strain limit {kept}, and a "
-            f"tail exit needs at least {MIN_SIDE_MM:g} mm. Pick another side, a point on the disk's edge, or 'auto'.",
-        )
-    length = math.fsum(lengths[k] for k in best)
-    # Rounded like surface.api.boundary_sides (counter-clockwise outer loop: the inside is on the left).
-    return {
-        "index": side["index"],
-        "from_uv": [api_module._r(first[0]), api_module._r(first[1])],
-        "to_uv": [api_module._r(last[0]), api_module._r(last[1])],
-        "from_xyz": [api_module._r(c) for c in mesh.vertices[loop[best[0]]]],
-        "to_xyz": [api_module._r(c) for c in mesh.vertices[loop[(best[-1] + 1) % n]]],
-        "length_mm": api_module._r(length),
-        "chord_mm": api_module._r(chord),
-        "straight": abs(length - chord) <= 1e-6 * max(length, 1.0) + 1e-9,
-        "inward_uv": [api_module._r(-dy / chord, 9), api_module._r(dx / chord, 9)],
-        "edges": best,
-    }
-
-
 def _point(value: Any, where: str) -> tuple:
     if not (isinstance(value, list) and len(value) == 3):
         raise SurfaceError("E_SURFACE_BASE_EDGE", f"{where} must be [x, y, z] in mm.")
@@ -604,6 +556,106 @@ def arc_exit(outline: Sequence, centre_s: float, half: float, name: str) -> dict
         "length_mm": round(math.fsum(lengths[i] for i in ordered), 6),
         "edges": ordered,
     }
+
+
+def principal_axes(chart: Chart) -> tuple:
+    """(long, short, centroid, ratio): the chart outline's principal directions (second moments of its area), the long
+    one first, and the ratio of its principal moments (1 for a disk or a square)."""
+
+    outline = chart.outline()
+    a = cx = cy = 0.0
+    for (x0, y0), (x1, y1) in zip(outline, outline[1:] + outline[:1]):
+        c = x0 * y1 - x1 * y0
+        a += c
+        cx += (x0 + x1) * c
+        cy += (y0 + y1) * c
+    a /= 2
+    cx /= 6 * a
+    cy /= 6 * a
+    sxx = syy = sxy = 0.0
+    for (x0, y0), (x1, y1) in zip(outline, outline[1:] + outline[:1]):
+        x0, y0, x1, y1 = x0 - cx, y0 - cy, x1 - cx, y1 - cy
+        c = x0 * y1 - x1 * y0
+        sxx += (y0 * y0 + y0 * y1 + y1 * y1) * c
+        syy += (x0 * x0 + x0 * x1 + x1 * x1) * c
+        sxy += (x0 * y1 + 2 * x0 * y0 + 2 * x1 * y1 + x1 * y0) * c
+    # sxx is the second moment about the x axis (spread in y), syy about the y axis (spread in x).
+    ixx, iyy, ixy = syy / 12, sxx / 12, sxy / 24
+    angle = 0.5 * math.atan2(2 * ixy, ixx - iyy)
+    long = (math.cos(angle), math.sin(angle))
+    middle, half = (ixx + iyy) / 2, math.sqrt(((ixx - iyy) / 2) ** 2 + ixy * ixy)
+    ratio = (middle + half) / (middle - half) if middle - half > 0 else math.inf
+    return long, (-long[1], long[0]), (cx, cy), ratio
+
+
+def axis_exit(chart: Chart, arc: Mapping[str, Any], traces: Sequence = (), recentre: bool = False) -> dict:
+    """An arc exit turned to the chart's principal axis nearest its chord's inward normal (:func:`along_axis`): the
+    chord across that axis through the arc's lowest point along it.
+
+    On a mirror-symmetric selection (``traces``, surface.api.mirror_traces; the review of 2026-11-17, finding 4) an axis
+    within MIRROR_AXIS_DEG of a plane's trace is the trace itself and the chord is centred on it; with ``recentre`` (the
+    auto exits) the arc is first moved to be centred where the trace leaves the outline at its low end, the same length,
+    so its edges (where the tails may leave) are the mirror images of one another too."""
+
+    long, short, _, _ = principal_axes(chart)
+    inward = arc["inward_uv"]
+    candidates = [long, (-long[0], -long[1]), short, (-short[0], -short[1])]
+    axis = max(candidates, key=lambda d: d[0] * inward[0] + d[1] * inward[1])
+    outline = chart.outline()
+    n = len(outline)
+    near = math.cos(math.radians(MIRROR_AXIS_DEG))
+    trace = next((t for t in traces if abs(t["direction"][0] * axis[0] + t["direction"][1] * axis[1]) >= near), None)
+    if trace is not None:
+        d = trace["direction"]
+        axis = d if d[0] * axis[0] + d[1] * axis[1] > 0 else (-d[0], -d[1])
+        if recentre:
+            start = _trace_leaves(outline, trace, axis)
+            if start is not None:
+                arc = arc_exit(outline, start, math.fsum(dist2(outline[i], outline[(i + 1) % n]) for i in arc["edges"]) / 2, arc["index"])
+    points = [outline[i] for i in arc["edges"]] + [outline[(arc["edges"][-1] + 1) % n]]
+    across = (axis[1], -axis[0])  # the chord's direction: the inward normal is it turned left (arc_exit)
+    low = min(p[0] * axis[0] + p[1] * axis[1] for p in points)
+    spans = [p[0] * across[0] + p[1] * across[1] for p in points]
+    lowest, highest = min(spans), max(spans)
+    if trace is not None:
+        middle = trace["point"][0] * across[0] + trace["point"][1] * across[1]
+        reach = max(highest - middle, middle - lowest)
+        lowest, highest = middle - reach, middle + reach
+    a = (across[0] * lowest + axis[0] * low, across[1] * lowest + axis[1] * low)
+    b = (across[0] * highest + axis[0] * low, across[1] * highest + axis[1] * low)
+    turned = dict(arc)
+    turned.update(
+        {
+            "from_uv": [round(a[0], 6), round(a[1], 6)],
+            "to_uv": [round(b[0], 6), round(b[1], 6)],
+            "inward_uv": [round(axis[0], 9), round(axis[1], 9)],
+            "chord_mm": round(highest - lowest, 6),
+        }
+    )
+    return turned
+
+
+def _trace_leaves(outline: Sequence, trace: Mapping[str, Any], axis: Sequence[float]) -> Any:
+    """The arc length along the outline (from its point 0) where a mirror plane's trace crosses it lowest along ``axis``
+    (the exit's end of the selection), or None when it does not cross it."""
+
+    (pu, pv), (du, dv) = trace["point"], trace["direction"]
+    n = len(outline)
+    best = None
+    running = 0.0
+    for i in range(n):
+        a, b = outline[i], outline[(i + 1) % n]
+        sa = (a[0] - pu) * dv - (a[1] - pv) * du
+        sb = (b[0] - pu) * dv - (b[1] - pv) * du
+        length = dist2(a, b)
+        if sa == 0.0 or (sa < 0.0 < sb) or (sb < 0.0 < sa):
+            t = 0.0 if sa == 0.0 else sa / (sa - sb)
+            point = (a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1]))
+            key = (point[0] * axis[0] + point[1] * axis[1], i)
+            if best is None or key < best[0]:
+                best = (key, running + t * length)
+        running += length
+    return None if best is None else best[1]
 
 
 def arc_at_point(mesh: Mesh, chart: Chart, point: Sequence[float], half: float) -> dict:
@@ -724,13 +776,17 @@ class BaseFrame:
 
 
 def surface_obstacles(mesh: Mesh, chart: Chart, options: Mapping[str, Any]) -> dict:
-    """Chart polygons and segments the boards must avoid."""
+    """Chart polygons and segments the boards must avoid (``field_bends``: those only the taxel field must, with
+    ``containment: board``)."""
+
+    from .chart import stretch_values
 
     triangles = []
-    # Facets stretched beyond the strain limit by the flattening.
+    # Facets stretched beyond the strain limit by the flattening (on a curved chart as the sheet keeps it on the part:
+    # surface.chart.stretch_values; facet by facet on a planar or developable one).
     limit = options["strain_limit"]
-    for facet, (s1, s2) in chart.strain.items():
-        if max(abs(s1 - 1), abs(s2 - 1)) > limit:
+    for facet, value in sorted(stretch_values(chart, mesh).items()):
+        if value > limit:
             triangles.append([chart.uv[v] for v in mesh.facets[facet]])
     # Parts of facets covered by another shell (walls where two parts touch).
     covered = []
@@ -742,11 +798,23 @@ def surface_obstacles(mesh: Mesh, chart: Chart, options: Mapping[str, Any]) -> d
             if all(m is not None for m in mapped):
                 covered.append(mapped)
     holes = chart.holes()
-    bends = bend_segments(mesh, chart, STATIC_BEND_FACTOR * STACK_THICKNESS_MM)
+    # The bends the checked outline may not cross.  With containment field that outline is F, the laminated field
+    # (STATIC_BEND_FACTOR x STACK_THICKNESS_MM, 6.5 mm).  With containment board it is the boards, a single FPC outside the
+    # taxel field (x SINGLE_FPC_MM, 2 mm), and F alone takes the laminated field's rule, ``field_bends`` (the lead's
+    # decision of 2026-11-18: since the 0.65 mm stack every bend under 6.5 mm blocked the whole board, the soft finger's
+    # tails too; field-only containment checks the routing off the field by the single board's rule as well).
+    board = options.get("containment") == "board"
+    bends = bend_segments(mesh, chart, STATIC_BEND_FACTOR * (SINGLE_FPC_MM if board else STACK_THICKNESS_MM))
     found = {"strained": triangles, "covered": covered, "holes": holes, "bends": bends}
+    if board:
+        found["field_bends"] = bend_segments(mesh, chart, STATIC_BEND_FACTOR * STACK_THICKNESS_MM)
     if options.get("border") is not None:
         # The user's border (surface.border, fit_route): not an obstacle, where the taxels may lie (surface.fill.FreeSpace).
         found["border"] = list(options["border"])
+    if options.get("mirror"):
+        # A doubly curved selection's mirror planes' traces (surface.api.mirror_traces, fit_route): not an obstacle, the
+        # axes of the symmetric-face rule (surface.fieldfit.exit_symmetry).
+        found["mirror"] = list(options["mirror"])
     return found
 
 
@@ -914,21 +982,59 @@ class UsableRaster:
         for a, b, _ in obstacles["bends"]:
             self._block_segment(frame.to_base(a), frame.to_base(b), blocked)
         self._band = 0
+        need = margin + self.h * 0.7072
         if margin > 0:
             # Clearance: the cell's centre at least margin + half a cell diagonal from
             # every blocked cell's centre, except in the band above the exit where the
             # tails leave (see _columns).
             distance = _distance_transform(blocked, self.h)
-            need = margin + self.h * 0.7072
             self.free = [[not blocked[j][i] and distance[j][i] >= need for i in range(self.nx)] for j in range(self.ny)]
             self._band = int(math.ceil(need / self.h)) + 1
         else:
             self.free = [[not cell for cell in row] for row in blocked]
         self._blocked = blocked
+        # Whole board: the cells of the bends the taxel field may not cross but the boards around it may
+        # (surface_obstacles' ``field_bends``), with the same clearance, as running counts per row of cells (field_y).
+        self.field_rows = None
+        if obstacles.get("field_bends"):
+            field = [[False] * self.nx for _ in range(self.ny)]
+            for a, b, _ in obstacles["field_bends"]:
+                self._block_segment(frame.to_base(a), frame.to_base(b), field)
+            if margin > 0:
+                distance = _distance_transform(field, self.h)
+                field = [[distance[j][i] < need for i in range(self.nx)] for j in range(self.ny)]
+            self.field_rows = []
+            for row in field:
+                running = [0]
+                for cell in row:
+                    running.append(running[-1] + cell)
+                self.field_rows.append(running)
         self._columns()
 
     def exit_y(self, x: float) -> Any:
         return self.exits.exit_y(x)
+
+    def field_y(self, x0: float, x1: float, height: float, lowest: float, highest: float, prefer: float) -> Any:
+        """Whole board: the lower edge y of the box ``[x0, x1] x [y, y + height]`` (F, the field and its margin) within
+        ``lowest..highest`` and nearest ``prefer`` (the higher of two as near) at which it meets no cell of
+        ``field_bends``, or None; ``prefer`` when none lies under its columns."""
+
+        i0 = min(self.nx, max(0, int(math.floor((x0 - self.x0) / self.h))))
+        i1 = min(self.nx, max(0, int(math.floor((x1 - self.x0) / self.h)) + 1))
+        # The lower edges the box may not take, (low, high) open, merged: a blocked row of cells under its columns.
+        taken: list = []
+        for j, running in enumerate(self.field_rows):
+            if running[i1] - running[i0] > 0:
+                low, high = self.y0 + j * self.h - height - 1e-6, self.y0 + (j + 1) * self.h + 1e-6
+                if taken and low <= taken[-1][1]:
+                    taken[-1][1] = high
+                else:
+                    taken.append([low, high])
+        for low, high in taken:
+            if low < prefer < high:
+                ends = [y for y in (high, low) if lowest - 1e-9 <= y <= highest + 1e-9]
+                return min(ends, key=lambda y: abs(y - prefer)) if ends else None
+        return prefer
 
     def _block_polygon(self, polygon, blocked) -> None:
         """Block every cell the polygon touches (its extent within each row of cells)."""
@@ -1438,6 +1544,14 @@ def evaluate(region: UsableRaster, rows, columns, pitch_x, pitch_y, options, rol
     field_x = left + EDGE_INSET_MM - extent["x_min"]
     taxels = rows * columns
     aw, ah = extent["field"]
+    if getattr(region, "field_rows", None) is not None:
+        # Whole board: F (the field and its margin) off the bends the laminated field may not cross, nearest the placement.
+        grow = float(profile["routing"]["active_edge_clearance_mm"])
+        found = region.field_y(field_x - grow, field_x + aw + grow, ah + 2 * grow, lowest - grow, highest - grow, field_y - grow)
+        if found is None:
+            rejected[FIELD_BEND_REASON] = rejected.get(FIELD_BEND_REASON, 0) + 1
+            return None
+        field_y = found + grow
     min_pitch = min(pitch_x, pitch_y)
     objective = options["objective"]
     if objective == "max_area":
@@ -1520,6 +1634,9 @@ def realize(candidate: Mapping[str, Any], chart: Chart, obstacles: Mapping[str, 
                                   tail_roots=tail_roots_base(result, (field_x, field_y)))
     if clearance is None:
         rejected["real outline leaves the surface"] = rejected.get("real outline leaves the surface", 0) + 1
+        return None
+    if field_bend_point(result, (field_x, field_y), candidate["region"], frame, obstacles, options["edge_margin_mm"]) is not None:
+        rejected[FIELD_BEND_REASON] = rejected.get(FIELD_BEND_REASON, 0) + 1
         return None
     manifest = result["manifest"]
     aw, ah = extent["field"]
@@ -1735,9 +1852,52 @@ def _containment_context(region: Any, frame: BaseFrame, obstacles: Mapping[str, 
         "bend_index": _SegmentIndex(bend_segments_base),
         "clear_index": _SegmentIndex(keep_clear),
         "clear_points": sorted({q for segment in keep_clear for q in segment}),
+        # Whole board: the bends only F must keep off (field_bend_point).
+        "field_index": _SegmentIndex([(frame.to_base(a), frame.to_base(b)) for a, b, _ in obstacles.get("field_bends", ())]),
     }
     region._containment = (obstacles, frame, context)
     return context
+
+
+def field_bend_point(result: Mapping[str, Any], origin: Sequence[float], region: Any, frame: BaseFrame, obstacles: Mapping[str, Any],
+                     margin: float) -> Any:
+    """Whole board (``obstacles["field_bends"]``, :func:`surface_obstacles`): where a bend tighter than the laminated field
+    may follow comes within ``margin`` of F, the taxel field P grown by its field margin (:func:`surface.fieldfit.field_body`),
+    as a point of the base frame, or None.  The boards around F take the single board's rule (``obstacles["bends"]``,
+    :func:`check_containment`)."""
+
+    if not obstacles.get("field_bends"):
+        return None
+    from .fieldfit import field_body
+
+    index = _containment_context(region, frame, obstacles)["field_index"]
+    polygon = field_body(result, origin)
+    for k in range(len(polygon)):
+        a, b = polygon[k - 1], polygon[k]
+        for c, d in index.near(a, b, margin):
+            if segments_intersect(a, b, c, d):
+                return segment_crossing(a, b, c, d)
+            if margin > 0 and segment_distance(a, b, c, d) < margin - 1e-6:
+                return min((c, d), key=lambda q: segment_distance(q, q, a, b))
+    xs = [p[0] for p in polygon]
+    ys = [p[1] for p in polygon]
+    for c, _ in index.segments:
+        # A bend that meets no side of F lies wholly inside it or outside.
+        if min(xs) <= c[0] <= max(xs) and min(ys) <= c[1] <= max(ys) and point_in_polygon(c, polygon):
+            return c
+    return None
+
+
+def segment_crossing(a, b, c, d) -> tuple:
+    """Where the segments ab and cd meet (on ab; ``a`` for parallel ones)."""
+
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    fx, fy = d[0] - c[0], d[1] - c[1]
+    det = dx * fy - dy * fx
+    if det == 0:
+        return tuple(a)
+    t = min(max(((c[0] - a[0]) * fy - (c[1] - a[1]) * fx) / det, 0.0), 1.0)
+    return (a[0] + dx * t, a[1] + dy * t)
 
 
 def _crosses_below(polygon: Sequence, flags: Sequence[bool], root: float, exit_index: Any) -> bool:

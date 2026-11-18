@@ -129,7 +129,8 @@ class FreeSpace:
         blocked = [[frame.to_base(p) for p in polygon] for key in ("strained", "covered") for polygon in obstacles[key]]
         blocked = [polygon for polygon in blocked if len(polygon) >= 3]
         # (ax, ay, bx, by, kind, group, exit): kind 0 the outline and holes (even-odd inside), 1 a blocked
-        # polygon (its group), 2 a bend segment.
+        # polygon (its group), 2 a bend segment, 3 a bend only the taxel field must keep off (Whole board's
+        # ``field_bends``: :meth:`field_intervals`).
         segments = []
         count = len(outline)
         for index in range(count):
@@ -146,6 +147,10 @@ class FreeSpace:
         for a, b, _ in obstacles["bends"]:
             (ax, ay), (bx, by) = frame.to_base(a), frame.to_base(b)
             segments.append((ax, ay, bx, by, 2, 0, False))
+        self.field_bends = bool(obstacles.get("field_bends"))
+        for a, b, _ in obstacles.get("field_bends", ()):
+            (ax, ay), (bx, by) = frame.to_base(a), frame.to_base(b)
+            segments.append((ax, ay, bx, by, 3, 0, False))
         self.segments = segments
         xs = [p[0] for p in outline]
         ys = [p[1] for p in outline]
@@ -201,6 +206,8 @@ class FreeSpace:
         blocked = []
         for index in self._near(low, high):
             ax, ay, bx, by, kind, group, _ = self.segments[index]
+            if kind == 3:
+                continue
             if kind != 2 and (ay <= middle < by or by <= middle < ay):
                 x = ax + (middle - ay) * (bx - ax) / (by - ay)
                 if kind == 0:
@@ -216,6 +223,29 @@ class FreeSpace:
             xs = sorted(interiors[group])
             blocked.extend((xs[k], xs[k + 1]) for k in range(0, len(xs) - 1, 2))
         found = _subtract(inside, _union(blocked))
+        if len(self._strips) > 200_000:
+            self._strips.clear()
+        self._strips[key] = found
+        return found
+
+    def field_intervals(self, y0: float, y1: float) -> list:
+        """Whole board: the x-intervals of the strip ``y0 <= y <= y1`` that no bend only the taxel field must keep off
+        (``field_bends``) comes within the edge margin of, unbounded (sorted, disjoint): the rest of the surface is
+        :meth:`intervals`'."""
+
+        key = ("field", y0, y1)
+        found = self._strips.get(key)
+        if found is not None:
+            return found
+        margin = self.margin
+        low, high = y0 - margin, y1 + margin
+        blocked = []
+        for index in self._near(low, high):
+            ax, ay, bx, by, kind, _, _ = self.segments[index]
+            clipped = _clip_x(ax, ay, bx, by, low, high) if kind == 3 else None
+            if clipped is not None:
+                blocked.append((clipped[0] - margin, clipped[1] + margin))
+        found = _subtract([(-math.inf, math.inf)], _union(blocked))
         if len(self._strips) > 200_000:
             self._strips.clear()
         self._strips[key] = found
@@ -245,8 +275,8 @@ class FreeSpace:
         low, high = lowest - margin, root + margin
         left, right = x0 - margin, x1 + margin
         for index in self._near(low, high):
-            ax, ay, bx, by, _, _, exit = self.segments[index]
-            if exit:
+            ax, ay, bx, by, kind, _, exit = self.segments[index]
+            if exit or kind == 3:
                 continue
             clipped = _clip_x(ax, ay, bx, by, low, high)
             if clipped is not None and clipped[0] <= right and clipped[1] >= left:
@@ -516,6 +546,16 @@ def _bands(space: FreeSpace, pitch: float, width: float, margin: float, phase_y:
     return origin, bands
 
 
+def _field_bands(space: FreeSpace, pitch: float, margin: float, origin: float, count: int) -> Any:
+    """Whole board: each lattice row's intervals off the bends only the taxel field must keep off, over its share of F
+    (its pitch strip and the field margin about it: :meth:`FreeSpace.field_intervals`); None without such bends."""
+
+    if not space.field_bends:
+        return None
+    reach = pitch / 2 + margin
+    return [space.field_intervals(round(origin + k * pitch - reach, 9), round(origin + k * pitch + reach, 9)) for k in range(count)]
+
+
 def _mirror(bands: list) -> list:
     return [[(-b, -a) for a, b in reversed(intervals)] for intervals in bands]
 
@@ -562,6 +602,7 @@ def _walk(lattice: dict, model: dict, rows_cap: int, columns_cap: int, threshold
     origin = lattice["x0"]  # lattice x of column 0 (search frame)
     bands = lattice["bands"]
     lefts = lattice["lefts"]
+    field_rows, field_lefts = lattice.get("field_bands") or (None, None)
     widths = model["widths"]
     points = model["breakpoints"]
     taus_table = model["taus"]
@@ -622,6 +663,16 @@ def _walk(lattice: dict, model: dict, rows_cap: int, columns_cap: int, threshold
                     if e > limit:
                         e = limit
                     s = i0 + taus[j - 1]
+                    if field_rows is not None:
+                        # Whole board: the row's share of F, from its first taxel less the field margin, off the bends only
+                        # the field must keep off (the Row channel beside it takes the single board's rule alone).
+                        edge = origin + s * pitch - half - margin
+                        free = field_rows[k]
+                        place = bisect.bisect_right(field_lefts[k], edge + _NOISE) - 1
+                        if place < 0 or free[place][1] < edge:
+                            break
+                        if free[place][1] < math.inf:
+                            e = min(e, int(math.floor((free[place][1] - margin - half - origin) / pitch)))
                     if s > e or (previous is not None and s > previous):
                         break
                     run = 1
@@ -777,8 +828,12 @@ def _lattices(space: FreeSpace, side_record: Mapping[str, Any], frame: Any, pitc
         if key not in bands_cache:
             y0, bands = _bands(space, pitch, width, margin, phase_y)
             mirrored = _mirror(bands)
-            bands_cache[key] = (y0, bands, [[a for a, _ in row] for row in bands], mirrored, [[a for a, _ in row] for row in mirrored])
-        y0, bands, lefts, mirrored, mirrored_lefts = bands_cache[key]
+            fields = _field_bands(space, pitch, margin, y0, len(bands))
+            if fields is not None:
+                # Each side's F bands and their left ends, as the bands' (None without field_bends).
+                fields = {side: (rows, [[a for a, _ in row] for row in rows]) for side, rows in (("left", fields), ("right", _mirror(fields)))}
+            bands_cache[key] = (y0, bands, [[a for a, _ in row] for row in bands], mirrored, [[a for a, _ in row] for row in mirrored], fields)
+        y0, bands, lefts, mirrored, mirrored_lefts, fields = bands_cache[key]
         for phase_x in phases_x:
             x0 = space.x0 + phase_x
             for role in roles:
@@ -787,6 +842,7 @@ def _lattices(space: FreeSpace, side_record: Mapping[str, Any], frame: Any, pitc
                     "space": space, "frame": frame, "side_record": side_record, "pitch": pitch, "width": width, "margin": margin,
                     "side": side, "role": role, "y0": y0, "x0": -x0 if side == "right" else x0,
                     "bands": mirrored if side == "right" else bands, "lefts": mirrored_lefts if side == "right" else lefts,
+                    "field_bands": None if fields is None else fields[side],
                     "phase": (phase_x, phase_y),
                 })
     return found
@@ -1031,14 +1087,12 @@ def _pitches(options: Mapping[str, Any], rectangles: Sequence) -> list:
 # --------------------------------------------------------------------------
 
 
-def fit_chart_fill(mesh: Any, chart: Any, sides: Sequence, bases: Sequence, options: Mapping[str, Any], cache: Any = None) -> dict:
-    """:func:`surface.fit.fit_chart` with masked fields: the rectangles and the masks, merged and realized best first."""
+def _search_fill(chart: Any, bases: Sequence, options: Mapping[str, Any], profile: Mapping[str, Any], obstacles: Mapping[str, Any],
+                 rejected: dict, per_base: list) -> tuple:
+    """The candidates of :func:`fit_chart_fill` among ``obstacles``: ``(rectangles, masked)``, each with its frame and
+    region; the search's rejections counted in ``rejected``, its frames in ``per_base``."""
 
-    profile = fit.load_profile_cached(options["template"])
-    obstacles = fit.surface_obstacles(mesh, chart, options)
     rectangles = []
-    rejected: dict = {}
-    per_base: list = []
 
     def run(side: Mapping[str, Any], angle: float, pitches: Any = None) -> list:
         frame = fit.BaseFrame(side, angle)
@@ -1066,6 +1120,29 @@ def fit_chart_fill(mesh: Any, chart: Any, sides: Sequence, bases: Sequence, opti
     masked, masked_rejected = masked_candidates(chart, bases, options, profile, obstacles, rectangles, per_base)
     for reason, count in masked_rejected.items():
         rejected[reason] = rejected.get(reason, 0) + count
+    return rectangles, masked
+
+
+def fit_chart_fill(mesh: Any, chart: Any, sides: Sequence, bases: Sequence, options: Mapping[str, Any], cache: Any = None) -> dict:
+    """:func:`surface.fit.fit_chart` with masked fields: the rectangles and the masks, merged and realized best first."""
+
+    profile = fit.load_profile_cached(options["template"])
+    obstacles = fit.surface_obstacles(mesh, chart, options)
+    rejected: dict = {}
+    per_base: list = []
+    rectangles, masked = _search_fill(chart, bases, options, profile, obstacles, rejected, per_base)
+    if obstacles.get("field_bends"):
+        # Whole board (2026-11-18): the search above lets the boards cross the bends only the taxel field must keep off and
+        # moves F off them within the boards' room (UsableRaster.field_y up and down, FreeSpace.field_intervals from the
+        # channel's edge), which a bend running toward the exit leaves none of.  The search with the boards off them as well,
+        # the whole board's rule until that day, finds the fields beside such a bend; its candidates hold under one board's
+        # rule too, so Whole board never proposes less than before (the roof turned, its creases across its exit: 182
+        # taxels, not 132).  Its account stays out of the reply's (its rejections and bases are the search's above).
+        strict = {key: value for key, value in obstacles.items() if key != "field_bends"}
+        strict["bends"] = obstacles["field_bends"]
+        more_rectangles, more_masked = _search_fill(chart, bases, options, profile, strict, {}, [])
+        rectangles += more_rectangles
+        masked += more_masked
     pool = [(_rectangle_rank(c), c) for c in rectangles] + [(c["rank"], c) for c in masked]
     pool.sort(key=lambda item: item[0])
     # (rank, order, candidate): a peeled candidate goes back in at its own rank.
@@ -1235,6 +1312,9 @@ def _realize_once(candidate: Mapping[str, Any], chart: Any, obstacles: Mapping[s
     if clearance is None:
         point = containment_failure(outlines, region, frame, obstacles, options["edge_margin_mm"], roots)
         return ("real outline leaves the surface", point)
+    point = fit.field_bend_point(result, (field_x, field_y), region, frame, obstacles, options["edge_margin_mm"])
+    if point is not None:
+        return (fit.FIELD_BEND_REASON, point)
     manifest = result["manifest"]
     registration = result["boards"]["row"]["grid_registration"]
     aw, ah = extent["field"]
@@ -1337,14 +1417,7 @@ def containment_failure(outlines: Mapping[str, Sequence], region: Any, frame: An
     return None
 
 
-def _crossing(a, b, c, d) -> tuple:
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    fx, fy = d[0] - c[0], d[1] - c[1]
-    det = dx * fy - dy * fx
-    if det == 0:
-        return tuple(a)
-    t = min(max(((c[0] - a[0]) * fy - (c[1] - a[1]) * fx) / det, 0.0), 1.0)
-    return (a[0] + dx * t, a[1] + dy * t)
+_crossing = fit.segment_crossing
 
 
 def peel(candidate: Mapping[str, Any], point: Sequence[float], profile: Mapping[str, Any]) -> Any:

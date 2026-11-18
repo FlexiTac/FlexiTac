@@ -43,10 +43,16 @@ fit, no entries.json, no engine.  Its state is <pre id="showcaseState">.
   is the showcase's one card, as wide as the row, its picture (one image, the card file, 4:5, no canvas and no three.js
   on the grid) beside its label, its title and its line; reached with Tab and opened with Enter it gives the showcase's
   own page in the window over the grid (since 2026-11-15), its title focused: the 3D view drawn over the picture from the
-  placed record (no build, the scene's gripper, Assembled at its home, the scene's looks and the rules' camera, the fingers orange,
-  the boards amber), its box 4:5; the window's Tab order (its X first), the Exploded | Assembled control worked with the
-  arrow keys, the view turned with them and brought back with 0; the tutorial's link and the two notices (each answered
-  by the server); no Open in Gen by Surface, no download; the window's X back to the card, its Details focused.  At 390 px, light and dark: the card stacked within the window, nothing scrolling sideways, the
+  placed record (no build, the scene's gripper, Exploded at its home, the card's view since the user's decision of 2026-11-16,
+  "Switch to exploded"; the card the Exploded drawing; the scene's looks and the rules' camera, and at the Assembled home
+  from the control the fingers orange, the boards amber), its box 4:5; the window's Tab order (its X first), the Exploded | Assembled control worked with the
+  arrow keys, the view turned with them and brought back with 0; the tutorial's link and the notices (each answered
+  by the server); no Open in Gen by Surface, none of the generator's downloads; since the user's request of 2026-11-17
+  ("把instruction里面的fpc gerber也都放到这边可以直接download") under the tutorial the pad's Top and Bottom FPC Gerber ZIPs
+  in the grey pills on one line, then its reading board in the sensors' own row ("Reading board", "32 × 16 · ZIP, 50 kB ·
+  CC BY-NC 4.0", between hairlines; the review of 2026-11-17: three pills had wrapped two and one), each file the served
+  one at its pin (tools/flexitac_downloads.py) under its name, the sources' line as before; the window's X back
+  to the card, its Details focused.  At 390 px, light and dark: the card stacked within the window, nothing scrolling sideways, the
   page's view drawn in its light box; no console error anywhere.  --out DIR: the pages' screenshots.
   Design your own (the user's decisions of 2026-11-15 and 2026-11-16: "在flexitac on xarm的details 后面，多一个按钮，generate
   sensor by yourself with cad file", named "Design your own"): on the card right after Details, on its line, as tall and
@@ -72,6 +78,9 @@ sys.dont_write_bytecode = True  # no __pycache__ next to the scripts
 import rp  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools"))
+import library_write  # noqa: E402
+
 PLACED = "vendor/flexitac-v2/umi-finray.placed.json"
 WEBGL_ARGS = ["--enable-unsafe-swiftshader", "--use-angle=swiftshader"]
 PROBE_PATH = "static/showcase-probe.html"
@@ -415,6 +424,17 @@ GRID = """() => {
     canvases: document.querySelectorAll('canvas').length, wide: document.scrollingElement.scrollWidth, window: innerWidth,
     scripts: performance.getEntriesByType('resource').map(entry => entry.name).filter(name => /three|library_view|onpart/.test(name))};
 }"""
+# The FlexiTac hardware's files in the showcase's window (2026-11-17; web/boards.js, tools/flexitac_downloads.py): each
+# download's [href, download, words, class, data-hardware] (the two FPC pills, then the board row's ZIP), their SHA-256s,
+# the reading board's notice (its row's licence link).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import flexitac_downloads  # noqa: E402
+
+HARDWARE_PILLS = [[f"static/vendor/flexitac-v2/{name}", name, f"{side} FPC Gerber ZIP", "lib-pill", f"{side.lower()}-gerber"]
+                  for side, name in zip(("Top", "Bottom"), flexitac_downloads.FPC_FILES)]
+HARDWARE_PILLS.append(["static/vendor/flexitac-reader/FlexiTac_reading_board_32x16.zip", "FlexiTac_reading_board_32x16.zip", "ZIP, 50 kB", "", None])
+HARDWARE_SHA256 = [pin[0] for pin in flexitac_downloads.FPC_FILES.values()] + [flexitac_downloads.BOARDS["32x16"]["bundle"][1]]
+READER_NOTICE = "static/vendor/flexitac-reader/NOTICE.md"
 PAGE = """() => {
   const detail = document.getElementById('libDetail'); const stage = detail.querySelector('.lib-stage'); const live = detail.querySelector('.lib-live');
   const box = element => { if (!element) return null; const r = element.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
@@ -430,7 +450,14 @@ PAGE = """() => {
     views: [...detail.querySelectorAll('input[name=libView]')].map(input => [input.value, input.checked]),
     pill: pill ? [pill.getAttribute('href'), pill.target, pill.rel, pill.textContent, getComputedStyle(pill).backgroundColor] : null,
     notices: [...detail.querySelectorAll('.lib-provenance a')].map(a => a.getAttribute('href')), sources: detail.querySelector('.lib-provenance')?.textContent,
-    open: detail.querySelectorAll('.lib-open').length, downloads: detail.querySelectorAll('[data-export], a[download], .lib-downloads').length,
+    open: detail.querySelectorAll('.lib-open').length, downloads: detail.querySelectorAll('[data-export]').length,
+    hardware: [...detail.querySelectorAll('a[download]')].map(a => [a.getAttribute('href'), a.getAttribute('download'), a.textContent, a.className,
+      a.dataset.hardware || null, getComputedStyle(a).backgroundColor, Math.round(a.getBoundingClientRect().top)]),
+    tutorialBottom: pill ? Math.round(pill.getBoundingClientRect().bottom) : null,
+    board: [...detail.querySelectorAll('.lib-order dt')].map(dt => [dt.textContent, dt.nextElementSibling.textContent,
+      [...dt.nextElementSibling.querySelectorAll('a')].map(a => [a.getAttribute('href'), a.target || null, a.getAttribute('aria-label')])]),
+    boardTop: detail.querySelector('.lib-order') ? Math.round(detail.querySelector('.lib-order').getBoundingClientRect().top) : null,
+    boardLines: detail.querySelector('.lib-order') ? ['borderTopWidth', 'borderBottomWidth'].map(key => getComputedStyle(detail.querySelector('.lib-order'))[key]) : null,
     pitch: detail.querySelectorAll('.lib-seg, .lib-facts').length, wide: document.scrollingElement.scrollWidth, window: innerWidth,
     page: getComputedStyle(document.body).backgroundColor};
 }"""
@@ -473,6 +500,22 @@ def near(a, b, tol: float = 1.0) -> bool:
     return abs(a - b) <= tol
 
 
+def picture_apart(one, other) -> float:
+    """The mean difference of two RGBA pictures' colours (0-255, the three channels' mean) over the pixels drawn in either
+    (alpha above 0), each over the card's light box (#f5f5f7)."""
+
+    from PIL import Image
+
+    flat = []
+    for image in (one, other):
+        ground = Image.new("RGBA", image.size, (245, 245, 247, 255))
+        ground.alpha_composite(image)
+        flat.append(ground.convert("RGB").tobytes())
+    drawn = [max(a, b) > 0 for a, b in zip(one.getchannel("A").tobytes(), other.getchannel("A").tobytes())]
+    total = sum(abs(flat[0][k] - flat[1][k]) for k in range(len(flat[0])) if drawn[k // 3])
+    return round(total / max(1, 3 * sum(drawn)), 2)
+
+
 def part_page(browser, url: str, out: Path) -> None:
     from PIL import Image
 
@@ -504,6 +547,13 @@ def part_page(browser, url: str, out: Path) -> None:
                  grid["images"] == 1 and grid["src"] == f"static/library/{card['src']}" and grid["natural"] == [card["width"], card["height"]]
                  and grid["complete"] and grid["loading"] is None and grid["alt"] == document["image"]["alt"] and grid["canvases"] == 0
                  and grid["scripts"] == [], (grid["images"], grid["src"], grid["natural"], grid["loading"], grid["canvases"], grid["scripts"]))
+        # The card is the Exploded drawing, as every gripper's card (the user's decision of 2026-11-16, "Switch to
+        # exploded"; the Assembled one before): the card file against both pictures downscaled to its size, the mean
+        # difference of their colours over the drawn pixels (0-255).
+        files = {kind: Image.open(LIBRARY / document["image"][kind]["src"]).convert("RGBA") for kind in ("card", "exploded", "assembled")}
+        apart = {mode: picture_apart(files["card"], files[mode].resize(files["card"].size, Image.LANCZOS)) for mode in ("exploded", "assembled")}
+        rp.check("1440: the card's picture is the Exploded drawing (the gripper cards' view), not the Assembled one",
+                 apart["exploded"] < 2 and apart["assembled"] > 8 and library_write.SHOWCASE_SHOTS["card"][2] == "exploded", apart)
         rp.check("1440: the card is as wide as the row, its picture a 4:5 light box on the left, its words just beside it, a fifth of the row, nothing past the window",
                  near(grid["card"][2], grid["row"][2]) and near(grid["shot"][2] * 5, grid["shot"][3] * 4, 4)
                  and grid["shot"][0] < grid["text"][0] and 0 <= grid["text"][0] - (grid["shot"][0] + grid["shot"][2]) <= 1
@@ -531,14 +581,15 @@ def part_page(browser, url: str, out: Path) -> None:
                  and page.evaluate("() => document.activeElement?.className") == "lib-pill lib-showcase-details", after)
         design_ok(grid, "1440 light", document)
         page.keyboard.press("Enter")
-        state = view_state(page, drawn("assembled"))
+        state = view_state(page, drawn("exploded"))
         info = page.evaluate(PAGE)
         rp.check("1440: Enter opens the showcase's own page in the window over the grid, its title focused, the tab named after it",
                  (info["hash"], info["windowed"], info["covered"], info["focused"], info["heading"]) == (f"#{identifier}", True, True, "libDetailTitle", document["title"])
                  and info["title"].startswith(f"{document['title']} · "), (info["hash"], info["windowed"], info["covered"], info["focused"], info["heading"], info["title"]))
-        rp.check("1440: the 3D view is drawn from the placed record: no build, the scene's gripper, Assembled at its home",
+        # (Exploded since the user's decision of 2026-11-16, the card's view, as a gripper's page opens; Assembled before.)
+        rp.check("1440: the 3D view is drawn from the placed record: no build, the scene's gripper, Exploded at its home, the card's view",
                  bool(state) and (state.get("state"), state.get("id"), state.get("build_id"), state.get("gripper"), state.get("mode"), state.get("drawn_mode"), state.get("moved"))
-                 == ("drawn", identifier, None, True, "assembled", "assembled", False) and info["live"],
+                 == ("drawn", identifier, None, True, "exploded", "exploded", False) and info["live"],
                  state and {key: state.get(key) for key in ("state", "note", "id", "build_id", "gripper", "mode", "drawn_mode", "moved")})
         stage = (state or {}).get("stage") or {}
         looks = stage.get("looks") or {}
@@ -550,10 +601,18 @@ def part_page(browser, url: str, out: Path) -> None:
                  looks.get("bodies") == sorted({body["look"] for body in scene["bodies"]}) and looks.get("part") == scene["part_look"]
                  and "camera" not in scene and stage.get("camera") == rules["camera"] and stage.get("see_through") == ["mate"],
                  (looks, stage.get("camera"), stage.get("see_through")))
-        rp.check("1440: the view's box is 4:5 beside the page's words and within the window, its canvas filling it, the Assembled view chosen",
+        rp.check("1440: the view's box is 4:5 beside the page's words and within the window, its canvas filling it, the Exploded view chosen",
                  near(info["stage"][2] * 5, info["stage"][3] * 4, 4) and near(info["canvas"][2], info["stage"][2]) and near(info["canvas"][3], info["stage"][3])
-                 and info["info"][0] > info["frame"][0] + info["frame"][2] and info["views"] == [["exploded", False], ["assembled", True]]
+                 and info["info"][0] > info["frame"][0] + info["frame"][2] and info["views"] == [["exploded", True], ["assembled", False]]
                  and info["stage"][1] + info["stage"][3] <= 900, (info["stage"], info["canvas"], info["views"]))
+        page.wait_for_timeout(400)
+        page.screenshot(path=str(out / "page.exploded.1440.light.png"))
+        # The colours of the gripper as built, at the Assembled home (the measures below are of it): the control's
+        # Assembled, then the page as it opened (Exploded) again.
+        page.evaluate("() => document.querySelector('input[name=libView][value=assembled]').click()")
+        state = view_state(page, drawn("assembled"))
+        rp.check("1440: Assembled is drawn at its home from the control", bool(state) and (state.get("drawn_mode"), state.get("moved")) == ("assembled", False),
+                 state and (state.get("state"), state.get("drawn_mode")))
         image = Image.open(io.BytesIO(base64.b64decode(page.evaluate(PAGE_CANVAS).split(",", 1)[1]))).convert("RGBA")
         # By hue (the merge of 2026-11-13: the fingers in the UMI rows' orange, whose mid-tones are darker than the base
         # orange's): the fingers' orange 8 to 26 degrees, the boards' amber 26 to 45, both saturated and lit.
@@ -575,16 +634,40 @@ def part_page(browser, url: str, out: Path) -> None:
         rp.check("1440: both pads in sight, the near finger's seen through that finger (the amber boards on the canvas's left half)",
                  left > 0.12, f"the left half's amber {left:.3f}")
         page.screenshot(path=str(out / "page.assembled.1440.light.png"))
-        rp.check("1440: the page's words: the label, one line, the line of detail, the tutorial for the Gerbers (a grey pill, a new tab), the two notices",
+        page.evaluate("() => document.querySelector('input[name=libView][value=exploded]').click()")
+        view_state(page, drawn("exploded"))
+        # The notices: the sources' two (the line as before 2026-11-17) and the reading board's, its row's licence link.
+        notices = [f"static/library/{item['notice']}" for item in document["sources"]]
+        rp.check("1440: the page's words: the label, one line, the line of detail, the tutorial for the Gerbers (a grey pill, a new tab), the sources' "
+                 "two notices",
                  (info["label"], " ".join(info["line"].split()), " ".join((info["detail"] or "").split())) == (document["label"], document["text"], document["detail"])
                  and info["pill"][:4] == [document["tutorial"]["href"], "_blank", "noopener noreferrer", document["tutorial"]["label"]]
-                 and info["notices"] == [f"static/library/{item['notice']}" for item in document["sources"]]
+                 and info["notices"] == notices and "Reading board" not in info["sources"]
                  and all(item["text"] in info["sources"] for item in document["sources"]), (info["label"], info["pill"], info["notices"]))
-        answered = page.evaluate("async (paths) => Promise.all(paths.map(async path => { const answer = await fetch(path); return [answer.status, (await answer.text()).length > 200]; }))", info["notices"])
-        rp.check("1440: both notices are files the site serves", answered == [[200, True], [200, True]], answered)
-        rp.check("1440: no Open in Gen by Surface, no download, no pitch or facts; the pill is not the action blue",
+        answered = page.evaluate("async (paths) => Promise.all(paths.map(async path => { const answer = await fetch(path); return [answer.status, (await answer.text()).length > 200]; }))",
+                                 info["notices"] + [READER_NOTICE])
+        rp.check("1440: the three notices (the sources' and the reading board's) are files the site serves", answered == [[200, True]] * 3, answered)
+        rp.check("1440: no Open in Gen by Surface, none of the generator's downloads, no pitch or facts; the pill is not the action blue",
                  (info["open"], info["downloads"], info["pitch"]) == (0, 0, 0) and info["pill"][4] not in ("rgb(0, 113, 227)", "rgb(41, 151, 255)"),
                  (info["open"], info["downloads"], info["pitch"], info["pill"][4]))
+        # The guide's own files (the user's request of 2026-11-17): under the tutorial the pad's two FPC ZIPs in the sensors'
+        # grey download pills, on one line; under them the reading board in the sensors' own row (the review of 2026-11-17),
+        # each the served file at its pin, under its own name.
+        hardware = [row[:5] for row in info["hardware"]]
+        pills = info["hardware"][:2]
+        rp.check("1440: under the tutorial the pad's Top and Bottom FPC Gerber ZIPs, grey pills (not the action blue) side by side on one line",
+                 hardware[:2] == HARDWARE_PILLS[:2] and all(row[5] not in ("rgb(0, 113, 227)", "rgb(41, 151, 255)") and row[6] > info["tutorialBottom"] for row in pills)
+                 and pills[0][6] == pills[1][6], info["hardware"])
+        rp.check("1440: under them the reading board's row (12 x 32: the 32 x 16 board), the sensors' words between two hairlines: its ZIP (named in full "
+                 "to a screen reader) and its licence (its notice, a new tab)",
+                 hardware[2:] == HARDWARE_PILLS[2:] and info["boardTop"] > pills[0][6] and info["boardLines"] == ["1px", "1px"]
+                 and info["board"] == [["Reading board", "32 × 16\u00a0· ZIP, 50 kB\u00a0· CC BY-NC 4.0",
+                                        [[HARDWARE_PILLS[2][0], None, "Reading board 32 × 16, ZIP, 50 kB"], [READER_NOTICE, "_blank", None]]]],
+                 (info["board"], info["boardTop"], info["boardLines"], info["hardware"][2:]))
+        served = page.evaluate("""async (paths) => Promise.all(paths.map(async path => { const answer = await fetch(path);
+          const digest = await crypto.subtle.digest('SHA-256', await answer.arrayBuffer());
+          return [answer.status, [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('')]; }))""", [row[0] for row in hardware])
+        rp.check("1440: each is the served file at its pin (tools/flexitac_downloads.py)", served == [[200, digest] for digest in HARDWARE_SHA256], served)
         # The keyboard on the page.  Its Tab order is the window's order: its X (since 2026-11-15; the page's back link
         # before), the view, the Exploded | Assembled control, then the words' links; the title, focused as the page opens, comes after the control, so Shift+Tab
         # from it reaches the control (the arrow keys choose) and then the view (the arrow keys turn it, 0 brings it back).
@@ -592,13 +675,11 @@ def part_page(browser, url: str, out: Path) -> None:
         while presses < 6 and page.evaluate("() => document.activeElement?.name") != "libView":
             page.keyboard.press("Shift+Tab")
             presses += 1
-        page.keyboard.press("ArrowLeft")
-        state = view_state(page, drawn("exploded"))
-        rp.check("1440: the arrow keys on the control switch the view to Exploded, drawn at its home",
-                 bool(state) and (state.get("mode"), state.get("drawn_mode"), state.get("moved")) == ("exploded", "exploded", False)
-                 and page.evaluate("() => document.activeElement?.value") == "exploded", state and (state.get("mode"), state.get("drawn_mode"), presses))
-        page.wait_for_timeout(400)
-        page.screenshot(path=str(out / "page.exploded.1440.light.png"))
+        page.keyboard.press("ArrowRight")
+        state = view_state(page, drawn("assembled"))
+        rp.check("1440: the arrow keys on the control switch the view to Assembled, drawn at its home",
+                 bool(state) and (state.get("mode"), state.get("drawn_mode"), state.get("moved")) == ("assembled", "assembled", False)
+                 and page.evaluate("() => document.activeElement?.value") == "assembled", state and (state.get("mode"), state.get("drawn_mode"), presses))
         page.keyboard.press("Shift+Tab")
         focused = page.evaluate("() => [document.activeElement?.className, document.activeElement?.getAttribute('aria-label'), document.activeElement?.getAttribute('role')]")
         for _ in range(4):
@@ -610,8 +691,9 @@ def part_page(browser, url: str, out: Path) -> None:
         # hidden since 2026-11-15.)
         order = page.evaluate("""() => [...document.querySelectorAll('#libWindow button, #libWindow a, #libWindow input, #libWindow [tabindex="0"]')]
           .map(node => node.classList[0] || node.name || node.textContent)""")
-        rp.check("1440: the window's Tab order: its X, the view, the control's two views, the tutorial, the two notices",
-                 order == ["lib-close", "lib-live", "libView", "libView", "lib-pill", "notice", "notice"], order)
+        rp.check("1440: the window's Tab order: its X, the view, the control's two views, the tutorial, the two FPC ZIPs, the board's ZIP and "
+                 "licence, the two notices",
+                 order == ["lib-close", "lib-live", "libView", "libView", "lib-pill", "lib-pill", "lib-pill", "ZIP, 50 kB", "CC BY-NC 4.0", "notice", "notice"], order)
         rp.check("1440: the keyboard reaches the view (a group named by the picture's alt); the arrow keys turn it and 0 brings it back",
                  focused == ["lib-live", document["image"]["alt"], "group"] and bool(turned) and turned.get("moved") is True and bool(back) and back.get("moved") is False,
                  (focused, turned and turned.get("moved"), back and back.get("moved")))
@@ -625,7 +707,7 @@ def part_page(browser, url: str, out: Path) -> None:
                  (after, (off or {}).get("state")))
         # The picture opens the page too (by the mouse), and Back comes back to Details.
         page.click(".lib-showcase-pic")
-        state = view_state(page, drawn("assembled"))
+        state = view_state(page, drawn("exploded"))
         opened = page.evaluate("() => [location.hash, document.getElementById('libWindow').open]")
         page.go_back()
         page.wait_for_timeout(300)
@@ -658,20 +740,20 @@ def part_page(browser, url: str, out: Path) -> None:
             design_ok(grid, f"390 {scheme}", document, scheme)
             page.locator("#showcase").screenshot(path=str(out / f"card.390.{scheme}.png"))
             page.click(".lib-showcase-pic")
-            state = view_state(page, drawn("assembled"))
+            state = view_state(page, drawn("exploded"))
             info = page.evaluate(PAGE)
             page.wait_for_timeout(300)
-            page.screenshot(path=str(out / f"page.assembled.390.{scheme}.png"))
-            rp.check(f"390 {scheme}: the showcase's page in one column (the window a sheet), its view drawn in a 4:5 light box above its words, nothing scrolling sideways",
-                     bool(state) and state.get("state") == "drawn" and state.get("drawn_mode") == "assembled" and info["live"]
+            page.screenshot(path=str(out / f"page.exploded.390.{scheme}.png"))
+            rp.check(f"390 {scheme}: the showcase's page in one column (the window a sheet), its view drawn Exploded in a 4:5 light box above its words, nothing scrolling sideways",
+                     bool(state) and state.get("state") == "drawn" and state.get("drawn_mode") == "exploded" and info["live"]
                      and near(info["stage"][2] * 5, info["stage"][3] * 4, 4) and info["stage"][0] >= 0 and info["stage"][0] + info["stage"][2] <= 390
                      and info["info"][1] >= info["frame"][1] + info["frame"][3] and info["ground"] == "rgb(245, 245, 247)" and info["wide"] <= 390,
                      (state and (state.get("state"), state.get("note")), info["stage"], info["info"], info["ground"], info["wide"]))
             dark = sum(int(value) for value in re.findall(r"\d+", info["page"])[:3]) < 120
             rp.check(f"390 {scheme}: the page is {scheme}", dark == (scheme == "dark"), info["page"])
-            page.evaluate("() => document.querySelector('input[name=libView][value=exploded]').click()")
-            state = view_state(page, drawn("exploded"))
-            rp.check(f"390 {scheme}: Exploded is drawn there too", bool(state) and state.get("drawn_mode") == "exploded", state and (state.get("state"), state.get("drawn_mode")))
+            page.evaluate("() => document.querySelector('input[name=libView][value=assembled]').click()")
+            state = view_state(page, drawn("assembled"))
+            rp.check(f"390 {scheme}: Assembled is drawn there too", bool(state) and state.get("drawn_mode") == "assembled", state and (state.get("state"), state.get("drawn_mode")))
             rp.check(f"390 {scheme}: no console error or warning", not page.errors, page.errors[:3])
         finally:
             page.context.close()

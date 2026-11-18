@@ -353,9 +353,10 @@ class MapVerificationTests(unittest.TestCase):
         self.assertEqual(strain, brute(chart, mesh, frame, polygons))
 
     def test_the_spacing_tolerance_follows_the_strain_limit(self) -> None:
-        # At a strain limit of 2% the sheet may stretch by 2% under the boards, and the spacing with it.
+        # At a strain limit of 2% the sheet may stretch by 2% under the boards, and the spacing with it (a 20-degree cap:
+        # the relaxed sheet within 2% since 2026-11-17, a 25-degree one's 2.4% refused).
         data, _, selection, result = self.fitted(
-            F.sphere_cap(60.0, 25.0, rings=8, segments=32), (0.0, 0.0, 60.0), "smooth", pitch_mm=1.5, strain_limit=0.02, proposals=2
+            F.sphere_cap(60.0, 20.0, rings=8, segments=32), (0.0, 0.0, 60.0), "smooth", pitch_mm=1.5, strain_limit=0.02, proposals=2
         )
         for proposal in result["proposals"]:
             mapped = place.map_route({"selection": selection, "placement": proposal["placement"], "design": proposal["design"]}, data)

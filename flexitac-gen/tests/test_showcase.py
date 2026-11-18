@@ -4,8 +4,8 @@ original version at the top of the Library, hand-designed, not auto-generated).
 - web/vendor/flexitac-v2/geometry.json (tools/flexitac_v2.py, from the official Gerbers): the pinned file; its
   invariants (12 sense and 32 drive lines at 2 mm on one origin, the slots between them, the A's window, the gold
   fingers at 0.5 mm, a trace from every electrode to a finger, the extents); the reader on small Gerbers of its own
-  (flashes, strokes joined, regions; what it refuses); the rebuild from the ZIPs where FLEXITAC_V2_GERBERS names their
-  folder; its notice (the licence the hardware repository states, the tutorial, the hashes).
+  (flashes, strokes joined, regions; what it refuses); the rebuild from the ZIPs (served beside it since 2026-11-17;
+  FLEXITAC_V2_GERBERS may name another folder); its notice (the licence the hardware repository states, the tutorial, the hashes).
 - The two boards as the engine draws them (flexitac_v2.engine_boards, engine/core.py's SVG writer): which FPC is row
   and which column, which lies outward, one field on both.
 - web/vendor/flexitac-v2/art.json.gz (tools/browser/flexitac_v2_art.py): a flexitac-library-art/v1 document of no
@@ -97,9 +97,10 @@ class GeometryTests(unittest.TestCase):
                 (Path(folder) / name).write_bytes(b"not the zip")
             self.assertIn("not the pinned", flexitac_v2.check(Path(folder))[0])
 
-    @unittest.skipUnless(os.environ.get("FLEXITAC_V2_GERBERS"), "FLEXITAC_V2_GERBERS does not name the folder of the two Gerber ZIPs")
     def test_the_official_gerbers_give_the_committed_geometry(self) -> None:
-        self.assertEqual(flexitac_v2.check(Path(os.environ["FLEXITAC_V2_GERBERS"])), [])
+        # Since 2026-11-17 the two ZIPs are served unchanged beside the geometry (tools/flexitac_downloads.py), so the
+        # rebuild runs on every run (FLEXITAC_V2_GERBERS, which named their folder before, still may).
+        self.assertEqual(flexitac_v2.check(Path(os.environ.get("FLEXITAC_V2_GERBERS") or FOLDER)), [])
 
     def test_the_two_boards_lines_at_2_mm_on_one_origin(self) -> None:
         top, bottom = GEOMETRY["boards"]["top"], GEOMETRY["boards"]["bottom"]
@@ -266,7 +267,8 @@ class NoticeTests(unittest.TestCase):
                       "FlexiTac © 2026 by Columbia University is licensed under CC BY-NC 4.0",
                       "https://creativecommons.org/licenses/by-nc/4.0/", "not** under this repository's Apache-2.0 licence",
                       "https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/", "hand-designed",
-                      "The ZIPs themselves are not in this repository"):
+                      # Served unchanged since the user's request of 2026-11-17 (tools/flexitac_downloads.py).
+                      "Since the user's request of 2026-11-17 the two ZIPs are served here too, unchanged"):
             with self.subTest(words=words):
                 self.assertIn(words, text)
         for name, digest in flexitac_v2.SOURCES.values():
@@ -276,14 +278,18 @@ class NoticeTests(unittest.TestCase):
 
     def test_each_file_is_tabled_with_its_hash_or_the_projects_own(self) -> None:
         rows = _notice_rows()
-        self.assertEqual(sorted(rows), ["art.json.gz", "geometry.json"])
+        # Since 2026-11-17 the two Gerber ZIPs too, unchanged (the showcase's window offers them; tools/flexitac_downloads.py).
+        zips = sorted(name for name, _ in flexitac_v2.SOURCES.values())
+        self.assertEqual(sorted(rows), sorted(["art.json.gz", "geometry.json", *zips]))
         for name, cells in rows.items():
             with self.subTest(file=name):
                 self.assertEqual(cells[4].strip("`"), hashlib.sha256((FOLDER / name).read_bytes()).hexdigest())
                 self.assertIn("CC BY-NC 4.0, Columbia University", cells[2])
-                self.assertTrue(cells[3].startswith("modified:"))
-        # The folder holds these, the notice and the project's own placed record (named in the notice), and no Gerber.
-        self.assertEqual(sorted(path.name for path in FOLDER.iterdir()), ["NOTICE.md", "art.json.gz", "geometry.json", "umi-finray.placed.json"])
+                self.assertTrue(cells[3].startswith("unchanged" if name in zips else "modified:"))
+        for name, digest in flexitac_v2.SOURCES.values():
+            self.assertEqual(hashlib.sha256((FOLDER / name).read_bytes()).hexdigest(), digest, "the tutorial's own ZIP, unchanged")
+        # The folder holds these, the notice and the project's own placed record (named in the notice), and no other Gerber.
+        self.assertEqual(sorted(path.name for path in FOLDER.iterdir()), sorted(["NOTICE.md", "art.json.gz", "geometry.json", "umi-finray.placed.json", *zips]))
         self.assertIn("`umi-finray.placed.json` is this project's own", " ".join((FOLDER / "NOTICE.md").read_text(encoding="utf-8").split()))
         self.assertTrue(any("web/vendor/flexitac-v2".startswith(root) or root == "web" for root in export_public.PUBLIC))
 

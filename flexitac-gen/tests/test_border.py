@@ -692,8 +692,11 @@ class StrainLimitedTests(unittest.TestCase):
         for got, want in zip(border.carry(points, chart, chart), points):
             self.assertLess(math.dist(got, want), 1e-9)
 
-    def test_a_dome_carries_the_border_onto_its_disk(self) -> None:
-        triangles = F.sphere_cap(60.0, 25.0, rings=8, segments=32)
+    def test_a_border_on_a_dome_holds_on_its_whole_chart(self) -> None:
+        # Since 2026-11-17 the fit takes a curved selection whole, on its least-max-stretch chart (no disk the border was
+        # carried onto): beyond the strain limit it is refused whatever the border, within it the border holds there.  A
+        # 20-degree cap (the relaxed sheet 1.5 % at its rim, smoothed 1.2 %; a 25-degree one's 2.4 % is over 2 %).
+        triangles = F.sphere_cap(60.0, 20.0, rings=8, segments=32)
         data = F.stl_bytes(triangles)
         mesh = F.mesh(triangles)
         seed = select.nearest_facet(mesh, (0.0, 0.0, 60.0))
@@ -703,16 +706,20 @@ class StrainLimitedTests(unittest.TestCase):
         cu = math.fsum(p[0] for p in whole["outline_uv"]) / len(whole["outline_uv"])
         cv = math.fsum(p[1] for p in whole["outline_uv"]) / len(whole["outline_uv"])
         uv = [(cu - 8, cv - 6), (cu + 8, cv - 6), (cu + 8, cv + 6), (cu - 8, cv + 6)]
-        result = fit.fit_route({"selection": selection, "border": {"uv": [list(p) for p in uv]}, "options": {"pitch_mm": 1.5, "rotation": "none"}}, data)
-        self.assertIn("strain_limited", result["selection"])
+        request = {"selection": selection, "border": {"uv": [list(p) for p in uv]}, "options": {"pitch_mm": 1.5, "rotation": "none"}}
+        with self.assertRaises(SurfaceError) as raised:
+            fit.fit_route(request, data)
+        self.assertEqual(raised.exception.code, "E_SURFACE_NOT_DEVELOPABLE")
+        request["options"]["strain_limit"] = 0.02
+        result = fit.fit_route(request, data)
+        self.assertNotIn("strain_limited", result["selection"])
+        self.assertEqual(result["selection"]["facets"], whole["facets"])
         _, chart = api.selection_chart(mesh, selection)
-        _, disk = fit.limited_chart(mesh, set(chart.facets), result["selection"]["strain_limited"])
-        carried = border.carry(uv, chart, disk)
         for proposal in result["proposals"]:
             self.assertEqual(proposal["placement"]["border"], border.echo(uv))
             frame = _frame(proposal["placement"])
             squares = border.design_squares(proposal["design"], proposal["placement"]["field_origin_base"])
-            self.assertEqual(border.outside(squares, carried, frame), [])
+            self.assertEqual(border.outside(squares, uv, frame), [])
             # At most what the 16 x 12 mm border holds at 1.5 mm (rows and columns either way round).
             crossing = fit._electrode(1.5, fit.DEFAULT_OPTIONS["fill"])
             self.assertLessEqual(proposal["metrics"]["taxels"], _expected_count(16.0, 12.0, 1.5, crossing))

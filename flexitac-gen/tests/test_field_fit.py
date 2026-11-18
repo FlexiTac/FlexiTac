@@ -442,6 +442,18 @@ class FieldSearchTests(unittest.TestCase):
                                  _brute(plain, up) if _brute(plain, up) > threshold else 0)
                 self.assertEqual(fieldfit.best_rectangle(plain, up, caps[0], caps[1])[0], _brute(plain, up, caps, rectangle=True))
 
+    def test_a_spent_work_budget_searches_no_window(self) -> None:
+        # The review of P5d: a lattice's column windows stop once the work meter reaches the budget, not only the next
+        # lattice.  A free 6 x 12 lattice under a 6 x 4 cap is searched by its windows (the whole lattice costs more than
+        # WHOLE_LATTICE_COST windows): 24 cells, 96 of work; with the budget spent no window is searched (the verification
+        # of 2026-11-17: the round-hole plate's budget test no longer reached the windows past the budget).
+        plain = [[11] * 12 for _ in range(6)]
+        grid = {"plain": plain, "up": plain, "rows": 6, "columns": 12, "zones": None}
+        meter = [0]
+        self.assertEqual((fieldfit.search_shaped(grid, 6, 4, 0, meter, 10 ** 9)[0], meter), (24, [96]))
+        meter = [96]
+        self.assertEqual((fieldfit.search_shaped(grid, 6, 4, 0, meter, 96), meter), ((0, []), [96]))
+
     def test_the_bounds_hold(self) -> None:
         # The lattice bound, each window's bound and the quadrant bound of a window around a blocked cell never
         # fall below the best field there.
@@ -761,9 +773,11 @@ class FieldFitTests(unittest.TestCase):
         mapped = place.map_route({"selection": selection, "placement": proposals[0]["placement"], "design": proposals[0]["design"]}, data)
         codes = [warning["code"] for warning in mapped["routing_on_surface"]["warnings"]]
         self.assertIn("W_ROUTING_HOLE", codes)
-        # The plate's sides are square edges: a band hanging over one creases (radius 0 against 10 x 0.11 mm).
+        # The plate's sides are square edges: a band hanging over one creases (radius 0 against 10 x 0.2 mm, a single FPC
+        # as ordered since 2026-11-17; 10 x 0.11 mm before).
         edge = next(w for w in mapped["routing_on_surface"]["warnings"] if w["code"] == "W_BAND_EDGE_RADIUS")
-        self.assertEqual((edge["measured_mm"], edge["limit_mm"]), (0.0, 1.1))
+        self.assertEqual((edge["measured_mm"], edge["limit_mm"]), (0.0, 2.0))
+        self.assertIn("(2 mm, 10 x 0.2 mm)", edge["message"])
 
     def test_a_reader_caps_every_proposal(self) -> None:
         for reader, (sense, drive) in (("32x16", (16, 32)), ("16x16", (16, 16))):
@@ -1733,8 +1747,8 @@ class ReviewFixTests(unittest.TestCase):
                 fit.fit_route({"selection": chosen, "base": "auto", "options": FIELD}, plate)
                 self.assertLess(searches[-1].meter[0], saved[1])
             # A small budget on the round-hole plate's lattices, larger than the caps: the search stops at the next
-            # window past it (1496 cells past 300 000 here; with the windows unchecked a lattice runs on, 62 336 past),
-            # and still proposes the fields found.
+            # window past it (1496 cells past 300 000 here; with the windows unchecked it stays within the bound too, as
+            # found on 2026-11-17, so test_a_spent_work_budget_searches_no_window holds them), and still proposes the fields found.
             fieldfit.WORK_BUDGET = 300_000
             small = fit.fit_route({"selection": selection, "base": "auto", "options": options}, data)
             self.assertTrue(small["proposals"])

@@ -736,8 +736,10 @@ EXPORT = (
       (GERBER, '            writer.writerow((pad["pin"], pad["net"]', '            writer.writerow((pad["position"], pad["net"]')),
     m("X/pinout-index", "M10", "pinout logical index from the position",
       (GERBER, '            index = _channel_index(pad["net"], stem) if pad["kind"] == "connector_pad" else None\n',
-       '            index = pad["position"] if pad["kind"] == "connector_pad" else None\n'),
-      expect="survive", reason="equivalent: channel k always sits at position k (channel_order never moves copper)"),
+       '            index = pad["position"] if pad["kind"] == "connector_pad" else None\n')),
+    # Expected to survive until the verification of the merge of 2026-11-17 ("equivalent: channel k always sits at
+    # position k"): the diagonal Row bus's folded pins break that; test_diagonal_export's folded row order,
+    # test_export_artifacts' pinout rows and the archives' pins kill it.
     m("X/names", "M6", "artifact names without the build id",
       (GERBER, 'f"{build_id}-{side}-{roles[side]}-direct-gerber.zip"', 'f"tactile-fpc-{side}-{roles[side]}-direct-gerber.zip"')),
     m("X/manifest-names", "M6", "review manifest records other names than the downloads",
@@ -872,7 +874,7 @@ TESTS_AND_DOCS = (
     m("T/doc-ci", "L13/M12", "README: CI described on Python versions the workflow does not run",
       ("README.md", "runs the suite on Python 3.9 and 3.12", "runs the suite on Python 3.8 and 3.12")),
     m("T/doc-test-count", "M12", "handoff: a stale test count",
-      ("claude/APP_HANDOFF.md", " tests in 52 modules", "0 tests in 52 modules")),
+      ("claude/APP_HANDOFF.md", " tests in 54 modules", "0 tests in 54 modules")),
     m("T/doc-mutation-summary", "M12", "handoff: a mutation summary that the catalogue does not give",
       ("claude/APP_HANDOFF.md", "3 equivalent (`E/F1-inputs`,", "4 equivalent (`E/F1-inputs`,")),
     m("F/stale-banner", "M4", "browser: the 'Form changed' banner is never shown",
@@ -1024,9 +1026,8 @@ SURFACE = (
     m("S/no-mismatch-check", "C-D9", "a design edited after the fit is mapped anyway",
       (PLACE, "    if differing:\n        raise SurfaceError(\n            \"E_SURFACE_PLACEMENT_MISMATCH\",",
        "    if False:\n        raise SurfaceError(\n            \"E_SURFACE_PLACEMENT_MISMATCH\",")),
-    m("S/no-strain-gate", "C-D8", "a curved selection is not cut down to its strain-limited disk",
-      (FIT, '    if chart.kind == "curved" and chart.stats["strain_max"] > options["strain_limit"]:\n',
-       "    if False:\n")),
+    # S/no-strain-gate (a curved selection not cut down to its strain-limited disk) retired on 2026-11-17 with the disk:
+    # the fit refuses such a selection whole since (CURVED: S/curved-beyond-limit-fitted).
     m("S/no-arc-exit", "C-D7", "rounded outlines get no arc exits (tails only across straight sides)",
       (FIT, "        if not chosen or chosen[0][\"chord_mm\"] < ARC_WHEN_SIDES_SHORTER_MM:\n", "        if False:\n"),
       (FIT, "        if best[\"chord_mm\"] < ARC_WHEN_SIDES_SHORTER_MM:\n", "        if False:\n")),
@@ -1201,13 +1202,8 @@ SURFACE = (
     m("S/scanline-all-edges", "G-R5.1", "the raster scans every outline segment on every line",
       (FIT, "        lines = _scanlines(polygons, [self.y0 + j * self.h + (eps if j == 0 else 0.0) - (eps if j == self.ny else 0.0) for j in range(self.ny + 1)])\n",
        "        lines = [_scanline(polygons, y) for y in [self.y0 + j * self.h + (eps if j == 0 else 0.0) - (eps if j == self.ny else 0.0) for j in range(self.ny + 1)]]\n")),
-    m("S/side-renumbered", "G-R2.1", "{side: n} is read from the strain-limited disk's sides, not the selection's",
-      (FIT, '        if isinstance(base, Mapping) and set(base) == {"side"}:\n            # {side: n} numbers',
-       "        if False:\n            # {side: n} numbers")),
-    m("S/strain-bisect-cold", "G-R5.0", "the strain limit bisects from half the selection (large cold solves)",
-      (FIT, "            radius = math.sqrt(x)\n", "            radius = None\n")),
-    m("S/strain-repeats-count", "G-R5.0", "a trial that repeats a disk already tried uses up the strain search",
-      (FIT, "    for _ in range(3 * STRAIN_BISECTIONS):", "    for _ in range(STRAIN_BISECTIONS):")),
+    # S/side-renumbered, S/strain-bisect-cold and S/strain-repeats-count (the strain-limited disk's side numbering and its
+    # radius search) retired on 2026-11-17 with fit.limit_strain (CURVED).
     m("S/placement-null-to", "G-R1.3", "an explicit null base_to_uv passes the placement check (a TypeError, not a 422)",
       (PLACE, "        if key not in placement and not required:\n", "        if placement.get(key) is None and not required:\n")),
     m("S/map-exit-edges-unbounded", "G-R2.0", "exit edges beyond the chart's outline reach the containment check (an IndexError, not a 422)",
@@ -1647,7 +1643,11 @@ DIAGONAL += (
     m("M/diag-shared-joins-sharp", "mask P5h", "a board's steps in below the shared outline keep their concave corners sharp (no R0.5 fillet)",
       (DIAGONAL_ENGINE, "    fixed = list(shared) + [point for point in ring if tuple(point) not in joined]\n", "    fixed = list(path)\n")),
     m("M/diag-shared-no-ear", "mask P5h", "under the other board's fillet into a tail wider than the field a board steps in along the level (a cusp), not a fillet radius lower",
-      (DIAGONAL_ENGINE, "            if dx > dy:\n", "            if False:\n")),
+      (DIAGONAL_ENGINE, "            if dx > dy:\n", "            if False:\n"),
+      expect="survive", reason="equivalent since diagonal-bus section 20 (the verification of the merge of 2026-11-17): the level lies below the "
+      "union's fillets into the tails, where _run_on runs the union's side straight down or along a side steeper than 45 degrees, so the "
+      "shared path never ends heading outward (dx > dy): none of the 1306 splices of the named corpus, the regressions and 300 seeded "
+      "designs, nor of 1200 more seeded designs, the largest dx - dy -1e-6 mm"),
     m("M/diag-shared-unchecked", "mask P5h", "the registration does not check that the two outlines coincide over the field",
       (DRC, "    keys[\"outlines_coincide_over_field\"] = deviation is not None and deviation <= epsilon\n", "    keys[\"outlines_coincide_over_field\"] = True\n"),
       (DRC, "    elif deviation > epsilon:\n", "    elif False:\n")),
@@ -2362,28 +2362,27 @@ ON_PART = (
       ("web/styles.css", ".stack-figure.is-on-part { display:none; }", ".stack-figure.is-on-part { display:block; }")),
     m("M/web-board-art-listener", "2026-11-05", "app.js: no answer to fpc:board-art (the sensor on the part never gets the boards' art)",
       (WEB, '  document.addEventListener("fpc:board-art", event => { if (event.detail) event.detail.result = boardArt(event.detail); });\n', "")),
+    # The F/on-part mutants were expected to survive (browser behaviour, the Playwright checks') until the verification of
+    # the merge of 2026-11-17: the suite kills them now, all nine by test_library's ShowcasePageTests, its pin of the
+    # sources the showcase's pictures were shot from (the pictures go stale; the defect itself is the Playwright checks' to
+    # see), F/on-part-mirror by test_showcase's wrap too and F/on-part-film-flat by test_surface_web's film lamp too.
     m("F/on-part-mirror", "2026-11-05", "browser: the top FPC laid on the part unmirrored (its copper side's art as if seen from outside)",
-      (DRAPE, "  const bx = isTop(art) ? ox + (Rx + Rw - sx) : ox + (sx - Rx);\n", "  const bx = isTop(art) ? ox + (sx - Rx) : ox + (sx - Rx);\n"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (DRAPE, "  const bx = isTop(art) ? ox + (Rx + Rw - sx) : ox + (sx - Rx);\n", "  const bx = isTop(art) ? ox + (sx - Rx) : ox + (sx - Rx);\n")),
     m("F/on-part-texture-rows", "2026-11-05", "browser: the boards' art upside down on their sheets (the texture's rows not flipped)",
-      (DRAPE, "  return [(sx - vx) / vw, 1 - (sy - vy) / vh];\n", "  return [(sx - vx) / vw, (sy - vy) / vh];\n"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (DRAPE, "  return [(sx - vx) / vw, 1 - (sy - vy) / vh];\n", "  return [(sx - vx) / vw, (sy - vy) / vh];\n")),
     m("M/web-on-part-probe-gate", "2026-11-05 review", "main.js: the sensor on the part compared with the map on every page, not with ?probe only",
       (CAD_MAIN, "const metrics = ON_PART_PROBE ? D.metrics(stack, plan.map, result.boards) : {};", "const metrics = D.metrics(stack, plan.map, result.boards);")),
     m("M/web-on-part-buffers", "2026-11-05 review", "onpart.js: Exploded / Assembled gives each sheet a new position attribute (its old GL buffer left to the garbage collector)",
       (ONPART, "      attribute.copyArray(view.mode === \"assembled\" ? sheet.assembled : sheet.positions);\n",
        "      geometry.setAttribute(\"position\", new THREE.BufferAttribute(view.mode === \"assembled\" ? sheet.assembled : sheet.positions, 3));\n")),
     m("F/on-part-coverage", "2026-11-05 review", "browser: the sheets' alpha test not turned into coverage (their outlines in hard steps)",
-      (ONPART, "function coverage(material) {\n  material.alphaToCoverage = true;\n", "function coverage(material) {\n  return material;\n  material.alphaToCoverage = true;\n"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (ONPART, "function coverage(material) {\n  material.alphaToCoverage = true;\n", "function coverage(material) {\n  return material;\n  material.alphaToCoverage = true;\n")),
     m("F/on-part-framing", "2026-11-05 review", "browser: the part framed within 1.3 times the sheets' radius again (the crank's tip runs off the pane)",
-      (DRAPE, "export const PART_FRAME_SHARE = 3;\n", "export const PART_FRAME_SHARE = 1.3;\n"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (DRAPE, "export const PART_FRAME_SHARE = 3;\n", "export const PART_FRAME_SHARE = 1.3;\n")),
     m("M/web-on-part-cursor", "2026-11-05 review 2", "onpart.js: OrbitControls' inline cursor left at auto (no grab over the figure)",
       (ONPART, '  controls.cursorStyle = "grab";\n', "")),
     m("F/on-part-seams", "2026-11-05 review 2", "browser: the sheets' coverage alpha written as it is (the pane seen through every outline over the part)",
-      (ONPART, "  Object.assign(material, {blending: THREE.CustomBlending,", "  Object.assign(material, {blending: THREE.NormalBlending,"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (ONPART, "  Object.assign(material, {blending: THREE.CustomBlending,", "  Object.assign(material, {blending: THREE.NormalBlending,")),
     m("M/web-on-part-tone", "2026-11-05 look", "studio.js: ACES filmic tone mapping instead of Khronos PBR Neutral (the art's colours shifted; the 3D view's too)",
       (STUDIO, "  renderer.toneMapping = THREE.NeutralToneMapping;\n", "  renderer.toneMapping = THREE.ACESFilmicToneMapping;\n")),
     m("M/web-on-part-warn-once", "2026-11-05 look", "studio.js: the look's fallbacks warn on every shader compiled, not once a cause",
@@ -2433,14 +2432,11 @@ ON_PART = (
     m("F/on-part-film-flat", "2026-11-05 look", "browser: the film a flat unlit black again (it reads as a hole cut in the stack)",
       (ONPART, "coverage(new THREE.MeshPhysicalMaterial({color: new THREE.Color(...rgb), map, alphaTest: ALPHA_TEST, side: THREE.DoubleSide, ...film,\n"
        "    sheenColor: new THREE.Color(...sheenRGB)}))",
-       "coverage(new THREE.MeshBasicMaterial({color: new THREE.Color(...rgb), map, alphaTest: ALPHA_TEST, side: THREE.DoubleSide}))"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+       "coverage(new THREE.MeshBasicMaterial({color: new THREE.Color(...rgb), map, alphaTest: ALPHA_TEST, side: THREE.DoubleSide}))")),
     m("F/on-part-contact-never", "2026-11-05 look", "browser: the contact shade never drawn (no line where the stack meets the part)",
-      (ONPART, "strength: [0.85, 0.4], most: 0.85};", "strength: [0, 0], most: 0.85};"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (ONPART, "strength: [0.85, 0.4], most: 0.85};", "strength: [0, 0], most: 0.85};")),
     m("F/on-part-bands-off", "2026-11-05 look", "browser: the layers' edge bands not drawn (each sheet a paper-thin face again)",
-      (ONPART, "    if (band?.geometry) {\n", "    if (false) {\n"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (ONPART, "    if (band?.geometry) {\n", "    if (false) {\n")),
     # The 3D view in the studio's light (2026-11-05; tests/test_surface_web.py, and the "cad" kind's part_view_look).
     m("M/web-view-own-lights", "2026-11-05 view look", "viewer.js: the 3D view's old lights again (a hemisphere and a sun) in place of the studio's",
       (VIEWER, "  camera.up.set(0, 0, 1);\n  const lights = studioLights(scene, camera);\n",
@@ -2468,8 +2464,7 @@ ON_PART = (
     m("M/web-on-part-film-lamp-anchor", "2026-11-05 film", "onpart.js: the film's lamp's anchor in three.js's text misspelt (the film nearly a flat black again, and a warning, on every visitor's page)",
       (ONPART, '["#include <lights_fragment_end>", `{', '["#include <lights_fragment_end >", `{')),
     m("F/on-part-film-unlit", "2026-11-05 film", "browser: the film's own lamp out (at the left figure's home it mirrors the room between the softboxes: nearly a flat black)",
-      (ONPART, "const FILM_LAMP = {aim: 1.5, out: 0.3, intensity: 0.2};", "const FILM_LAMP = {aim: 1.5, out: 0.3, intensity: 0};"),
-      expect="survive", reason="out of scope: browser behaviour, checked by the Playwright scripts in tools/browser, not by the stdlib suite"),
+      (ONPART, "const FILM_LAMP = {aim: 1.5, out: 0.3, intensity: 0.2};", "const FILM_LAMP = {aim: 1.5, out: 0.3, intensity: 0};")),
 )
 
 MUTANTS = AUDIT + ENGINE + API + EXPORT + TESTS_AND_DOCS + GOLD_FINGERS + SURFACE + MASKED_FIELD + DIAGONAL + FIELD_FIT + BORDER + EASYEDA + ON_PART
@@ -2706,9 +2701,11 @@ LIBRARY_VIEW = (
       (LIBRARY_WRITE, '            if shot.get("view_sha256") != view and identifier not in older:\n                older.append(identifier)\n',
        '            if shot.get("view_sha256") != view and identifier not in older:\n                problems.append((identifier, f"{identifier}: {RESHOOT}"))\n'),
       killers=("test_library.",)),
+    # (Re-anchored on 2026-11-17: the rules' checks with a scene's own override over them, scene_checks(), and a hand's
+    # further fingers, extras.)
     m("S/library-view-rule", "2026-11-05 3D view", "a gripper's recorded stage numbers unchecked (a stack hidden by the other finger, or the stacks touching, taken)",
       (LIBRARY_WRITE, '    found = [f"its stage breaks a rule of {SCENES_INDEX}: {message}: {fix}"\n'
-                      '             for message in stage_problems(stage.get("numbers"), rules.get("checks") or {}, see_through, rules.get("explode_stacks"))]\n',
+                      '             for message in stage_problems(stage.get("numbers"), scene_checks(rules, own), see_through, rules.get("explode_stacks"), extras)]\n',
        "    found = []\n"),
       killers=("test_library.",)),
     # The user's decision of 2026-11-06 (one stack exploded, the sensor finger's; the near finger see-through in both
@@ -3087,8 +3084,6 @@ SHOWCASE_PAGE = (
        "      ...(parts.length ? [grippers(parts)] : []),\n      ...(state.showcase ? [showcaseCard()] : []),\n"), killers=("test_library.",)),
     m("S/library-showcase-route", "2026-11-12 showcase page", "library.js: the showcase's address not routed to its page (the grid with a note)",
       (LIBRARY_JS, "    if (state.showcase?.id === id) { showShowcase(); return; }\n", ""), killers=("test_library.",)),
-    m("S/library-showcase-exploded", "2026-11-12 showcase page", "library.js: the showcase's page opening Exploded, not the view its card shows",
-      (LIBRARY_JS, "    state.picture = SHOWCASE_VIEW;\n", "    state.picture = VIEWS[0][0];\n"), killers=("test_library.",)),
     m("S/library-showcase-fit", "2026-11-12 showcase page", "library.js: the showcase's 3D view asked for as a sensor's (a variant and a part it has not)",
       (LIBRARY_JS, "      if (variant.view.placed) return live.view.show({base: BASE, id, placed: variant.view.placed, mode: state.picture});\n", ""), killers=("test_library.",)),
     m("S/library-showcase-box", "2026-11-12 showcase page", "library.css: the showcase's page's box 16:10 (3:1 in one column) again, the upright gripper small in it",
@@ -3532,6 +3527,65 @@ UMI_SHAPES_REVIEW = (
        '    "sha256": "e2692fc9f689582d3455755757e04365bcad50eccea2f0bf42e3668d901a6fb0"\n'), killers=("test_library.",)),
 )
 MUTANTS += UMI_SHAPES_REVIEW
+# The Robotiq 2F-85 (the user's request of 2026-11-16, "是不是可以加一个 robotiq的gripper card", and decision "Menagerie
+# model"): MuJoCo Menagerie's robotiq_2f85 (BSD-2-Clause) the one Robotiq model under its name, the user's own 2F-85 file
+# and every other Robotiq model still refused (by name, and by SHA-256 where the file is known); its scene's near finger
+# see-through, its sensor on the pad's contact face, its look written from its look file.  Each killed alone by its
+# killers' module on a scratch copy; library_checks part_layout, part_grid, part_pictures and part_aligned see the page's
+# eighth card in the browser.
+ROBOTIQ_SCENE = "web/library/scenes/robotiq-2f-85.json"
+ROBOTIQ_LOOK = "tools/library_looks/robotiq-2f-85.json"
+ROBOTIQ = (
+    m("R/robotiq-name-denied", "2026-11-16 Robotiq 2F-85", "the writer: every Robotiq name refused again (the Menagerie's 2F-85 part, its bodies and its "
+      "licence text named a vendor model of the deny-list)",
+      (LIBRARY_WRITE, 'DENIED_NAME = re.compile(r"robotiq(?![ _-]?2f-?85)|2f-?85[ _-]?opened"\n',
+       'DENIED_NAME = re.compile(r"robotiq|2f-?85[ _-]?opened"\n'), killers=("test_library.",)),
+    m("R/robotiq-other-models", "2026-11-16 Robotiq 2F-85", "the writer: any Robotiq name taken (the 3F's ROBOTIQ_AGS-001-XXXX.stl, 'Robotiq 3-Finger', a "
+      "2F-140 or a Hand-E)",
+      (LIBRARY_WRITE, 'DENIED_NAME = re.compile(r"robotiq(?![ _-]?2f-?85)|2f-?85[ _-]?opened"\n',
+       'DENIED_NAME = re.compile(r"2f-?85[ _-]?opened"\n'), killers=("test_library.",)),
+    m("R/robotiq-opened-name", "2026-11-16 Robotiq 2F-85", "the writer: the user's own 2F-85 file taken by its name (2F85_Opened.stl)",
+      (LIBRARY_WRITE, 'DENIED_NAME = re.compile(r"robotiq(?![ _-]?2f-?85)|2f-?85[ _-]?opened"\n',
+       'DENIED_NAME = re.compile(r"robotiq(?![ _-]?2f-?85)"\n'), killers=("test_library.",)),
+    m("R/robotiq-opened-hash", "2026-11-16 Robotiq 2F-85", "the writer: the user's own 2F-85 file off the deny-list's hashes (taken under any name)",
+      (LIBRARY_WRITE, '    "b0df0eaca944c7401185ada85d22e3111b477c3484c6fa3fd915fce6d6811aaf": "Robotiq 2F-85 (2F85_Opened.stl)",\n', ""),
+      killers=("test_library.",)),
+    m("R/robotiq-bsd2-closed", "2026-11-16 Robotiq 2F-85", "the writer: BSD-2-Clause no open licence (the 2F-85's bodies refused, their rows naming none)",
+      (LIBRARY_WRITE, 'OPEN_LICENCES = ("Apache-2.0", "MIT", "BSD-3-Clause", "BSD-2-Clause", "CERN-OHL-W-2.0")\n',
+       'OPEN_LICENCES = ("Apache-2.0", "MIT", "BSD-3-Clause", "CERN-OHL-W-2.0")\n'),
+      killers=("test_library.",)),
+    m("R/robotiq-near-solid", "2026-11-16 Robotiq 2F-85", "the 2F-85's scene: its near finger solid (the decision of 2026-11-06 broken on one gripper; "
+      "its pictures of another scene)",
+      (ROBOTIQ_SCENE, ' "see_through": [\n  "mate"\n ],\n', ' "see_through": [],\n'), killers=("test_library.",)),
+    m("R/robotiq-back-face", "2026-11-16 Robotiq 2F-85", "parts.json: the 2F-85's sensor on the silicone pad's back face (the seed facet the view ray's "
+      "way round; its fits of another request)",
+      (PARTS_JSON, '"seed_facet": 232\n', '"seed_facet": 14\n'), killers=("test_library.",)),
+    m("R/robotiq-look-housing", "2026-11-16 Robotiq 2F-85", "the 2F-85's look file: the housing's black at the base look's room again (its scene no "
+      "longer what the look file gives)",
+      (ROBOTIQ_LOOK, '"env_intensity": 2.8,', '"env_intensity": 2.4,'), killers=("test_library_split.",)),
+)
+MUTANTS += ROBOTIQ
+# The review of 2026-11-16 of the Robotiq 2F-85: with "robotiq" taken before "2F-85" a copy of the user's own 2F85_Opened.stl
+# under another header and a 2F-85 name passed both the name and the hash; a 3D model under web/ whose path names the
+# 2F-85 is now one of MENAGERIE_2F85_MODELS at its SHA-256 (showcase()'s walk of web/).  Each killed alone by
+# test_library on a scratch copy.
+ROBOTIQ_REVIEW = (
+    m("R/robotiq-pin-unchecked", "2026-11-16 Robotiq 2F-85 review", "the writer: a model under the 2F-85's name taken at any SHA-256 (a copy of the "
+      "user's own file under another header and a 2F-85 name published)",
+      (LIBRARY_WRITE, "        if path.suffix.lower() in MODEL_SUFFIXES and MENAGERIE_2F85_NAME.search(relative) and MENAGERIE_2F85_MODELS.get(relative) != digest:\n",
+       "        if False:\n"), killers=("test_library.",)),
+    m("R/robotiq-pin-name", "2026-11-16 Robotiq 2F-85 review", "the writer: only the 2F-85's bodies' folder held (a model named robotiq_2f85 or "
+      "Robotiq 2F-85 elsewhere taken at any SHA-256)",
+      (LIBRARY_WRITE, 'MENAGERIE_2F85_NAME = re.compile(r"robotiq[ _-]?2f-?85", re.IGNORECASE)\n',
+       'MENAGERIE_2F85_NAME = re.compile(r"bodies/robotiq-2f-85/", re.IGNORECASE)\n'), killers=("test_library.",)),
+    m("R/robotiq-pin-stl-only", "2026-11-16 Robotiq 2F-85 review", "the writer: STL alone held (a 2F-85 model as OBJ, glTF or STEP taken)",
+      (LIBRARY_WRITE, 'MODEL_SUFFIXES = (".stl", ".obj", ".ply", ".3mf", ".glb", ".gltf", ".step", ".stp")\n', 'MODEL_SUFFIXES = (".stl",)\n'),
+      killers=("test_library.",)),
+    m("R/robotiq-pin-dropped", "2026-11-16 Robotiq 2F-85 review", "the writer: the 2F-85's pad body unpinned (its file refused by the check of its own pins)",
+      (LIBRARY_WRITE, '    "library/bodies/robotiq-2f-85/pad.stl": "0a16b432f97e7fbfc160e6e18c356567c31d556ab428c31bf102964559398ce4",\n', ""),
+      killers=("test_library.",)),
+)
+MUTANTS += ROBOTIQ_REVIEW
 # The UMI shelf's cards aligned with the grippers' (the user's request of 2026-11-16, with a screenshot of the live shelf:
 # "图一中umicard图太大，确保你要和上面的card大小保持一致；另外你这样是重新选择了一个角度，用户需要再完成一次gripper方向的空间转换，
 # 这样不好；你做成和这个finger一样的空间角度，而且可以做成exploded,这样所有card都是对齐的，大小对齐，空间朝向对齐。最上面的xarm
@@ -3628,6 +3682,1105 @@ CARDS_ALIGNED = (
       (LIBRARY_SHOTS_TOOL, "            if homed and other is not None:\n", "            if False:\n"), killers=("test_library.",)),
 )
 MUTANTS += CARDS_ALIGNED
+# The UMI shelf's cards zoomed on the tip and the showcase's card Exploded (the user's decisions of 2026-11-16: "你可以show
+# gripper的angle但是zoom in了，就是方向还是那个方向，但是用zoom in +exploded,那就可以tell了", of zoom 2 "你现在zoom in 的太过了，
+# tactile的tail都看不到", and of the xArm card "Switch to exploded"): library_write.CARD_FRAMES (zoom 1.25 since the review
+# of 2026-11-16, 1.35 before; the tip 6 % below the top) and its checks, library_shots' shoot of the card (the Exploded
+# home again in a pane zoom times larger, the window on the tip) and --check's and --check-generator's use of it,
+# SHOWCASE_SHOTS's card and SHOWCASE_VIEW Exploded.  Each killed alone by test_library on a scratch copy;
+# library_checks part_aligned and showcase_checks part_page see the page's in the browser.  With it
+# S/library-showcase-exploded of 2026-11-12 (the page opening Exploded) retired: it is the wanted behaviour now, its
+# reverse S/zoom-showcase-page-assembled.  The review of 2026-11-16 added 5 (the last): the zoom of 1.35 again (the
+# finger's base on the card's bottom edge), the base and the bottom unchecked, the base measured on the whole drawing,
+# the card's read not held to the Exploded home's direction.
+CARDS_ZOOM = (
+    m("S/zoom-frames-none", "2026-11-16 cards zoomed", "the writer: no card framed on the tip (the UMI cards the whole drawing again, their five tips alike "
+      "at a card's size)",
+      (LIBRARY_WRITE, 'CARD_FRAMES = {"umi-finray": {"zoom": 1.25, "top": 0.06}, "umi-tapers": {"zoom": 1.25, "top": 0.06}}\n', "CARD_FRAMES = {}\n"),
+      killers=("test_library.",)),
+    m("S/zoom-two", "2026-11-16 cards zoomed", "the writer: the UMI cards zoomed 2 again (the tails cut at their roots: the user's 'tactile的tail都看不到')",
+      (LIBRARY_WRITE, 'CARD_FRAMES = {"umi-finray": {"zoom": 1.25, "top": 0.06}, "umi-tapers": {"zoom": 1.25, "top": 0.06}}\n',
+       'CARD_FRAMES = {"umi-finray": {"zoom": 2, "top": 0.06}, "umi-tapers": {"zoom": 2, "top": 0.06}}\n'), killers=("test_library.",)),
+    m("S/zoom-family-ignored", "2026-11-16 cards zoomed", "the writer: a tip's card frame not its family's (the five tapered tips' cards the whole drawing)",
+      (LIBRARY_WRITE, "    return CARD_FRAMES.get(part_id, CARD_FRAMES.get(family) if family else None)\n", "    return CARD_FRAMES.get(part_id)\n"),
+      killers=("test_library.",)),
+    m("S/zoom-record-unchecked", "2026-11-16 cards zoomed", "the writer: a record's card frame unchecked (a UMI card of the whole drawing, or a gripper's "
+      "cut, taken as current)",
+      (LIBRARY_WRITE, '        broken += [f"{message}: {fix}" for message in card_frame_problems(shot.get("card_frame"), card_frame(families, variant["part"]))]\n', ""),
+      killers=("test_library.",)),
+    m("S/zoom-tip-unchecked", "2026-11-16 cards zoomed", "the writer: the tip's place in the card's window unchecked (a tip cut by the top edge taken)",
+      (LIBRARY_WRITE, '    if margins[1] != round(frame["top"] * height):\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/zoom-sides-unchecked", "2026-11-16 cards zoomed", "the writer: the card's sides unchecked (a sheet's tip cut by a side taken)",
+      (LIBRARY_WRITE, '    if min(margins[0], margins[2]) < CARD_SIDE_MIN * width:\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/zoom-window-unchecked", "2026-11-16 cards zoomed", "the writer: the card's window not held inside the drawing zoomed (a window of no render taken)",
+      (LIBRARY_WRITE, '            and 0 <= window[0] <= round(frame["zoom"] * width) - width and 0 <= window[1] <= round(frame["zoom"] * height) - height):\n', "            ):\n"),
+      killers=("test_library.",)),
+    m("S/zoom-home-uncrossed", "2026-11-16 cards zoomed", "the writer: a card frame of a part the rules draw at no gripper's home taken (the card no zoom of "
+      "the 3D view's home)",
+      (LIBRARY_WRITE, "    for key in sorted(set(CARD_FRAMES) - set(rules[\"part_homes\"])) if isinstance(rules.get(\"part_homes\"), dict) else ():\n",
+       "    for key in ():\n"), killers=("test_library.",)),
+    m("S/zoom-render-unzoomed", "2026-11-16 cards zoomed", "library_shots: the card read at the pictures' own pane (a crop of the 1280 x 800 drawing "
+      "upscaled, not a render zoom times larger)",
+      (LIBRARY_SHOTS_TOOL, '            pane = [round(PANE_CSS[0] * frame["zoom"]), round(PANE_CSS[1] * frame["zoom"])]\n', "            pane = list(PANE_CSS)\n"),
+      killers=("test_library.",)),
+    m("S/zoom-shoot-whole", "2026-11-16 cards zoomed", "library_shots: the sensors shot with no card frame (the UMI cards the whole drawing again)",
+      (LIBRARY_SHOTS_TOOL, '"card": None if scene is not None else library_write.card_frame(parts, variant["part"])})', '"card": None})'), killers=("test_library.",)),
+    m("S/zoom-check-blind", "2026-11-16 cards zoomed", "library_shots --check: the card's frame not compared (a record of another frame passing)",
+      (LIBRARY_SHOTS_TOOL, '                same_frame = kept.get("card_frame") == fresh.get("card_frame")\n', "                same_frame = True\n"), killers=("test_library.",)),
+    m("S/zoom-generator-whole", "2026-11-16 cards zoomed", "library_shots --check-generator: the pictures shot as the rules are without the card's frame "
+      "(every UMI card file differing)",
+      (LIBRARY_SHOTS_TOOL, "looked = twice(identifier, lambda: viewed(given, framing)) if given else bare", "looked = twice(identifier, lambda: viewed(given)) if given else bare"),
+      killers=("test_library.",)),
+    m("S/zoom-top-margin", "2026-11-16 cards zoomed", "library_shots: the card's window from the tip itself (the tip on its top edge)",
+      (LIBRARY_SHOTS_TOOL, '    return box[1] - round(frame["top"] * library_write.SHOT_SIZE[1])\n', "    return box[1]\n"), killers=("test_library.",)),
+    m("S/zoom-left-uncentred", "2026-11-16 cards zoomed", "library_shots: the card's window at the drawing's left edge, not about its rows' drawing",
+      (LIBRARY_SHOTS_TOOL, "    return min(max((band[0] + band[2] - library_write.SHOT_SIZE[0]) // 2, 0), size[0] - library_write.SHOT_SIZE[0])\n",
+       "    return min(max(band[0], 0), size[0] - library_write.SHOT_SIZE[0])\n"), killers=("test_library.",)),
+    m("S/zoom-showcase-card-assembled", "2026-11-16 cards zoomed", "the writer: the showcase's card the Assembled drawing again (the gripper cards Exploded)",
+      (LIBRARY_WRITE, '"card": (f"showcase/{SHOWCASE_ID}.card.webp", SHOWCASE_CARD_SIZE, "exploded")}', '"card": (f"showcase/{SHOWCASE_ID}.card.webp", SHOWCASE_CARD_SIZE, "assembled")}'),
+      killers=("test_library.",)),
+    m("S/zoom-showcase-view-assembled", "2026-11-16 cards zoomed", "library.js: the showcase's card's view and page Assembled again",
+      (LIBRARY_JS, '  const SHOWCASE_VIEW = "exploded";\n', '  const SHOWCASE_VIEW = "assembled";\n'), killers=("test_library.",)),
+    m("S/zoom-showcase-page-assembled", "2026-11-16 cards zoomed", "library.js: the showcase's page opening Assembled, not the view its card shows",
+      (LIBRARY_JS, "    state.picture = SHOWCASE_VIEW;\n", "    state.picture = VIEWS[1][0];\n"), killers=("test_library.",)),
+    # The review of 2026-11-16 (sound with fixes): the finger's base on the card's bottom edge at 1.35, the bottom margin
+    # unchecked, the direction held by a pixel likeness alone.
+    m("S/zoom-base-grazing", "2026-11-16 cards zoomed", "the writer: the UMI cards zoomed 1.35 again (the finger's base on the card's bottom edge: the review)",
+      (LIBRARY_WRITE, 'CARD_FRAMES = {"umi-finray": {"zoom": 1.25, "top": 0.06}, "umi-tapers": {"zoom": 1.25, "top": 0.06}}\n',
+       'CARD_FRAMES = {"umi-finray": {"zoom": 1.35, "top": 0.06}, "umi-tapers": {"zoom": 1.35, "top": 0.06}}\n'), killers=("test_library.",)),
+    m("S/zoom-base-unchecked", "2026-11-16 cards zoomed", "the writer: the finger's base unchecked (a card with the base on its bottom edge taken)",
+      (LIBRARY_WRITE, '    if base < round(frame["top"] * height):\n', "    if False:\n"), killers=("test_library.",)),
+    m("S/zoom-bottom-unchecked", "2026-11-16 cards zoomed", "the writer: the card's bottom margin unchecked (a whole drawing framed lower than the "
+      "grippers' taken as the tip framing)",
+      (LIBRARY_WRITE, "    if margins[3] != 0:\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/zoom-base-whole", "2026-11-16 cards zoomed", "library_shots: the finger's base read as the whole drawing's bottom (every card refused, the tails "
+      "running off)",
+      (LIBRARY_SHOTS_TOOL, "    return alpha.size[1] - alpha.crop((left, 0, right, alpha.size[1])).getbbox()[3]\n", "    return alpha.size[1] - alpha.getbbox()[3]\n"),
+      killers=("test_library.",)),
+    m("S/zoom-direction-unchecked", "2026-11-16 cards zoomed", "library_shots: the card's read not held to the Exploded home's direction, up and explode "
+      "(a degree of elevation passing library_checks' likeness)",
+      (LIBRARY_SHOTS_TOOL, '            if not homes["exploded"] or not homes["exploded"].get("home") or state.get("stage") != homes["exploded"]:\n',
+       "            if False:\n"), killers=("test_library.",)),
+)
+MUTANTS += CARDS_ZOOM
+
+# The LeFlexiTac (the user's request of 2026-11-16: "增加一个leflexitac的 放在最前面 ... 放在夹爪部分的最前面，就是franka gripper的
+# 最前面"; LeRobot's SO-101 gripper with LeFlexiTac's jaws, its files stating no licence): the grid's first gripper, its
+# scene (the rotary jaw, the static jaw the other finger, the one explode override) and the pending licence entry.  Each
+# killed alone by test_library on a scratch copy.
+LEFLEXITAC = (
+    m("S/leflexitac-not-first", "2026-11-16 LeFlexiTac", "parts.json: the LeFlexiTac after the Robotiq 2F-85 (the grid's second card, where "
+      "the user asked for it first, before the Franka Hand; the merge of 2026-11-17 put the Robotiq 2F-85 between them)",
+      ("web/library/parts.json", '  "leflexitac",\n  "robotiq-2f-85",\n', '  "robotiq-2f-85",\n  "leflexitac",\n'),
+      ("web/library/entries.json", '  "leflexitac",\n  "robotiq-2f-85",\n', '  "robotiq-2f-85",\n  "leflexitac",\n'), killers=("test_library.",)),
+    m("S/leflexitac-pending-any-source", "2026-11-16 LeFlexiTac", "the writer: a NOTICE row that says NOASSERTION taken from any source (no "
+      "licence stated, no entry pending the user's word)",
+      (LIBRARY_WRITE, "        if (row[1].strip() in sources and NO_LICENCE in row[2]\n", "        if (NO_LICENCE in row[2]\n"), killers=("test_library.",)),
+    m("S/leflexitac-pending-refused", "2026-11-16 LeFlexiTac", "the writer: the entry never read for a body's row (the LeFlexiTac's "
+      "wrist roll refused, its scene stale)",
+      (LIBRARY_WRITE, "            elif not ((pending_row(row) or permitted_row(row)) if NO_LICENCE in row[2] else",
+       "            elif not (False if NO_LICENCE in row[2] else"),
+      killers=("test_library.",)),
+    m("S/leflexitac-pending-any-text", "2026-11-16 LeFlexiTac", "the writer: a part's NOASSERTION licence taken whatever text it names (not the "
+      "entry's note)",
+      (LIBRARY_WRITE, '        if licence.get("text") == entry["note"] and licence.get("source") in sources:\n',
+       '        if licence.get("source") in sources:\n'), killers=("test_library.",)),
+    m("S/leflexitac-recipe-key", "2026-11-16 LeFlexiTac", "the writer: a one-word id taken as a recipe key (the LeFlexiTac's scene and "
+      "NOTICE.md refused for naming leflexitac)",
+      (LIBRARY_WRITE, 'for part_id in parts["parts"] if "-" in part_id) + r")\\b(?!/)")', 'for part_id in parts["parts"]) + r")\\b(?!/)")'),
+      killers=("test_library.",)),
+    m("S/leflexitac-licence-label", "2026-11-16 LeFlexiTac", "library.js: 'Licence (NOASSERTION)' on the LeFlexiTac's page, where no licence "
+      "is stated",
+      (LIBRARY_JS, 'license.spdx === "NOASSERTION" ? (license.permission ? "Shared with the authors\' permission" : "Licence not stated") : '
+       '`Licence (${license.spdx})`', "`Licence (${license.spdx})`"),
+      killers=("test_library.",)),
+    m("S/leflexitac-build-unwarned", "2026-11-16 LeFlexiTac", "the site build says nothing of a part whose files state no licence (a "
+      "preview built for publishing in silence)",
+      ("tools/build_static_site.py", "    pending = library_write.pending_note(parts, chosen)\n    if pending:\n",
+       "    pending = library_write.pending_note(parts, chosen)\n    if False:\n"), killers=("test_library.",)),
+    m("S/leflexitac-explode-rules", "2026-11-16 LeFlexiTac", "the LeFlexiTac's scene at the rules' gap share (its explode override "
+      "dropped: the film less than the rules' quarter seen)",
+      ("web/library/scenes/leflexitac.json", ',\n "explode": {\n  "gap_share": 0.45\n }\n}\n', "\n}\n"), killers=("test_library.",)),
+    m("S/leflexitac-mate-off", "2026-11-16 LeFlexiTac", "the LeFlexiTac's other finger's sensor 3 mm off the static jaw's face (the mate's "
+      "translation moved)",
+      ("web/library/scenes/leflexitac.json", "    -29.842401\n", "    -26.842401\n"), killers=("test_library.",)),
+    # The review of 2026-11-17: the files stating no licence refused by the site build (but for a local preview) and the
+    # public export, the credit of the open part they were remodelled from required.  Each killed alone by its killers'
+    # module on a scratch copy (S/leflexitac-pending-refused re-anchored on the new branch).  The importer's own recipe has
+    # no mutant: the importer is private (test_library's test of it runs where it is present).
+    m("S/leflexitac-build-ungated", "2026-11-17 LeFlexiTac review", "the site build never refuses the files stating no licence (only "
+      "warns: the pages workflow would publish them)",
+      ("tools/build_static_site.py", "    unlicensed_gate(allow_pending)\n", ""), killers=("test_static_site.",)),
+    m("S/leflexitac-build-preview-always", "2026-11-17 LeFlexiTac review", "the site build's command line a local preview always (its "
+      "--allow-pending-licences never needed)",
+      ("tools/build_static_site.py", "                       allow_pending=args.allow_pending_licences)",
+       "                       allow_pending=True)"), killers=("test_static_site.",)),
+    m("S/leflexitac-export-ungated", "2026-11-17 LeFlexiTac review", "the public export writes a web/library holding files that state "
+      "no licence",
+      ("tools/export_public.py", "    if held:\n", "    if False:\n"), killers=("test_static_site.",)),
+    m("S/leflexitac-row-uncredited", "2026-11-17 LeFlexiTac review", "the writer: a pending entry's NOTICE row taken without the "
+      "credit of the part its file was remodelled from (any SO-ARM100 file named)",
+      (LIBRARY_WRITE, "                and (credit is None or credit in row[2])\n", ""), killers=("test_library.",)),
+    m("S/leflexitac-holder-uncredited", "2026-11-17 LeFlexiTac review", "the writer: a part's pending licence taken without the credit "
+      "of the part its file was remodelled from in its holder",
+      (LIBRARY_WRITE, '            if credit is None or credit in str(licence.get("holder")):\n', "            if True:\n"),
+      killers=("test_library.",)),
+    m("S/leflexitac-open-by-upstream", "2026-11-17 LeFlexiTac review", "the writer: a body's NOASSERTION row taken as open for the "
+      "Apache-2.0 of the part it was remodelled from (from any source, no pending entry read)",
+      (LIBRARY_WRITE, "            elif not ((pending_row(row) or permitted_row(row)) if NO_LICENCE in row[2] else any(licence in row[2] for licence in OPEN_LICENCES)) or",
+       "            elif not (any(licence in row[2] for licence in OPEN_LICENCES) or pending_row(row) or permitted_row(row)) or"), killers=("test_library.",)),
+    # The user's word of 2026-11-17 ("leflexitac, i am the author, so its ok to use it in public": a co-author's): the
+    # LeFlexiTac's entry PERMITTED_LICENCES', its files still stating no licence, shared with the authors' permission
+    # (recorded, dated, in the rows, the part's licence, the note and the page's link) and published; a pending entry's
+    # still refused (a fixture: the same entry made pending).  S/leflexitac-pending-refused, S/leflexitac-licence-label
+    # and S/leflexitac-open-by-upstream re-anchored on the new code.  Each killed alone by its killers' module.
+    m("S/leflexitac-permission-undated", "2026-11-17 LeFlexiTac permission", "the writer: the permission's words without who gave it "
+      "and when (the record undated)",
+      (LIBRARY_WRITE, "    return f\"{SHARED} (given by {by}, {permitted})\"\n", "    return SHARED\n"),
+      killers=("test_library.",)),
+    m("S/leflexitac-permission-licence-unread", "2026-11-17 LeFlexiTac permission", "the writer: a part's licence taken whatever "
+      "permission it says (a permitted part's saying none, a pending part's saying one: its page 'Shared with the authors' "
+      "permission')",
+      (LIBRARY_WRITE, '                if licence.get("permission") == words:\n', "                if True:\n"),
+      killers=("test_library.",)),
+    m("S/leflexitac-permission-row-unread", "2026-11-17 LeFlexiTac permission", "the writer: a NOTICE row taken whatever permission it "
+      "says (a permitted entry's row without the words, a pending entry's row with them)",
+      (LIBRARY_WRITE, "                and (words in row[2] if permitted else SHARED not in row[2])\n", ""), killers=("test_library.",)),
+    m("S/leflexitac-permitted-refused", "2026-11-17 LeFlexiTac permission", "the site build and the public export refuse the rows of "
+      "files shared with the authors' permission (the LeFlexiTac never published)",
+      (LIBRARY_WRITE, "             if NO_LICENCE in row[2] and not row[0].startswith(\"licenses/\") and permitted_row(row) is None}\n",
+       "             if NO_LICENCE in row[2] and not row[0].startswith(\"licenses/\")}\n"),
+      killers=("test_library.", "test_static_site.")),
+    m("S/leflexitac-pending-published", "2026-11-17 LeFlexiTac permission", "the site build and the public export take a pending "
+      "entry's part as a permitted one's (published before its authors' word)",
+      (LIBRARY_WRITE, '            if (part.get("license") or {}).get("spdx") == NO_LICENCE and permitted_licence(part["license"]) is None}\n',
+       '            if (part.get("license") or {}).get("spdx") == NO_LICENCE and (permitted_licence(part["license"]) or pending_licence(part["license"])) is None}\n'),
+      killers=("test_library.",)),
+    m("S/leflexitac-permission-label", "2026-11-17 LeFlexiTac permission", "library.js: 'Licence not stated' on the LeFlexiTac's page, "
+      "where its authors' permission is recorded",
+      (LIBRARY_JS, '(license.permission ? "Shared with the authors\' permission" : "Licence not stated")', '"Licence not stated"'),
+      killers=("test_library.",)),
+    # The review of the permission (2026-11-17): a PERMITTED_LICENCES entry without its day and who gave it is no
+    # permission (its files held, never published saying nothing of it).  Each killed alone by test_library.
+    m("S/leflexitac-permission-unrecorded-taken", "2026-11-17 LeFlexiTac permission review", "the writer: a permitted entry "
+      "without its day or who gave it taken as a permission (its rows and its part's licence saying none, its files published)",
+      (LIBRARY_WRITE, "        if permitted and words is None:\n            continue\n", ""), killers=("test_library.",)),
+    m("S/leflexitac-permission-any-day", "2026-11-17 LeFlexiTac permission review", "the writer: permission() taking any "
+      "'permitted' and 'by' (not a day, an empty name, none: the record not dated or naming no one)",
+      (LIBRARY_WRITE, '    if not (isinstance(permitted, str) and re.fullmatch(r"\\d{4}-\\d{2}-\\d{2}", permitted) and isinstance(by, str) and by.strip()):\n',
+       "    if not permitted:\n"), killers=("test_library.",)),
+)
+MUTANTS += LEFLEXITAC
+
+# The AgileX Piper (the user's request of 2026-11-17, "AgileX Piper；ALOHA 2 夹爪；…这些先并行开始做"; fpc-int-n-piper): its
+# card last of the grippers, its finger menagerie agilex_piper's link7.stl on its whole inner face inside a border that
+# makes the face symmetric, its scene the jaws 70 mm apart with the other finger turned, and the writer's recipe-key
+# check passing an upstream model's folder (agilex_piper/, licenses/mujoco_menagerie-agilex_piper.txt).  Each killed
+# alone by test_library on a scratch copy.
+SCENE_PIPER = "web/library/scenes/agilex-piper.json"
+AGILEX_PIPER = (
+    m("S/piper-key-folder", "2026-11-17 AgileX Piper", "the writer's recipe-key check refusing an upstream model's folder again (menagerie's "
+      "agilex_piper/ in the Piper's scene and NOTICE rows taken for the private recipe's key)",
+      (LIBRARY_WRITE, '+ r")\\b(?!/)")\n', '+ r")\\b")\n'), killers=("test_library.",)),
+    m("S/piper-key-licence", "2026-11-17 AgileX Piper", "the writer's recipe-key check refusing a key after '-' again (the Piper's licence text "
+      "mujoco_menagerie-agilex_piper.txt in its NOTICE rows taken for the recipe's key)",
+      (LIBRARY_WRITE, 'keys = re.compile(r"(?<![\\w-])(" + ', 'keys = re.compile(r"\\b(" + '), killers=("test_library.",)),
+    m("S/piper-mate-gap", "2026-11-17 AgileX Piper", "the Piper's other finger 64 mm across the jaws, not piper.xml's 70 (each finger 35 mm "
+      "at full opening)",
+      (SCENE_PIPER, "    70.0\n", "    64.0\n"), killers=("test_library.",)),
+    m("S/piper-border-askew", "2026-11-17 AgileX Piper", "the Piper's border one corner 1 mm wider (no longer a rectangle on the face's axes: "
+      "the face inside it not symmetric, its sensors not centred)",
+      (PARTS_JSON, "       -27.8112,\n       28.361064\n", "       -27.8112,\n       29.361064\n"), killers=("test_library.",)),
+    # The review of 2026-11-17: the model at the newest commit to touch it, the one rail, the fingers no metal.
+    m("S/piper-pin-old", "2026-11-17 AgileX Piper", "the Piper's part pinned at f3b6013 again, older than fb36886, the newest commit to touch "
+      "menagerie's agilex_piper",
+      (PARTS_JSON, "mujoco_menagerie/blob/fb36886b3023db08c198264e1e9956ab202c3e3b/agilex_piper/",
+       "mujoco_menagerie/blob/f3b6013629c7b94f8ee93fd977b161fa8350f9bc/agilex_piper/"), killers=("test_library.",)),
+    m("S/piper-scene-pin-old", "2026-11-17 AgileX Piper", "the Piper's scene saying its opening is f3b6013's piper.xml, not fb36886's",
+      (SCENE_PIPER, '"source": "mujoco_menagerie fb36886, agilex_piper/piper.xml', '"source": "mujoco_menagerie f3b6013, agilex_piper/piper.xml'),
+      killers=("test_library.",)),
+    m("S/piper-notice-pin-old", "2026-11-17 AgileX Piper", "the Piper's rail's NOTICE row naming f3b6013 again, not the commit its body is from",
+      ("web/library/NOTICE.md", "| `bodies/agilex-piper/link6-rail.stl` | mujoco_menagerie `fb36886`",
+       "| `bodies/agilex-piper/link6-rail.stl` | mujoco_menagerie `f3b6013`"), killers=("test_library.",)),
+    m("S/piper-two-rails", "2026-11-17 AgileX Piper", "the Piper's scene giving its cross plate two guide rails again (the body's rail is one piece)",
+      (SCENE_PIPER, "the cross plate with its guide rail and end blocks", "the cross plate with its two guide rails and their end blocks"),
+      killers=("test_library.",)),
+    m("S/piper-finger-metal", "2026-11-17 AgileX Piper", "the Piper's fingers drawn as a metal (metalness 0.6), not the non-metal the "
+      "gripper's listings give (non-slip rubber)",
+      (SCENE_PIPER, '   "metalness": 0,\n', '   "metalness": 0.6,\n'), killers=("test_library.",)),
+    m("S/piper-finger-print", "2026-11-17 AgileX Piper", "the Piper's finger look based on a printed black again, not rubber, its material",
+      ("tools/library_looks/agilex-piper.json", '"finger-black": {"base": "rubber-black"', '"finger-black": {"base": "print-black"'),
+      killers=("test_library.",)),
+)
+MUTANTS += AGILEX_PIPER
+
+# The Galaxea R1 Lite (the user's request of 2026-11-17): its finger from GalaxeaManipSim abe7f51 under that repository's
+# own LICENSE (Apache-2.0), its scene the open gripper, its face bordered short of the carriage's notch, its card last
+# in the grid.  Each killed alone by test_library on a scratch copy.
+GALAXEA_SCENE = "web/library/scenes/galaxea-r1-lite.json"
+GALAXEA_R1_LITE = (
+    m("S/galaxea-licence-holder", "2026-11-17 Galaxea R1 Lite", "licenses/galaxeamanipsim.txt: another holder's copyright line than the LICENSE "
+      "at abe7f51 (Copyright 2025 Galaxea)",
+      ("web/library/licenses/galaxeamanipsim.txt", "Copyright 2025 Galaxea\n                                 Apache License",
+       "Copyright 2025 Galaxea AI\n                                 Apache License"), killers=("test_library.",)),
+    m("S/galaxea-licence-readme", "2026-11-17 Galaxea R1 Lite", "NOTICE.md: GalaxeaManipSim's licence named after its README's badge (MIT), "
+      "not its LICENSE file (Apache-2.0)",
+      ("web/library/NOTICE.md", "`abe7f5161eeaa150e6eaffdf443af5df7f23f356`, Apache License 2.0, Copyright",
+       "`abe7f5161eeaa150e6eaffdf443af5df7f23f356`, MIT License, Copyright"), killers=("test_library.",)),
+    m("S/galaxea-trademark", "2026-11-17 Galaxea R1 Lite", "NOTICE.md: Galaxea and R1 Lite not named among the trademarks",
+      ("web/library/NOTICE.md", 'Galaxea,\nI2RT,', 'I2RT,'), ("web/library/NOTICE.md", 'R1 Lite, Rainbow Robotics,', 'Rainbow Robotics,'), killers=("test_library.",)),
+    m("S/galaxea-mirror", "2026-11-17 Galaxea R1 Lite", "the R1 Lite's scene: its other finger called the mirror image (its board the "
+      "mirror-image board), where finger_link2 is finger_link1 turned",
+      (GALAXEA_SCENE, '"kind": "turned"', '"kind": "mirror"'), killers=("test_library.",)),
+    m("S/galaxea-half-open", "2026-11-17 Galaxea R1 Lite", "the R1 Lite's scene: the jaws half open (q 25 mm of the URDF's 50)",
+      (GALAXEA_SCENE, '"q_mm": 50.0', '"q_mm": 25.0'), killers=("test_library.",)),
+    m("S/galaxea-near-solid", "2026-11-17 Galaxea R1 Lite", "the R1 Lite's scene: the near finger solid (the user's rule of 2026-11-06: "
+      "see-through on every gripper)",
+      (GALAXEA_SCENE, '"see_through": [\n  "mate"\n ]', '"see_through": []'), killers=("test_library.",)),
+    m("S/galaxea-mate-nearer", "2026-11-17 Galaxea R1 Lite", "the R1 Lite's scene: the other finger 26.9 mm nearer (the faces 73 mm apart, "
+      "not the URDF's 100)",
+      (GALAXEA_SCENE, "-126.906", "-100.0"), killers=("test_library.",)),
+    m("S/galaxea-border-on-notch", "2026-11-17 Galaxea R1 Lite", "parts.json: the R1 Lite's border moved onto the notch (its corner at v 18 mm): "
+      "a request the shipped fits are not of",
+      ("web/library/parts.json", '    "border": {\n     "uv": [\n      [\n       15,\n       17.5\n      ],',
+       '    "border": {\n     "uv": [\n      [\n       15,\n       18\n      ],'), killers=("test_library.",)),
+    m("S/galaxea-not-last", "2026-11-17 Galaxea R1 Lite", "parts.json: the R1 Lite's card before the AgileX Piper's (the line's card "
+      "last in the grid, after the merge of 2026-11-17 the Piper's next; entries.json then not the writer's)",
+      ("web/library/parts.json", '  "agilex-piper",\n  "galaxea-r1-lite"', '  "galaxea-r1-lite",\n  "agilex-piper"'),
+      killers=("test_library.",)),
+)
+MUTANTS += GALAXEA_R1_LITE
+
+# The review of 2026-11-17 of the Galaxea R1 Lite: GalaxeaManipSim's NOTICE carried with its licence, G1 among the
+# trademarks, the carriage drawn black on the sensor's finger, no material claimed for the fingers.  Each killed alone
+# by test_library on a scratch copy.
+GALAXEA_LOOK = "tools/library_looks/galaxea-r1-lite.json"
+GALAXEA_R1_LITE_REVIEW = (
+    m("S/galaxea-notice-untabled", "2026-11-17 Galaxea R1 Lite review", "NOTICE.md: GalaxeaManipSim's NOTICE carried with no row "
+      "(its file neither tabled nor the project's own)",
+      ("web/library/NOTICE.md", "| `licenses/galaxeamanipsim-NOTICE.txt` | GalaxeaManipSim `abe7f51`, `NOTICE` | Apache-2.0 NOTICE, Galaxea "
+       "(MIT portions, Tianxing Chen) | unchanged | `b37c5fab7d2070adec53099acc19c6772a59ebd3bd8681a54401aff5aacf754e` |\n", ""),
+      killers=("test_library.",)),
+    m("S/galaxea-notice-unnamed", "2026-11-17 Galaxea R1 Lite review", "NOTICE.md: the finger's row names the licence alone, not the "
+      "NOTICE carried beside it (a licence text tabled that no row names)",
+      ("web/library/NOTICE.md", " | Apache-2.0, Galaxea, `licenses/galaxeamanipsim.txt`, its NOTICE `licenses/galaxeamanipsim-NOTICE.txt` |",
+       " | Apache-2.0, Galaxea, `licenses/galaxeamanipsim.txt` |"), killers=("test_library.",)),
+    m("S/galaxea-notice-unsaid", "2026-11-17 Galaxea R1 Lite review", "NOTICE.md: GalaxeaManipSim's source paragraph no longer names its "
+      "NOTICE (the README's MIT put down to the badge alone)",
+      ("web/library/NOTICE.md", "  metres, and its gripper link.  The repository's `NOTICE`, that portions\n",
+       "  metres, and its gripper link.  The repository's notice, that portions\n"), killers=("test_library.",)),
+    m("S/galaxea-trademark-g1", "2026-11-17 Galaxea R1 Lite review", "NOTICE.md: the gripper's own name, G1, not among the trademarks "
+      "(NOTICE.md and its scene call it the R1 Lite's G1 gripper)",
+      ("web/library/NOTICE.md", 'G1, Galaxea,', 'Galaxea,'), killers=("test_library.",)),
+    m("S/galaxea-carriage-grey", "2026-11-17 Galaxea R1 Lite review", "the R1 Lite's scene: the drawn carriage in the finger's grey (the grey "
+      "block at the root and the strips along the plate's slot again)",
+      (GALAXEA_SCENE, '"look": "carriage-black"', '"look": "finger-grey"'), killers=("test_library.",)),
+    m("S/galaxea-carriage-fillet", "2026-11-17 Galaxea R1 Lite review", "the R1 Lite's look file: the carriage's fillet between its block and "
+      "bar left out of the boxes (a grey corner of it showing)",
+      (GALAXEA_LOOK, ', {"box": [[-30.86, -13.58, 4.9], [-29.2, -7.36, 6.24]]}', ""), killers=("test_library.",)),
+    m("S/galaxea-carriage-on-face", "2026-11-17 Galaxea R1 Lite review", "the R1 Lite's look file: the bar's box run 10 mm up the contact face, "
+      "over the field's border",
+      (GALAXEA_LOOK, "[-15.43, -7.36, 5.0]", "[-5.43, -7.36, 5.0]"), killers=("test_library.",)),
+    m("S/galaxea-nylon", "2026-11-17 Galaxea R1 Lite review", "the R1 Lite's look file: the fingers said to be printed nylon again, which no "
+      "source gives",
+      (GALAXEA_LOOK, "fine grained matt finish (no page", "fine grained matt finish, a printed nylon's (no page"), killers=("test_library.",)),
+)
+MUTANTS += GALAXEA_R1_LITE_REVIEW
+
+# The Seeed reBot DevArm (the user's request of 2026-11-17, the eighth gripper card): its part a modified file (the
+# contact face's pockets capped), its scene at full opening with the mate turned, the actuator the project's drawing
+# credited so, its source and the maker's names in NOTICE.md.  Each killed alone by test_library on a scratch copy.
+REBOT_SCENE = "web/library/scenes/seeed-rebot.json"
+LIBRARY_NOTICE = "web/library/NOTICE.md"
+SEEED_REBOT = (
+    m("S/rebot-licence-unchanged", "2026-11-17 Seeed reBot DevArm", "parts.json: the reBot's part said unchanged (the menagerie's finger, whose "
+      "pockets the project capped)",
+      (PARTS_JSON, '"change": "contact face\'s two pockets capped, m to mm, binary STL"', '"change": "unchanged"'), killers=("test_library.",)),
+    m("S/rebot-half-open", "2026-11-17 Seeed reBot DevArm", "the reBot's scene at 40 of its 50 mm (not fully open, as the user approved every gripper)",
+      (REBOT_SCENE, '  "q_mm": 50.0,\n', '  "q_mm": 40.0,\n'), killers=("test_library.",)),
+    m("S/rebot-mate-mirror", "2026-11-17 Seeed reBot DevArm", "the reBot's mate called a mirror (its matrix a turn: the mirror-image board drawn where "
+      "the same board is)",
+      (REBOT_SCENE, '  "kind": "turned",\n', '  "kind": "mirror",\n'), killers=("test_library.",)),
+    m("S/rebot-drawn-uncredited", "2026-11-17 Seeed reBot DevArm", "NOTICE.md: the reBot's drawn actuator can no more credited as the project's own "
+      "drawing",
+      (LIBRARY_NOTICE, "`bodies/seeed-rebot/drawn-motor-can.stl`,\n", ""), killers=("test_library.",)),
+    m("S/rebot-source-unsaid", "2026-11-17 Seeed reBot DevArm", "NOTICE.md: the reBot's source (the menagerie's seeed_rebot_devarm, MIT, Seeed "
+      "Studio) left out of its Sources",
+      (LIBRARY_NOTICE, "- MuJoCo Menagerie at the same commit, `seeed_rebot_devarm` (MIT License,\n  Copyright (c) 2026 Seeed Studio;",
+       "- MuJoCo Menagerie at the same commit, `seeed_rebot_devarm`, by Seeed Studio;"), killers=("test_library.",)),
+    m("S/rebot-trademark", "2026-11-17 Seeed reBot DevArm", "NOTICE.md: Seeed and reBot left out of the trademarks",
+      (LIBRARY_NOTICE, 'Seeed, SO-101,', 'SO-101,'), (LIBRARY_NOTICE, 'reBot, Robotiq,', 'Robotiq,'), killers=("test_library.",)),
+    # The review of 2026-11-17: the part's modified-file note, what its capped pockets are, and Seeed's other grant.
+    m("S/rebot-modified-note-gone", "2026-11-17 Seeed reBot DevArm review", "NOTICE.md: the reBot part's modified-file note loses its "
+      "opening (the file no longer said to be changed from the menagerie's pla_left.STL)",
+      (LIBRARY_NOTICE, "`meshes/seeed-rebot.stl` is not the upstream file (MIT License): it is the\n", ""), killers=("test_library.",)),
+    m("S/rebot-pads-unsaid", "2026-11-17 Seeed reBot DevArm review", "NOTICE.md: the reBot's capped pockets no longer said to seat its "
+      "silicone grip pads",
+      (LIBRARY_NOTICE, "The pockets seat the gripper's silicone grip pads (30 x 9 x 2 mm\nin Seeed's bill of materials), which stand about "
+       "0.15 mm proud of the face;\nwith the pads out, a laminated sensor bridges", "A laminated sensor bridges"), killers=("test_library.",)),
+    m("S/rebot-cern-unsaid", "2026-11-17 Seeed reBot DevArm review", "NOTICE.md: Seeed's CERN-OHL-W-2.0 grant of the same meshes (its "
+      "hardware repository) left out of the reBot's source",
+      (LIBRARY_NOTICE, "Seeed Studio also\n  publishes these meshes under the CERN Open Hardware Licence Version 2,\n  Weakly Reciprocal "
+       "(CERN-OHL-W-2.0), in its hardware repository,\n  `https://github.com/Seeed-Projects/reBot-DevArm` at\n  "
+       "`eda479d46249e32f8ecc61ebfe8ce49f8a58c19b`\n  (`Rebot_Arm_description/RS/meshes/visual/`: `cnc7.STL`, `cnc_left.STL`\n  "
+       "and `pla7_green.STL` the same files, `pla_left.STL` the same finger\n  meshed finer), and reBot-Isaacsim's "
+       "`urdf/RS/UPSTREAM_LICENSE` gives that\n  licence for its copy of them.  The files here", "The files here"),
+      killers=("test_library.",)),
+)
+MUTANTS += SEEED_REBOT
+
+# The UFACTORY xArm Gripper's card (the user's word of 2026-11-17, "xarm原装夹爪"): the deny-list's names narrowed to its
+# own (MuJoCo Menagerie's ufactory_xarm7, BSD-3-Clause), its scene at the open linkage.  Each killed alone by
+# test_library on a scratch copy.  The review of 2026-11-17: S/ (the Library's), not X/ (the exporter's); the deny-list's
+# mutants on its two xArm lines alone (the Robotiq line's narrowing replaces the first line at the merge); after the
+# card's id or the model folder only the Library's own extensions.
+XARM_SCENE = "web/library/scenes/ufactory-xarm.json"
+XARM_DENY_ID = r'r"|(?!(?<![\w-])ufactory-xarm(?:-\d+(?:\.\d+)?mm)?(?=\Z|/|\.(?:stl|json(?:\.gz)?|(?:exploded|assembled)(?:\.card)?\.webp)\Z)"'
+XARM_DENY_FOLDER = r'r"|(?<![\w.])ufactory_xarm7(?=/|\.txt\Z))ufactory"'
+XARM_DENY_TITLE = r'r"|(?<!ufactory-)(?<!ufactory_)(?!^xarm gripper\Z)xarm", re.IGNORECASE)'
+XARM_GRIPPER = (
+    m("S/xarm-deny-any-suffix", "2026-11-17 xArm Gripper", "library_write: the deny-list lets any name after the card's id pass (ufactory-xarm-g1, "
+      "ufactory-xarm-gripper)",
+      (LIBRARY_WRITE, XARM_DENY_ID, r'r"|(?!(?<![\w-])ufactory-xarm"'), killers=("test_library.",)),
+    m("S/xarm-deny-any-extension", "2026-11-17 xArm Gripper review", "library_write: the deny-list lets any name after the card's id and a '.' "
+      "pass (ufactory-xarm.g1.stl), not only the Library's own extensions",
+      (LIBRARY_WRITE, XARM_DENY_ID, r'r"|(?!(?<![\w-])ufactory-xarm(?:-\d+(?:\.\d+)?mm)?(?=\Z|[./])"'), killers=("test_library.",)),
+    m("S/xarm-deny-folder-suffix", "2026-11-17 xArm Gripper review", "library_write: the deny-list lets Menagerie's folder name alone or with "
+      "any '.' after it pass (ufactory_xarm7.g1.stl), not only '/' and its licence text's .txt",
+      (LIBRARY_WRITE, XARM_DENY_FOLDER, r'r"|(?<![\w.])ufactory_xarm7(?=\Z|[./]))ufactory"'), killers=("test_library.",)),
+    m("S/xarm-deny-title-prefix", "2026-11-17 xArm Gripper", "library_write: the deny-list lets a name that begins with the card's title pass "
+      "(xArm Gripper G1)",
+      (LIBRARY_WRITE, r'(?!^xarm gripper\Z)xarm", re.IGNORECASE)', r'(?!^xarm gripper)xarm", re.IGNORECASE)'), killers=("test_library.",)),
+    m("S/xarm-deny-all", "2026-11-17 xArm Gripper", "library_write: the deny-list of before, every xarm and ufactory name (the card's own files refused)",
+      (LIBRARY_WRITE, "                         " + XARM_DENY_ID + "\n                         " + XARM_DENY_FOLDER + "\n                         "
+       + XARM_DENY_TITLE + "\n", '                         r"|xarm|ufactory", re.IGNORECASE)\n'), killers=("test_library.",)),
+    m("S/xarm-scene-closed", "2026-11-17 xArm Gripper", "the xArm Gripper's scene with its other finger 86 mm nearer (the jaws all but closed, not "
+      "hand.xml's open linkage)",
+      (XARM_SCENE, "    0.0,\n    -140.93\n", "    0.0,\n    -54.93\n"), killers=("test_library.",)),
+    m("S/xarm-scene-mirror", "2026-11-17 xArm Gripper", "the xArm Gripper's other finger called the mirror image (its sensor the mirror-image board), "
+      "where it is the same finger turned",
+      (XARM_SCENE, '  "kind": "turned",\n', '  "kind": "mirror",\n'), killers=("test_library.",)),
+)
+MUTANTS += XARM_GRIPPER
+# The xArm Gripper's grey pad (the user's word of 2026-11-17, "xarm grey pad"): on each finger a prism of the project's own
+# over the model's pad (the finger and its pad are one file, the part), in pad-grey; S/xarm-scene-closed above re-anchored
+# on the mate's own matrix (the other pad's matrix holds -140.93 too).  Each killed alone by test_library on a scratch copy;
+# the look file and its scene edited alike, so library_split --check (test_library_split) still passes.
+XARM_LOOKS = "tools/library_looks/ufactory-xarm.json"
+XARM_GREY_PAD = (
+    m("S/xarm-pad-black", "2026-11-17 xArm grey pad", "the xArm Gripper's drawn pads in the finger's black (the look file and its scene alike): "
+      "the pad not the light grey rubber of UFACTORY's photos",
+      (XARM_LOOKS, '"pad-grey": {"base": "rubber-black", "color": "#a2a3a6",', '"pad-grey": {"base": "rubber-black", "color": "#2e2e31",'),
+      (XARM_SCENE, '   "color": "#a2a3a6",\n', '   "color": "#2e2e31",\n'), killers=("test_library.",)),
+    m("S/xarm-pad-mate-finger", "2026-11-17 xArm grey pad", "the other finger's drawn pad on the sensor finger (the look file and its scene alike): "
+      "drawn solid through the see-through near finger, not ghosted with it",
+      (XARM_LOOKS, '[0.0, 0.0, 0.0, 1.0]], "finger": "mate"}', '[0.0, 0.0, 0.0, 1.0]], "finger": "sensor"}'),
+      (XARM_SCENE, '   "finger": "mate",\n', '   "finger": "sensor",\n'), killers=("test_library.",)),
+    m("S/xarm-pad-notice", "2026-11-17 xArm grey pad", "NOTICE.md without the drawn pads' credit (the project's own drawing over UFACTORY's pad, "
+      "unnamed)",
+      ("web/library/NOTICE.md", "`bodies/ufactory-xarm/drawn-pad-sensor.stl` and\n`bodies/ufactory-xarm/drawn-pad-mate.stl` are not from the upstream model,\n",
+       "These are not from the upstream model,\n"), killers=("test_library.",)),
+)
+MUTANTS += XARM_GREY_PAD
+
+# The Rainbow RB-Y1 (the user's request of 2026-11-17, "AgileX Piper；ALOHA 2 夹爪；Galaxea R1 Lite；OpenArm（Enactic）；Rainbow
+# RB-Y1；Seeed reBot DevArm；xarm原装夹爪；还有一个unitree的三爪也可以加上去；这些先并行开始做"): its card the grippers' last, its
+# face the pad's without the top strip under the gripper's rail block, its scene the 1.2 gripper whole (the lead's decision
+# of 2026-11-17: the v1.3 model's gripper stands much shorter than Rainbow Robotics' drawing; the mate turned, the near
+# finger see-through, the approach its pad's tip's way), and its makers' names among NOTICE.md's trademarks.  Each killed
+# alone by test_library on a scratch copy.  Retired with the v1.3 gripper (2026-11-17): S/rby1-ring-uncredited and
+# S/rby1-ring-unsized, of the top ring the project drew where that gripper was open (EE_BODY closes its own top).
+RBY1_SCENE = "web/library/scenes/rainbow-rby1.json"
+RBY1_NOTICE_SOURCE = "the 1.2 model's gripper (`assets/EE_BODY.obj`, in `rby1m_1.2.xml`)"
+RAINBOW_RBY1 = (
+    m("S/rby1-strip-selected", "2026-11-17 Rainbow RB-Y1", "parts.json: the RB-Y1 pad's top strip selected again (the boards on the face within 3 mm "
+      "of the gripper's rail block: the rules' clearance broken)",
+      (PARTS_JSON, '       "seed_facet": 38\n      },\n      {\n       "facets": [\n        34,\n        35\n       ],\n       "mode": "subtract",\n'
+                   '       "op": "facets"\n      }\n', '       "seed_facet": 38\n      }\n'), killers=("test_library.",)),
+    m("S/rby1-card-not-last", "2026-11-17 Rainbow RB-Y1", "parts.json: the RB-Y1's card before the xArm Gripper's (not after it, "
+      "where the merge of 2026-11-17 puts it in the grid)",
+      (PARTS_JSON, '  "ufactory-xarm",\n  "rainbow-rby1"', '  "rainbow-rby1",\n  "ufactory-xarm"'), killers=("test_library.",)),
+    m("S/rby1-mate-mirrored", "2026-11-17 Rainbow RB-Y1", "the RB-Y1's scene: the mate called a mirror (it is ee_finger_r1 turned: "
+      "its kind not its matrix's determinant's sign)",
+      (RBY1_SCENE, '"kind": "turned"', '"kind": "mirror"'), killers=("test_library.",)),
+    m("S/rby1-near-solid", "2026-11-17 Rainbow RB-Y1", "the RB-Y1's scene: the near finger solid (the user's decision of 2026-11-06: see-through "
+      "on every gripper)",
+      (RBY1_SCENE, ' "see_through": [\n  "mate"\n ],\n', ' "see_through": [],\n'), killers=("test_library.",)),
+    m("S/rby1-approach-flipped", "2026-11-17 Rainbow RB-Y1", "the RB-Y1's scene: the approach toward the gripper's housing, not the pad's tip (the "
+      "gripper upside down at the homes)",
+      (RBY1_SCENE, ' "approach": [\n  0.0,\n  0.0,\n  -1.0\n ],\n', ' "approach": [\n  0.0,\n  0.0,\n  1.0\n ],\n'), killers=("test_library.",)),
+    m("S/rby1-trademark", "2026-11-17 Rainbow RB-Y1", "NOTICE.md: Rainbow Robotics and RB-Y1 not among the trademarks",
+      ("web/library/NOTICE.md", 'Rainbow Robotics,\nRB-Y1,', 'RB-Y1,'), ("web/library/NOTICE.md", 'RB-Y1, reBot,', 'reBot,'), killers=("test_library.",)),
+    # The review of 2026-11-17 (sound-with-fixes): the pad black as the photos show it, the photos not called a version's
+    # gripper, the files' source the menagerie's bef9f83 (not rby1-sdk).
+    m("S/rby1-pad-grey", "2026-11-17 Rainbow RB-Y1 review", "the RB-Y1's scene: the pad the model's light grey again (every maker photo shows "
+      "the fingers black, their inner faces too)",
+      (RBY1_SCENE, '"color": "#232325"', '"color": "#a6a8aa"'), killers=("test_library.",)),
+    m("S/rby1-photos-v1.3", "2026-11-17 Rainbow RB-Y1 review", "the RB-Y1's scene: its look said to be after photos of the RB-Y1 v1.3 (no "
+      "photo says which gripper it shows)",
+      (RBY1_SCENE, "photos of the RB-Y1 (its product page", "photos of the RB-Y1 v1.3 (its product page"), killers=("test_library.",)),
+    m("S/rby1-sdk-provenance", "2026-11-17 Rainbow RB-Y1 review", "NOTICE.md: the RB-Y1's meshes said to be derived from rby1-sdk "
+      "again (they came to the menagerie at bef9f83)",
+      ("web/library/NOTICE.md", "its 1.2 files came to the menagerie at `bef9f83`", "derived from Rainbow Robotics' `rby1-sdk`"),
+      killers=("test_library.",)),
+    # The 1.2 gripper (the lead's decision of 2026-11-17): the model's own gripper, its placement and its sources, no ring.
+    m("S/rby1-mate-unturned", "2026-11-17 Rainbow RB-Y1 1.2 gripper", "the RB-Y1's scene: the mate unturned, as the 1.2 model leaves "
+      "ee_finger_r2's frame (its pad facing away from the sensor finger's)",
+      (RBY1_SCENE, ' "mate": {\n  "kind": "turned",\n  "matrix": [\n   [\n    -1.0,\n    0.0,\n    0.0,\n    -106.0\n   ],\n   [\n    0.0,\n    -1.0,\n',
+       ' "mate": {\n  "kind": "turned",\n  "matrix": [\n   [\n    1.0,\n    0.0,\n    0.0,\n    -106.0\n   ],\n   [\n    0.0,\n    1.0,\n'),
+      killers=("test_library.",)),
+    m("S/rby1-housing-low", "2026-11-17 Rainbow RB-Y1 1.2 gripper", "the RB-Y1's scene: the gripper 20 mm lower than EE_BODY_R places it "
+      "(its rail block through the pads' roots)",
+      (RBY1_SCENE, "     1.0,\n     74.0\n", "     1.0,\n     54.0\n"), killers=("test_library.",)),
+    m("S/rby1-about-v1.3", "2026-11-17 Rainbow RB-Y1 1.2 gripper", "the RB-Y1's scene: its about naming the v1.3 model's file where the "
+      "1.2 model's gripper is drawn",
+      (RBY1_SCENE, "rainbow_robotics_rby1/rby1m_1.2.xml (Apache-2.0", "rainbow_robotics_rby1/rby1m_1.3.xml (Apache-2.0"), killers=("test_library.",)),
+    m("S/rby1-notice-v1.3", "2026-11-17 Rainbow RB-Y1 1.2 gripper", "NOTICE.md: the RB-Y1's source the v1.3 gripper EE_GR_TF again "
+      "(the bodies are EE_BODY's)",
+      ("web/library/NOTICE.md", RBY1_NOTICE_SOURCE, "the v1.3 model's gripper (`assets/EE_GR_TF.obj`)"), killers=("test_library.",)),
+    m("S/rby1-ring-again", "2026-11-17 Rainbow RB-Y1 1.2 gripper", "the RB-Y1's look file: the project's top ring drawn again (EE_BODY "
+      "closes its own top)",
+      ("tools/library_looks/rainbow-rby1.json", ' "part_look": "rubber-black",\n',
+       ' "part_look": "rubber-black",\n "drawn": [{"name": "top-ring", "look": "anodized-black", "draw": [{"cylinder": {"from": [-53, 0, 74], '
+       '"to": [-53, 0, 89], "radius": 44, "segments": 64}}], "finger": null}],\n'), killers=("test_library.",)),
+)
+MUTANTS += RAINBOW_RBY1
+
+
+# The OpenArm (2026-11-17, the user's request of that day: the grippers' eighth card, Enactic's OpenArm v1 gripper from
+# its open model): each killed alone by test_library on a scratch copy.
+OPENARM_SCENE = "web/library/scenes/enactic-openarm.json"
+OPENARM = (
+    m("O/openarm-trademarks", "2026-11-17 OpenArm", "NOTICE.md's trademarks without the OpenArm's maker and name (Enactic, OpenArm)",
+      ("web/library/NOTICE.md", 'Enactic, Feetech,', 'Feetech,'), ("web/library/NOTICE.md", 'OpenArm, PiPER,', 'PiPER,'),
+      killers=("test_library.",)),
+    m("O/openarm-licence-row", "2026-11-17 OpenArm", "a body of openarm_description's tabled under HandUMI's licence text (not Enactic's)",
+      ("web/library/NOTICE.md", "Apache-2.0, Enactic, Inc., `licenses/openarm_description.txt` | modified: the guide's carriage block",
+       "Apache-2.0, BrikHMP18 (HandUMI), `licenses/handumi-hw.txt` | modified: the guide's carriage block"),
+      killers=("test_library.",)),
+    m("O/openarm-mirrored", "2026-11-17 OpenArm", "the OpenArm's other finger called the mirror image (its matrix a turn: the URDF's right finger is "
+      "the same finger turned)",
+      (OPENARM_SCENE, '"kind": "turned"', '"kind": "mirror"'), killers=("test_library.",)),
+    m("O/openarm-half-open", "2026-11-17 OpenArm", "the OpenArm's jaws drawn short of full opening (40 of finger_joint1/2's 44 mm)",
+      (OPENARM_SCENE, '"q_mm": 44.0', '"q_mm": 40.0'), killers=("test_library.",)),
+    m("O/openarm-near-solid", "2026-11-17 OpenArm", "the OpenArm's near finger solid (the user's rule of 2026-11-06: the near finger see-through on "
+      "every gripper)",
+      (OPENARM_SCENE, '"see_through": [\n  "mate"\n ],', '"see_through": [],'), killers=("test_library.",)),
+)
+MUTANTS += OPENARM
+# The review of the OpenArm (2026-11-17, fixed the same day): the card titled "OpenArm 1.0" (Enactic's name for it since
+# OpenArm 2.0, whose gripper is another), the scene's about saying which gripper it draws and naming the looks' photo as
+# openarm.dev's og:image (its hero is OpenArm 2.0's), the replica credited to Enactic's finger beside HandUMI.  Each
+# killed alone by test_library on a scratch copy.  The scene builder's Collada reader refusing another unit or up axis
+# (dae_frame()) is held by test_library's test_the_collada_reader_takes_only_metres_and_z_up; its mutants are out of
+# the catalogue (the builder is private, and the public copy's CI runs --check), each killed alone on a scratch copy.
+OPENARM_REVIEW = (
+    m("O/openarm-title-unversioned", "2026-11-17 OpenArm review", "the OpenArm's card titled 'OpenArm' (Enactic's current OpenArm is 2.0, "
+      "another gripper; the card draws 1.0's)",
+      (PARTS_JSON, '   "title": "OpenArm 1.0",\n', '   "title": "OpenArm",\n'), killers=("test_library.",)),
+    m("O/openarm-about-unversioned", "2026-11-17 OpenArm review", "the OpenArm's scene's about not saying it draws OpenArm 1.0's "
+      "parallel_link gripper, not 2.0's pinch_gripper",
+      (OPENARM_SCENE, "\"about\": \"OpenArm 1.0's parallel gripper (openarm_description's parallel_link end effector, the v1.0 arm's; "
+                      "OpenArm 2.0's gripper is another, its pinch_gripper, not drawn here) at full opening",
+       "\"about\": \"OpenArm v1 parallel gripper at full opening"), killers=("test_library.",)),
+    m("O/openarm-hero-photo", "2026-11-17 OpenArm review", "the OpenArm's looks said drawn after openarm.dev's hero photo (it "
+      "introduces OpenArm 2.0), not its og:image of the OpenArm 1.0",
+      (OPENARM_SCENE, "openarm.dev's social-preview photo (its og:image, ogp.webp) of the bimanual OpenArm 1.0",
+       "openarm.dev's hero photo of the bimanual OpenArm"), killers=("test_library.",)),
+    m("O/openarm-finger-uncredited", "2026-11-17 OpenArm review", "NOTICE.md's row of the OpenArm's mesh crediting HandUMI alone (the "
+      "replica is Enactic's finger.dae surface, Apache-2.0)",
+      ("web/library/NOTICE.md", "`licenses/handumi-hw.txt`; the surface of Enactic's finger (openarm_description `81fe647`, `finger.dae`; "
+                                "Apache-2.0, Enactic, Inc., `licenses/openarm_description.txt`) | unchanged |",
+       "`licenses/handumi-hw.txt` | unchanged |"), killers=("test_library.",)),
+    m("O/openarm-holder-uncredited", "2026-11-17 OpenArm review", "parts.json's OpenArm licence holder HandUMI alone (not after Enactic's "
+      "finger)",
+      (PARTS_JSON, '"holder": "BrikHMP18 (HandUMI hardware), after Enactic, Inc.\'s OpenArm 1.0 finger",',
+       '"holder": "BrikHMP18 (HandUMI hardware)",'), killers=("test_library.",)),
+)
+MUTANTS += OPENARM_REVIEW
+# The user's correction of 2026-11-17 ("openarm你选的面不对，我们可以只选取finger tip那个小圆弧三角的部分"): the OpenArm's
+# sensor on the small flat rounded pad at its fingertip alone, its tails across the pad's root edge toward the mount, at
+# 1 to 2.5 mm (3 mm leaves 3 rows on the pad's 11 mm).  Each killed alone by test_library on a scratch copy.
+OPENARM_TIP = (
+    m("O/openarm-face-cradle", "2026-11-17 OpenArm tip", "the OpenArm's face grown from the cradle again (seed 1509: the first build's "
+      "curved face, not the fingertip pad)",
+      (PARTS_JSON, '"seed_facet": 347', '"seed_facet": 1509'), killers=("test_library.",)),
+    m("O/openarm-base-tip", "2026-11-17 OpenArm tip", "the OpenArm's base at the pad's rounded end (its tails out past the fingertip, not "
+      "toward the mount)",
+      (PARTS_JSON, "      58.82,\n", "      70,\n"), killers=("test_library.",)),
+    m("O/openarm-3mm", "2026-11-17 OpenArm tip", "the OpenArm's coarsest pitch 3 mm again (3 rows of 14 taxels on the pad's 11 mm)",
+      (PARTS_JSON, '     "pitch_mm": 2.5\n    }\n   ]\n  },\n  "franka-hand": {', '     "pitch_mm": 3\n    }\n   ]\n  },\n  "franka-hand": {'),
+      killers=("test_library.",)),
+)
+MUTANTS += OPENARM_TIP
+
+# The YUBI Gripper (the user's words of 2026-11-17, of the downloaded pad: "这个同样也只做fingertip的三角；名字不要叫genealist,
+# 感觉是 yubi"): its card named YUBI, its sensor on the fingertip's face alone, CERN-OHL-W-2.0 its open licence, its rotary
+# fingers drawn open short of their limit with the other finger the mirror image, NOTICE.md's terms of that licence (each
+# changed body dated, the licence named for the changed files), the drawn shapes credited, the names among the
+# trademarks, the licence text as published.  Each killed alone by test_library on a scratch copy.
+YUBI_SCENE = "web/library/scenes/yubi-gripper.json"
+YUBI_NOTICE = "web/library/NOTICE.md"
+YUBI = (
+    m("S/yubi-generalist", "2026-11-17 YUBI Gripper", "parts.json: the YUBI card titled Generalist again (the name the user turned down)",
+      (PARTS_JSON, '"title": "YUBI Gripper",', '"title": "Generalist gripper",'), killers=("test_library.",)),
+    m("S/yubi-face-whole-pad", "2026-11-17 YUBI Gripper", "parts.json: the YUBI sensor grown from the pad's arch between its screws (the earlier "
+      "card's face), not the fingertip's triangle",
+      (PARTS_JSON, '"seed_facet": 101', '"seed_facet": 445'), killers=("test_library.",)),
+    m("S/yubi-licence-apache", "2026-11-17 YUBI Gripper", "parts.json: the YUBI pad's licence said Apache-2.0 (yubi-hw's is CERN-OHL-W-2.0)",
+      (PARTS_JSON, '"spdx": "CERN-OHL-W-2.0",', '"spdx": "Apache-2.0",'), killers=("test_library.",)),
+    m("S/yubi-licence-closed", "2026-11-17 YUBI Gripper", "library_write: CERN-OHL-W-2.0 no open licence (the YUBI bodies' rows refused)",
+      (LIBRARY_WRITE, 'OPEN_LICENCES = ("Apache-2.0", "MIT", "BSD-3-Clause", "BSD-2-Clause", "CERN-OHL-W-2.0")\n',
+       'OPEN_LICENCES = ("Apache-2.0", "MIT", "BSD-3-Clause", "BSD-2-Clause")\n'), killers=("test_library.",)),
+    m("S/yubi-fully-open", "2026-11-17 YUBI Gripper", "the YUBI scene said open to its parts' limit (drawn at 11 of the 38.5 degrees they allow)",
+      (YUBI_SCENE, '  "q_mm": 32.409,\n', '  "q_mm": 80.812,\n'), killers=("test_library.",)),
+    m("S/yubi-mate-turned", "2026-11-17 YUBI Gripper", "the YUBI scene's mate called turned (its matrix a mirror: the same board drawn where the "
+      "mirror-image board is)",
+      (YUBI_SCENE, '  "kind": "mirror",\n', '  "kind": "turned",\n'), killers=("test_library.",)),
+    m("S/yubi-note-undated", "2026-11-17 YUBI Gripper", "NOTICE.md: a changed YUBI body's note without the date of its change (CERN-OHL-W-2.0 "
+      "section 3.3(b))",
+      (YUBI_NOTICE, "mm of the upstream one both ways, written from ASCII as a binary STL, changed\nby the FlexiTac-Gen project on 2026-11-17.\n\n"
+       "`bodies/yubi-gripper/bracket-dynamixel.stl`", "mm of the upstream one both ways, written from ASCII as a binary STL, changed\nby the "
+       "FlexiTac-Gen project in 2026.\n\n`bodies/yubi-gripper/bracket-dynamixel.stl`"), killers=("test_library.",)),
+    m("S/yubi-terms-unsaid", "2026-11-17 YUBI Gripper", "NOTICE.md: the YUBI bodies no longer said to be licensed under CERN-OHL-W-2.0 (section "
+      "3.3(d)), not the repository's Apache License 2.0",
+      (YUBI_NOTICE, "  licence's words, licensed under CERN-OHL-W-2.0 as its section 3.3(d)\n  requires, not under this repository's Apache License 2.0; their notes",
+       "  licence's words; their notes"), killers=("test_library.",)),
+    m("S/yubi-drawn-uncredited", "2026-11-17 YUBI Gripper", "NOTICE.md: the YUBI's drawn servo no more credited as the project's own drawing",
+      (YUBI_NOTICE, "`bodies/yubi-gripper/drawn-servo.stl`, `drawn-camera-board.stl`,", "`drawn-camera-board.stl`,"), killers=("test_library.",)),
+    m("S/yubi-trademark", "2026-11-17 YUBI Gripper", "NOTICE.md: YUBI, Toyota, DYNAMIXEL and ROBOTIS left out of the trademarks",
+      (YUBI_NOTICE, ', YUBI)', ')'), (YUBI_NOTICE, 'Toyota, Trossen,', 'Trossen,'), (YUBI_NOTICE, "(DYNAMIXEL, ROBOTIS, ELP)", "(ELP)"),
+      killers=("test_library.",)),
+    m("S/yubi-licence-text", "2026-11-17 YUBI Gripper", "licenses/yubi-hw.txt not yubi-hw's LICENSE as published (its copyright line changed)",
+      ("web/library/licenses/yubi-hw.txt", "Copyright 2026 Toyota Motor Corporation\n", "Copyright Toyota\n"), killers=("test_library.",)),
+    # Its review (2026-11-17): the near finger's sensor read as a face (the least opening every pitch's rules allow), the
+    # page's line in a visitor's words, the bodies' section saying it is not fully open, ELP among the trademarks.
+    m("S/yubi-near-edge-on", "2026-11-17 YUBI review", "the YUBI scene's approach back at 16 degrees open (the near finger's sensor seen 3.2 "
+      "degrees off edge-on at the Exploded home, a line)",
+      (YUBI_SCENE, "  -0.9816271834499208,\n  0.0,\n  -0.1908089953649345\n", "  -0.9612616959415791,\n  0.0,\n  -0.27563735580562976\n"),
+      killers=("test_library.",)),
+    m("S/yubi-finger-code", "2026-11-17 YUBI review", "parts.json: the YUBI page's line the maker's file code again (finger pad (t30))",
+      (PARTS_JSON, '  "yubi-gripper": {\n   "finger": "gripper finger pad",', '  "yubi-gripper": {\n   "finger": "finger pad (t30)",'),
+      killers=("test_library.",)),
+    m("S/yubi-said-full-open", "2026-11-17 YUBI review", "NOTICE.md: the bodies' section says every gripper drawn at full opening, the YUBI "
+      "Gripper's exception left out",
+      (YUBI_NOTICE, "degrees and the YUBI Gripper's\nrotary fingers as far as its near sensor reads as a face, as their scenes\nsay;",
+       "degrees, as its scene says;"), killers=("test_library.",)),
+    m("S/yubi-elp", "2026-11-17 YUBI review", "NOTICE.md: ELP, whose camera the project drew, left out of the trademarks",
+      (YUBI_NOTICE, "(DYNAMIXEL, ROBOTIS, ELP)", "(DYNAMIXEL, ROBOTIS)"), killers=("test_library.",)),
+)
+MUTANTS += YUBI
+
+# The hands' one mechanism (the user's requests of 2026-11-17, a sensor on every finger): a hand's further fingers (a
+# scene's extra_fingers, the stage's still stacks on them) and a scene's own card override (checks: card_min_px within
+# CHECKS_OVERRIDE_BOUNDS, the writer's and the shots tool's scene_checks()), each killed alone by test_library on a
+# scratch copy.  They came with the Unitree Dex3-1's line (their ids keep its name; S/dex3-stage-own-tip re-anchored at
+# the three hands' merge on the stage's line that leaves a further finger's own links out too) and, at that merge, the
+# Allegro Hand's line (the frame and the still stacks, and the page's border checks its review added).  The Allegro Hand
+# and the Unitree Dex3-1 were removed at the user's word of 2026-11-17 (their scene builders in git history at bff728c):
+# the mechanism's mutants are one group here, killed with the LEAP Hand alone, and the two groups of those hands were
+# retired, with each mutant of theirs whose edit was the removed hands' own text: S/dex3-scene-two-fingers (the Dex3-1's
+# scene), S/allegro-links-not-own, S/allegro-thumb-solid and S/allegro-thumb-base-ghosted (the Allegro Hand's scene) and
+# S/allegro-border-pieces (its border in parts.json).  The Unitree Dex3-1 is back since the user's word of 2026-11-18
+# (dex3() restored from bff728c): its group is UNITREE_DEX3 below, S/dex3-scene-two-fingers re-anchored there on its
+# restored scene; this group stays the mechanism's.
+HAND_MECHANISM = (
+    m("S/dex3-extra-unchecked", "2026-11-17 unitree dex3", "the writer: a scene's extra_fingers taken unchecked (any list, any matrix, any kind)",
+      (LIBRARY_WRITE, '    if "extra_fingers" in document:\n        extra = document["extra_fingers"]\n',
+       '    if False:\n        extra = document["extra_fingers"]\n'), killers=("test_library.",)),
+    m("S/dex3-extra-kind", "2026-11-17 unitree dex3", "the writer: an extra finger's kind not held to its matrix's determinant (a mirror-image board "
+      "called the same board)",
+      (LIBRARY_WRITE, '                elif finger["kind"] != ("turned" if determinant(finger["matrix"]) > 0 else "mirror"):\n',
+       '                elif False:\n'), killers=("test_library.",)),
+    m("S/dex3-checks-unbounded", "2026-11-17 unitree dex3", "the writer: a scene's checks override unbounded (any key, any number: card_min_px 0 taken)",
+      (LIBRARY_WRITE, '    checks = document.get("checks")\n    if "checks" in overrides and not', '    checks = document.get("checks")\n    if False and not'),
+      killers=("test_library.",)),
+    m("S/dex3-checks-ignored", "2026-11-17 unitree dex3", "scene_checks(): the scene's override ignored (the hand's committed pictures refused, card_px 14 "
+      "under the rules' 20)",
+      (LIBRARY_WRITE, "        checks.update({key: value for key, value in own.items() if key in CHECKS_OVERRIDE_BOUNDS})\n", "        pass\n"),
+      killers=("test_library.",)),
+    m("S/dex3-checks-any-key", "2026-11-17 unitree dex3", "scene_checks(): every key of a scene's checks taken over the rules' (clearance_min_mm 0 "
+      "loosening a rule the override may not name)",
+      (LIBRARY_WRITE, "        checks.update({key: value for key, value in own.items() if key in CHECKS_OVERRIDE_BOUNDS})\n", "        checks.update(own)\n"),
+      killers=("test_library.",)),
+    m("S/dex3-shots-rules-only", "2026-11-17 unitree dex3", "library_shots.py: a shoot held to the rules' checks alone (the hand's sensors refused "
+      "where the writer takes them)",
+      (LIBRARY_SHOTS_TOOL, 'broken = rule_breaches(drawn["stage"], library_write.scene_checks(rules, scene.get("checks")), scene["see_through"],',
+       'broken = rule_breaches(drawn["stage"], rules.get("checks") or {}, scene["see_through"],'), killers=("test_library.",)),
+    m("S/dex3-stage-no-extras", "2026-11-17 unitree dex3", "library_stage.js: a scene's further fingers never drawn (the LEAP Hand's middle and ring "
+      "fingertips and their sensors gone)",
+      (LIBRARY_STAGE, "      const extras = (data.extra_fingers || []).map(finger => Pmm.clone().multiply(m4(finger.matrix)).multiply(Pmm.clone().invert()));\n",
+       "      const extras = [];\n"), killers=("test_library.",)),
+    m("S/dex3-stage-extras-unmeasured", "2026-11-17 unitree dex3", "library_stage.js: the further fingers' stacks never measured (the exploded stack "
+      "held apart from the thumb's alone)",
+      (LIBRARY_STAGE, "      const copies = [[\"stack2\", mate], ...state.info.extras.map((extra, k) => [`stack${k + 3}`, extra])];\n",
+       "      const copies = [[\"stack2\", mate]];\n"), killers=("test_library.",)),
+    # The review of 2026-11-17 (sound-with-fixes): the checks override in a hand's scene alone, and each further stack
+    # measured (its top FPC's seen share, extra_seen, held to near_seen_min; its clearance to all but its own fingertip).
+    m("S/dex3-checks-any-scene", "2026-11-17 unitree dex3 review", "the writer: a two-finger gripper's scene taking the checks override (the card rule "
+      "loosened on a gripper with no further finger)",
+      (LIBRARY_WRITE, '    elif "checks" in overrides and "extra_fingers" not in document:\n', "    elif False:\n"), killers=("test_library.",)),
+    m("S/dex3-extra-seen-unchecked", "2026-11-17 unitree dex3 review", "the writer: a hand's extra_seen never held to near_seen_min (a further stack "
+      "hidden taken)",
+      (LIBRARY_WRITE, '    if extras:\n        rules.append(("extra_seen", ', '    if False:\n        rules.append(("extra_seen", '), killers=("test_library.",)),
+    m("S/dex3-staging-two-finger", "2026-11-17 unitree dex3 review", "the writer: a hand's record checked as a two-finger gripper's (its extra_seen "
+      "refused as an unknown number, its rule never held)",
+      (LIBRARY_WRITE, '        extras = len(document["extra_fingers"]) if isinstance(document.get("extra_fingers"), list) else 0\n',
+       "        extras = 0\n"), killers=("test_library.",)),
+    m("S/dex3-shots-no-extras", "2026-11-17 unitree dex3 review", "library_shots.py: a hand's shoot checked as a two-finger gripper's (its extra_seen "
+      "refused, the writer taking it)",
+      (LIBRARY_SHOTS_TOOL, 'rules.get("explode_stacks"), scene["extras"])', 'rules.get("explode_stacks"))'), killers=("test_library.",)),
+    m("S/dex3-stage-own-tip", "2026-11-17 unitree dex3 review", "library_stage.js: a further stack's clearance measured to its own fingertip too "
+      "(under 1 mm on every hand: every hand refused)",
+      (LIBRARY_STAGE, "if (item !== own && item.extra !== k + 1) worldTriangles(item.positions, item.index, item.matrix, list);",
+       "if (item.extra !== k + 1) worldTriangles(item.positions, item.index, item.matrix, list);"), killers=("test_library.",)),
+    m("S/dex3-stage-extra-unseen", "2026-11-17 unitree dex3 review", "library_stage.js: a further stack's top FPC not measured in Assembled (a hand "
+      "hiding its middle fingertip's sensor there taken)",
+      (LIBRARY_STAGE, "              && !(further.has(label) && key === `${label}.top`)) continue;", "              ) continue;"), killers=("test_library.",)),
+    m("S/dex3-stage-no-extra-seen", "2026-11-17 unitree dex3 review", "library_stage.js: a hand's numbers without extra_seen (its further stacks' "
+      "seen share never recorded)",
+      (LIBRARY_STAGE, "    ...(further.length ? {extra_seen: r3(Math.min(...MODES.flatMap(mode => further.map(label => measures.cover[mode][`${label}.top`].visible))))} : {})};",
+       "    };"), killers=("test_library.",)),
+    # The Allegro Hand's line's (2026-11-17): the further fingers framed and their stacks still, and the page's border
+    # checks its review added (test_every_border_is_one_the_page_fits, on the AgileX Piper's border since the removal).
+    # S/allegro-bsd2-closed (BSD-2-Clause dropped from OPEN_LICENCES) retired at the verification of the merge of
+    # 2026-11-17: on the one tuple it is R/robotiq-bsd2-closed's edit.
+    m("S/allegro-stage-unframed", "2026-11-17 Allegro Hand", "library_stage.js: the further fingers' parts out of the homes' frame (a hand's further "
+      "fingers cut by the picture's edge; re-anchored on extra_fingers at the hands' merge)",
+      (LIBRARY_STAGE, "        for (const extra of extras) sample(positions, extra.clone().multiply(P), 3000, points);\n", ""),
+      killers=("test_library.",)),
+    m("S/allegro-stage-exploding", "2026-11-17 Allegro Hand", "library_stage.js: the further fingers' stacks on the exploding sheets' geometry (every "
+      "finger's sensor flying off its face in Exploded; re-anchored on extra_fingers at the hands' merge)",
+      (LIBRARY_STAGE, "group: stackCopy(extra, true), inverse:", "group: stackCopy(extra, false), inverse:"), killers=("test_library.",)),
+    m("S/allegro-border-clockwise", "2026-11-17 Allegro Hand", "the writer: a clockwise border composed (surface/border.py fits it; the page's runFit "
+      "refuses it, Not fitted: E_CLIENT_BORDER, no sensor built at gen.html?part=<id>)",
+      (LIBRARY_WRITE, "    if area < 0:\n", "    if False:\n"), killers=("test_library.",)),
+    m("S/allegro-border-uncomposed", "2026-11-17 Allegro Hand", "the writer: compose() sends a border the page refuses (border_problem() unread)",
+      (LIBRARY_WRITE, '        if problem:\n            raise LibraryError(f"border: {problem}")\n', '        if False:\n            raise LibraryError(f"border: {problem}")\n'),
+      killers=("test_library.",)),
+    m("S/allegro-border-exit", "2026-11-17 Allegro Hand", "the writer: a border with no edge of the page's 3 mm exit composed (runFit: the tails have no exit)",
+      (LIBRARY_WRITE, "    if max(lengths) < BORDER_EXIT_MIN_MM:\n", "    if False:\n"), killers=("test_library.",)),
+)
+MUTANTS += HAND_MECHANISM
+
+
+# The LEAP Hand (the user's request of 2026-11-17 and words of that day, "先把这几个做出来，看看每个手指都做出来的效果怎么样": a
+# dexterous hand with a sensor on every finger; fpc-int-n-leap-hand): a scene's optional extra_fingers (the writer's
+# check, the stage drawing each further fingertip opaque with a still stack), the hand's fingertip pad grown exactly flat
+# (theta_c 1 degree: symmetric, every sensor centred), its thumb see-through, and the writer's recipe-key check passing
+# menagerie's leap_hand/ folder.  Since the review that day the hand's extra_fingers are the Unitree Dex3-1 line's (one
+# mechanism: each further stack measured, extra_seen and its clearance; a hand's checks override), the hand at the
+# grippers' homes with card_min_px 14 (its middle and ring spread), each further finger owning its links (a body's
+# finger "extra<k>"), its part the white fingertip alone.  Its copies of that line's mutants (the same patches) dropped
+# at the hands' merge of 2026-11-17: the one set is HAND_MECHANISM's.  Each killed alone by test_library
+# on a scratch copy.
+SCENE_LEAP = "web/library/scenes/leap-hand.json"
+LEAP_HAND = (
+    m("S/leap-extra-optional", "2026-11-17 LEAP Hand", "extra_fingers not a key a scene may have (the LEAP Hand's scene refused, the hand "
+      "undrawable)",
+      (LIBRARY_WRITE, 'SCENE_OPTIONAL = ("camera", "explode", "looks", "part_look", "smooth_deg", "extra_fingers", "checks")\n',
+       'SCENE_OPTIONAL = ("camera", "explode", "looks", "part_look", "smooth_deg", "checks")\n'), killers=("test_library.",)),
+    m("S/leap-extra-ghosted", "2026-11-17 LEAP Hand", "the stage drawing the further fingertips as the mate's (see-through with the thumb, "
+      "the rule's opaque fingers ghosted)",
+      (LIBRARY_STAGE, "        extraPart.userData.finger = null;\n", '        extraPart.userData.finger = "mate";\n'), killers=("test_library.",)),
+    m("S/leap-extra-bare", "2026-11-17 LEAP Hand", "the stage drawing no stack on the further fingertips (a sensor on two fingers of four)",
+      (LIBRARY_STAGE, "const others = state.info.extras.map(extra => ({group: stackCopy(extra, true), inverse: extra.clone().invert()}));",
+       "const others = [];"), killers=("test_library.",)),
+    m("S/leap-extra-unmeasured", "2026-11-17 LEAP Hand", "the measures leaving the further fingertips out (a fingertip hiding the exploded "
+      "stack would pass opaque_max)",
+      (LIBRARY_STAGE, "      roles.body.push(...extraParts);\n", ""), killers=("test_library.",)),
+    m("S/leap-pad-flat4", "2026-11-17 LEAP Hand", "the hand's pad grown with the flat preset's 4 degrees (a sliver of one curved side taken, "
+      "the face 0.11 mm off its mirror image, the sensors no longer centred)",
+      (PARTS_JSON, '       "theta_c_deg": 1\n', '       "theta_c_deg": 4\n'), killers=("test_library.",)),
+    m("S/leap-thumb-solid", "2026-11-17 LEAP Hand", "the thumb drawn solid (its pad faces away from the grippers' homes: its sensor hidden)",
+      (SCENE_LEAP, ' "see_through": [\n  "mate"\n ]', ' "see_through": []'), killers=("test_library.",)),
+    # S/leap-key-folder (the recipe-key check refusing an upstream model's folder again) retired at the verification of
+    # the merge of 2026-11-17: on the one regex it is S/piper-key-folder's edit.
+    # The review of 2026-11-17 (sound-with-fixes): the hand at the grippers' homes, its card's override, its part the
+    # white fingertip alone, the further stacks measured (the Dex3-1 line's mechanism).
+    m("S/leap-own-camera", "2026-11-17 LEAP Hand review", "the hand's scene with its own camera again (45 degrees off the pad: its card out of "
+      "line with the grippers', the user's rule of 2026-11-16)",
+      (SCENE_LEAP, ' "checks": {\n', ' "camera": {\n  "exploded": {\n   "tilt_deg": 45\n  }\n },\n "checks": {\n'), killers=("test_library.",)),
+    m("S/leap-part-cut", "2026-11-17 LEAP Hand review", "the part's change said as the cut at the flange's plane again (the part that took the "
+      "link's six posts along, 2167 facets)",
+      (PARTS_JSON, "distal.obj's object fingertip_W (the white fingertip) alone, m to mm, binary STL",
+       "cut from distal.obj at its flange (y >= 13.386 mm of its file), m to mm, binary STL"), killers=("test_library.",)),
+    m("S/leap-extra-own-links", "2026-11-17 LEAP Hand review", "library_stage.js: a further stack held apart from its own finger's links too "
+      "(2.7 mm from its own distal link: every hand whose fingertip sits on a link refused)",
+      (LIBRARY_STAGE, "if (item !== own && item.extra !== k + 1) worldTriangles(", "if (item !== own) worldTriangles("), killers=("test_library.",)),
+    m("S/leap-extra-finger-any", "2026-11-17 LEAP Hand review", "the writer: a body's finger extra<k> taken past the scene's further fingers "
+      "(a body owned by a finger the scene does not have)",
+      (LIBRARY_WRITE, '    owners = FINGERS + tuple(f"extra{k}" for k in range(1, extras + 1))\n',
+       '    owners = FINGERS + tuple(f"extra{k}" for k in range(0, extras + 2))\n'),
+      killers=("test_library.",)),
+)
+MUTANTS += LEAP_HAND
+
+# The Unitree Dex3-1 back in the Library (the user's word of 2026-11-18, "挺好的，这样你就可以把dex3加回去", after the
+# gently curved faces of 2026-11-17): its fits made as the page makes them on its doubly curved dome (the stretch
+# selection of a click, the request at the select's own 1 %: library_write.page_options(curved=True), part_options,
+# stretch_problem, the job composing it), its scene the restored builder's (a sensor on its three fingertips, the middle
+# one its further finger, the card's override 19 px), its notice and its trademark.  The group of its first line
+# (2026-11-17) was the hands' mechanism's, HAND_MECHANISM since the hands' removal; S/dex3-scene-two-fingers, retired
+# with the hand, is re-anchored here on the restored scene; the curved request composed at 0.3 % is CURVED's
+# S/library-curved-unchecked (re-anchored the same day).  Each killed alone by test_library on a scratch copy.
+DEX3_SCENE = "web/library/scenes/unitree-dex3.json"
+UNITREE_DEX3 = (
+    m("S/dex3-scene-two-fingers", "2026-11-17 unitree dex3", "scenes/unitree-dex3.json: the middle fingertip gone (a sensor on two fingers of the three)",
+      (DEX3_SCENE, ' "extra_fingers": [\n', ' "extra_fingers_": [\n'), killers=("test_library.",)),
+    m("S/dex3-curved-everywhere", "2026-11-18 dex3 back", "the writer: every face's request at the curved 1 % (the 98 others no longer the "
+      "page's requests)",
+      (LIBRARY_WRITE, "    return curved if curved_face(selection, mesh) is not None else flat\n", "    return curved\n"), killers=("test_library.",)),
+    m("S/dex3-curved-options-flat", "2026-11-18 dex3 back", "page_options(curved=True): the strain limit's data-flat number kept (the curved "
+      "request at 0.3 %)",
+      (LIBRARY_WRITE, '    return {key: control["default"] if curved else control.get("flat", control["default"]) for key, control in found.items()\n',
+       '    return {key: control.get("flat", control["default"]) for key, control in found.items()\n'), killers=("test_library.",)),
+    m("S/dex3-job-flat", "2026-11-18 dex3 back", "the writer's job: every request composed at data-flat's 0.3 %, the selection never read "
+      "(the Dex3-1's fits not the page's)",
+      (LIBRARY_WRITE, "    request = compose(part, variant, part_options(part, data, flat, curved))\n",
+       "    request = compose(part, variant, flat)\n"), killers=("test_library.",)),
+    m("S/dex3-stretch-budget-any", "2026-11-18 dex3 back", "the writer: a selection's stretch_budget taken whatever it is (a click at Strict "
+      "0.3 % that the page, its select at 1 %, never sends)",
+      (LIBRARY_WRITE, '        if isinstance(op, dict) and "stretch_budget" in op and op["stretch_budget"] != limit:\n',
+       "        if False:\n"), killers=("test_library.",)),
+    m("S/dex3-override-loose", "2026-11-18 dex3 back", "scenes/unitree-dex3.json: the card override back at 14 px (the 7 mm disks' figure; "
+      "its cards measure 19)",
+      (DEX3_SCENE, '  "card_min_px": 19\n', '  "card_min_px": 14\n'), killers=("test_library.",)),
+    m("S/dex3-notice-unmodified", "2026-11-18 dex3 back", "NOTICE.md: the fingertip's hull not said to be a modified file (BSD-3-Clause)",
+      ("web/library/NOTICE.md", "`meshes/unitree-dex3.stl` is not the upstream file (BSD-3-Clause): it is\n",
+       "`meshes/unitree-dex3.stl` is unitree_ros's own file: it is\n"), killers=("test_library.",)),
+    m("S/dex3-trademark", "2026-11-18 dex3 back", "NOTICE.md: Dex3 left out of the trademarks",
+      ("web/library/NOTICE.md", "Dex1, Dex3, Enactic,", "Dex1, Enactic,"), killers=("test_library.",)),
+)
+MUTANTS += UNITREE_DEX3
+
+# The 3D view's tool menu tells the order of work (the user's request of 2026-11-17, "select a surface标注一个 1, select a
+# base 标注一个 2； edit board 显示optional"): Select a surface numbered 1, Base edge 2, Edit border marked Optional, for
+# the eye alone; main.js renames Edit border in its first span; the word hidden while the border is edited.  Each killed
+# alone by test_surface_web on a scratch copy; cad_checks part_tool_menu sees the menu in the browser.
+MENU_STEPS = (
+    m("S/menu-steps-renamed-whole", "2026-11-17 menu steps", "main.js: Edit border renamed by its whole text again (the word Optional gone as the "
+      "page draws the button)",
+      (CAD_MAIN, '  button.querySelector(".cad-edit-border-name").textContent = cad.editing ? "Done editing" : "Edit border";\n',
+       '  button.textContent = cad.editing ? "Done editing" : "Edit border";\n'), killers=("test_surface_web.",)),
+    m("S/menu-steps-number-spoken", "2026-11-17 menu steps", "gen.html: Select a surface's number read out (its radio named '1Select a surface')",
+      ("web/gen.html", '<span><span class="cad-tool-no" aria-hidden="true">1</span>Select a surface</span>', '<span><span class="cad-tool-no">1</span>Select a surface</span>'),
+      killers=("test_surface_web.",)),
+    m("S/menu-steps-word-pressed", "2026-11-17 menu steps", "theme.css: Optional left on the blue Done editing while the border is edited",
+      ("web/theme.css", '.cad-edit-border[aria-pressed="true"] .cad-tool-optional { display:none; }\n', ""), killers=("test_surface_web.",)),
+)
+MUTANTS += MENU_STEPS
+
+# The FlexiTac hardware's own files (the user's request of 2026-11-17: the pad's FPC Gerbers downloadable in the
+# showcase's window; every sensor's window "ordering and fabrication" and its reading board, 32 x 16 below 32 x 16 lines,
+# else 32 x 32; Gen's step 3 too): web/boards.js's rule and pins, the windows' rows, Gen's refresh, the bundles' tool and
+# the site build's gate.  Each killed alone by test_flexitac_downloads (or the module named) on a scratch copy.
+BOARDS_JS = "web/boards.js"
+DOWNLOADS_TOOL = "tools/flexitac_downloads.py"
+BOARDS = (
+    m("B/boards-small-17", "2026-11-17 reading boards", "boards.js: the 32 x 16 board for a smaller side of 17 lines too (17 x 32 on a board of 16 sense lines)",
+      (BOARDS_JS, "large <= 32 && small <= 16 ?", "large <= 32 && small <= 17 ?"), killers=("test_flexitac_downloads.",)),
+    m("B/boards-large-33", "2026-11-17 reading boards", "boards.js: the 32 x 32 board for 33 lines on a side (33 x 8 offered a board it does not fit)",
+      (BOARDS_JS, ': large <= 32 ? BOARDS["32x32"] : null;', ': large <= 33 ? BOARDS["32x32"] : null;'), killers=("test_flexitac_downloads.",)),
+    m("B/boards-unsorted", "2026-11-17 reading boards", "boards.js: rows and columns taken as they come, not the larger and the smaller (16 x 32 on "
+      "the 32 x 32 board, 32 x 16 on the 32 x 16)",
+      (BOARDS_JS, "const [large, small] = [Math.max(rows, columns), Math.min(rows, columns)];", "const [large, small] = [rows, columns];"),
+      killers=("test_flexitac_downloads.",)),
+    m("B/boards-file-stale", "2026-11-17 reading boards", "boards.js: the 32 x 32 board's size not its bundle's (the page's '93 kB' of another file)",
+      (BOARDS_JS, 'file: "FlexiTac_reading_board_32x32.zip", bytes: 92579', 'file: "FlexiTac_reading_board_32x32.zip", bytes: 92578'),
+      killers=("test_flexitac_downloads.",)),
+    m("B/library-rows-gone", "2026-11-17 reading boards", "library.js: a sensor's window without Ordering and fabrication and Reading board",
+      (LIBRARY_JS, "            orderFacts(variant.rows, variant.columns)),\n", "            null),\n"), killers=("test_flexitac_downloads.",)),
+    m("B/showcase-board-gone", "2026-11-17 reading boards", "library.js: the showcase's window without its reading board's row (the FPC Gerbers alone)",
+      (LIBRARY_JS, '          board ? el("dl", {className: "lib-order"}, boardRow(board)) : null,\n', "          null,\n"), killers=("test_flexitac_downloads.",)),
+    m("B/gen-board-stale", "2026-11-17 reading boards", "app.js: step 3's reading board never refreshed (the first design's board kept through every "
+      "fit and edit)", ("web/app.js", "          : \"Downloads are enabled only for a valid build that matches the form.\";\n    showBoard();\n",
+                        "          : \"Downloads are enabled only for a valid build that matches the form.\";\n"),
+      killers=("test_flexitac_downloads.",)),
+    m("B/bundle-unsorted", "2026-11-17 reading boards", "flexitac_downloads.py: a bundle's members in the order given, not by name (its bytes then hang on "
+      "the order the sources were read in)", (DOWNLOADS_TOOL, "        for name in sorted(files):\n", "        for name in files:\n"),
+      killers=("test_flexitac_downloads.",)),
+    m("B/bundle-dated", "2026-11-17 reading boards", "flexitac_downloads.py: the bundles' members dated otherwise (the served bundles no longer re-derived)",
+      (DOWNLOADS_TOOL, "ZIP_TIME = (1980, 1, 1, 0, 0, 0)\n", "ZIP_TIME = (2026, 11, 17, 0, 0, 0)\n"), killers=("test_flexitac_downloads.",)),
+    m("B/members-unpinned", "2026-11-17 reading boards", "flexitac_downloads.py: a bundle's members not held to their pins (a changed Gerber ZIP named only "
+      "by the bundle's own hash)", (DOWNLOADS_TOOL, '    problems = [problem for name, payload in files.items() for problem in pinned(f"{BOARDS[board][\'bundle\'][0]}: {name}", payload, wanted[name])]\n',
+                                    "    problems = []\n"), killers=("test_flexitac_downloads.",)),
+    m("B/budget-loose", "2026-11-17 reading boards", "flexitac_downloads.py: the reading boards' folder's budget ten times its size",
+      (DOWNLOADS_TOOL, "BUDGETS = {FPC_FOLDER: 160_000, READER_FOLDER: 160_000}\n", "BUDGETS = {FPC_FOLDER: 160_000, READER_FOLDER: 1_600_000}\n"),
+      killers=("test_flexitac_downloads.",)),
+    m("B/site-ungated", "2026-11-17 reading boards", "build_static_site.py: the hardware's files published unchecked (a file of other bytes served)",
+      ("tools/build_static_site.py", "    problems = flexitac_downloads.check(vendor=static / \"vendor\")\n", "    problems = []\n"),
+      killers=("test_flexitac_downloads.",)),
+    m("B/gen-guide-other", "2026-11-17 reading boards", "gen.html: step 3's Ordering and fabrication linking another address than the guide's",
+      ("web/gen.html", '<div><dt>Ordering and fabrication</dt><dd><a href="https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db"',
+       '<div><dt>Ordering and fabrication</dt><dd><a href="https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/"'),
+      killers=("test_flexitac_downloads.",)),
+    # The review of 2026-11-17: Gen's board follows the tails a Reader or connector pins sized; the board's dot never
+    # starts a line and its ZIP is named in full; the showcase's board in a row; the guide linked once in step 3; the
+    # notice's EasyEDA; every download boards.js names published.
+    m("B/tails-lines-only", "2026-11-17 reading boards review", "boards.js: tailsBoard by the lines alone (tails sized to the 32 x 32 reader named "
+      "the 32 x 16 board, the 48 x 48 reader's a board too)", (BOARDS_JS, "    if (pins[0] === rows && pins[1] === columns) {\n", "    if (true) {\n"),
+      killers=("test_flexitac_downloads.",)),
+    m("B/tails-pins-held", "2026-11-17 reading boards review", "boards.js: sized tails given the board their pins fit, not the one with those "
+      "connectors (the 16 x 16 reader's tails on the 32 x 16 board)",
+      (BOARDS_JS, "    const board = Object.values(BOARDS).find(item => item.pins.join() === sorted) || null;\n",
+       "    const board = readingBoard(...pins);\n"), killers=("test_flexitac_downloads.",)),
+    m("B/board-pins-other", "2026-11-17 reading boards review", "boards.js: the 32 x 16 board's connectors 16 and 16 pins (its BOM's FPC2 has 32)",
+      (BOARDS_JS, "bytes: 50257, pins: Object.freeze([16, 32])}", "bytes: 50257, pins: Object.freeze([16, 16])}"), killers=("test_flexitac_downloads.",)),
+    m("B/gen-pins-unread", "2026-11-17 reading boards review", "app.js: step 3's board from the rows and columns alone (the connector pins a Reader set "
+      "unread)", ("web/app.js", 'boards.tailsBoard(number("rows"), number("columns"), number("rowPins"), number("columnPins"))',
+                  'boards.tailsBoard(number("rows"), number("columns"))'), killers=("test_flexitac_downloads.",)),
+    m("B/board-dot-starts", "2026-11-17 reading boards review", "library.js: the reading board's dot free to start a line (a plain space before it)",
+      (LIBRARY_JS, '[el("span", {}, board.label), "\\u00a0· ",', '[el("span", {}, board.label), " · ",'), killers=("test_flexitac_downloads.",)),
+    m("B/gen-dot-starts", "2026-11-17 reading boards review", "app.js: step 3's reading board's dot free to start a line",
+      ("web/app.js", '"aria-label": `Reading board ${board.label}, ${size}`}, size), "\\u00a0· ",', '"aria-label": `Reading board ${board.label}, ${size}`}, size), " · ",'),
+      killers=("test_flexitac_downloads.",)),
+    m("B/board-zip-unnamed", "2026-11-17 reading boards review", "library.js: the reading board's ZIP link named 'ZIP, 50 kB' alone to a screen reader",
+      (LIBRARY_JS, ', "aria-label": `Reading board ${board.label}, ${size}`}, size)', "}, size)"), killers=("test_flexitac_downloads.",)),
+    m("B/notes-guide-twice", "2026-11-17 reading boards review", "gen.html: the Ordering notes link the guide again under the row that links it",
+      ("web/gen.html", "            <summary>Ordering notes</summary>\n",
+       '            <summary>Ordering notes</summary>\n            <p class="order-guide">Step by step: the <a href="https://docs.google.com/document/d/'
+       '1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db" target="_blank" rel="noopener noreferrer">FlexiTac fabrication '
+       'guide</a>.</p>\n'), killers=("test_flexitac_downloads.",)),
+    m("B/notice-easyeda-pro", "2026-11-17 reading boards review", "flexitac-reader/NOTICE.md: both boards said to be EasyEDA Pro's (the 32 x 16 board's "
+      "Gerbers are EasyEDA v6.5.51's)", ("web/vendor/flexitac-reader/NOTICE.md", "(the\n32 x 16 board's Gerbers are EasyEDA v6.5.51 exports of 2026-04-03,",
+                                        "(the\n32 x 16 board's Gerbers are EasyEDA Pro v6.5.51 exports of 2026-04-03,"),
+      killers=("test_flexitac_downloads.",)),
+    m("B/hrefs-unpublished", "2026-11-17 reading boards review", "boards.js: the reading boards' downloads under a folder the site does not publish",
+      (BOARDS_JS, '  const READER = "static/vendor/flexitac-reader/";\n', '  const READER = "static/vendor/flexitac-readers/";\n'),
+      killers=("test_flexitac_downloads.",)),
+)
+MUTANTS += BOARDS
+
+# The merge of the Library's lines (2026-11-17, fpc-int-n-final): what the merge itself decided.  The showcase's pill the
+# FlexiTac fabrication guide's ordering section (the user's word of 2026-11-17), the Galaxea R1 Lite's border counter-
+# clockwise (the hands' border_problem(), the page's border.js validate()), the reBot's CERN-OHL-W-2.0 text named by its
+# part's row (the lead's decision).  Each killed alone by test_library on a scratch copy.
+MERGE_FINAL = (
+    m("S/merge-tutorial-top", "2026-11-17 merge", "showcase.json: the pill back at the guide's top (not its ordering section, Gen's step 3's)",
+      ("web/library/showcase.json", '#heading=h.kk7d14qme9db"', '"'), killers=("test_library.",)),
+    m("S/merge-tutorial-label", "2026-11-17 merge", "showcase.json: the pill's old label (the user's word: FlexiTac fabrication guide)",
+      ("web/library/showcase.json", '"label": "FlexiTac fabrication guide"', '"label": "FlexiTac hardware tutorial (Gerbers)"'), killers=("test_library.",)),
+    m("S/merge-galaxea-clockwise", "2026-11-17 merge", "parts.json: the Galaxea R1 Lite's border clockwise again (the page refuses it)",
+      (PARTS_JSON, '      [\n       -15,\n       17.5\n      ],\n      [\n       -15,\n       -40\n      ],\n      [\n       15,\n       -40\n      ]\n',
+       '      [\n       15,\n       -40\n      ],\n      [\n       -15,\n       -40\n      ],\n      [\n       -15,\n       17.5\n      ]\n'),
+      killers=("test_library.",)),
+    m("S/merge-rebot-cern-unnamed", "2026-11-17 merge", "NOTICE.md: the reBot part's row without Seeed's CERN-OHL-W-2.0 text (a licence text no row names)",
+      (LIBRARY_NOTICE, "; also CERN-OHL-W-2.0, Seeed Studio, `licenses/seeed-rebot_devarm.txt`", ""), killers=("test_library.",)),
+)
+MUTANTS += MERGE_FINAL
+
+# The verification of the merge of 2026-11-17 (pass-with-fixes): the public copy's suite read the private scene builder
+# unasked (test_library's reBot test; test_static_site now asks every test's private path for exists() first).  Killed
+# alone by test_static_site on a scratch copy.
+MERGE_VERIFY = (
+    m("S/verify-private-read", "2026-11-17 merge check", "test_library: the reBot's pin read from the private tools/library_scenes.py unasked (in the "
+      "public copy, which has no such file, the suite fails, and the publish waits on it)",
+      ("tests/test_library.py", "        if path.exists():\n            pinned = re.search(r'\"rebot-pla_left\"",
+       "        if True:\n            pinned = re.search(r'\"rebot-pla_left\""), killers=("test_static_site.",)),
+)
+MUTANTS += MERGE_VERIFY
+
+
+# Gently curved faces (the user's decisions of 2026-11-17, fpc-int-n-curved; docs/CAD_MODE.md "Gently curved faces"): the
+# study's root causes each pinned by tests/test_surface_curved.py (a click on a dome selects one symmetric patch by
+# stretch, the whole selection fitted or refused saying how much fits, the least-max-stretch chart, the lattice along an
+# elongated dome, the exits on the selection's edge, the real stack).  Each killed alone by test_surface_curved on a
+# scratch copy (others listed where they kill it too).  Retired with the review's fixes (2026-11-17), equivalent since:
+# S/stretch-axis-from-click (the dome's axis the click's normal: the cone is re-centred on its own mean normal, so every
+# click within the dome's patch gives it, and a click off it selects round itself), S/stretch-on-any-face (a Surface click
+# by stretch on a planar or developable face: such a face fits whole, so the face itself comes back).
+CURVED_TESTS = ("test_surface_curved.", "test_surface_fit.", "test_border.", "test_surface_chart.", "test_surface_web.", "test_library.",
+                "test_surface_contract.", "test_surface_identity_guard.", "test_field_fit.")
+SOLVE = "surface/solve.py"
+CURVED = (
+    m("S/curved-beyond-limit-fitted", "2026-11-17 curved", "a curved selection beyond the strain limit fitted anyway (not refused: a sheet "
+      "stretched past the limit, no Shrink to fit)",
+      (FIT, "    if stretch <= limit:\n        return\n", "    if True:\n        return\n"), killers=CURVED_TESTS),
+    m("S/curved-shrink-unsaid", "2026-11-17 curved", "the refusal does not say how much fits round the click (details.shrink null: the page's "
+      "line without the area)",
+      (FIT, "        if fits <= limit:\n            shrink = {", "        if False:\n            shrink = {"), killers=CURVED_TESTS),
+    m("S/stretch-omega-only", "2026-11-17 curved", "the stretch selection stops at the total curvature's first guess (no regula falsi on the "
+      "charts: the Dex3-1's patch the centre's alone, its first guess beyond the limit)",
+      (SELECT, "        if steps > STRETCH_STEPS + STRETCH_MORE or (steps > STRETCH_STEPS and within[1] >= STRETCH_NEAR * budget):\n",
+       "        if True:\n"), killers=CURVED_TESTS),
+    m("S/curvature-beyond-region", "2026-11-17 curved", "the total curvature smoothed over every closed vertex of the mesh, not the region's own "
+      "(a box's corners raise its flat pad's to 0.76 sr: the Franka Hand's pad taken as doubly curved)",
+      (SELECT, "    members = set(interior)\n", "    members = set(defect)\n    interior = sorted(defect)\n"), killers=CURVED_TESTS),
+    m("S/least-stretch-off", "2026-11-17 curved", "a curved chart left as ARAP made it (its largest stretch about twice the least: the Dex3-1's "
+      "dome 1.79 % against 0.82 %)",
+      (SOLVE, "    if least and _max_stretch(uv, triangles, frames[0]) > BOUNDED_FROM:\n", "    if False:\n"), killers=CURVED_TESTS),
+    m("S/least-stretch-everywhere", "2026-11-17 curved", "every curved chart re-solved, a nearly flat one too (the Franka Hand's pad, 0.002 %: its "
+      "chart and fits changed)",
+      (SOLVE, "    if least and _max_stretch(uv, triangles, frames[0]) > BOUNDED_FROM:\n", "    if least and _max_stretch(uv, triangles, frames[0]) > 0.0:\n"),
+      killers=CURVED_TESTS),
+    m("S/least-stretch-no-stop", "2026-11-17 curved", "the least-max-stretch rounds never stop early (always BOUNDED_ROUNDS: two to three times "
+      "the time, other charts)",
+      (SOLVE, "        if len(history) >= 3 and history[-3] - history[-1] < BOUNDED_STOP * history[-3]:\n            break\n",
+       "        if False:\n            break\n"), killers=CURVED_TESTS),
+    m("S/stretch-facet-judged", "2026-11-17 curved", "a curved chart judged by its own worst facet (the least-max-stretch chart's, not the "
+      "relaxed sheet's smoothed: other patches, refusals by one sliver)",
+      (CHART, '    if chart.kind == "curved":\n        return max(smoothed_strain(chart, mesh).values(), default=0.0)\n',
+       '    if False:\n        return max(smoothed_strain(chart, mesh).values(), default=0.0)\n'), killers=CURVED_TESTS),
+    m("S/axis-ignored", "2026-11-17 curved", "an elongated doubly curved selection keeps its arc exit's chord (the lattice across the "
+      "fingertip, turned against its base)",
+      (FIT, "    return principal_axes(chart)[3] > AXIS_MOMENT_RATIO\n", "    return False\n"), killers=CURVED_TESTS),
+    m("S/axis-fields-turned", "2026-11-17 curved", "an elongated doubly curved selection searched with turned fields as the options allow",
+      (FIT, '        searched = dict(options, rotation="none")\n', "        searched = options\n"), killers=CURVED_TESTS),
+    m("S/stack-of-before", "2026-11-17 curved", "the field's stack the 0.47 mm of before (two 0.11 mm boards), not the ordered 0.2 mm boards "
+      "laminated (bends of 4.7 mm passed)",
+      (FIT, "STACK_THICKNESS_MM = round(2 * SINGLE_FPC_MM + FILM_MM + 2 * LAMINATE_MM, 6)\n", "STACK_THICKNESS_MM = 0.47\n"),
+      killers=CURVED_TESTS),
+    m("S/strain-check-facet", "2026-11-17 curved", "the map's strain checks pass on the worst single facet on the part (a sheet's smoothed "
+      "stretch not what passes, the two the same)",
+      (PLACE, '    record = _record(rule, limit, _strain_under(chart, mesh, frame, polygons, stretch_values(chart, mesh)), "max<=", "ratio", what)\n',
+       '    record = _record(rule, limit, _strain_under(chart, mesh, frame, polygons, relaxed_strain(chart, mesh)), "max<=", "ratio", what)\n'),
+      killers=CURVED_TESTS),
+    m("S/tier-sent-as-text", "2026-11-17 curved", "main.js readOptions: the strain limit's tier sent as text (\"0.003\": every fit refused, "
+      "E_SURFACE_REQUEST)",
+      (CAD_MAIN, 'control.hasAttribute("data-number") ? Number(control.value) : control.value', "control.value"), killers=CURVED_TESTS),
+    m("S/library-tier-as-text", "2026-11-17 curved", "library_write: the tier's select read as text (every Library request's strain limit "
+      "\"0.003\": the fits refused)",
+      (LIBRARY_WRITE, '            if "data-number" in attributes:\n', "            if False:\n"), killers=CURVED_TESTS),
+    # The review of 2026-11-17's findings (fpc-int-n-curved): each killed alone by test_surface_curved.
+    m("S/relaxed-ignored", "2026-11-17 curved review", "a curved chart judged by the least-max-stretch chart's stretch, not the relaxed "
+      "sheet's (soft tape creeps to it: 1.2 to 1.7 x more; the 0.3 % gate leaving 0.45 % on the part)",
+      (CHART, "    if chart.relaxed is None:\n        values = {f: facet_stretch(chart, f) for f in chart.facets}\n",
+       "    if True:\n        values = {f: facet_stretch(chart, f) for f in chart.facets}\n"), killers=CURVED_TESTS),
+    m("S/stretch-beyond-kept", "2026-11-17 curved review", "the stretch selection returns its narrowest patch beyond the limit when none within "
+      "it was found (the fit refuses it, Shrink to fit selects it again: the AgileX Piper's facet 60)",
+      (SELECT, "    return set(region_at(within[0]))\n", "    return set(region_at(within[0] if within[0] > 0 or beyond is None else beyond[0]))\n"),
+      killers=CURVED_TESTS),
+    m("S/stretch-same-patch-stops", "2026-11-17 curved review", "a trial cone that gives the patch beyond the limit again ends the search (no "
+      "narrower patch of its own sought: a lat-long cap's patch far under the limit)",
+      (SELECT, "        downwards = high_judged and region == region_at(high)\n",
+       "        if high_judged and region == region_at(high):\n            return None\n        downwards = False\n"), killers=CURVED_TESTS),
+    m("S/stretch-click-outside", "2026-11-17 curved review", "the dome's patch selected for a click it does not hold (a click on the fingertip's "
+      "side or tip end selects the palmar patch, and a second click adds nothing)",
+      (SELECT, "    if seed not in patch:\n        patch = _widest_within(", "    if False:\n        patch = _widest_within("), killers=CURVED_TESTS),
+    m("S/face-graph-directed", "2026-11-17 curved review", "the face's graph directed as grow's (a click on a facet tighter than 4 mm not reached "
+      "from the dome's centre: the AgileX Piper's facet 1008)",
+      (SELECT, "                linked[other].add(facet)\n", ""), killers=CURVED_TESTS),
+    m("S/face-whole-untried", "2026-11-17 curved review", "a doubly curved face within the limit whole not selected whole (a cone of it, its "
+      "outline cut)",
+      (SELECT, "    if total_curvature(mesh, face) <= WHOLE_FACE_SCREEN * 12 * math.pi * budget and stretch_of(face) <= budget:\n",
+       "    if False:\n"), killers=CURVED_TESTS),
+    m("S/outline-unfilled", "2026-11-17 curved review", "the stretch patch not filled to its convex outline (the staircase across the hull's "
+      "long strips: six inner corners on the Dex3-1's patch at 0.3 %)",
+      (SELECT, "    region = convex_fill(mesh, region, cos_d, allowed)\n", "    region = set(region)\n"), killers=CURVED_TESTS),
+    m("S/no-fit-bend-unsaid", "2026-11-17 curved review", "a face bent tighter than the laminated field refused without saying so (a half "
+      "cylinder of R 5 mm: 'no taxel field fits' alone)",
+      (FIELDFIT, '        if obstacles["bends"]:\n', "        if False:\n"), killers=CURVED_TESTS),
+    # The user's feedback of 2026-11-17 on the Dex3-1's dome (a lopsided selection, only its flattest part) and their
+    # choice of 1 % on curved faces: each killed alone by its killers' module on a scratch copy.
+    m("S/mirror-closure-off", "2026-11-17 curved symmetric", "the stretch patch not taken with its mirror image (a cone of normals on a "
+      "tessellation that is not symmetric: a lopsided rim, other patches from other clicks)",
+      (SELECT, "            if closed != region and len(components(mesh, closed)) == 1:\n", "            if False:\n"), killers=CURVED_TESTS),
+    m("S/mirror-planes-none", "2026-11-17 curved symmetric", "no mirror plane found on any face (the Dex3-1's mid-plane unseen: symmetric "
+      "only by rounding's luck)",
+      (SELECT, "    cache[key] = planes\n", "    cache[key] = planes = []\n"), killers=CURVED_TESTS),
+    m("S/mirror-apart-joined", "2026-11-17 curved symmetric", "a patch on one side of the plane taken with its mirror image too (two "
+      "pieces, a click on the fingertip's side selecting both sides)",
+      (SELECT, "            if closed != region and len(components(mesh, closed)) == 1:\n", "            if closed != region:\n"),
+      killers=CURVED_TESTS),
+    m("S/curved-limit-flat", "2026-11-17 curved symmetric", "main.js: the strain limit 0.3 % on every face (the user's 1 % on curved faces "
+      "never in effect: the Dex3-1's dome refused)",
+      (CAD_MAIN, "const strainLimit = () => doublyCurved() ? curvedLimit() : flatLimit();\n", "const strainLimit = () => flatLimit();\n"),
+      killers=CURVED_TESTS),
+    m("S/curved-limit-everywhere", "2026-11-17 curved symmetric", "main.js: the curved faces' 1 % sent for every face (every flat face's "
+      "request another: the Library's shipped fits not taken)",
+      (CAD_MAIN, "const strainLimit = () => doublyCurved() ? curvedLimit() : flatLimit();\n", "const strainLimit = () => curvedLimit();\n"),
+      killers=CURVED_TESTS),
+    # Re-anchored on 2026-11-18, when the Unitree Dex3-1 came back and the writer composes a doubly curved face's
+    # request at 1 % as the page does (page_options(curved=True), part_options) where it had refused such a face.
+    m("S/library-flat-unread", "2026-11-17 curved symmetric", "library_write: the strain limit's selected value composed for every Library "
+      "part (1 %, not the 0.3 % the page sends off a doubly curved face: every request another)",
+      (LIBRARY_WRITE, '    return {key: control["default"] if curved else control.get("flat", control["default"]) for key, control in found.items()\n',
+       '    return {key: control["default"] for key, control in found.items()\n'), killers=CURVED_TESTS),
+    m("S/library-curved-unchecked", "2026-11-17 curved symmetric", "library_write: a doubly curved Library face's request composed with "
+      "0.3 % where the page sends 1 % (refused until 2026-11-18, composed at 1 % since)",
+      (LIBRARY_WRITE, "    return curved if curved_face(selection, mesh) is not None else flat\n", "    return flat\n"), killers=CURVED_TESTS),
+    # The independent review of the symmetric, larger selections (2026-11-17, its follow-up's findings): each killed alone
+    # by its killers' module on a scratch copy.
+    m("S/holes-unfilled", "2026-11-17 curved follow-up", "the stretch patch's holes left unfilled (a ring round two slivers on the Dex3-1's "
+      "mid-plane by its tip end judged beyond any limit: a smaller, other patch; the review's slit before the disk check)",
+      (SELECT, "            found = regions[theta] = frozenset(fill_holes(mesh, mirror_closure(mesh, smooth_outline(mesh, grown, theta_d_deg, centre, face), planes)))\n",
+       "            found = regions[theta] = frozenset(mirror_closure(mesh, smooth_outline(mesh, grown, theta_d_deg, centre, face), planes))\n"),
+      killers=CURVED_TESTS),
+    m("S/ring-taken", "2026-11-17 curved follow-up", "a curved ring judged by its chart's stretch (the chart opens it along a seam on one "
+      "side: an open mesh's hole enclosed, the selection drawn not the one fitted)",
+      (SELECT, '                elif not chart_module.patch_topology(mesh, region)["disk"]:\n', "                elif False:\n"), killers=CURVED_TESTS),
+    m("S/mirror-plane-unfitted", "2026-11-17 curved follow-up", "a mirror plane that fails through the face's centroid not fitted (a 4 mm2 "
+      "hole on one side of a dome loses its plane: a lopsided patch)",
+      (SELECT, "    for turn in (False, True):\n        point, axis = centre, normal\n", "    for turn in ():\n        point, axis = centre, normal\n"),
+      killers=CURVED_TESTS),
+    m("S/mirror-plane-turned-first", "2026-11-17 curved follow-up", "a fitted plane turned at once (a part drawn symmetric about a "
+      "coordinate plane given a normal a tenth of a degree off it)",
+      (SELECT, "    for turn in (False, True):\n        point, axis = centre, normal\n", "    for turn in (True,):\n        point, axis = centre, normal\n"),
+      killers=CURVED_TESTS),
+    m("S/dome-axis-off-plane", "2026-11-17 curved follow-up", "the dome's axis not laid on its mirror planes (rounding's component across "
+      "them kept: a cone not symmetric to the bit)",
+      (SELECT, "        if norm(laid) > 1e-9:\n            axis = _unit(laid)\n", "        if False:\n            axis = _unit(laid)\n"),
+      killers=CURVED_TESTS),
+    m("S/mirror-closure-late", "2026-11-17 curved follow-up", "the stretch patch taken with its mirror image only after its outline is drawn "
+      "(a lopsided cone's outline drawn: other facets)",
+      (SELECT, "            grown = mirror_closure(mesh, grown, planes)\n", ""), killers=CURVED_TESTS),
+    m("S/sides-unmirrored", "2026-11-17 curved follow-up", "a mirror-symmetric curved selection's sides split from its first corner (the "
+      "Dex3-1 dome's base end two halves at the plane: the page's auto base drawn on one)",
+      (SURFACE_API, "        runs = _mirrored_runs(points, directions, limit, trace)\n", "        runs = None\n"), killers=CURVED_TESTS),
+    m("S/exit-off-trace", "2026-11-17 curved follow-up", "the auto arcs turned to the principal axis only, not laid on the plane and centred "
+      "(their edges farther up one long side)",
+      (FIT, '    trace = next((t for t in traces if abs(t["direction"][0] * axis[0] + t["direction"][1] * axis[1]) >= near), None)\n',
+       "    trace = None\n"), killers=CURVED_TESTS),
+    m("S/symmetry-axis-chord", "2026-11-17 curved follow-up", "the symmetric-face rule about the exit's chord alone on a mirror-symmetric "
+      "selection (a tessellation that is not symmetric: its notch on one side, no symmetric field)",
+      (FIELDFIT, "    trace = mirror_axis(frame, obstacles)\n", "    trace = None\n"), killers=CURVED_TESTS),
+    m("S/traces-none", "2026-11-17 curved follow-up", "no mirror plane's trace for any curved chart (the sides, the exits and the "
+      "symmetric-face rule as before)",
+      (SURFACE_API, "            cached = chart_module.mirror_traces(mesh, chart, select.mirror_maps(mesh, chart.facets))\n", "            cached = []\n"),
+      killers=CURVED_TESTS),
+    m("S/centre-off-face", "2026-11-17 curved follow-up", "the select reply's middle any facet of the selection (a filled hole's facet by "
+      "the Dex3-1's tip end: the other limit selects that facet alone)",
+      (SURFACE_API, "    candidates = [f for f in ordered if face is not None and f in face] or ordered\n", "    candidates = ordered\n"),
+      killers=CURVED_TESTS),
+    m("S/library-strict-chosen", "2026-11-17 curved follow-up", "main.js: a Library sensor's 0.3 % written into the strain limit (Strict "
+      "0.3 % chosen for the user's own curved clicks on the part)",
+      (CAD_MAIN, '    if (control.hasAttribute("data-flat") && Number(options[key]) === Number(control.dataset.flat)) continue;\n', ""),
+      killers=CURVED_TESTS),
+    # Whole board on the real stack (the lead's decision of 2026-11-18): F the laminated field's bend rule, the boards one
+    # board's.  Each killed alone by test_surface_curved (WholeBoardBendTests) on a scratch copy.
+    m("S/board-bends-field-rule", "2026-11-18 whole board", "under Whole board every bend tighter than the laminated field's 6.5 mm "
+      "blocks the whole board again, its tails and fan-out too (the roof's creases across the face: no fit; the soft finger's "
+      "face fitted nothing at side 0)",
+      (FIT, "    bends = bend_segments(mesh, chart, STATIC_BEND_FACTOR * (SINGLE_FPC_MM if board else STACK_THICKNESS_MM))\n",
+       "    bends = bend_segments(mesh, chart, STATIC_BEND_FACTOR * STACK_THICKNESS_MM)\n"), killers=CURVED_TESTS),
+    m("S/field-bends-dropped", "2026-11-18 whole board", "under Whole board the taxel field takes one board's bend rule too (F over the "
+      "roof's far crease: 326 taxels, the map's field_bend_radius failed)",
+      (FIT, "    if board:\n        found[\"field_bends\"] =", "    if False:\n        found[\"field_bends\"] ="), killers=CURVED_TESTS),
+    m("S/field-bends-walk-unchecked", "2026-11-18 whole board", "the masked walk lays F over a bend only the field must keep off (its "
+      "candidates rejected one by one when built)",
+      (FILL, "                    if field_rows is not None:\n                        # Whole board: the row's share of F",
+       "                    if False:\n                        # Whole board: the row's share of F"), killers=CURVED_TESTS),
+    m("S/field-bends-raster-unchecked", "2026-11-18 whole board", "the rectangle search places F over a bend only the field must keep off",
+      (FIT, '    if getattr(region, "field_rows", None) is not None:\n', "    if False:\n"), killers=CURVED_TESTS),
+    m("S/field-bends-built-unchecked", "2026-11-18 whole board", "a built field's F not checked against the bends only it must keep off "
+      "(the search's raster and strips alone)",
+      (FIT, '    if not obstacles.get("field_bends"):\n        return None\n    from .fieldfit import field_body\n',
+       "    if True:\n        return None\n    from .fieldfit import field_body\n"), killers=CURVED_TESTS),
+    m("S/field-bends-block-tails", "2026-11-18 whole board", "the masked search's tails kept off the bends only the taxel field must keep "
+      "off (the roof's masked fields lost: the tails cross its near crease)",
+      (FILL, "            if exit or kind == 3:\n", "            if exit:\n"), killers=CURVED_TESTS),
+    # The review of Whole board on the real stack (2026-11-18): a bend running toward the exit.  Each killed alone by
+    # test_surface_curved (WholeBoardBendTests) on a scratch copy.
+    m("S/field-bends-strict-search-dropped", "2026-11-18 whole board review", "Whole board searches only with the boards across the bends "
+      "only the field must keep off: the roof turned, its creases running to the exit, 132 taxels turned 10 degrees, not 182",
+      (FILL, '    if obstacles.get("field_bends"):\n        # Whole board (2026-11-18): the search above',
+       '    if False:\n        # Whole board (2026-11-18): the search above'), killers=CURVED_TESTS),
+    m("S/field-bends-strict-search-unkept", "2026-11-18 whole board review", "the second search lets the boards across the field's bends "
+      "as well and keeps F off none of them: its fields over the creases use up the realize attempts (the roofs fit nothing)",
+      (FILL, '        strict["bends"] = obstacles["field_bends"]\n', ""), killers=CURVED_TESTS),
+)
+MUTANTS += CURVED
 
 
 # --------------------------------------------------------------------------

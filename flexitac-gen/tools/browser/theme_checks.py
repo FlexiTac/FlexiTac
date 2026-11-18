@@ -33,8 +33,8 @@ the page checked opens (so the generator opens dark from the stored choice), the
     beside it in Gen by Surface, the sensor on the part's (2026-11-05), the map's white; color-scheme light there);
   - the colours, as Apple uses them: the elements filled with the action blue (or any blue) only the regions' primary
     actions (Generate sensor, Generate & validate in the form and in Advanced Customization, the two Gerber ZIPs, Fit while it is the
-    guide's next step) and the selection states (the guide's next step, Edit border on; tinted: the chosen tool, the
-    chosen proposal), and no element larger than 12 px filled green; in eight states: Gen by Surface as it opens, with
+    guide's next step) and the selection states (the guide's next step, Edit border on, the chosen tool's number since
+    2026-11-17; tinted: the chosen tool, the chosen proposal), and no element larger than 12 px filled green; in eight states: Gen by Surface as it opens, with
     Advanced Customization open, with the border editor on and with a setting changed (Fit the next step: Fit blue,
     Generate & validate off), #rect as it opens, with its folds open, stale, and with a failing design check (the
     server's reply with one rule failed);
@@ -110,7 +110,7 @@ DRAWINGS = "svg, canvas, img, .oblique-board, .assembly-scene, .coin-ref, .coin-
 FIT_NEXT = '#guideSubsteps .flow-substep[data-substep="fit"].is-next'
 BLUE_ALLOWED = ["#generate", "#cadGenerate", "#cadQuickGenerate", ".download-actions button.download-main",
                 f"body:has({FIT_NEXT}) #cadFit", ".flow-step.is-next .flow-no", ".flow-substep.is-next .flow-sub-no",
-                '#cadEditBorder[aria-pressed="true"]']
+                '#cadEditBorder[aria-pressed="true"]', ".cad-tools input:checked + span .cad-tool-no"]
 # The page's buttons, summaries and header links whose transition is not 0s (no colour fades in the theme).
 FADING = """() => [...document.querySelectorAll('button, summary, a.masthead-link')]
     .map(n => [n.id || n.className || n.tagName, getComputedStyle(n).transitionDuration]).filter(([, d]) => d.split(', ').some(x => x !== '0s'))"""

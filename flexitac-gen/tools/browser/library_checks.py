@@ -8,9 +8,11 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   umi finger在首页而可以显示重复,其他的夹爪后面就只出现一次,然后标注一下点进去我们有1-3mm customization" and "UMI
   Fin-Ray Gripper. ... 这个section可以放在夹爪的后面"): at 1440, 1100, 900, 768, 744, 735, 734, 600, 390, 360 and 320 px
   no horizontal page overflow (320 px since the header's below-360 rules of 2026-11-05); no tile and no "Start here.";
-  the showcase's card (2026-11-12; showcase_checks.py part_page), then the grippers' section ('Grippers. Seven, each fitted at four pitches.'), its seven cards in the parts' order
+  the showcase's card (2026-11-12; showcase_checks.py part_page), then the grippers' section ('Grippers. <their count>, each
+  fitted at four pitches.', the count entries.json's, a word as library.js writes it: 'Seven' before the grippers of
+  2026-11-16..17), its cards in the parts' order (the LeFlexiTac's first)
   (gripper-<part>, opening #<part>-2mm, named by the gripper, its two grey lines its range, '1 to 3 mm', and 'Pick your
-  pitch', no badge line), four to a row from 735 px (4 + 3) and two below (2 + 2 + 2 + 1), never wider than the UMI
+  pitch', no badge line), four to a row from 735 px and two below, the last row the rest (rows_of_cards()), never wider than the UMI
   shelf's cards from 735 px and as wide from 1100 px, every grey line on one line and no text past its card's box down
   to 320 px; then the UMI finger's shelf, since the user's request of 2026-11-16 one card per finger shape (its pitches
   by pitch, closed by the tapered tips' family card, before): 'Straight finger' (its 2 mm sensor, '1 to 3 mm', 'Pick
@@ -21,7 +23,7 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   page), '<' is off at its start and '>' moves it by one card, and an arrow Tabbed to shows its focus ring inside the
   window at 390 and 360 px, each of its cards Tabbed to whole inside the row's gutters (the review of 2026-11-06) and its
   focus ring inside the window with room under it (the verification of 2026-11-06);
-  both headings ('Grippers. Seven, each fitted at four pitches.'; 'UMI Fin-Ray Gripper. Six finger shapes, straight to
+  both headings ('Grippers. <their count>, each fitted at four pitches.', the count entries.json's; 'UMI Fin-Ray Gripper. Six finger shapes, straight to
   pointed.'), one line at 1440 and 1280 px, never splitting a range or 'straight to pointed', at most two lines at
   900 px broken between phrases.
 - part_first_screen (the user's decision of 2026-11-05: the picture may be squashed): below 900 px a sensor's picture
@@ -38,8 +40,8 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
 - part_pictures (the on-part figure on the cards and a sensor's page, the user's request of 2026-11-05; the pictures'
   contract: entries.json's "image", shots/<id>.exploded.webp, .assembled.webp and .exploded.card.webp): the tree's own
   pictures when entries.json names them, else stand-ins drawn here in the browser and served for the contract's
-  "image" (nothing committed).  Every card of the grid (the grippers' seven, each its 2 mm sensor's, the UMI shelf's
-  six shapes, each its sensor's: 13; 12 before the shapes of 2026-11-16) shows its sensor's Exploded card picture, contained and
+  "image" (nothing committed).  Every card of the grid (the grippers', each its 2 mm sensor's, the UMI shelf's six shapes,
+  each its sensor's: the grippers' count and six; 13 before the grippers of 2026-11-16..17, 12 before the shapes of 2026-11-16) shows its sensor's Exploded card picture, contained and
   centred in its light box, lazy, decoded async, its width and height set (no card moves as they arrive), its alt the
   entry's, the bytes asked for as the page opens within the first screen's 1 MB; a sensor's page shows the Exploded
   picture (eager) with a
@@ -106,13 +108,12 @@ served here under /flexitac-gen/ on FPC_STATIC_PORT, default FPC_PORT + 1, as Gi
   on Open in Gen by Surface.
 - part_grid (2026-11-06): each gripper's card opens its 2 mm sensor's page, whose Pitch reaches its four pitches, the
   UMI shelf's Straight finger its 2 mm page with its four pitches, each shape's card its sensor's page with the card's
-  axes of more than one choice, and every one of the 58 sensors' pages is reached by clicks alone (the cards, the
-  Pitch, Shape and Tip width); the window's X (a page's back link to #gripper-<part> until 2026-11-15) leaves the grid
-  where it was with its card focused; the older
-  addresses land sensibly: #shelf-<gripper> on its card (the address #gripper-<part>, no history entry), #shelf-start
-  at the top with no hash (opened anew, and typed with the grid scrolled down), #shelf-umi-finray and #grippers on
-  their sections, the UMI finger's removed cards' (#umi-finray-1mm, -1.5mm, -3mm) and #umi-tapers their pages with
-  their X to the UMI shelf.
+  axes of more than one choice, and every one of the sensors' pages (58 before the grippers of 2026-11-16..17) is
+  reached by clicks alone (the cards, the Pitch, Shape and Tip width); the window's X (a page's back link to
+  #gripper-<part> until 2026-11-15) leaves the grid where it was with its card focused; the older addresses land
+  sensibly: #shelf-<gripper> on its card (the address #gripper-<part>, no history entry), #shelf-start at the top with
+  no hash (opened anew, and typed with the grid scrolled down), #shelf-umi-finray and #grippers on their sections, the
+  UMI finger's removed cards' (#umi-finray-1mm, -1.5mm, -3mm) and #umi-tapers their pages with their X to the UMI shelf.
 - part_window (the user's request of 2026-11-15: "after we click for all cards to details, we may not jump to a new
   page. lets bump our to a large window, and if you click the "x" of right top conrner, it will close and back show
   lib"): at 1440 x 900, 900 x 900 and 390 x 844, light and dark, each opener (a gripper's card, the UMI shelf's
@@ -204,6 +205,17 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
 import library_shots  # noqa: E402
 import library_write  # noqa: E402
+# The ordering's two rows of a sensor's window (2026-11-17; web/boards.js): each label, its value's text and its links
+# [href, download, target].
+BOARDS_GUIDE = "https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/edit?tab=t.0#heading=h.kk7d14qme9db"
+BOARDS_FOLDER = "static/vendor/flexitac-reader/"
+ORDER_ROWS = """() => [...document.querySelectorAll('#libDetail .lib-order dt')].map(dt => [dt.textContent, dt.nextElementSibling.textContent,
+  [...dt.nextElementSibling.querySelectorAll('a')].map(a => [a.getAttribute('href'), a.getAttribute('download'), a.getAttribute('target')])])"""
+# The board's dots (the review of 2026-11-17): each "\u00a0· " on the line of the piece before it (a dot never starts a
+# line), as [the dot's top, the piece's top] in px.
+BOARD_DOTS = """() => [...document.querySelectorAll('#libDetail .lib-board')].flatMap(dd => [...dd.childNodes].filter(node => node.nodeType === 3)
+  .map(node => { const range = document.createRange(); const at = node.data.indexOf('·'); range.setStart(node, at); range.setEnd(node, at + 1);
+    return [node.data, Math.round(range.getBoundingClientRect().top), Math.round(node.previousSibling.getBoundingClientRect().top)]; }))"""
 
 LIBRARY = ROOT / "web" / "library"
 ENTRIES = json.loads((LIBRARY / "entries.json").read_text(encoding="utf-8"))
@@ -215,16 +227,33 @@ SITE = {"base": URL, "root": None}
 READY = "() => document.querySelectorAll('.lib-card').length > 0 || document.getElementById('libStatus').textContent !== ''"
 # 768 to 734 px: the grippers' grid turns from four to a row to two at the UMI shelf's own 735 px (2026-11-06).
 WIDTHS = (1440, 1100, 900, 768, 744, 735, 734, 600, 390, 360, 320)
-COUNTS = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
+COUNTS = ("No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+          "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty")
+
+
+def count_word(count: int) -> str:
+    """A heading's count as library.js words it: COUNTS's word up to twenty (twelve until the final merge of 2026-11-17: the grid's nineteen cards read 'Nineteen'), its digits past (the review of 2026-11-17 of
+    the hands' merge: the grippers' heading is computed from entries.json, and eleven cards or more had raised an
+    IndexError here where the page writes 'Eleven' or '13')."""
+
+    return COUNTS[count] if 0 <= count < len(COUNTS) else str(count)
 # The grid (the user's requests of 2026-11-06; library.js SHELVED): the grippers' section, one card per part but the
 # shelved (the UMI finger, and any part a family closes), each opening its 2 mm sensor, then each shelved part's shelf;
 # GRID_CARDS: the sensors whose card pictures the grid shows, in its order (13 since the UMI shelf's shapes of
-# 2026-11-16), all asked for as the page opens (it is short), within FIRST_SCREEN_BYTES (test_library's).
+# 2026-11-16, the grippers' count and six since the grippers of 2026-11-16..17), all asked for as the page opens (it is short), within FIRST_SCREEN_BYTES (test_library's).
 SHELVED = ["umi-finray"] + [family["shelf"] for family in ENTRIES["families"].values() if family["shelf"] != "umi-finray"]
 CARDED = [part for part in ENTRIES["order"] if part not in SHELVED]
 SHELVES = [part for part in ENTRIES["order"] if part in SHELVED]
 FAMILIES_OF = {part: [name for name, family in ENTRIES["families"].items() if family["shelf"] == part] for part in ENTRIES["order"]}
 GRID_CARDS = library_shots.grid_cards(ENTRIES)
+
+
+def rows_of_cards(count: int, per_row: int) -> list:
+    """The grid's rows of ``count`` cards, ``per_row`` a row, the last one the rest ([4, 4, 2] for ten four to a row)."""
+
+    return [per_row] * (count // per_row) + ([count % per_row] if count % per_row else [])
+
+
 FIRST_SCREEN_BYTES = 1_000_000
 # The tallest sensor's page (a three-line title and two controls: Shape and Tip width): the Short taper's card's sensor
 # since the UMI finger's shapes of 2026-11-16 (the Tapered tips page, #umi-tapers, before, whose sensor is the
@@ -253,6 +282,13 @@ PICTURED = any(variant["image"] for variant in ENTRIES["variants"].values())
 CASES = ("pictures", "placeholders")
 CARD_SIZE = (640, 400)
 SHOT_SIZE = (1280, 800)
+# A UMI card's likeness to its Exploded picture enlarged and cut as the shoot cuts it (card_framing()): the mean colour
+# difference over the pixels both draw opaque, of 255.  A coarse guard (the review of 2026-11-16): the enlarged 1x picture
+# is softer than the card's own render, so the 30 cards score 4.1 to 6.1 at 1.25 as they are; of two cards shot again
+# (4.0 and 6.4 before WebP), with the Exploded camera a degree higher they score 5.0 and 6.0, a degree less tilted 7.8
+# and 11.3: a degree of elevation passes.  The direction itself is held exactly by the shoot (library_shots.shoot():
+# the stage's report at the card's read the Exploded read's, word for word).
+LIKENESS_MAX = 8
 STAND_IN = """([width, height, tone]) => { const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
   const g = canvas.getContext('2d'); const s = width / 1280;
   g.fillStyle = '#c7c8cc'; g.beginPath(); g.roundRect(440 * s, 380 * s, 400 * s, 380 * s, 36 * s); g.fill();
@@ -610,8 +646,10 @@ def part_layout(browser):
             got = [{key: card[key] for key in ("id", "href", "variant", "name", "lines")} for card in cards]
             check("layout: the grippers' section a card per gripper in the parts' order (gripper-<part>, opening its 2 mm sensor, its name, "
                   "'1 to 3 mm' (its own range) and 'Pick your pitch'), no badge line",
-                  got == expected_cards and layout["grid"]["badges"] == 0 and len(got) == 7
-                  and {card["name"]: card["lines"][0] for card in got}.get("Franka Hand") == "1 to 2.5 mm",
+                  got == expected_cards and layout["grid"]["badges"] == 0 and len(got) == len(CARDED) and got[0]["id"] == "gripper-leflexitac"
+                  and {card["name"]: card["lines"][0] for card in got}.get("Franka Hand") == "1 to 2.5 mm"
+                  and {card["name"]: card["lines"][0] for card in got}.get("YUBI Gripper") == "1 to 2.5 mm"
+                  and {card["name"]: card["lines"][0] for card in got}.get("Unitree Dex3-1") == "1 to 2.5 mm",
                   [(one, other) for one, other in zip(got, expected_cards) if one != other][:2] or got[:2])
             headings = {row["id"]: row["heading"] for row in layout["rows"]}
             headings["grippers"] = layout["grid"]["heading"]
@@ -619,13 +657,13 @@ def part_layout(browser):
             # finger's shelf, since the user's request of 2026-11-16, its shapes: the part's own (straight) and each card's,
             # the last one's named ('Six finger shapes, straight to pointed.'), here from entries.json's cards, not its
             # headings.
-            expected_headings = {"grippers": f"Grippers. {COUNTS[len(CARDED)]}, each fitted at {COUNTS[4].lower()} pitches."}
+            expected_headings = {"grippers": f"Grippers. {count_word(len(CARDED))}, each fitted at {COUNTS[4].lower()} pitches."}
             for part in SHELVES:
                 last = shapes_of[part][-1]["axes"][0]["choices"][-1]["label"].lower()
-                expected_headings[f"shelf-{part}"] = f"{ENTRIES['parts'][part]['title']}. {COUNTS[1 + len(shapes_of[part])]} finger shapes, straight to {last}."
-            check("layout: both headings, their bold half and their grey half ('Grippers. Seven, each fitted at four pitches.', "
+                expected_headings[f"shelf-{part}"] = f"{ENTRIES['parts'][part]['title']}. {count_word(1 + len(shapes_of[part]))} finger shapes, straight to {last}."
+            check(f"layout: both headings, their bold half and their grey half ('{expected_headings['grippers']}', "
                   "'UMI Fin-Ray Gripper. Six finger shapes, straight to pointed.')",
-                  headings == expected_headings and headings["grippers"] == "Grippers. Seven, each fitted at four pitches."
+                  headings == expected_headings
                   and headings["shelf-umi-finray"] == "UMI Fin-Ray Gripper. Six finger shapes, straight to pointed."
                   and not [text for text in headings.values() if re.search(r"\b(fine|coarse)\b", text)],
                   {key: value for key, value in headings.items() if value != expected_headings.get(key)} or headings)
@@ -653,12 +691,15 @@ def part_layout(browser):
             page.screenshot(path=f"{SHOTS}/library_grid_1440.png")
         if width == 390:
             page.screenshot(path=f"{SHOTS}/library_grid_390.png")
-    check("layout: the grippers four to a row from 735 px (4 + 3), two below (2 + 2 + 2 + 1), never three",
-          all(rows_of[width] == ([4, 3] if width >= 735 else [2, 2, 2, 1]) for width in WIDTHS), rows_of)
+    # Rows of four from 735 px, of two below, the last one the rest (2026-11-17, the grippers and the hands added: the
+    # count entries.json's; 4 + 3 and 2 + 2 + 2 + 1 with the seven grippers before them).
+    check(f"layout: the grippers four to a row from 735 px ({' + '.join(map(str, rows_of_cards(len(CARDED), 4)))}), two below "
+          f"({' + '.join(map(str, rows_of_cards(len(CARDED), 2)))}), never three",
+          all(rows_of[width] == rows_of_cards(len(CARDED), 4 if width >= 735 else 2) for width in WIDTHS), rows_of)
     check("layout: the UMI shelf four to a row from 735 px (4 + 2), two below (2 + 2 + 2), as the grippers'",
           all(found == {"shelf-umi-finray": [4, 2] if width >= 735 else [2, 2, 2]} for width, found in shelf_rows_of.items()), shelf_rows_of)
     check("layout: at every width from 1440 to 320 px each UMI shelf's card a gripper's card's size, its width and its picture's box (one size "
-          "for all thirteen; the user's request of 2026-11-16: the shelf's cards had been a third of the row)",
+          f"for all {len(CARDED) + 6}; the user's request of 2026-11-16: the shelf's cards had been a third of the row)",
           all(len(grid) == 1 and umi == grid for grid, umi in sizes_of.values()), {width: sizes for width, sizes in sizes_of.items() if width in (1440, 1100, 768, 390)})
     check("layout: from 1440 to 320 px every grey line of a gripper's card on one line, no text past its card's box",
           not any(text_of.values()), {width: found for width, found in text_of.items() if found})
@@ -673,7 +714,7 @@ def part_layout(browser):
     for width, height in ((390, 844), (360, 740)):
         page.set_viewport_size({"width": width, "height": height}); page.wait_for_timeout(120)
         page.evaluate("() => scrollTo(0, 0)"); page.wait_for_timeout(80)
-        page.focus("#gripper-makermods-metal")
+        page.focus(f"#gripper-{CARDED[-1]}")  # the grippers' last card
         tabbed[width] = []
         for _ in range(count):
             page.keyboard.press("Tab"); page.wait_for_timeout(100)
@@ -759,8 +800,9 @@ def part_grid(browser):
             if page.evaluate(VIEW)["hash"] == f"#{key}":
                 reached.add(key)
         page.go_back(); page.wait_for_timeout(150)
+    # Eight gripper cards since the Galaxea R1 Lite of 2026-11-17 (its review: the count here had stayed at seven).
     check("grid: each gripper's card opens its 2 mm sensor's page, its Pitch the gripper's four pitches",
-          not wrong and len(opened) == 7, wrong[:2] or opened)
+          not wrong and len(opened) == len(CARDED), wrong[:2] or opened)
     # The UMI shelf (one card per finger shape since the user's request of 2026-11-16): the straight finger's card opens
     # its 2 mm page, whose Pitch reaches its four pitches; each shape's card its sensor's page, whose controls are the
     # card's axes of more than one choice (Tip width; the Short taper's Shape too; none on the Pointed tip's), which
@@ -886,9 +928,21 @@ def part_routes(browser):
           fine["hash"] == "#widowx-250-1mm" and fine["history"] == shown["history"] and fine["checked"] == "widowx-250-1mm"
           and fine["tab"] == "WidowX 250, 1 mm · Library · FlexiTac-Gen", fine)
     facts = page.inner_text(".lib-facts")
-    check("routes: the page's facts (26 rows × 27 columns · 664 taxels, 1 mm · fill 0.50, the field, the tails, reader none, the build)",
-          "26 rows × 27 columns · 664 taxels" in facts and "1 mm · fill 0.50" in facts and "surface-26x27-7112a7cc7ced" in facts
-          and "none (one tail pin per line)" in facts, facts)
+    check("routes: the page's facts (26 rows × 27 columns · 664 taxels, 1 mm · fill 0.50, the field, the tails, the build; no Reader row since "
+          "2026-11-17)", "26 rows × 27 columns · 664 taxels" in facts and "1 mm · fill 0.50" in facts and "surface-26x27-7112a7cc7ced" in facts
+          and "Reader" not in facts and "tail pin" not in facts, facts)
+    # The user's request of 2026-11-17 ("所有的card加上一条：ordering and fabrication：放上instruction link；reading board
+    # download"): under the facts, the guide in a new tab and the board its lines take (26 x 27: the 32 x 32), its bundle
+    # and its notice (web/boards.js).
+    order = page.evaluate(ORDER_ROWS)
+    named = page.get_attribute(".lib-board a[download]", "aria-label")
+    check("routes: under the facts, Ordering and fabrication (the FlexiTac fabrication guide, a new tab) and Reading board (26 x 27: "
+          "'32 × 32 · ZIP, 93 kB · CC BY-NC 4.0', a no-break space before each dot, the bundle downloaded under its name and named in full to a "
+          "screen reader, the notice in a new tab)",
+          order == [["Ordering and fabrication", "FlexiTac fabrication guide", [[BOARDS_GUIDE, None, "_blank"]]],
+                    ["Reading board", "32 × 32\u00a0· ZIP, 93 kB\u00a0· CC BY-NC 4.0", [[f"{BOARDS_FOLDER}FlexiTac_reading_board_32x32.zip", "FlexiTac_reading_board_32x32.zip", None],
+                                                                                      [f"{BOARDS_FOLDER}NOTICE.md", None, "_blank"]]]]
+          and named == "Reading board 32 × 32, ZIP, 93 kB", (order, named))
     # (The page's pills: the grid's own, the showcase's Details since 2026-11-15, are under the window.)
     widths = page.evaluate("() => [document.querySelector('.lib-open'), ...document.querySelectorAll('#libDetail .lib-pill')].map(n => n.getBoundingClientRect().width)")
     check("routes: Open in Gen by Surface, the primary action, at least as wide as each download pill (1440 px)",
@@ -904,7 +958,11 @@ def part_routes(browser):
         narrow[width] = page.evaluate("""() => { const lines = node => { const range = document.createRange(); range.selectNodeContents(node);
             return new Set([...range.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top))).size; };
           const columns = [...document.querySelector('.lib-detail-body').children].map(n => Math.round(n.getBoundingClientRect().width));
-          return {columns, facts: [...document.querySelectorAll('.lib-facts dd')].map(lines), pills: [...document.querySelectorAll('#libDetail .lib-pill')].map(n => Math.round(n.getBoundingClientRect().top))}; }""")
+          const left = node => Math.round(node.getBoundingClientRect().left); const body = document.getElementById('libWindowBody');
+          return {columns, facts: [...document.querySelectorAll('.lib-facts dd')].map(lines), pills: [...document.querySelectorAll('#libDetail .lib-pill')].map(n => Math.round(n.getBoundingClientRect().top)),
+                  order: [...document.querySelectorAll('.lib-order dd')].map(lines), pieces: [...document.querySelectorAll('.lib-board > *')].map(lines),
+                  values: [...new Set([...document.querySelectorAll('.lib-facts dd')].map(left))], ordered: [...new Set([...document.querySelectorAll('.lib-order dd')].map(left))],
+                  hairline: getComputedStyle(document.querySelector('.lib-facts')).borderBottomWidth, over: body.scrollHeight - body.clientHeight}; }""")
         page.screenshot(path=f"{SHOTS}/library_detail_{width}.png")
     # The review of 2026-11-05: below 900 px Open in Gen by Surface and the downloads come before the facts, so on a
     # 390 x 844 phone Open is in the first screen; from 900 px the facts stay before it.
@@ -926,6 +984,27 @@ def part_routes(browser):
           all(len(view["columns"]) == 2 and abs(view["columns"][0] - view["columns"][1]) <= 1 for view in narrow.values())
           and all(count == 1 for width in (900, 1280, 1440) for count in narrow[width]["facts"])
           and all(len(narrow[width]["pills"]) == 2 and narrow[width]["pills"][0] == narrow[width]["pills"][1] for width in (1100, 1280, 1440)), narrow)
+    # The ordering's two rows (2026-11-17): one line each at 1280 and 1440 px (their labels' column at most 40 %: at 900 px
+    # "Ordering and fabrication" takes two lines and the board's value may), the board's pieces never split.
+    check("routes: Ordering and fabrication and Reading board one line each at 1280 and 1440 px; the board's size, ZIP and licence never split "
+          "(900 to 1440 px)", all(narrow[width]["order"] == [1, 1] for width in (1280, 1440))
+          and all(len(narrow[width]["pieces"]) == 3 and set(narrow[width]["pieces"]) == {1} for width in narrow), narrow)
+    # The review of 2026-11-17: from 1200 px the facts and the two rows one table (one values' column, no hairline between),
+    # so a plain sensor's window fits 1440 x 900 again (the two rows for the Reader row: one row taller, 747 px of 756);
+    # below, the facts' 72 px labels and the rows' own column under a hairline, as before.
+    check("routes: from 1200 px the facts and the ordering's rows one table (one values' column, no hairline between them), the 1440 x 900 window "
+          "with no scroll; at 900 and 1100 px the rows' own column under a hairline",
+          all(len(narrow[width]["values"]) == 1 and narrow[width]["ordered"] == narrow[width]["values"] and narrow[width]["hairline"] == "0px" for width in (1280, 1440))
+          and narrow[1440]["over"] == 0
+          and all(narrow[width]["ordered"][0] > narrow[width]["values"][0] and narrow[width]["hairline"] == "1px" for width in (900, 1100)), narrow)
+    # A phone's narrowest windows (the review of 2026-11-17: at 320 to 326 px the second dot had started a line).
+    dots = {}
+    for width in (320, 322, 324, 326, 390):
+        page.set_viewport_size({"width": width, "height": 800}); page.wait_for_timeout(150)
+        dots[width] = page.evaluate(BOARD_DOTS)
+    check("routes: from 320 to 390 px each of the board's dots on the line of the piece before it (never starting a line)",
+          all(len(seen) == 2 and all(text == "\u00a0· " and top == before for text, top, before in seen) for seen in dots.values()), dots)
+    page.set_viewport_size({"width": 1440, "height": 900}); page.wait_for_timeout(150)
     page.click(".lib-seg label:has(input[value='widowx-250-2mm'])"); page.wait_for_timeout(150)
     pitched = page.evaluate(VIEW)
     check("routes: another pitch replaces the address (no history entry) and shows that sensor, its segment focused",
@@ -1401,7 +1480,7 @@ def pictures_case(browser, view):
     """part_pictures with every view set (``view``) or null."""
     tag, suffix = (" (3D view)", "_view") if view else ("", "")
     # The grid at 1440 px and on a 390 x 844 phone: every card's picture lazy, and the bytes asked for as the page opens
-    # (all 13 at 1440 px: the page is short) within the first screen's budget; then, once every section has been in
+    # (all of them at 1440 px: the page is short) within the first screen's budget; then, once every section has been in
     # sight, every card's Exploded card picture shown in its light box.
     stand = stand_ins(browser) if not PICTURED else {}
 
@@ -1432,11 +1511,11 @@ def pictures_case(browser, view):
     wrong = [result for result in map(card_picture_wrong, slots) if result is not None]
     owners = [slot["owner"] for slot in slots]
     shelf = [card_owner(item["owner"])[0] for item in slots if item["shelf"]]
-    check(f"pictures{tag}: every card (the grippers' seven, each its 2 mm sensor's, the UMI shelf's six shapes, each its sensor's: "
+    check(f"pictures{tag}: every card (the grippers' {len(CARDED)}, each its 2 mm sensor's, the UMI shelf's six shapes, each its sensor's: "
           f"{len(GRID_CARDS)}) shows its sensor's Exploded card file (640 x 400) filling its light box, the UMI shelf's as the grippers' (the user's "
           "request of 2026-11-16; their Assembled picture framed on the fingertip from the review that day), contained and centred, lazy, "
           "decoded async, its width and height set, its alt the entry's",
-          not wrong and [card_owner(owner)[0] for owner in owners] == GRID_CARDS and len(GRID_CARDS) == 13 and shelf == GRID_CARDS[7:],
+          not wrong and [card_owner(owner)[0] for owner in owners] == GRID_CARDS and len(GRID_CARDS) == len(CARDED) + 6 and shelf == GRID_CARDS[len(CARDED):],
           wrong[:3] or owners)
     pictured = page.evaluate(GEOMETRY)
     page.screenshot(path=f"{SHOTS}/library_pictures{suffix}_grid_1440_light.png")
@@ -1808,10 +1887,28 @@ def part_downloads(browser):
     download.save_as(path)
     check("downloads: the part's STL is its mesh (widowx-250.stl, 22 kB)", path.read_bytes() == (LIBRARY / part["mesh"]["file"]).read_bytes()
           and download.suggested_filename == "widowx-250.stl" and "Part STL (22 kB)" in page.inner_text(".lib-links"), download.suggested_filename)
+    # The reading board (2026-11-17): the 26 x 27 sensor's, the 32 x 32 board's bundle as served (tools/flexitac_downloads.py).
+    with page.expect_download(timeout=60000) as info:
+        page.click(".lib-board a[download]")
+    download = info.value
+    path = downloads / f"library-{download.suggested_filename}"
+    download.save_as(path)
+    check("downloads: the reading board's ZIP is the 32 x 32 bundle as served, under its name",
+          path.read_bytes() == (ROOT / "web" / "vendor" / "flexitac-reader" / "FlexiTac_reading_board_32x32.zip").read_bytes()
+          and download.suggested_filename == "FlexiTac_reading_board_32x32.zip", download.suggested_filename)
     licence = page.get_attribute(".lib-links a[target='_blank']", "href")
     reply = page.request.get(SITE["base"] + licence)
     check("downloads: the licence text is served (BSD-3-Clause)", reply.status == 200 and reply.body() == (LIBRARY / part["license"]["text"]).read_bytes()
           and "Licence (BSD-3-Clause)" in page.inner_text(".lib-links"), (licence, reply.status))
+    # (2026-11-17) The LeFlexiTac's files state no licence and are shared with its authors' permission
+    # (tools/library_write.py PERMITTED_LICENCES): its page's one link, to the project's note, says so.
+    open_library(page, "#leflexitac-2mm")
+    links = page.inner_text(".lib-links")
+    note = page.get_attribute(".lib-links a[target='_blank']", "href")
+    reply = page.request.get(SITE["base"] + note)
+    check("downloads: the LeFlexiTac's page links its note as 'Shared with the authors' permission'",
+          "Shared with the authors' permission" in links and "Licence" not in links and reply.status == 200
+          and reply.body() == (LIBRARY / "licenses" / "leflexitac.txt").read_bytes(), (links, note, reply.status))
     check("downloads: no console error", not errors_of(page), errors_of(page)[:5])
     page.context.close()
 
@@ -3280,7 +3377,146 @@ def part_aligned(browser):
     check("aligned: the UMI finger and its five shapes at the same homes (scenes.json's part_homes: the approach its tip's way), exploded 0.8 of the "
           "boards' narrower side a layer", all(held[key] and read[key].get("explode_share") == 0.8 for key in shelf),
           {key: found for key, found in read.items() if key in shelf and not (held[key] and isinstance(found, dict) and found.get("explode_share") == 0.8)})
+    # The UMI shelf's cards zoomed on the tip (the user's decisions of 2026-11-16: "你可以show gripper的angle但是zoom in了，
+    # 就是方向还是那个方向，但是用zoom in +exploded,那就可以tell了"; of zoom 2, "你现在zoom in 的太过了，tactile的tail都看不到"):
+    # each card file the home above zoomed (library_write.CARD_FRAMES), the tip 6 % below its top, the tails' ends off its
+    # bottom, inside its sides, the finger's base clear of the bottom (the review of 2026-11-16: at 1.35 it lay on the
+    # edge), and the same drawing as the sensor's Exploded picture cut there and enlarged as much (the same direction,
+    # explode and look); every gripper's card the whole drawing, clear of every edge.
+    # (Every UMI sensor's card file, the 30: the shelf shows six.)
+    parts = json.loads((LIBRARY / "parts.json").read_text(encoding="utf-8"))
+    umi = [key for key, variant in ENTRIES["variants"].items() if library_write.card_frame(parts, variant["part"])]
+    framed = {key: card_framing(key) for key in umi}
+    check("aligned: each UMI card the Exploded home zoomed on the tip (the tip 6 % below its top, the tails' ends off its bottom, inside its sides), "
+          "the same drawing as its Exploded picture enlarged there", len(umi) == 30 and set(shelf) <= set(umi) and all(found["sound"] for found in framed.values()),
+          (len(umi), {key: found for key, found in framed.items() if not found["sound"]}))
+    bases = [found.get("base") for found in framed.values()]
+    check("aligned: each UMI card's finger (its rightmost object) ending at least 0.05 of the card's height above its bottom edge, as its record's base_px",
+          all(found.get("base") is not None and found["base"] >= 0.05 * CARD_SIZE[1] and found["base_agrees"] for found in framed.values()),
+          {"least": min(bases), "most": max(bases), "off": {key: (found.get("base"), found.get("base_agrees")) for key, found in framed.items()
+                                                            if not (found["base"] >= 0.05 * CARD_SIZE[1] and found["base_agrees"])}})
+    whole = {key: card_framing(key) for key in (ENTRIES["parts"][part]["default"] for part in CARDED)}
+    check("aligned: every gripper's card the whole Exploded drawing, clear of every edge", all(found["whole"] for found in whole.values()),
+          {key: found for key, found in whole.items() if not found["whole"]})
+    # On the grid, each UMI card the grippers' size, its picture its card file; opened from its card, its page the whole
+    # drawing Exploded at the same home (no zoom on the page: the view has no zoom control, and a zoomed home would hide
+    # the tails for ever).
+    page.goto(SITE["base"] + "?probe")
+    wait_until(page, READY, 30)
+    load_grid(page)
+    boxes = page.evaluate("""() => [...document.querySelectorAll('.lib-cards > .lib-card')].map(card => { const shot = card.querySelector('.lib-shot');
+      const img = shot.querySelector('img'); const r = shot.getBoundingClientRect();
+      return [card.closest('.lib-shelf') ? 'umi' : 'gripper', Math.round(r.width * 10) / 10, Math.round(r.height * 10) / 10, img && img.getAttribute('src'),
+              img && [img.naturalWidth, img.naturalHeight]]; })""")
+    sizes = {(kind, width, height) for kind, width, height, _, _ in boxes}
+    srcs = [src for kind, *_, src, _ in boxes if kind == "umi"]
+    check("aligned: the UMI cards' pictures the grippers' size, each its card file (640 x 400)",
+          len({(width, height) for _, width, height in sizes}) == 1 and srcs == [f"static/library/{IMAGES[key]['exploded']['card']}" for key in shelf]
+          and all(natural == list(CARD_SIZE) for kind, *_, natural in boxes if kind == "umi"), (sorted(sizes), srcs))
+    opened = {}
+    for key in shelf:
+        page.goto(SITE["base"] + "?probe")
+        wait_until(page, READY, 30)
+        load_grid(page)
+        page.click(f'#shelf-umi-finray a[href="#{key}"]')
+        state = view_settled(page, key) or {}
+        read = page.evaluate(library_shots.SHOT, "exploded") if state.get("state") == "drawn" else {}
+        after = json.loads(read["state"]) if "state" in read else {}
+        edges = edge_pixels(base64.b64decode(read["url"].split(",", 1)[1])) if "url" in read else None
+        stage = after.get("stage") or {}
+        opened[key] = {"mode": state.get("mode"), "drawn": after.get("drawn_mode"), "moved": after.get("moved"), "edges": edges,
+                       "home": home_frame(stage, "exploded") if stage.get("home") and stage.get("up") else None}
+    check("aligned: each UMI page opened from its card the whole drawing (nothing on the canvas's edge), Exploded at the card's home",
+          all(found["mode"] == "exploded" and found["drawn"] == "exploded" and found["moved"] is False and found["edges"] == 0
+              and found["home"] and (found["home"]["elevation_deg"], found["home"]["tilt_deg"], found["home"]["front"]) == want["exploded"]
+              for found in opened.values()), {key: found for key, found in opened.items()})
     check("aligned: no console error", not errors_of(page), errors_of(page)[:5])
+    page.context.close()
+
+
+def card_framing(key):
+    """What ``key``'s card file (the tree's) is: {sound: the tip framing of library_write.CARD_FRAMES (its opaque drawing
+    0.06 of its height below its top within 1 px, on its bottom edge, CARD_SIDE_MIN of its width from each side) and the
+    Exploded picture's drawing (library_shots.card_top() and card_left() on it enlarged ``zoom`` times, cut and brought
+    down to the card: a mean colour difference under LIKENESS_MAX of 255 over 0.9 of the pixels both draw opaque), whole:
+    its opaque drawing clear of every edge, base: the rows between its finger's base (library_shots.card_base() on its
+    opaque drawing: the rightmost object) and its bottom edge, base_agrees: that half the record's base_px within 2 px,
+    box, likeness}."""
+    from PIL import Image, ImageChops, ImageStat
+
+    record = SHOTS_MANIFEST.get(key) or {}
+    frame = library_write.card_frame(json.loads((LIBRARY / "parts.json").read_text(encoding="utf-8")), ENTRIES["variants"][key]["part"])
+    card = Image.open(LIBRARY / record["files"]["card"]["path"]).convert("RGBA")
+    width, height = card.size
+    box = card.getchannel("A").point(lambda value: 255 if value > 128 else 0).getbbox()
+    whole = bool(box) and box[0] > 0 and box[1] > 0 and box[2] < width and box[3] < height
+    if frame is None or not box:
+        return {"sound": False, "whole": whole, "box": box}
+    exploded = Image.open(LIBRARY / record["files"]["exploded"]["path"]).convert("RGBA")
+    big = exploded.resize((round(exploded.width * frame["zoom"]), round(exploded.height * frame["zoom"])), Image.LANCZOS)
+    alpha = big.getchannel("A")
+    top = library_shots.card_top(alpha.getbbox(), frame)
+    left = library_shots.card_left(alpha.crop((0, top, big.width, min(big.height, top + exploded.height))).getbbox(), big.size)
+    cut = big.crop((left, top, left + exploded.width, top + exploded.height)).resize(card.size, Image.LANCZOS)
+    solid = [image.getchannel("A").point(lambda value: 255 if value == 255 else 0) for image in (card, cut)]
+    both = ImageChops.multiply(*solid)
+    count = both.histogram()[255]
+    mean = math.fsum(ImageStat.Stat(ImageChops.difference(card.convert("RGB"), cut.convert("RGB")), mask=both).mean) / 3 if count else None
+    likeness = {"mean": None if mean is None else round(mean, 2), "share": round(count / max(1, solid[0].histogram()[255]), 3)}
+    sound = (abs(box[1] - frame["top"] * height) <= 1 and box[3] == height and min(box[0], width - box[2]) >= library_write.CARD_SIDE_MIN * width
+             and likeness["mean"] is not None and likeness["mean"] < LIKENESS_MAX and likeness["share"] > 0.9)
+    base = library_shots.card_base(card.getchannel("A").point(lambda value: 255 if value > 128 else 0))
+    recorded = (record.get("card_frame") or {}).get("base_px")
+    agrees = isinstance(recorded, int) and abs(base - recorded * height / library_write.SHOT_SIZE[1]) <= 2
+    return {"sound": sound, "whole": whole, "box": box, "likeness": likeness, "base": base, "base_agrees": agrees}
+
+
+def part_hands(browser):
+    """A hand's further fingers (a scene's extra_fingers, one mechanism for the hands since their merge of 2026-11-17,
+    the user's requests that day, a sensor on every finger: the LEAP Hand's since the Allegro Hand and the Unitree Dex3-1
+    were removed at the user's word that day, and the Unitree Dex3-1's again since 2026-11-18; the reviews of 2026-11-17,
+    which found them drawn but never measured): every gripper's 2 mm sensor's stage
+    (?probe) draws exactly its scene's further fingers (none on a two-finger gripper); and each hand's, shot as the
+    shots tool shoots it (?probe=shoot), measures each further stack: its top FPC seen in both modes (extra_seen at least
+    the rules' near_seen_min) and its field's clearance to every body and finger but its own fingertip and its own links
+    (a body's finger "extra<k>": the LEAP Hand's) (stack3_body, ... at least clearance_min_mm in
+    both modes; with its own fingertip counted it would be under 1 mm, with the LEAP Hand's own distal link 2.7 mm)."""
+    rules = json.loads((LIBRARY / "scenes" / "scenes.json").read_text(encoding="utf-8"))["rules"]
+    counts = {}
+    for part in CARDED:
+        scene = json.loads((LIBRARY / "scenes" / f"{part}.json").read_text(encoding="utf-8"))
+        counts[part] = len(scene.get("extra_fingers") or [])
+    page = view_page(browser)
+    library_case(page, "pictures", view=True)
+    drawn = {}
+    for part in CARDED:
+        state = open_view(page, ENTRIES["parts"][part]["default"]) or {}
+        drawn[part] = (state.get("stage") or {}).get("extra_fingers", 0) if state.get("state") == "drawn" else state.get("state")
+    check("hands: every gripper's stage draws exactly its scene's further fingers (the Unitree Dex3-1's middle fingertip, the LEAP "
+          "Hand's middle and ring fingertips; none on a two-finger gripper)",
+          drawn == counts and any(counts.values()), drawn)
+    measured = {}
+    for part in [part for part in CARDED if counts[part]]:
+        key = ENTRIES["parts"][part]["default"]
+        page.goto(SITE["base"] + f"?probe=shoot#{key}")
+        wait_until(page, READY, 30)
+        stage = (view_settled(page, key) or {}).get("stage") or {}
+        clearance = (stage.get("measures") or {}).get("clearance") or {}
+        labels = [f"stack{k + 3}" for k in range(counts[part])]
+        measured[key] = {"extra_seen": (stage.get("numbers") or {}).get("extra_seen"),
+                         "cover": {mode: [((stage.get("measures") or {}).get("cover") or {}).get(mode, {}).get(f"{label}.top", {}).get("visible") for label in labels]
+                                   for mode in library_shots.MODES},
+                         "clearance": {mode: [clearance.get(mode, {}).get(f"{label}_body") for label in labels] for mode in library_shots.MODES}}
+    reach = lambda value: 12 if isinstance(value, str) and value.startswith(">") else value  # noqa: E731 (the stage's '>12': beyond its reach)
+    check("hands: each hand's further stacks measured (?probe=shoot): their top FPCs seen in both modes, extra_seen their least and at least "
+          f"near_seen_min ({rules['checks']['near_seen_min']}); each one's field at least clearance_min_mm ({rules['checks']['clearance_min_mm']} mm) "
+          "from every body and finger but its own fingertip and links, in both modes",
+          bool(measured) and all(isinstance(found["extra_seen"], (int, float)) and found["extra_seen"] >= rules["checks"]["near_seen_min"]
+                                 and found["extra_seen"] == min(value for mode in library_shots.MODES for value in found["cover"][mode])
+                                 and all(isinstance(reach(value), (int, float)) and reach(value) >= rules["checks"]["clearance_min_mm"]
+                                         for mode in library_shots.MODES for value in found["clearance"][mode])
+                                 for found in measured.values()), measured)
+    check("hands: no console error", not errors_of(page), errors_of(page)[:5])
     page.context.close()
 
 
@@ -3308,7 +3544,7 @@ def main(argv=None):
             if SITE["root"] is not None:
                 answer_github(browser)  # the built site's pages ask GitHub's API for the header's counts (web/counts.js)
             parts = (part_layout, part_grid, part_routes, part_window, part_window_edges, part_first_screen, part_pictures, part_view, part_view_hint_sizes,
-                     part_view_race, part_looks, part_pad, part_aligned,
+                     part_view_race, part_looks, part_pad, part_aligned, part_hands,
                      part_placeholders, part_family, part_downloads, part_isolation, part_errors, part_first_page)
             for part in parts:
                 if args.parts and part.__name__ not in args.parts:

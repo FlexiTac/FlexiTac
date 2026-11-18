@@ -196,6 +196,9 @@ _FREE = 1 << 62
 # an exit when its outline and holes, mirrored about the axis through the exit's chord midpoint perpendicular to it, lie
 # within this (mm) of themselves (faceting, collinear segments and flattening noise stay under it).
 SYMMETRY_TOLERANCE_MM = 0.05
+# A mirror plane's trace (surface.api.mirror_traces) is an exit's axis when it runs within this many degrees of square
+# across the exit's chord (mirror_axis): the auto exits laid on it are square to the bit (surface.fit.axis_exit).
+MIRROR_TRACE_DEG = 0.1
 # The mirrored outline is sampled at every vertex and at most this far apart (mm) along its segments; its deviation is
 # reported up to SYMMETRY_REPORT_MM (None beyond).
 SYMMETRY_SAMPLE_MM = 1.0
@@ -425,6 +428,13 @@ def exit_symmetry(chart: Any, side: Mapping[str, Any], obstacles: Mapping[str, A
     tolerance = SYMMETRY_TOLERANCE_MM if tolerance is None else tolerance
     frame = fit.BaseFrame(side, 0.0)
     axis = frame.length / 2
+    trace = mirror_axis(frame, obstacles)
+    if trace is not None:
+        # A doubly curved selection that is its own mirror image, the exit square across the plane's trace (surface.api.
+        # mirror_traces; the review of 2026-11-17, finding 2): the axis is the trace, and the outline may lie off its
+        # mirror image by a facet (a tessellation that is not itself symmetric).
+        axis, allowance = trace
+        tolerance = max(tolerance, allowance)
     outline = [frame.to_base(p) for p in chart.outline()]
     holes = [[frame.to_base(p) for p in hole] for hole in obstacles["holes"]]
     surface = [(ring[k - 1], ring[k]) for ring in [outline] + holes for k in range(len(ring))]
@@ -460,6 +470,22 @@ def exit_symmetry(chart: Any, side: Mapping[str, Any], obstacles: Mapping[str, A
             if worst == math.inf:
                 break
     return {"symmetric": worst <= tolerance, "axis": axis, "axis_mm": round(axis, 6), "deviation_mm": round(worst, 6) if worst != math.inf else None}
+
+
+def mirror_axis(frame: Any, obstacles: Mapping[str, Any]) -> Any:
+    """``(axis, allowance_mm)``: where a mirror plane's trace (``obstacles["mirror"]``, surface.api.mirror_traces) crosses
+    an exit's chord line (x in its unturned base frame), when the trace runs within MIRROR_TRACE_DEG of square across the
+    chord; None otherwise (no trace, or none square across it)."""
+
+    square = math.sin(math.radians(MIRROR_TRACE_DEG))
+    for trace in obstacles.get("mirror") or ():
+        (pu, pv), (du, dv) = trace["point"], trace["direction"]
+        p = frame.to_base((pu, pv))
+        q = frame.to_base((pu + du, pv + dv))
+        dx, dy = q[0] - p[0], q[1] - p[1]
+        if dy != 0.0 and abs(dx) <= square * math.sqrt(dx * dx + dy * dy):
+            return p[0] - p[1] * dx / dy, trace["allowance_mm"]
+    return None
 
 
 def symmetric_columns(space: Any, pitch: float, width: float, margin: float, axis: float, even: bool) -> Any:
@@ -3164,7 +3190,14 @@ def fit_chart_field(mesh: Any, chart: Any, sides: Sequence, bases: Sequence, opt
     if not queue:
         # Not one crossing with the field margin fits the usable surface beside any exit: the reason the client shows.
         margin = float(profile["routing"]["active_edge_clearance_mm"])
-        rejected[f"no taxel field fits the surface (a crossing and its {margin:g} mm field margin)"] = len(bases)
+        reason = f"no taxel field fits the surface (a crossing and its {margin:g} mm field margin)"
+        if obstacles["bends"]:
+            # Said when the surface bends tighter than the laminated field may (2026-11-17: 6.5 mm for the 0.65 mm
+            # stack, where a cylinder of R 5 or 6 mm took a field at the 0.47 mm stack of before).
+            tightest = min(radius for _, _, radius in obstacles["bends"])
+            reason += (f"; it bends tighter than the field's {fit.STATIC_BEND_FACTOR * fit.STACK_THICKNESS_MM:g} mm "
+                       f"({fit.STATIC_BEND_FACTOR:g} x {fit.STACK_THICKNESS_MM:g} mm), to {tightest:.1f} mm")
+        rejected[reason] = len(bases)
     for proposal in proposals:
         # The rank of the proposal in the place of the field a tip-first field displaced: its tie's, or its own (None when
         # neither was proposed).
@@ -3217,7 +3250,7 @@ def verify_field(mesh: Any, chart: Any, frame: Any, exits: Any, outlines: Mappin
     overhang (:func:`routing_report`), the strain and the tightest bend
     under the boards, and warnings: ``W_BAND_EDGE_RADIUS`` where a board
     crosses an edge of the surface, a side or the base edge, that bends
-    tighter than a single FPC may (10 x 0.11 mm; :func:`edge_warnings`),
+    tighter than a single FPC may (10 x 0.2 mm, surface.fit.SINGLE_FPC_MM; :func:`edge_warnings`),
     ``W_ROUTING_HOLE``, ``W_ROUTING_COVERED``,
     ``W_ROUTING_BEND`` and ``W_ROUTING_STRAIN`` where a board lies over a
     hole, a covered wall, a bend tighter than that or a facet stretched
@@ -3253,10 +3286,10 @@ def verify_field(mesh: Any, chart: Any, frame: Any, exits: Any, outlines: Mappin
     records.append(place._record("field_corner_overhang", CORNER_TOLERANCE_MM, overhang, "max<=", "mm",
                                  f"F's convex corners (its {field_margin:g} mm margin beyond the taxels' corners) leave the surface by at most "
                                  f"{CORNER_TOLERANCE_MM:g} mm"))
-    records.append(place._record("strain_under_field", limit, place._strain_under(chart, mesh, frame, parts), "max<=", "ratio",
-                                 "the sheet does not stretch beyond the limit under the taxel field (F less its corner squares)"))
+    records.append(place.strain_record("strain_under_field", chart, mesh, frame, parts, limit,
+                                       "the sheet does not stretch beyond the limit under the taxel field (F less its corner squares)"))
     records.append(place._record("field_bend_radius", field_limit, min(place._min_bend_radius(mesh, chart, frame, part, field_limit) for part in parts),
-                                 "min>=", "mm", "static bend of the laminated field (10 x 0.47 mm) under F less its corner squares"))
+                                 "min>=", "mm", f"static bend of the laminated field ({place.FIELD_BEND}) under F less its corner squares"))
     records += [by_rule["tail_top_length_mm"], by_rule["tail_bottom_length_mm"]]
     lowest = bottoms(outline)
     for key in ("row", "column"):
@@ -3383,7 +3416,7 @@ def edge_warnings(mesh: Any, chart: Any, frame: Any, outlines: Mapping[str, Sequ
                 "code": "W_BAND_EDGE_RADIUS", "board": key, "edges": crossed, "measured_mm": round(tightest, 6), "limit_mm": round(limit, 6),
                 "side_mm": sharp["side"], "base_mm": sharp["base"],
                 "message": f"The {title} FPC crosses {where} of the surface, sharper than a single FPC can wrap ({limit:g} mm, "
-                           f"10 x 0.11 mm): {advice}.",
+                           f"{fit.STATIC_BEND_FACTOR:g} x {fit.SINGLE_FPC_MM:g} mm): {advice}.",
             })
     return warnings
 

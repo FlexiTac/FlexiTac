@@ -19,7 +19,7 @@
      "sha256": "581166c9534213697695f5e2b6a50a591f9b93d02f1226b47e07dc866144fc76"
     }
    },
-   "fit_sha256": "b72e37a0f4183f6848472af88e9b1a2ee575ca54160c9dd1b78c6d87be53fb3e"
+   "fit_sha256": "697a7c706a305155f1475f5ca469a14d66cafcdb5f66b793c113a456c319c66d"
   },
   "umi-concave-tip17.8-2mm": {
    "build_id": "surface-32x11-f20b3f659cff",
@@ -37,7 +37,7 @@
      "sha256": "4a6f8e6ab6cfd5d73203af27da0b149dada611e8927a7378fe510595cf1151ff"
     }
    },
-   "fit_sha256": "9862f6607827bbcb14264f1e87fa1a57d31dbd5e1e9b02012b4fce52237196b7"
+   "fit_sha256": "00f62148f01854e44fb2ff13f558e588499fe8521bcd0f15a14b4571ff4801c4"
   },
   "umi-concave-tip21.8-2mm": {
    "build_id": "surface-32x11-62d7fb2ed676",
@@ -55,7 +55,7 @@
      "sha256": "85e0cba4a5f2b6b007ade5854e3f4c40b4125db86939f8596a22b45e66e1d31b"
     }
    },
-   "fit_sha256": "45942a6ab6b3918761599a69be7fc05153bef444960870e573a8db92d3a2bf72"
+   "fit_sha256": "12309dd06465e9ec332349eac69b64c30c3151d6751d298751ef021f0f56549a"
   },
   "umi-concave-tip5.8-2mm": {
    "build_id": "surface-32x9-30f809793c76",
@@ -73,7 +73,7 @@
      "sha256": "842daab8325adc65c0e07ec22d5bb5896f30256cbee68399589cde9f0a48ba1b"
     }
    },
-   "fit_sha256": "4f89ba1f0414cc076582a6c7ee9d5890a90366ea80349649f2d5d5457cea81cf"
+   "fit_sha256": "b4c9ee4e2bbdda28b0164585a91f04c9b2c6fb561d31db391e64343bd54be288"
   },
   "umi-concave-tip9.8-2mm": {
    "build_id": "surface-32x9-ea37529f0b44",
@@ -91,7 +91,7 @@
      "sha256": "2dc67c41ebbd1c06e7ffcbaa7f57a71f5cf9712ee853bd368e627980438e484a"
     }
    },
-   "fit_sha256": "46be41265f76fc0a5b794903f630e083c64d175d9cd7d980f75a8306d6864b3c"
+   "fit_sha256": "fae25b3e421d1be86c149be8dd12c812ae93e6aaf7caef864daca673da7ceaf9"
   },
   "umi-convex-tip13.8-2mm": {
    "build_id": "surface-32x12-568f1bcff1cc",
@@ -109,7 +109,7 @@
      "sha256": "4966ea72d37ac19d2e7c9556038f1ae6ce9ee853067b34a738b0ee8e78030474"
     }
    },
-   "fit_sha256": "52952cf3dd982d204cf01e585ad1b30c037ec0a1589fa81d6d46c382d79ddb9c"
+   "fit_sha256": "501883c3b1c702250073113dd24b4101a6c199a2b390e9db10d6fe0459b73882"
   },
   "umi-convex-tip17.8-2mm": {
    "build_id": "surface-32x12-a4e852337e7a",
@@ -127,7 +127,7 @@
      "sha256": "9b279d91546e721baae854ba931e589cc65f87e60b202ce6887c01a4139500ba"
     }
    },
-   "fit_sha256": "94e0715552e2ceb9bc1cb6629fec69c7211f14ce07ec0081a90a8c9a1d029114"
+   "fit_sha256": "84e1a9a55c8a2dcffc154f577aef9ebca8bd39aa1a702de1886f58c321aacdea"
   },
   "umi-convex-tip21.8-2mm": {
    "build_id": "surface-32x12-a2448259d9c3",
@@ -145,7 +145,7 @@
      "sha256": "bba8bb3afa2e56b7f43a9a39faa0c10a6d3935444393a8a6f870468c3e06536c"
     }
    },
-   "fit_sha256": "9cf5f42251da93381e5d1660d4e69c19eb4a81e6a9afcf286869f7b31b30ad0e"
+   "fit_sha256": "7ebb307c184e62a95bb03dafea75a098696eab7549dc189fc428882778de4990"
   },
   "umi-convex-tip5.8-2mm": {
    "build_id": "surface-32x11-e1778282dbcd",
@@ -163,7 +163,7 @@
      "sha256": "1c5f70a76604d0857355db61354dbe96d06cff0e04db9b75c8fb1280713a743d"
     }
    },
-   "fit_sha256": "9d8f9241a6370f8319e61c87b7b50a5b02f533b6ee94ca900e255e8fee9722fc"
+   "fit_sha256": "82f34d52e6478f96eba47b46c2f1a86c243b5431c5ac03ebbec8f4b3ea6397f0"
   },
   "umi-convex-tip9.8-2mm": {
    "build_id": "surface-32x12-7aea1fdee23c",
@@ -181,7 +181,7 @@
      "sha256": "b621dc69979baf4983f67f0d67a342db7ee66fd62cb99fa30450d5262c2f4d7f"
     }
    },
-   "fit_sha256": "2f4c6c11113541ec088375118efd97deb7943caa71af7f84db45e4fe7affaa92"
+   "fit_sha256": "05a2d954ff60a774483869f40d78433727586057bc276f074276d01e4409b58b"
   },
   "umi-finray-1.5mm": {
    "build_id": "surface-32x17-23d2f6c5a920",
@@ -199,7 +199,7 @@
      "sha256": "864a2e63a5690c07ec13d1acb98f6920c0c9c80a5b227cae2b8c29675c1683e9"
     }
    },
-   "fit_sha256": "90a02212f4be1365c681fc36503c29db20e010edf72be3591a77780d45060ae4"
+   "fit_sha256": "3aceb44f47f00bdc2ae3ebd0ee533e436c7e95141f647d4ea9d05daff4527023"
   },
   "umi-finray-1mm": {
    "build_id": "surface-32x25-3b48a66c2948",
@@ -217,7 +217,7 @@
      "sha256": "a51031b52f010d20543c2df41161cc20fe6ac2d4e814e58b55ee670727afbc64"
     }
    },
-   "fit_sha256": "7dd0290ea23d914f18158852b637e41a3e814d5d74cc564b43daafd2ebcf444b"
+   "fit_sha256": "2c722f206082dc81c1783214a59b6d4f12fb5ec3fbadccd7ebc33763909b7a08"
   },
   "umi-finray-2mm": {
    "build_id": "surface-32x12-3713abf9ee10",
@@ -235,7 +235,7 @@
      "sha256": "c5525a0618a6e4a8ce8fbb31726f30c38d0d0841baf702fb7f42279cba164d5f"
     }
    },
-   "fit_sha256": "488dc0a3ab81bd398bee635cad5ee3c782f7559826944643a41349c40e546e1a"
+   "fit_sha256": "76cf220c09eece5330a7eac4b87a02065929711511791995ba00465b92b465e7"
   },
   "umi-finray-3mm": {
    "build_id": "surface-21x8-4548f2e02ef6",
@@ -253,7 +253,7 @@
      "sha256": "7a60329280a10f8c1e8059e5557658ff98006da449e591ef17204f6b6ff84f01"
     }
    },
-   "fit_sha256": "910d5174be2cbe52052c6d450a6511c4b309e4a8d293ea971b947ec441e5a414"
+   "fit_sha256": "c113842b29b8294e552c776f95dc2d2e0aa6dada0224f3b0152d14000f2ce24c"
   },
   "umi-pointed-tip2-2mm": {
    "build_id": "surface-32x12-225658b2334b",
@@ -271,7 +271,7 @@
      "sha256": "6ef315aa19fefda3f8f4d015c90e979faff4fa9052af45db9ce1dc395f31d62e"
     }
    },
-   "fit_sha256": "45d6d9bae3bdfbac3e2dc58194e4c0537c1200c9450a4f5e535fb6dc358491d1"
+   "fit_sha256": "1c829179e5c7a3c91459262d12da49433e75725674c1df60674239db1d4753f1"
   },
   "umi-short-convex-tip13.8-2mm": {
    "build_id": "surface-32x12-2d739fe25b69",
@@ -289,7 +289,7 @@
      "sha256": "c1b36db6728067fa5a98c19a1cbce9c8b4171237af15f1266878d8ab0bb8afb8"
     }
    },
-   "fit_sha256": "b154d1327e32935faa0833f46378f31e0434de34ec838512d473f47b6d85a9a9"
+   "fit_sha256": "82c357a51edd2921872047af90572d22f5d5f64c493129f3e2ce95fb25d86528"
   },
   "umi-short-convex-tip17.8-2mm": {
    "build_id": "surface-32x12-94ed1318b98d",
@@ -307,7 +307,7 @@
      "sha256": "81f53da12b02aed1452253d6bc81b45306c719f56db03a1fb9bce177f4ba6efe"
     }
    },
-   "fit_sha256": "edb64c3d2781184773c9f4a6f92db7e43b8485603d51a28a80490cbbf8eac233"
+   "fit_sha256": "bc099df7cdd514f18e0055505dbc663f5245b1ba9b95c077410689b8afd57799"
   },
   "umi-short-convex-tip21.8-2mm": {
    "build_id": "surface-32x12-342fbab32928",
@@ -325,7 +325,7 @@
      "sha256": "14f52099ebe16fdd997767a8969fecaf1095589d635252c2ec23b79c1eb2c251"
     }
    },
-   "fit_sha256": "cf2573ec7f8656174a02e84abcbc6417fdc989d6ecfdb509c2906a506d6f80d1"
+   "fit_sha256": "c1e40d88726722408c75d98de79c4259f6b70d325a5f00aba28fbb32f7feac08"
   },
   "umi-short-convex-tip5.8-2mm": {
    "build_id": "surface-32x12-c9006c20cab8",
@@ -343,7 +343,7 @@
      "sha256": "b790af1e8f05409a58fd38d693d0289fc2dc6a3f8022437e2340d6d0f55a8147"
     }
    },
-   "fit_sha256": "a79a7ef72db981ac69ef957dfd6d5ac3afea6065aa182a594587ec5c40e612f0"
+   "fit_sha256": "4277429cf7900fd6cd7f24118ae79e8f648c79fa643893342e665a8cb5710a5c"
   },
   "umi-short-convex-tip9.8-2mm": {
    "build_id": "surface-32x12-104ecbf19cc9",
@@ -361,7 +361,7 @@
      "sha256": "a4a68a042a5901abe915e41bb01a59f01ed665e0880c52e8b7915a161851171f"
     }
    },
-   "fit_sha256": "7e9fc74833ebe3f6ccc18c142cbb086d6e2c9f44bd81c388a1f3f53d58a4cd6d"
+   "fit_sha256": "60e25d8b36e4fe842bb254d7b566b9c22f1c2ec2be92191ecabd526bfd741a79"
   },
   "umi-short-trap-tip13.8-2mm": {
    "build_id": "surface-32x12-9293aa782072",
@@ -379,7 +379,7 @@
      "sha256": "8c9666a22725e758aa9607f4902980387a72a82ce645d73a1b8db3d18c54d7f7"
     }
    },
-   "fit_sha256": "62d53cba2acae5f8f502c726096ee49421f0bfa54b9adc732b88573598989eaf"
+   "fit_sha256": "04af8be0199ae869cfaac4b053aaa1d9775bacd2455e9717ee0e58ecb86ab59c"
   },
   "umi-short-trap-tip17.8-2mm": {
    "build_id": "surface-32x12-cdebb8ebe8e3",
@@ -397,7 +397,7 @@
      "sha256": "ee1a3ac52443a5a6ff12231df835b1344864402d6e20bbd6c06bfc72fb684bdf"
     }
    },
-   "fit_sha256": "7e66f885e910cf4378513c3eb4059939f23d40859dd8daae85e0f0e75c033fa8"
+   "fit_sha256": "a6bd8b57071aebfc9022c257fe918c809bc5ca52f6aeaeab09a6fd4dc7037d2f"
   },
   "umi-short-trap-tip21.8-2mm": {
    "build_id": "surface-32x12-a813c264bd0f",
@@ -415,7 +415,7 @@
      "sha256": "23acf43d69f64401fc590e710b915beeacb76bd1f1351e11dfabc63352768a81"
     }
    },
-   "fit_sha256": "b5ac00c094f532b2082847b75bab1bcfcf8352f15bc7b5a5b3f1f5aa2a875a82"
+   "fit_sha256": "c30ffff492797bde4c0e4c3e1f9f5a42b18fa96f6ebcbe4f316bc9745161860e"
   },
   "umi-short-trap-tip5.8-2mm": {
    "build_id": "surface-32x12-b6c8e235bf0a",
@@ -433,7 +433,7 @@
      "sha256": "ae28bc9b0d6a48870901f160611a2ac8af003e34377ae55244453664597887b9"
     }
    },
-   "fit_sha256": "9744bf8d6ecc9a731b94c40865597533c4f2031acdfafd56f0e787686f089b01"
+   "fit_sha256": "0f62f4f8ef9ae561aad243169ec43f34204c73d1cf3dd07e07d58c00f871879b"
   },
   "umi-short-trap-tip9.8-2mm": {
    "build_id": "surface-32x12-c31187be42da",
@@ -451,7 +451,7 @@
      "sha256": "e13a6b7cb051dfe9d46cbfd63073e3eb15e6db41b459a676fe734ec56850cada"
     }
    },
-   "fit_sha256": "ace88a1b25b97c7074fb6bf28aa6e09053839131f63a255a38e869e4b4ec55d1"
+   "fit_sha256": "b768ffe44d3403f70ab1ab45dbef1b314f5894f814737f87769806b6cf8fb302"
   },
   "umi-trap-tip13.8-2mm": {
    "build_id": "surface-32x11-3b33935dba27",
@@ -469,7 +469,7 @@
      "sha256": "79552bb2832184268f50a34534bd9894c2dbf550d62936d7cb017298d0baa8d6"
     }
    },
-   "fit_sha256": "1746c1eb70d6d51feccae1b932dc349d9d0ab64af87b964add7830c17372781d"
+   "fit_sha256": "dda165dfdbce91faab3aa22c59f29d722e328340fbe03bea4f426b34bb323f2e"
   },
   "umi-trap-tip17.8-2mm": {
    "build_id": "surface-32x11-0081149cd3fc",
@@ -487,7 +487,7 @@
      "sha256": "396b56640aa455ac5f70bfc0b407d5f516dcfc57d719df5b836fc9747922e526"
     }
    },
-   "fit_sha256": "3fb0ad9481deef8f266eefd35adf72a6710dc3a9bb4e5a5d096a2973ac19de0e"
+   "fit_sha256": "706984d207f8f57ba14286b115fac1b6e0fe2c4f1064c5b9674246e77d7bdb35"
   },
   "umi-trap-tip21.8-2mm": {
    "build_id": "surface-32x11-b71429b37fb2",
@@ -505,7 +505,7 @@
      "sha256": "4054da5810777b31d9599c3cca2cf387f28ea9c697d934ead569a2e2d14a6ba7"
     }
    },
-   "fit_sha256": "c3efa569930da76406473f94292e15d71f33cf63b4e21d77fbaa5dc2112f0928"
+   "fit_sha256": "ac776223d3e2164d8edf66e5a67fa9bdf2fde54ea8e51a0f9afa24ac22721650"
   },
   "umi-trap-tip5.8-2mm": {
    "build_id": "surface-32x11-c3cf744e7a3c",
@@ -523,7 +523,7 @@
      "sha256": "77813872ef5e9d7df75a5896d7d3cfe12ee91c65a97a6d5eb9b2c59fb85873e7"
     }
    },
-   "fit_sha256": "15b39e0564c34532b4ec80c1f761ccba5358e4da204974bd93ffad77dce90cac"
+   "fit_sha256": "1b243db005edbc15eca61778c24c6aa55664be067e8a526068f53b851d98b452"
   },
   "umi-trap-tip9.8-2mm": {
    "build_id": "surface-32x11-11e36f96e75a",
@@ -541,7 +541,7 @@
      "sha256": "3b2c732de304a3154a037b7864c19df2bb303fd1e4e17737d612085ca320c68f"
     }
    },
-   "fit_sha256": "73d4391e56d5a3af6bef03c08c9cfacb95ed6d263846c09c21077d6862f62920"
+   "fit_sha256": "a75d96b4051ef391bda16fe926e34fd0075a4ca20622940e5d7f0f9bd54b7605"
   }
  }
 }

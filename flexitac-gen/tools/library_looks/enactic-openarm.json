@@ -1,0 +1,25 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "enactic-openarm",
+ "about": "drawn after Enactic's own pictures of the OpenArm 1.0 gripper (2026-11-17: openarm.dev's social-preview photo (its og:image, ogp.webp) of the bimanual OpenArm 1.0, both grippers in it, and the 1.0 documentation's gripper renders, docs.openarm.dev/1.0, its gripper pages and bill of materials): matte black printed fingers (the Library's part, the HandUMI replica of the OpenArm finger), a black motor can between bright machined aluminium end caps, the bent stainless sheet-metal brackets and the plate on the motor, the guide's stainless carriage blocks under the fingers, and the dark guide rail with its bright counterbored holes; the CAD files' own colours (finger.dae's black finger and pale carriage, hand.dae's dark rail and pale plate, link7.dae's dark can and pale caps) agree.  Not modelled: the swivel rotor and its two links (not in openarm_description's v1.0 meshes), the wrist bracket under the motor (link7.dae's, left out), the cables.",
+ "smooth_deg": 35,
+ "part_look": "print-black",
+ "looks": {
+  "rail-black": {"base": "anodized-black", "color": "#2c2c30", "metalness": 0.85, "roughness": 0.4, "evidence": "openarm.dev's og:image photo of the OpenArm 1.0, the left gripper: the guide rail is a dark bar whose counterbored holes catch the light as bright slots, and hand.dae draws it dark (#2b2b2b, its material mat_1.010) beside the pale plate and brackets: a black-treated steel with small sharp highlights"},
+  "cap-satin": {"base": "anodized-natural", "color": "#c2c5c9", "roughness": 0.55, "env_intensity": 0.8, "evidence": "openarm.dev's og:image photo of the OpenArm 1.0: the motor's end caps are bead-blasted aluminium, a soft light grey with no mirror image of the room; with the base look the rear cap's lower edge mirrored the studio's floor and read #f0f4f9 at the homes, the card's own white"},
+  "can-black": {"base": "anodized-black", "roughness": 0.6, "env_intensity": 2.8, "evidence": "openarm.dev's og:image photo of the OpenArm 1.0, both grippers: the motor can is a black satin cylinder with one broad soft highlight, between the bright aluminium flange in front of it and the wrist's bracket behind it; link7.dae draws the can dark (#2b2b2b, mat_2.005)"}
+ },
+ "bodies": {
+  "bodies/enactic-openarm/hand.stl": {"sha256": "032014d0e4f67935d6d098a88eb6fcd16787422f6f5ac755e2aaed80d4e61c81", "facets_sha256": "2bdad75fab95b3f14214ff0d05e53d4b8d7d1f94014b7560bb38a7b27103ae6e", "weld_mm": 0.01, "components": [
+   {"name": "hand-rail", "look": "rail-black", "pick": [{"component": {"box": [[-4.54, -77.5, 667.5], [4.56, 77.5, 673.0]], "triangles": 944}}]},
+   {"name": "hand-brackets", "look": "steel-ground", "pick": "rest"}
+  ]},
+  "bodies/enactic-openarm/link7-motor.stl": {"sha256": "d49d9fd61f01e783177441b678bb57df9e9108eeb6c55bbad360f5b8ccda64e3", "facets_sha256": "a59409b63e3f4e9bda1fdba57741bae7164f009631ffc6ffdb44f5cce85e1768", "weld_mm": 0.01, "components": [
+   {"name": "motor-flange", "look": "anodized-natural", "pick": [{"box": [[-29.0, -29.0, 646.9], [29.0, 29.0, 654.1]]}]},
+   {"name": "motor-cap", "look": "cap-satin", "pick": [{"component": {"box": [[-28.67, -28.65, 594.01], [28.65, 34.5, 608.0]], "triangles": 846}}]},
+   {"name": "motor-screws", "look": "steel-ground", "pick": [{"components_inside": [[-16.5, -16.5, 593.5], [16.5, 34.2, 612.2]]}]},
+   {"name": "motor-can", "look": "can-black", "pick": "rest"}
+  ]},
+  "bodies/enactic-openarm/finger-carriage.stl": {"sha256": "3e50ee99348ef41531ddfb8e19a8a89ce541d71a652ed5113289ae93dabc0f44", "look": "steel-ground"}
+ }
+}

@@ -9,8 +9,9 @@ autogenerate").
     python3 -I tools/flexitac_v2.py --check GERBER_DIR    # and the ZIPs are the pinned ones and give it again
 
 GERBER_DIR holds Gerber_Top_FPC_2026-03-02.zip and Gerber_Bottom_FPC_2026-03-02.zip, the two files the FlexiTac
-hardware tutorial links (web/vendor/flexitac-v2/NOTICE.md names it); they are never committed, extracted or run: each
-member is read in memory with zipfile (run this tool with ``python3 -I``).  Their SHA-256s are pinned here (SOURCES),
+hardware tutorial links (web/vendor/flexitac-v2/NOTICE.md names it; since 2026-11-17 the site serves them there
+unchanged, tools/flexitac_downloads.py); they are never extracted or run: each member is read in memory with zipfile
+(run this tool with ``python3 -I``).  Their SHA-256s are pinned here (SOURCES),
 and so is the SHA-256 of the geometry they give (GEOMETRY_SHA256): another ZIP is refused, and a deliberate change of
 this reader is a change of that pin.
 

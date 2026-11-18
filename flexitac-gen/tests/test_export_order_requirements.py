@@ -220,6 +220,15 @@ class OrderBlockValidationTests(unittest.TestCase):
         single = copy.deepcopy(before)
         single["order"].update(fpc_layers=1, fpc_thickness_mm=0.11)
         self.assertEqual(profile_module.profile_issues(single), [])
+        # Its stack-up is the ordered build: 0.025 + 0.035 + 0.025 + 0.025 = 0.11 mm is not JLC's 0.07 mm, though both are
+        # JLC thicknesses (the verification of 2026-11-17: no test ordered a 1-layer FPC its layers do not add up to).
+        other = copy.deepcopy(single)
+        other["order"]["fpc_thickness_mm"] = 0.07
+        self.assertEqual(
+            [(issue["code"], issue["field"], issue["message"]) for issue in profile_module.profile_issues(other)],
+            [("E_PROFILE_INCONSISTENT", "profile.stackup",
+              "the core, copper and coverlay layers add up to 0.11 mm, not the ordered 0.07 mm FPC (order.fpc_thickness_mm).")],
+        )
         thin = copy.deepcopy(single)
         thin["stackup"]["stiffener_thickness_mm"] = 0.1
         self.assertEqual(

@@ -5,8 +5,9 @@
   shots/<id>.assembled.webp, shots/<id>.exploded.card.webp and shots/manifest.json); every tabled file
   exists; no file anywhere under web/ is one of the deny-list's vendor models (Robotiq 2F-85 and 3F, the video's
   split of the xArm gripper, the MakerMods body), and no id, title or file name names them; web/library/ stays within
-  its 17 MB budget (12 MB until the UMI finger's shapes of 2026-11-16), its pictures within theirs (8 MB, the grid's
-  first screen about 1 MB).
+  its 29.2 MB budget (since the Unitree Dex3-1 came back on 2026-11-18; 27.6 MB from the Allegro Hand's and its removal
+  on 2026-11-17, 29.5 MB at the merge of that day, 21.5 MB with the three hands' line, 17 MB until it, 12 MB until the
+  UMI finger's shapes of 2026-11-16), its pictures within theirs (8.9 MB, the grid's first screen about 1 MB).
 - The showcase (the project owner's decision of 2026-11-12: the hand-designed FlexiTac sensor on UFACTORY's xArm
   Gripper G1, the one vendor model shown): an explicit category (library_write.showcase): web/vendor/ufactory-g1/
   holds exactly its twelve meshes at their pinned SHA-256 (this module's list, equal to the writer's) and its notice,
@@ -137,9 +138,15 @@ except ImportError:  # run as a package
 
 # All of web/library/ but its pictures (shots/, showcase/: their own budgets below): 12 MB until the UMI finger's shapes
 # of 2026-11-16 (the user's request: one card per shape), whose sixteen tips (their meshes, 3.8 MB, their fits and art)
-# took it from 11.66 to 16.41 MB.
-BUDGET_BYTES = 17_000_000
-SPDX = {"Apache-2.0", "MIT", "BSD-3-Clause"}
+# took it from 11.66 to 16.41 MB (17 MB).  Set once for the merged set on 2026-11-17 (fpc-int-n-final: the twelve
+# grippers and hands the lines of 2026-11-16..17 added, each with its mesh, four fits, art, scene and bodies; the
+# lines' own shares, 0.5 to 2.4 MB each, the LEAP Hand's the largest, are in their docs/LIBRARY_VIEW.md sections):
+# 28.60 MB, 3 % to spare (29.5 MB).  Lowered on 2026-11-17 when the Allegro Hand and the Unitree Dex3-1 were removed
+# (the user's word): 26.72 MB, 3 % to spare (27.6 MB).  Raised on 2026-11-18 when the Unitree Dex3-1 came back (the
+# user's word; its mesh, four fits, art, scene and bodies, 1.59 MB): 28.31 MB, 3 % to spare.
+BUDGET_BYTES = 29_200_000
+# BSD-2-Clause since 2026-11-16: MuJoCo Menagerie's robotiq_2f85 (ROS-Industrial).
+SPDX = {"Apache-2.0", "MIT", "BSD-3-Clause", "BSD-2-Clause", "CERN-OHL-W-2.0"}  # CERN-OHL-W-2.0: the YUBI Gripper (2026-11-17)
 # Vendor models that may not be redistributed (the video's recipes: user-provided, shown for illustration).
 DENIED_SHA256 = {
     "b0df0eaca944c7401185ada85d22e3111b477c3484c6fa3fd915fce6d6811aaf": "Robotiq 2F-85 (2F85_Opened.stl)",
@@ -177,7 +184,37 @@ DENIED_SHA256 = {
     "3c813623f4c273bfb6f4fd483fc8ee23dc4325de32e9d89d7c44cb1a0e97c033": "MakerMods Metal Arm (link7.STL): not cleared",
     "62d0ed4072aea7e4d0655e16edbf8243317e3e106996f00f06e72afc78d091ec": "MakerMods Metal Arm (link8.STL): not cleared",
 }
-DENIED_NAME = re.compile(r"robotiq|xarm|ufactory", re.IGNORECASE)
+# Since the user's decision of 2026-11-16 ("Menagerie model") the Robotiq 2F-85 of MuJoCo Menagerie may carry its name
+# (robotiq followed by 2F-85); every other Robotiq model and the user's own 2F-85 file (2F85_Opened) stay refused.
+# The user's word of 2026-11-17 ("xarm原装夹爪"): the xArm Gripper card of Menagerie's ufactory_xarm7 passes by its names
+# alone (its id and files', with the Library's own extensions since the review of that day, its title, the model folder);
+# every other xarm or ufactory name stays denied.  The merge of 2026-11-17: the two lines' expressions one.
+DENIED_NAME = re.compile(r"robotiq(?![ _-]?2f-?85)|2f-?85[ _-]?opened"
+                         r"|(?!(?<![\w-])ufactory-xarm(?:-\d+(?:\.\d+)?mm)?(?=\Z|/|\.(?:stl|json(?:\.gz)?|(?:exploded|assembled)(?:\.card)?\.webp)\Z)"
+                         r"|(?<![\w.])ufactory_xarm7(?=/|\.txt\Z))ufactory"
+                         r"|(?<!ufactory-)(?<!ufactory_)(?!^xarm gripper\Z)xarm", re.IGNORECASE)
+# The review of 2026-11-16 (library_write.MENAGERIE_2F85_MODELS): a 3D model under web/ whose path names the 2F-85 is one
+# of the Menagerie model's files the Library publishes, at its SHA-256, so a copy of the user's own file under another
+# header and a 2F-85 name is refused, its own triangles never hashed (the file is never read).
+MENAGERIE_2F85_NAME = re.compile(r"robotiq[ _-]?2f-?85", re.IGNORECASE)
+MODEL_SUFFIXES = (".stl", ".obj", ".ply", ".3mf", ".glb", ".gltf", ".step", ".stp")
+MENAGERIE_2F85_MODELS = {
+    "library/meshes/robotiq-2f-85.stl": "ca20c0fa61e6d3ce7b04bed25360e048e31dfd88ace04187aa6d9e8f4ca3fd0f",
+    "library/bodies/robotiq-2f-85/base-housing.stl": "10d076752f8342ddfbcb5e457a39ffe463c9d75af4d1635eb7afab06156f6a37",
+    "library/bodies/robotiq-2f-85/base-palm.stl": "34402c00f6ddcab95365effe67956ed395a646a0902a54049580ee926b1d2836",
+    "library/bodies/robotiq-2f-85/base-screws.stl": "2f8372e89470951284b07dc2dc3b98308542537950051711f7eb371cc2c31158",
+    "library/bodies/robotiq-2f-85/base_mount.stl": "8fd8796a29801361d2b418d71e60207b545c1c945e0a24e87227f97fd520a522",
+    "library/bodies/robotiq-2f-85/coupler-link.stl": "3b1c077e6613a0047c4d71086d1b6a76230bd84f563625242395c8fd7c456421",
+    "library/bodies/robotiq-2f-85/drawn-coupler-pins.stl": "92759fbca8d0af7c5f3727350ba09b2096b83a5d18b6090fa0087d1c43b24fe2",
+    "library/bodies/robotiq-2f-85/drawn-spring-link-caps.stl": "acb4a2ce6f2d20a40ab78f1a6ac5a1fa3f75b99c5c8f8c9a46f97929949167b7",
+    "library/bodies/robotiq-2f-85/drawn-spring-link-pins.stl": "a7c42e47721e925c64157a12ba4d69c7e327c94b1b6e1cc67c48e5120d2e3b7b",
+    "library/bodies/robotiq-2f-85/driver.stl": "612d798e7d0425e4ba9e0b97aeb4f9cf586a30da277778aebf8b319617dcfba8",
+    "library/bodies/robotiq-2f-85/follower-pins.stl": "45440bef98962e1bf7a36b96790e9468f30b248e507ac32a2d77c89e22e41a03",
+    "library/bodies/robotiq-2f-85/follower-tip.stl": "19a9b43ee9c2d772b0269fab0b05a48d27c5bda3d66f548279ccac50a1d8a0ce",
+    "library/bodies/robotiq-2f-85/pad.stl": "0a16b432f97e7fbfc160e6e18c356567c31d556ab428c31bf102964559398ce4",
+    "library/bodies/robotiq-2f-85/spring-link-far-pins.stl": "d110d548ce8f5973d3a86a4983f3149636d896c1e30ad7ad30372e99cfc13413",
+    "library/bodies/robotiq-2f-85/spring-link.stl": "20dbf70b890999ba9e62e8ddf990fc073a1e553818cc8fc636fee44dd6197a4b",
+}
 NOTICE_ROW = re.compile(r"^\| `([\w./-]+)` \|([^|\n]*)\|([^|\n]*)\|([^|\n]*)\| `([0-9a-f]{64})` \|$", re.MULTILINE)
 # The showcase (the project owner's decision of 2026-11-12; library_write.SHOWCASE_*): UFACTORY's 3D model of the xArm
 # Gripper G1, split and decimated, in a folder of its own beside the Library: exactly these files at these hashes (the
@@ -229,11 +266,15 @@ OWN_FILE = re.compile(r"^(NOTICE\.md|parts\.json|entries\.json|fits/[a-z0-9.-]+\
                       r"|bodies/[a-z0-9-]+/drawn-[a-z0-9-]+\.stl"
                       # The showcase's page (2026-11-12): its document and its three pictures.
                       r"|showcase\.json|showcase/flexitac-g1\.(exploded|assembled|card)\.webp)$")
-# The pictures' budgets (2026-11-05): the whole set (126 files of 42 sensors; 174 of 58 since 2026-11-16), and the grid's
-# first screen: since the layout of 2026-11-06 every card of the grid (the grippers' seven, then the UMI shelf's cards:
+# The pictures' budgets (2026-11-05): the whole set (126 files of 42 sensors; 174 of 58 since 2026-11-16; set once for
+# the merged set on 2026-11-17, 318 of 106 and the showcase's three, 8.84 MB, 4 % to spare (9.2 MB); lowered the same
+# day when the two hands were removed, 294 of 98 and the showcase's three, 8.23 MB, 4 % to spare (8.55 MB); raised on
+# 2026-11-18 when the Unitree Dex3-1 came back, 306 of 102 and the showcase's three, 8.56 MB, 4 % to spare), and the
+# grid's first screen: since the layout of 2026-11-06 every
+# card of the grid (the grippers', then the UMI shelf's cards:
 # since 2026-11-16 its six shapes, before its four pitches and its Tapered tips card), all asked for as the page opens
 # (it is short; library_checks part_pictures measures the bytes).
-SHOTS_BUDGET_BYTES = 8_000_000
+SHOTS_BUDGET_BYTES = 8_900_000
 FIRST_SCREEN_BYTES = 1_000_000
 FIXTURES = ROOT / "tests" / "fixtures"
 # The contract of the pictures (the Library's UI and tools/browser/library_shots.py were built against it, 2026-11-05).
@@ -250,6 +291,10 @@ LIBRARY_INDEX_PATH = "library/entries.json"
 # profile's words in the licence's change, its taper's height and its tip widths (the user's of 2026-11-05; the
 # shapes of 2026-11-16: the concave arc, the short taper and the point).
 TAPERS = "umi-tapers"
+# The Library's doubly curved faces (the page sends its curved strain limit, 1 %, with their selection: main.js
+# strainLimit; library_write.part_options): the Unitree Dex3-1's fingertip dome, since the hand came back on 2026-11-18
+# (the user's word, after the gently curved faces of 2026-11-17).  RequestTests holds every part's selection to it.
+CURVED_PARTS = {"unitree-dex3"}
 TAPER_TIPS = ("21.8", "17.8", "13.8", "9.8", "5.8")
 TAPER_KINDS = {"short-trap": ("short trapezoid", "trapezoid", 40, TAPER_TIPS), "short-convex": ("short convex", "convex arc", 40, TAPER_TIPS),
                "convex": ("convex arc tip", "convex arc", 75, TAPER_TIPS), "trap": ("trapezoid tip", "trapezoid", 75, TAPER_TIPS),
@@ -399,8 +444,14 @@ SHOT_CARD = (FIXTURES / "library_shot.card.webp").read_bytes()
 # finger turned or mirrored; the MakerMods tips on a rail) and decided on 2026-11-06 ("每一个夹爪只用爆炸一个sensor,
 # 靠近外面的finger透明, 夹爪不爆炸; 靠近里面的finger不透明, 夹爪爆炸"): the finger nearer the camera see-through in both
 # views, its stack assembled; the far finger's stack exploded (gap share 0.42, its stacks apart in mm and on screen).
-BODIES_BUDGET_BYTES = 2_500_000
-ART_BUDGET_BYTES = 600_000
+# 2.5 MB and 0.6 MB until the lines of 2026-11-16..17; set once for the merged set on 2026-11-17 (fpc-int-n-final: the
+# twelve grippers' and hands' bodies, the LEAP Hand's 2.18 MB the largest, and their 48 sensors' art): the bodies
+# 8.27 MB, the art 1.01 MB, 4 % to spare each (8.6 and 1.05 MB).  Lowered on 2026-11-17 when the Allegro Hand and the
+# Unitree Dex3-1 were removed (the user's word): the bodies 7.68 MB, the art 0.95 MB, 4 % to spare each (8.0 MB and
+# 0.985 MB).  Raised on 2026-11-18 when the Unitree Dex3-1 came back: the bodies 7.97 MB, the art 0.98 MB, 4 % to spare
+# each.
+BODIES_BUDGET_BYTES = 8_300_000
+ART_BUDGET_BYTES = 1_020_000
 APPROVED_RULES = {"gap_share": 0.42, "min_step_mm": 2, "ghost_opacity": 0.28, "measure_px": [1280, 800], "depth_tol_mm": 0.1,
                   "explode_stacks": ["sensor"], "see_through_modes": ["exploded", "assembled"],
                   "camera": {"exploded": {"tilt_deg": 65, "elevation_deg": 30, "front": 1},
@@ -427,15 +478,42 @@ APPROVED_RULES = {"gap_share": 0.42, "min_step_mm": 2, "ghost_opacity": 0.28, "m
                   # the finger's face from there).
                   "part_homes": {"umi-finray": {"approach": [0, 0, -1], "explode_share": 0.8},
                                  "umi-tapers": {"approach": [0, 0, -1], "explode_share": 0.8}}}
-# The near finger (the mate) see-through on every gripper (the user's decision of 2026-11-06).
-SEE_THROUGH = {"franka-hand": ["mate"], "widowx-250": ["mate"], "trossen-widowx-ai": ["mate"], "arx-x5": ["mate"], "i2rt-yam": ["mate"],
-               "unitree-dex1": ["mate"], "makermods-metal": ["mate"]}
-MATE_KINDS = {"franka-hand": "turned", "widowx-250": "turned", "trossen-widowx-ai": "mirror", "arx-x5": "mirror", "i2rt-yam": "mirror",
-              "unitree-dex1": "turned", "makermods-metal": "turned"}
+# The grippers that are not UMI fingers, in the grid's order (each a scene, a card and four sensors; the user's decisions of
+# 2026-11-16..18): the LeFlexiTac first, then the Robotiq 2F-85, the seven of 2026-11-05 but the Unitree Dex1-1, the
+# grippers added since, each line's, then the Unitree Dex1-1, the Unitree Dex3-1 and the LEAP Hand last (the user's
+# words of 2026-11-17: the Allegro Hand and the Unitree Dex3-1 removed, the Dex1-1 moved to the end beside the hand; of
+# 2026-11-18: the Dex3-1 back, after the Dex1-1).  Every count of them below is this list's.
+GRIPPERS = ["leflexitac", "robotiq-2f-85", "franka-hand", "widowx-250", "trossen-widowx-ai", "arx-x5", "i2rt-yam", "makermods-metal",
+            "agilex-piper", "galaxea-r1-lite", "seeed-rebot", "ufactory-xarm", "rainbow-rby1", "enactic-openarm", "yubi-gripper",
+            "unitree-dex1", "unitree-dex3", "leap-hand"]
+# The near finger (the mate) see-through on every gripper (the user's decision of 2026-11-06); on a hand the thumb
+# (2026-11-17).
+SEE_THROUGH = {part: ["mate"] for part in GRIPPERS}
+# The AgileX Piper (2026-11-17): link8.stl is link7.stl turned 180 degrees about z.  The Galaxea R1 Lite (2026-11-17):
+# GalaxeaManipSim's finger_link2 is finger_link1 turned about the approach axis.
+# The YUBI Gripper (2026-11-17): its left finger's parts the right one's mirrored (a mirror-image board).
+MATE_KINDS = {"leflexitac": "turned", "robotiq-2f-85": "turned", "franka-hand": "turned", "widowx-250": "turned", "trossen-widowx-ai": "mirror",
+              "arx-x5": "mirror", "i2rt-yam": "mirror", "unitree-dex1": "turned", "makermods-metal": "turned", "agilex-piper": "turned",
+              "galaxea-r1-lite": "turned", "seeed-rebot": "turned", "ufactory-xarm": "turned", "rainbow-rby1": "turned", "enactic-openarm": "turned",
+              "yubi-gripper": "mirror", "unitree-dex3": "turned", "leap-hand": "turned"}
 PICTURE = "on both fingers of the open gripper"
+# The LeFlexiTac's explode (2026-11-16): the scenes' one override, at its bound (library_write.EXPLODE_BOUNDS), with its reason.
+LEFLEXITAC_EXPLODE = {"gap_share": 0.45}
 RAIL = "bodies/makermods-metal/rail.stl"
-# Since its body drawn by eye (the user's decision of 2026-11-14) the MakerMods picture is the open gripper's too.
-PICTURES = {"makermods-metal": "on both fingertips of the open gripper"}
+# Since its body drawn by eye (the user's decision of 2026-11-14) the MakerMods picture is the open gripper's too, and
+# the YUBI Gripper's (2026-11-17: its sensors on the fingertips alone).  The hands (the user's requests of 2026-11-17, a
+# sensor on every finger; the LEAP Hand since the two others were removed that day, and the Unitree Dex3-1 again since
+# 2026-11-18): their pictures' words their own, their further fingers (a scene's extra_fingers) and their scenes' one
+# override (card_min_px: a fingertip's sensor on a hand framed whole is 14 to 15 px wide on the LEAP Hand's card, 19 on
+# the Dex3-1's, its dome's sensor 13.75 to 15 mm across).
+PICTURES = {"makermods-metal": "on both fingertips of the open gripper", "yubi-gripper": "on both fingertips of the open gripper",
+            "unitree-dex3": "on the three fingertips of the open hand", "leap-hand": "on every finger of the open hand"}
+EXTRA_FINGERS = {"unitree-dex3": 1, "leap-hand": 2}
+CHECKS_OVERRIDES = {"unitree-dex3": {"card_min_px": 19}, "leap-hand": {"card_min_px": 14}}
+# The YUBI Gripper (2026-11-17): Toyota/yubi-hw at its pinned commit, its pad and its licence text as published.
+YUBI_HW = "https://github.com/Toyota/yubi-hw/blob/dd8bd13d2fd8e5003057243576f88be333d95fc5"
+YUBI_PAD_SHA256 = "36e029e3fe2590711014823c6b75b0c403b0c0a59315d565b4625318f2a46466"
+YUBI_LICENCE_SHA256 = "6d3e25e377354ac09d62d33c38520d0fc2a0d7be84b346643de91a5d46d98902"
 IDENTITY = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 TURNED = [[-1, 0, 0, 0], [0, -1, 0, -80], [0, 0, 1, 0], [0, 0, 0, 1]]
 MIRROR = [[-1, 0, 0, -88], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
@@ -566,6 +644,16 @@ def _view_library(library: Path, variants: dict, parts: dict, identifiers=("wido
     return library
 
 
+def _card_frame(frame):
+    """A record's "card_frame" as the shots tool writes it for a part whose cards are zoomed on the tip (``frame``,
+    library_write.card_frame(); None: none): the window in the drawing zoom times larger, the tip ``top`` of its height
+    below its top edge, the drawing off its bottom edge, the finger's base 60 px above it."""
+
+    if frame is None:
+        return None
+    return {"zoom": frame["zoom"], "top": frame["top"], "window_px": [270, 22], "margins_px": [270, round(frame["top"] * 800), 270, 0], "base_px": 60}
+
+
 def _shot_library(library: Path, variants: dict, identifiers=("widowx-250-2mm",), files=None, **changes) -> Path:
     """``library``/shots/ holding the fixture as the pictures of ``identifiers`` (``files`` {kind: bytes} in its place),
     with the manifest the tool writes for them (its record() and manifest_text(), at the figure's sources of now, a
@@ -584,7 +672,8 @@ def _shot_library(library: Path, variants: dict, identifiers=("widowx-250-2mm",)
         margins = {"exploded": [590, 240, 590, 240], "assembled": [590, 240, 590, 240]}
         look = library_write.part_look_sha256(library_write.part_look(index, families, variants[identifier]["part"]))
         records[identifier] = dict(SHOTS_TOOL.record(identifier, variants[identifier], data, margins, library_write.figure_sha256(), "photo",
-                                                     part_look=look), **changes)
+                                                     part_look=look, card_frame=_card_frame(library_write.card_frame(families, variants[identifier]["part"]))),
+                                   **changes)
     (library / library_write.SHOTS_MANIFEST).write_text(SHOTS_TOOL.manifest_text(records), encoding="utf-8")
     return library
 
@@ -706,7 +795,7 @@ class FileTests(LibraryTestCase):
     def test_no_vendor_model_of_the_deny_list(self) -> None:
         places = {pinned: f"vendor/ufactory-g1/{name}" for name, pinned in SHOWCASE_FILES.items()}
         self.assertEqual(len(places), len(SHOWCASE_FILES))
-        seen = set()
+        seen, pinned = set(), set()
         for path in sorted(WEB.rglob("*")):
             if path.is_file():
                 relative = path.relative_to(WEB).as_posix()
@@ -725,7 +814,13 @@ class FileTests(LibraryTestCase):
                         seen.add(digest)
                     if LIBRARY in path.parents:
                         self.assertIsNone(DENIED_NAME.search(path.name))
+                    # A model named after the Robotiq 2F-85 is one the Library pins, at its SHA-256 (the review of
+                    # 2026-11-16: a copy of the user's own file under another header would pass the hash).
+                    if path.suffix.lower() in MODEL_SUFFIXES and MENAGERIE_2F85_NAME.search(relative):
+                        self.assertEqual(MENAGERIE_2F85_MODELS.get(relative), digest, "a model under the 2F-85's name that is not pinned")
+                        pinned.add(relative)
         self.assertEqual(seen, set(places), "each mesh of the vendor's folder once, in its place")
+        self.assertEqual(pinned, set(MENAGERIE_2F85_MODELS), "each pinned file of the 2F-85 published")
         names = [*self.entries["order"], *self.entries["variants"]]
         for part in self.parts["parts"].values():
             names += [part["title"], part["mesh"]["file"], part["mesh"]["name"]]
@@ -769,7 +864,12 @@ class LicenceTests(LibraryTestCase):
             part = self.parts["parts"][part_id]
             licence = part["license"]
             with self.subTest(part=part_id):
-                self.assertIn(licence["spdx"], SPDX)
+                if licence["spdx"] == library_write.NO_LICENCE:
+                    # No licence stated (the LeFlexiTac's, 2026-11-16): only through its dated entry, pending its authors'
+                    # word or with their permission recorded (2026-11-17).
+                    self.assertIsNotNone(library_write.permitted_licence(licence) or library_write.pending_licence(licence), licence)
+                else:
+                    self.assertIn(licence["spdx"], SPDX)
                 self.assertTrue(licence["holder"])
                 self.assertTrue(licence["text"].startswith("licenses/") and licence["text"] in rows, licence["text"])
                 commit = re.search(r"/([0-9a-f]{40})/", licence["source"])
@@ -791,6 +891,32 @@ class LicenceTests(LibraryTestCase):
                 if part_id == "franka-hand":
                     self.assertIn("convex hull", licence["change"])
                     self.assertIn("modified: convex hull", row[3])
+                elif part_id == "seeed-rebot":
+                    # The menagerie's pla_left with its contact face's two pockets capped (2026-11-17): a modified file.
+                    self.assertEqual(licence["change"], "contact face's two pockets capped, m to mm, binary STL")
+                    self.assertEqual(row[3].strip(), f"modified: {licence['change']}")
+                elif part_id == "rainbow-rby1":
+                    # The RB-Y1's pad (2026-11-17): the menagerie's OBJ in metres, written by the scene builder in mm.
+                    self.assertEqual(licence["change"], "OBJ in metres to binary STL in millimetres")
+                    self.assertEqual(row[3].strip(), f"modified: {licence['change']}")
+                elif part_id == "unitree-dex3":
+                    # The fingertip link with its ridged cap replaced by the cap's mirror-symmetric hull (2026-11-17; back
+                    # on 2026-11-18, the same file).
+                    self.assertEqual(licence["change"], "the fingertip cap's mirror-symmetric convex hull, m to mm, binary STL")
+                    self.assertEqual(row[3].strip(), f"modified: {licence['change']}")
+                    self.assertTrue((LIBRARY / mesh).read_bytes()[:80].startswith(b"modified (tip cap hull, m to mm) by FlexiTac-Gen 2026, see NOTICE.md"))
+                    notice = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+                    self.assertIn("`meshes/unitree-dex3.stl` is not the upstream file (BSD-3-Clause)", notice)
+                    # The hand's name and its maker's among the trademarks (the G1 the robot it is the hand of).
+                    trademarks = " ".join(notice.split("## Trademarks", 1)[1].split())
+                    self.assertLessEqual({"Dex3", "Unitree", "G1"}, set(re.search(r"makers \(([^)]*)\)", trademarks).group(1).split(", ")))
+                    # The tests' fixture of the curved faces (since the hand's removal of 2026-11-17) is this file.
+                    self.assertEqual((LIBRARY / mesh).read_bytes(), (FIXTURES / "unitree-dex3.stl").read_bytes())
+                elif part_id == "leap-hand":
+                    # 2026-11-17: the white fingertip, menagerie leap_hand's distal.obj's object fingertip_W alone (a modified
+                    # file; since the review that day not a cut at the flange's plane, which took the link's posts along).
+                    self.assertEqual(licence["change"], "distal.obj's object fingertip_W (the white fingertip) alone, m to mm, binary STL")
+                    self.assertEqual(row[3].strip(), f"modified: {licence['change']}")
                 elif part.get("family") == TAPERS:
                     # Cut from the page's own UMI finger (its source, its licence), a modified file (Apache 4(b)).
                     kind, tip = re.fullmatch(r"umi-([a-z-]+)-tip([\d.]+)", part_id).groups()
@@ -817,7 +943,12 @@ class LicenceTests(LibraryTestCase):
             self.assertIn("mirror", text)
         for path, row in sorted(bodies.items()):
             with self.subTest(body=path):
-                self.assertTrue([licence for licence in SPDX if licence in row[2]], row[2])
+                if library_write.NO_LICENCE in row[2]:
+                    # No licence stated: by its entry only (pending or permitted), whatever open part it names as its
+                    # upstream (2026-11-17).
+                    self.assertIsNotNone(library_write.permitted_row(row) or library_write.pending_row(row), row[2])
+                else:
+                    self.assertTrue([licence for licence in SPDX if licence in row[2]], row[2])
                 texts = re.findall(r"`(licenses/[\w.-]+)`", row[2])
                 self.assertTrue(texts)
                 for licence in texts:
@@ -835,8 +966,146 @@ class LicenceTests(LibraryTestCase):
         self.assertEqual(texts, named)
         for path in texts:
             with self.subTest(text=path):
-                self.assertEqual(rows[path][3].strip(), "unchanged")
                 self.assertRegex(rows[path][1], r"`[0-9a-f]{7}`")
+                pending = [entry for table in (library_write.PENDING_LICENCES, library_write.PERMITTED_LICENCES)
+                           for entry in table.values() if entry["note"] == path]
+                if pending:
+                    # The project's note on a source that states no licence (2026-11-16): no licence text, tabled as its own.
+                    self.assertEqual(rows[path][3].strip(), "the project's own words")
+                    self.assertIn(f"`{pending[0]['commit'][:7]}`", rows[path][1])
+                    continue
+                self.assertEqual(rows[path][3].strip(), "unchanged")
+
+    def test_a_source_stating_no_licence_is_taken_only_by_its_dated_entry(self) -> None:
+        # The user's request of 2026-11-16 (the LeFlexiTac): LeFlexiTac's two STL downloads state no licence.  They are in the
+        # Library by an explicit, dated entry, never by NOASSERTION alone: pending its authors' word from 2026-11-16, then
+        # shared with their permission (PERMITTED_LICENCES) by the user's word of 2026-11-17, a co-author's ("leflexitac, i
+        # am the author, so its ok to use it in public").  Still no licence: the permission recorded, dated, in the rows, the
+        # part's licence, the project's note and the page's link, and the files published.  A pending entry's are refused.
+        self.assertEqual(library_write.NO_LICENCE, "NOASSERTION")
+        self.assertEqual(library_write.PENDING_LICENCES, {})
+        self.assertEqual(sorted(library_write.PERMITTED_LICENCES), ["TNA001-AI/LeFlexiTac"])
+        entry = library_write.PERMITTED_LICENCES["TNA001-AI/LeFlexiTac"]
+        words = "shared with the authors' permission (given by a co-author of LeFlexiTac, 2026-11-17)"
+        self.assertEqual((entry["entered"], entry["permitted"], entry["by"]), ("2026-11-16", "2026-11-17", "a co-author of LeFlexiTac"))
+        self.assertEqual(library_write.permission(entry), words)
+        self.assertRegex(entry["commit"], r"^[0-9a-f]{40}$")
+        note = " ".join((LIBRARY / entry["note"]).read_text(encoding="utf-8").split())
+        for said in ("This file is not a licence.", entry["commit"], "TNA001-AI/LeFlexiTac", *entry["files"], "with the permission of their authors",
+                     "given by a co-author of LeFlexiTac on 2026-11-17", "it is not a licence, and none is stated for them"):
+            self.assertIn(said, note)
+        self.assertNotIn("not to be published", note)
+        rows = _notice()
+        notice = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        self.assertEqual(sorted(part_id for part_id, part in self.parts["parts"].items() if part["license"]["spdx"] == library_write.NO_LICENCE),
+                         ["leflexitac"])
+        licence = self.parts["parts"]["leflexitac"]["license"]
+        self.assertIs(library_write.permitted_licence(licence), entry)
+        self.assertIsNone(library_write.pending_licence(licence))
+        self.assertEqual(licence["permission"], words)
+        self.assertEqual([part_id for part_id, part in self.parts["parts"].items() if "permission" in part["license"]], ["leflexitac"])
+        self.assertEqual(self.entries["parts"]["leflexitac"]["license"], licence)
+        unstated = ["bodies/leflexitac/static-jaw.stl", "bodies/leflexitac/wrist-roll.stl", "meshes/leflexitac.stl"]
+        self.assertEqual(sorted(path for path, row in rows.items() if library_write.NO_LICENCE in row[2] and not path.startswith("licenses/")),
+                         unstated)
+        for path in unstated:
+            with self.subTest(row=path):
+                self.assertIs(library_write.permitted_row(rows[path]), entry)
+                self.assertIsNone(library_write.pending_row(rows[path]))
+                self.assertIn(f"no licence stated, {words}, `licenses/leflexitac.txt`; remodelled from SO-ARM100 ", rows[path][2])
+        # (The review of 2026-11-17) LeFlexiTac's files are SO-ARM100's Apache-2.0 parts remodelled: each row and the part's
+        # holder credit the part it was remodelled from, with SO-ARM100's licence text (Apache-2.0 section 4(a), (c)).
+        self.assertEqual(entry["remodelled"]["text"], "licenses/so-arm100.txt")
+        self.assertIn("Apache License", (LIBRARY / "licenses" / "so-arm100.txt").read_text(encoding="utf-8")[:200])
+        for path, upstream in (("meshes/leflexitac.stl", "Moving_Jaw_08d.stl"), ("bodies/leflexitac/static-jaw.stl", "Wrist_Roll_08c.stl"),
+                               ("bodies/leflexitac/wrist-roll.stl", "Wrist_Roll_08c.stl")):
+            with self.subTest(credited=path):
+                self.assertIn(library_write.remodelled(entry, f"assets/models/{upstream}"), rows[path][2])
+                self.assertEqual(re.findall(r"`(licenses/[\w.-]+)`", rows[path][2]), ["licenses/leflexitac.txt", "licenses/so-arm100.txt"])
+        self.assertIn(library_write.remodelled(entry, "assets/models/Moving_Jaw_08d.stl"), licence["holder"])
+        self.assertIn("STL/SO101/Individual/Moving_Jaw_SO101.stl", note)
+        # The files the site build and the public export refuse: none, the permission recorded (their gates:
+        # test_static_site); a licence text's row aside.
+        self.assertEqual(library_write.unlicensed(self.parts, notice), [])
+        self.assertEqual(library_write.unlicensed({"parts": {}}, "| `licenses/leflexitac.txt` | x | NOASSERTION, not a licence | y | `" + "0" * 64 + "` |"), [])
+        line = lambda row: f"| `{row[0]}` |{row[1]}|{row[2]}|{row[3]}| `{row[4]}` |"  # noqa: E731
+        # Never another source, file, note, text or date, nor a row that does not say NOASSERTION or the permission: each
+        # such row refused, and held by the build and the export where it says NOASSERTION.
+        row = rows["bodies/leflexitac/wrist-roll.stl"]
+        for case, changed in (("another commit", (row[0], row[1].replace("b61259f", "0000000"), *row[2:])),
+                              ("another file", (row[0], row[1].replace("Wrist_Roll_08c.stl", "Base.stl"), *row[2:])),
+                              ("another source", (row[0], row[1].replace("LeFlexiTac", "Other"), *row[2:])),
+                              ("another source, no upstream", (row[0], " Other `0000000`, `assets/models/Other.stl` ", row[2].partition("; remodelled")[0], *row[3:])),
+                              ("another note", (row[0], row[1], row[2].replace("`licenses/leflexitac.txt`", "`licenses/other.txt`"), *row[3:])),
+                              ("not said", (row[0], row[1], row[2].replace("NOASSERTION", "unknown"), *row[3:])),
+                              ("no upstream credit", (row[0], row[1], row[2].partition("; remodelled")[0], *row[3:])),
+                              ("another upstream file", (row[0], row[1], row[2].replace("Wrist_Roll_Follower_SO101", "Moving_Jaw_SO101"), *row[3:])),
+                              ("another text", (row[0], row[1], row[2] + ", `licenses/i2rt.txt`", *row[3:])),
+                              ("no permission", (row[0], row[1], row[2].replace(f", {words}", ""), *row[3:])),
+                              ("another date", (row[0], row[1], row[2].replace("2026-11-17", "2026-11-18"), *row[3:]))):
+            with self.subTest(case=case):
+                self.assertIsNone(library_write.permitted_row(changed))
+                self.assertEqual(library_write.unlicensed({"parts": {}}, line(changed)), [row[0]] if library_write.NO_LICENCE in changed[2] else [])
+        commit = entry["commit"]
+        for case, changed in (("another commit", dict(licence, source=licence["source"].replace(commit, "0" * 40))),
+                              ("another file", dict(licence, source=licence["source"].replace("Moving_Jaw_08d", "Other"))),
+                              ("another text", dict(licence, text="licenses/other.txt")), ("an spdx", dict(licence, spdx="MIT")),
+                              ("no upstream credit", dict(licence, holder=licence["holder"].partition("; remodelled")[0])),
+                              ("another upstream file", dict(licence, holder=licence["holder"].replace("Moving_Jaw_SO101", "Wrist_Roll_Follower_SO101"))),
+                              ("no permission", {key: value for key, value in licence.items() if key != "permission"}),
+                              ("another date", dict(licence, permission=words.replace("2026-11-17", "2026-11-18")))):
+            with self.subTest(case=case):
+                self.assertIsNone(library_write.permitted_licence(changed))
+                held = library_write.unlicensed({"parts": {"x": {"mesh": {"file": "meshes/x.stl"}, "license": changed}}}, "")
+                self.assertEqual(held, ["meshes/x.stl"] if changed["spdx"] == library_write.NO_LICENCE else [])
+        # A pending entry (the fixture: this one as it was before the user's word, its rows and its part's licence saying no
+        # permission) is still refused by the site build and the public export; its rows and its licence are never taken
+        # saying the permission; the build warns of its sensors (pending_note()).
+        pending = dict({key: value for key, value in entry.items() if key not in ("permitted", "by")}, pending="its authors' word")
+        bare = {key: value for key, value in licence.items() if key != "permission"}
+        parts = copy.deepcopy(self.parts)
+        parts["parts"]["leflexitac"]["license"] = bare
+        unsaid = notice.replace(f", {words}", "")
+        with mock.patch.dict(library_write.PERMITTED_LICENCES, clear=True), \
+                mock.patch.dict(library_write.PENDING_LICENCES, {"TNA001-AI/LeFlexiTac": pending}):
+            self.assertIs(library_write.pending_licence(bare), pending)
+            self.assertIsNone(library_write.pending_licence(licence))
+            self.assertIsNone(library_write.permitted_licence(bare))
+            for path in unstated:
+                with self.subTest(pending=path):
+                    self.assertIs(library_write.pending_row((rows[path][0], rows[path][1], rows[path][2].replace(f", {words}", ""), *rows[path][3:])), pending)
+                    self.assertIsNone(library_write.pending_row(rows[path]))
+            self.assertEqual(library_write.unlicensed(parts, unsaid), unstated)
+            self.assertEqual(library_write.unlicensed(self.parts, notice), unstated)
+            # Each held by itself: the part's licence alone, the rows alone.
+            self.assertEqual(library_write.unlicensed(parts, ""), ["meshes/leflexitac.stl"])
+            self.assertEqual(library_write.unlicensed({"parts": {}}, unsaid), unstated)
+            self.assertEqual(library_write.pending_note(parts, ["leflexitac-2mm", "widowx-250-2mm"]),
+                             "the files of leflexitac state no licence (PENDING_LICENCES: TNA001-AI/LeFlexiTac, entered 2026-11-16, pending "
+                             "its authors' word): not to be published until then")
+        self.assertIsNone(library_write.pending_note(self.parts, ["leflexitac-2mm", "widowx-250-2mm"]))
+        self.assertIsNone(library_write.pending_note(self.parts, ["widowx-250-2mm"]))
+        # (The review of 2026-11-17) A permitted entry whose permission is not recorded with its day and who gave it is no
+        # permission: its rows and its part's licence taken by neither table, saying the words or not, and its files held
+        # by the site build and the export (never published saying nothing of it, nor crashing the gate).
+        for case, unrecorded in (("undated", {key: value for key, value in entry.items() if key != "permitted"}),
+                                 ("not a day", dict(entry, permitted="yes")), ("no one", {key: value for key, value in entry.items() if key != "by"}),
+                                 ("an empty name", dict(entry, by=" "))):
+            with self.subTest(unrecorded=case), mock.patch.dict(library_write.PERMITTED_LICENCES, {"TNA001-AI/LeFlexiTac": unrecorded}):
+                self.assertIsNone(library_write.permission(unrecorded))
+                for said in (bare, licence):
+                    self.assertIsNone(library_write.permitted_licence(said))
+                for path in unstated:
+                    self.assertIsNone(library_write.permitted_row((rows[path][0], rows[path][1], rows[path][2].replace(f", {words}", ""), *rows[path][3:])))
+                    self.assertIsNone(library_write.permitted_row(rows[path]))
+                self.assertEqual(library_write.unlicensed(parts, unsaid), unstated)
+                self.assertEqual(library_write.unlicensed(self.parts, notice), unstated)
+        build = (ROOT / "tools" / "build_static_site.py").read_text(encoding="utf-8")
+        self.assertIn('    pending = library_write.pending_note(parts, chosen)\n    if pending:\n        print(f"build_static_site: warning: {pending}"', build)
+        # The page's one link to the note says so: "Shared with the authors' permission" (a pending part's "Licence not
+        # stated"; an open part's "Licence (<spdx>)").
+        self.assertIn("""license.spdx === "NOASSERTION" ? (license.permission ? "Shared with the authors' permission" : "Licence not stated") """
+                      """: `Licence (${license.spdx})`""", (WEB / "library.js").read_text(encoding="utf-8"))
 
 
 class EntriesTests(LibraryTestCase):
@@ -897,9 +1166,15 @@ class EntriesTests(LibraryTestCase):
                                  (len(pitches), min(pitches), max(pitches)))
                 self.assertEqual(min(pitches), 1)
         self.assertEqual({part_id: part["shelf"] for part_id, part in self.entries["parts"].items() if part_id in self.entries["order"]},
-                         {"umi-finray": "Six finger shapes, straight to pointed.", "franka-hand": "Four pitches, 1 to 2.5 mm.",
+                         {"umi-finray": "Six finger shapes, straight to pointed.", "leflexitac": "Four pitches, 1 to 3 mm.",
+                          "robotiq-2f-85": "Four pitches, 1 to 3 mm.", "franka-hand": "Four pitches, 1 to 2.5 mm.",
                           "widowx-250": "Four pitches, 1 to 3 mm.", "trossen-widowx-ai": "Four pitches, 1 to 3 mm.", "arx-x5": "Four pitches, 1 to 4 mm.",
-                          "i2rt-yam": "Four pitches, 1 to 4 mm.", "unitree-dex1": "Four pitches, 1 to 3 mm.", "makermods-metal": "Four pitches, 1 to 3 mm."})
+                          "i2rt-yam": "Four pitches, 1 to 4 mm.", "unitree-dex1": "Four pitches, 1 to 3 mm.", "makermods-metal": "Four pitches, 1 to 3 mm.",
+                          "agilex-piper": "Four pitches, 1 to 4 mm.", "galaxea-r1-lite": "Four pitches, 1 to 3 mm.", "seeed-rebot": "Four pitches, 1 to 3 mm.",
+                          "ufactory-xarm": "Four pitches, 1 to 3 mm.", "rainbow-rby1": "Four pitches, 1 to 3 mm.",
+                          "enactic-openarm": "Four pitches, 1 to 2.5 mm.",
+                          "yubi-gripper": "Four pitches, 1 to 2.5 mm.", "unitree-dex3": "Four pitches, 1 to 2.5 mm.",
+                          "leap-hand": "Four pitches, 1 to 3 mm."})
         # The writer's wording itself, on shelves the Library does not have: one pitch, two with no family, a family of
         # two cards (the part's own shape and its cards': the last card's shape named).
         family = {"cards": [{"axes": [{"choices": [{"label": "Trapezoid"}, {"label": "Convex arc"}]}]},
@@ -913,10 +1188,12 @@ class EntriesTests(LibraryTestCase):
         # The grid's cards and shelves are the grippers' (the family's parts are one card on the UMI shelf); "start" is
         # each one's 2 mm sensor, the sensor its card opens (the page's layout of 2026-11-06).
         self.assertEqual(self.entries["order"], [part for part in self.parts["order"] if not self.parts["parts"][part].get("family")])
-        self.assertEqual(self.entries["order"], ["umi-finray", "franka-hand", "widowx-250", "trossen-widowx-ai", "arx-x5", "i2rt-yam",
-                                                 "unitree-dex1", "makermods-metal"])
+        # The LeFlexiTac the grippers' first (the user's request of 2026-11-16: "放在夹爪部分的最前面，就是franka gripper的最前面"),
+        # then the Robotiq 2F-85 (2026-11-16), second in the multi-gripper video's order the Library keeps; the grippers
+        # added after them (2026-11-17) last, in the order of their lines' merge: GRIPPERS.
+        self.assertEqual(self.entries["order"], ["umi-finray"] + GRIPPERS)
         self.assertEqual(self.entries["start"], [self.entries["parts"][part]["default"] for part in self.entries["order"]])
-        self.assertEqual(len(self.entries["variants"]), 58, "8 grippers by 4 pitches and 26 tapered tips")
+        self.assertEqual(len(self.entries["variants"]), 4 * (1 + len(GRIPPERS)) + 26, "the UMI finger and the grippers by 4 pitches, 26 tapered tips")
 
 
 class PictureTests(LibraryTestCase):
@@ -999,7 +1276,7 @@ class PictureTests(LibraryTestCase):
             # The sensors in the Library's order (the plan's: parts.json's, each part's by pitch), as the warning names them.
             ordered = [row[0] for row in self.plan]
             unviewed = f"library_write: warning: {library_write.view_note(ordered)}"
-            self.assertEqual(run(self.entries["variants"]), (0, [unviewed, "library_write: 58 sensors, all current, each with its picture, 0 with a 3D view"]))
+            self.assertEqual(run(self.entries["variants"]), (0, [unviewed, f"library_write: {len(ordered)} sensors, all current, each with its picture, 0 with a 3D view"]))
             others = [identifier for identifier in ordered if identifier != dropped]
             self.assertEqual(run(others), (1, [
                 f"stale: picture {dropped}: no picture: re-shoot with tools/browser/library_shots.py --only {dropped}",
@@ -1179,7 +1456,11 @@ class PictureTests(LibraryTestCase):
         self.assertIn('alone = twice(identifier, lambda: viewed(without(given, "pad", "home"))) if given and given.get("pad") is not None else dressed', source)
         self.assertIn('other = (twice(identifier, lambda: viewed(dict(without(given, "pad", "home"), look=other_look(given["look"]))))', source)
         self.assertIn('padded = {mode: pad_differences(rgba(alone[mode]["png"]), rgba(dressed[mode]["png"]), rgba(other[mode]["png"])) for mode in MODES}', source)
-        self.assertIn("pictures, _ = encode(looked)", source)
+        self.assertIn("pictures, _, _ = encode(looked)", source)
+        # The pictures as the rules are, the card zoomed on the tip where the part's cards are (the user's decision of
+        # 2026-11-16: CARD_FRAMES), as the shoot takes it.
+        self.assertIn("looked = twice(identifier, lambda: viewed(given, framing)) if given else bare", source)
+        self.assertIn('framing = library_write.card_frame(parts, variant["part"])', source)
         # The sixth (the review of 2026-11-16: the look and the tint held at the pictures' own homes too, which a visitor
         # sees): at the grippers' homes, the witness the part grey there, the rules' home alone served (aimed, no look),
         # the look without the tint and in the other colour against it, the pictures' view (looked) against the look
@@ -1264,6 +1545,153 @@ class PictureTests(LibraryTestCase):
         self.assertIn("if (aimed && !state.extras && view.stack) {", stage)
         self.assertIn("lampAt(one, new THREE.Vector3(0, 0, 1), aimed.lamp);", stage)
         self.assertIn("state.aimed = null;", stage[stage.index("    function defaults() {"):stage.index("    function aim(")])
+
+    def test_the_umi_cards_are_zoomed_on_the_tip(self) -> None:
+        # The user's decisions of 2026-11-16 on the UMI shelf's cards ("你可以show gripper的angle但是zoom in了，就是方向还是那个
+        # 方向，但是用zoom in +exploded,那就可以tell了"; then, of zoom 2, "你现在zoom in 的太过了，tactile的tail都看不到"): each
+        # UMI sensor's card file is its Exploded home (the grippers' direction, up and explode: part_homes) drawn 1.25 times
+        # larger, a real render, and of it the window of 1280 x 800 on the tip (the tip 6 % of its height below its top,
+        # the grippers' drawings' own top margin; its middle across the middle of its rows' drawing), downscaled to the
+        # card; the tails' ends run off its bottom, the finger's base at least the top margin above it (the review of
+        # 2026-11-16: at 1.35 the base lay on the card's bottom edge).  Every other card is the whole Exploded drawing,
+        # and the pictures and the 3D view of every sensor stay the whole drawing.
+        frame = {"zoom": 1.25, "top": 0.06}
+        self.assertEqual(library_write.CARD_FRAMES, {"umi-finray": frame, "umi-tapers": frame})
+        self.assertEqual((library_write.CARD_FRAME_KEYS, library_write.CARD_SIDE_MIN), (("base_px", "margins_px", "top", "window_px", "zoom"), 0.04))
+        self.assertEqual(library_write.card_frame(self.parts, "umi-finray"), frame)
+        self.assertEqual(library_write.card_frame(self.parts, "umi-pointed-tip2"), frame, "a tip's frame is its family's")
+        self.assertIsNone(library_write.card_frame(self.parts, "franka-hand"))
+        # Only a part the rules draw at the grippers' homes: the card is that home zoomed.
+        index = _json(LIBRARY / library_write.SCENES_INDEX)
+        self.assertLessEqual(set(library_write.CARD_FRAMES), set(index["rules"]["part_homes"]))
+        spoiled = json.loads(json.dumps(index))
+        spoiled["rules"]["part_homes"].pop("umi-tapers")
+        with tempfile.TemporaryDirectory() as folder:
+            library = Path(folder) / "library"
+            (library / "scenes").mkdir(parents=True)
+            (library / library_write.SCENES_INDEX).write_text(json.dumps(spoiled), encoding="utf-8")
+            problems = [message for _, message in library_write.scenes(self.parts, library)[1]]
+        self.assertIn("CARD_FRAMES zooms the cards of 'umi-tapers' on the tip, but scenes/scenes.json's rule part_homes gives it no home", problems)
+        # The committed records: each UMI sensor's card framed so, the tip 48 px below the window's top, the tails' ends
+        # off its bottom, the finger's base at least 48 px above it, the sheets and the finger well inside its sides,
+        # centred; no gripper's card framed.
+        shots = _json(LIBRARY / library_write.SHOTS_MANIFEST)["shots"]
+        framed = []
+        for identifier, variant in self.entries["variants"].items():
+            record, wanted = shots[identifier].get("card_frame"), library_write.card_frame(self.parts, variant["part"])
+            with self.subTest(sensor=identifier):
+                if wanted is None:
+                    self.assertIsNone(record)
+                    continue
+                framed.append(identifier)
+                self.assertEqual(library_write.card_frame_problems(record, wanted), [])
+                left, top, right, bottom = record["margins_px"]
+                self.assertEqual((top, bottom), (48, 0))
+                self.assertGreaterEqual(record["base_px"], 48)
+                self.assertGreaterEqual(min(left, right), 250)
+                self.assertLessEqual(abs(left - right), 1)
+        self.assertEqual(len(framed), 30)
+        # card_frame_problems() names each fault.
+        good = {"zoom": 1.25, "top": 0.06, "window_px": [270, 22], "margins_px": [270, 48, 270, 0], "base_px": 60}
+        problems = library_write.card_frame_problems
+        self.assertEqual((problems(good, frame), problems(None, None)), ([], []))
+        self.assertEqual(problems(good, None), ["its card is framed on the tip, but its part's cards are the whole drawing (CARD_FRAMES)"])
+        self.assertEqual(problems(None, frame), ["its card is not framed on the tip as CARD_FRAMES has it (no card_frame of base_px, margins_px, top, window_px, zoom)"])
+        self.assertEqual(problems({key: value for key, value in good.items() if key != "base_px"}, frame),
+                         ["its card is not framed on the tip as CARD_FRAMES has it (no card_frame of base_px, margins_px, top, window_px, zoom)"])
+        self.assertEqual(problems(dict(good, zoom=2), frame), ["its card is framed at zoom 2, top 0.06, not CARD_FRAMES's 1.25, 0.06"])
+        self.assertEqual(problems(dict(good, zoom=1.35), frame), ["its card is framed at zoom 1.35, top 0.06, not CARD_FRAMES's 1.25, 0.06"])
+        self.assertEqual(problems(dict(good, top=0.1), frame), ["its card is framed at zoom 1.25, top 0.1, not CARD_FRAMES's 1.25, 0.06"])
+        for window in ([321, 22], [320, 201], [-1, 22], [270.0, 22], [270]):
+            with self.subTest(window=window):
+                self.assertEqual(problems(dict(good, window_px=window), frame),
+                                 [f"its card's window {window!r} is not [x, y] within the drawing 1.25 times larger"])
+        self.assertEqual(problems(dict(good, window_px=[320, 200]), frame), [])
+        self.assertEqual(problems(dict(good, margins_px=[270, 47, 270, 0]), frame), ["its card's tip is 47 px below the window's top, not 48 (0.06 of its height)"])
+        self.assertEqual(problems(dict(good, margins_px=[51, 48, 270, 0]), frame), ["its card's drawing lies 51 px from a side of the window, under 0.04 of its width"])
+        self.assertEqual(problems(dict(good, margins_px=[270, 48, 52, 0]), frame), [])
+        self.assertEqual(len(problems(dict(good, margins_px=[270, 48, -1, 0]), frame)), 1)
+        # The drawing runs off the bottom (the tails' ends), the finger's base the top margin above it at least (the
+        # review of 2026-11-16: at 1.35 it lay on the edge).
+        self.assertEqual(problems(dict(good, margins_px=[270, 48, 270, 1]), frame),
+                         ["its card's drawing ends 1 px above the window's bottom, not running off it (the tails' ends)"])
+        self.assertEqual(problems(dict(good, base_px=47), frame),
+                         ["its card's finger ends 47 px above the window's bottom, under its top margin's 48 (the base on the edge)"])
+        self.assertEqual(problems(dict(good, base_px=0, margins_px=[270, 48, 270, 3]), frame),
+                         ["its card's drawing ends 3 px above the window's bottom, not running off it (the tails' ends)",
+                          "its card's finger ends 0 px above the window's bottom, under its top margin's 48 (the base on the edge)"])
+        self.assertEqual(problems(dict(good, base_px=48), frame), [])
+        for base in (-1, 801, 60.0, True, None):
+            with self.subTest(base=base):
+                self.assertEqual(problems(dict(good, base_px=base), frame), [f"its card's finger base {base!r} is not whole pixels within the window"])
+        # The shots tool: the window's arithmetic, and the shoot: the Exploded home read once more in a pane zoom times
+        # PANE_CSS (the same camera, framed as the home frames it: a real render, no crop of the picture), the card the
+        # window of it; --check compares the frame; the sensors of parts with a frame shot so; --check-generator too.
+        tool = SHOTS_TOOL
+        self.assertEqual(tool.card_top((600, 70, 1100, 1060), frame), 22)
+        self.assertEqual(tool.card_top((600, 40, 1100, 1060), frame), -8)
+        self.assertEqual(tool.card_left((500, 0, 1100, 800), (1600, 1000)), 160)
+        self.assertEqual(tool.card_left((501, 0, 1100, 800), (1600, 1000)), 160, "an odd difference left of the middle")
+        self.assertEqual(tool.card_left((0, 0, 300, 800), (1600, 1000)), 0)
+        self.assertEqual(tool.card_left((1500, 0, 1599, 800), (1600, 1000)), 320)
+        shoot = inspect.getsource(tool.shoot)
+        self.assertIn('pane = [round(PANE_CSS[0] * frame["zoom"]), round(PANE_CSS[1] * frame["zoom"])]', shoot)
+        self.assertIn('read = page.evaluate(SHOT, "exploded")', shoot)
+        self.assertIn('!= ("drawn", build, "exploded", "exploded", False, buffer, [0, 0]):', shoot)
+        # ... at the Exploded home's direction exactly (the review of 2026-11-16: the pixel likeness of library_checks let
+        # a degree of elevation through): the stage's report at the card's read the Exploded read's, word for word.
+        self.assertIn('homes[mode] = state.get("stage")', shoot)
+        self.assertIn('if not homes["exploded"] or not homes["exploded"].get("home") or state.get("stage") != homes["exploded"]:', shoot)
+        self.assertIn('card, framed = card_window(shots["card"]["png"], shots["card"]["frame"])', inspect.getsource(tool.encode))
+        main = inspect.getsource(tool.main)
+        self.assertIn('"card": None if scene is not None else library_write.card_frame(parts, variant["part"])})', main)
+        self.assertIn('same_frame = kept.get("card_frame") == fresh.get("card_frame")', main)
+        self.assertIn("card_frame=framed)", main)
+        window = inspect.getsource(tool.card_window)
+        self.assertIn("top = card_top(box, frame)", window)
+        self.assertIn('"base_px": card_base(window.getchannel("A"))}', window)
+        # The finger's base: the window's rightmost run of drawn columns, its lowest pixel (card_base(); run on a drawing
+        # in test_the_card_s_window_is_taken_on_the_tip where Pillow is).
+        base = inspect.getsource(tool.card_base)
+        self.assertIn("right = max(x for x, drawn in enumerate(columns) if drawn) + 1", base)
+        self.assertIn("    while left > 0 and columns[left - 1]:", base)
+        self.assertIn("return alpha.size[1] - alpha.crop((left, 0, right, alpha.size[1])).getbbox()[3]", base)
+        self.assertIn("problems = library_write.card_frame_problems(record, frame)", window)
+
+    @unittest.skipUnless(importlib.util.find_spec("PIL"), "Pillow (the shots tool's encoder) is not installed")
+    def test_the_card_s_window_is_taken_on_the_tip(self) -> None:
+        # card_window() on a drawing as the shoot reads it at zoom 1.25 (1600 x 1000): a finger whose tip is 70 px below
+        # its top and whose base is at 740 px, and left of it a sheet whose tail runs to 990 px; the window 1280 x 800
+        # from 22 px (the tip 48 px below its top), its middle across the middle of the drawing in its rows, the sheet's
+        # tail off its bottom, the finger's base 81 px above it; downscaled to the card.
+        from PIL import Image, ImageDraw
+
+        def drawing(*boxes, size=(1600, 1000)):
+            image = Image.new("RGBA", size, (0, 0, 0, 0))
+            for box in boxes:
+                ImageDraw.Draw(image).rectangle(box, fill=(232, 90, 28, 255))
+            buffer = io.BytesIO()
+            image.save(buffer, "PNG")
+            return buffer.getvalue()
+
+        frame = {"zoom": 1.25, "top": 0.06}
+        sheet, finger = (600, 90, 659, 990), (760, 70, 999, 740)
+        card, record = SHOTS_TOOL.card_window(drawing(sheet, finger), frame)
+        self.assertEqual(card.size, library_write.CARD_SIZE)
+        self.assertEqual(record, {"zoom": 1.25, "top": 0.06, "window_px": [160, 22], "margins_px": [440, 48, 440, 0], "base_px": 81})
+        self.assertEqual(card.getchannel("A").point(lambda value: 255 if value > 128 else 0).getbbox(), (220, 24, 420, 400))
+        refused = (((sheet[:3] + (999,), finger), (1600, 1000), "reaches its frame's edge"),
+                   ((sheet, finger[:1] + (40,) + finger[2:]), (1600, 1000), "below the top of the drawing"),
+                   (((100, 90, 1500, 990), finger), (1600, 1000), "from a side of the window"),
+                   ((sheet, finger), (1280, 800), "not RGBA (1600, 1000)"),
+                   # The finger's base on the window's bottom edge (the review of 2026-11-16: so at 1.35), or a sheet's
+                   # tail under the finger's columns (its base then unknown), or nothing running off the bottom.
+                   ((sheet, finger[:3] + (800,)), (1600, 1000), "the base on the edge"),
+                   ((sheet, finger, (640, 760, 800, 990)), (1600, 1000), "the base on the edge"),
+                   ((sheet[:3] + (700,), finger), (1600, 1000), "not running off it"))
+        for boxes, size, words in refused:
+            with self.subTest(boxes=boxes), self.assertRaisesRegex(SHOTS_TOOL.ShotError, re.escape(words)):
+                SHOTS_TOOL.card_window(drawing(*boxes, size=size), frame)
 
     def test_a_picture_is_a_webp_with_alpha_of_its_size(self) -> None:
         info = library_write.webp_info
@@ -1399,15 +1827,87 @@ class SceneTests(LibraryTestCase):
         self.assertEqual(problems, [], f"the scenes are stale: {REBUILD}")
         self.assertEqual(index, _json(LIBRARY / library_write.SCENES_INDEX))
 
+    def test_the_xarm_gripper_open_as_its_model_draws_it(self) -> None:
+        # The user's word of 2026-11-17 ("xarm原装夹爪"): UFACTORY's xArm Gripper from MuJoCo Menagerie's ufactory_xarm7
+        # (BSD-3-Clause, UFACTORY Inc.), hand.xml's four-bar linkage at its drivers' 0, fully open: every body where its
+        # pos puts it (no turn), the other finger the Library's left_finger.stl turned 180 degrees about the approach
+        # axis (the same board), 140.93 mm from it (the pads' faces 88.93 mm apart), each finger 43.64 mm from closed.
+        part = self.parts["parts"]["ufactory-xarm"]
+        self.assertEqual((part["title"], part["maker"], part["mesh"]["file"]), ("xArm Gripper", "UFACTORY", "meshes/ufactory-xarm.stl"))
+        self.assertEqual((part["license"]["spdx"], part["license"]["holder"], part["license"]["text"], part["license"]["change"]),
+                         ("BSD-3-Clause", "UFACTORY Inc.", "licenses/mujoco_menagerie-ufactory_xarm7.txt", "unchanged"))
+        self.assertEqual(part["license"]["source"], "https://github.com/google-deepmind/mujoco_menagerie/blob/"
+                         "f3b6013629c7b94f8ee93fd977b161fa8350f9bc/ufactory_xarm7/assets/left_finger.stl")
+        text = (LIBRARY / part["license"]["text"]).read_text(encoding="utf-8")
+        self.assertIn("Copyright (c) 2018, UFACTORY Inc.", text)
+        self.assertIn("Redistribution and use in source and binary forms", text)
+        self.assertEqual([variant["pitch_mm"] for variant in part["variants"]], [1, 1.5, 2, 3])
+        scene = _json(LIBRARY / "scenes" / "ufactory-xarm.json")
+        self.assertEqual(scene["approach"], [0.0, 0.0, 1.0])
+        self.assertEqual((scene["opening"]["q_mm"], scene["opening"]["limit_mm"]), (43.641775, 43.641775))
+        self.assertEqual((scene["mate"]["kind"], scene["mate"]["part"], scene["mate"]["matrix"]),
+                         ("turned", True, [[-1.0, 0.0, 0.0, 0.0], [0.0, -1.0, 0.0, -140.93], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]))
+        pads = {"bodies/ufactory-xarm/drawn-pad-sensor.stl": "sensor", "bodies/ufactory-xarm/drawn-pad-mate.stl": "mate"}
+        for body in scene["bodies"]:
+            with self.subTest(body=body["mesh"]):
+                self.assertTrue(body["mesh"].startswith("bodies/ufactory-xarm/"))
+                if body["mesh"] in pads:
+                    continue
+                self.assertEqual([row[:3] for row in body["matrix"][:3]], [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+                self.assertIsNone(body["finger"])
+        # Drawn after UFACTORY's photos: the white shell, the black anodised links and fingers (the part), the steel pins.
+        looks = {body["mesh"].rpartition("/")[2]: scene["looks"][body["look"]]["color"] for body in scene["bodies"]}
+        self.assertEqual((looks["base-shell.stl"], looks["left_outer_knuckle.stl"], looks["left-inner-pins.stl"]), ("#eceef0", "#2e2e31", "#c8cacc"))
+        self.assertEqual(scene["part_look"], "anodized-satin")
+        # The pad light grey rubber (the user's word of 2026-11-17, "xarm grey pad"): the part's file (the finger with its
+        # pad, one file) unchanged, and on each finger a prism of the project's own over its pad, in pad-grey: the pad's
+        # outline and thickness (the part's facets 2900 to 2991, the face the fit's seed facet is on) 0.02 mm larger on
+        # every side; the other finger's the same prism where the mate's matrix turns the part.
+        drawn = {body["mesh"]: body for body in scene["bodies"] if body["mesh"] in pads}
+        self.assertEqual({mesh: (body["finger"], body["look"]) for mesh, body in drawn.items()}, {mesh: (finger, "pad-grey") for mesh, finger in pads.items()})
+        self.assertEqual(drawn["bodies/ufactory-xarm/drawn-pad-sensor.stl"]["matrix"], [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+        self.assertEqual(drawn["bodies/ufactory-xarm/drawn-pad-mate.stl"]["matrix"], scene["mate"]["matrix"])
+        self.assertEqual(scene["looks"]["pad-grey"], {"color": "#a2a3a6", "metalness": 0, "roughness": 0.92, "env_intensity": 1.2})
+        mesh = (LIBRARY / part["mesh"]["file"]).read_bytes()
+        self.assertEqual(hashlib.sha256(mesh).hexdigest(), part["mesh"]["sha256"])
+        self.assertIn(part["setup"]["selection"]["ops"][0]["seed_facet"], range(2900, 2992))
+        corners = [[1000 * value for value in struct.unpack_from("<9f", mesh, 84 + 50 * index + 12)[3 * k:3 * k + 3]] for index in range(2900, 2992) for k in range(3)]
+        self.assertEqual([round(most(point[axis] for point in corners), 2) for most in (min, max) for axis in range(3)], [-14.75, -26.0, 22.25, 14.75, -23.0, 59.75])
+        files = {path: (LIBRARY / path).read_bytes() for path in pads}
+        self.assertEqual(files["bodies/ufactory-xarm/drawn-pad-sensor.stl"][80:], files["bodies/ufactory-xarm/drawn-pad-mate.stl"][80:], "one prism")
+        for path, data in files.items():
+            with self.subTest(pad=path):
+                self.assertTrue(library_write.own_body(path, data))
+        prism = files["bodies/ufactory-xarm/drawn-pad-sensor.stl"]
+        planes = []
+        for index in range(struct.unpack_from("<I", prism, 80)[0]):
+            a, b, c = (struct.unpack_from("<9f", prism, 84 + 50 * index + 12)[3 * k:3 * k + 3] for k in range(3))
+            u, v = [b[i] - a[i] for i in range(3)], [c[i] - a[i] for i in range(3)]
+            normal = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]
+            length = math.sqrt(sum(value * value for value in normal))
+            planes.append(([value / length for value in normal], a))
+        inside = [max(sum(n[i] * (point[i] - a[i]) for i in range(3)) for n, a in planes) for point in corners]
+        self.assertTrue(-0.021 <= min(inside) and max(inside) <= -0.019, (min(inside), max(inside)))
+        text = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        for path in pads:
+            self.assertIn(f"`{path}`", text)
+        self.assertIn("They are the project's own\ndrawing, not UFACTORY's geometry.", text)
+        for identifier in self.entries["parts"]["ufactory-xarm"]["variants"]:
+            with self.subTest(sensor=identifier):
+                variant = self.entries["variants"][identifier]
+                self.assertTrue(variant["symmetric_face"] and variant["centred"], "the pad's face is symmetric: the field centred")
+                self.assertEqual(variant["row_tail_mm"], variant["column_tail_mm"], "the tails ending together")
+
     def test_every_gripper_is_drawn_whole_as_the_user_approved(self) -> None:
-        # The prototype the user approved on 2026-11-05: the seven grippers whole (Franka's whole hand), each with its
+        # The prototype the user approved on 2026-11-05: the grippers whole (Franka's whole hand; the LEAP Hand of
+        # 2026-11-17, with a sensor on every finger), each with its
         # scene, the UMI finger and its tapered tips none (their fingertip scene); both fingers, the jaws fully open, the
         # other finger turned (the same part: the same board) or mirrored (the mirror-image board); the MakerMods tips on
         # the project's own plain rail, never its body's file.  The user's decision of 2026-11-06: the near finger (the mate)
         # see-through on every gripper, in both views, its stack assembled, the sensor finger's alone exploded.
         index = _json(LIBRARY / library_write.SCENES_INDEX)
         grippers = library_write.gripper_parts(self.parts)
-        self.assertEqual(grippers, ["franka-hand", "widowx-250", "trossen-widowx-ai", "arx-x5", "i2rt-yam", "unitree-dex1", "makermods-metal"])
+        self.assertEqual(grippers, GRIPPERS)
         self.assertEqual(index["scenes"], {part: f"scenes/{part}.json" for part in grippers})
         self.assertEqual(index["rules"], APPROVED_RULES)
         for part_id in grippers:
@@ -1416,8 +1916,16 @@ class SceneTests(LibraryTestCase):
                 self.assertEqual((scene["part"], scene["format"], scene["frame"]), (part_id, "flexitac-library-scene/v1", "the part's file axes, mm"))
                 self.assertEqual(scene["see_through"], SEE_THROUGH[part_id])
                 self.assertEqual(scene["mate"]["kind"], MATE_KINDS[part_id])
-                self.assertEqual(scene["opening"]["q_mm"], scene["opening"]["limit_mm"], "the jaws fully open")
+                if part_id in ("leflexitac", "yubi-gripper"):
+                    # A rotary jaw (the LeFlexiTac, 2026-11-16): open as far as the homes let its sensors read
+                    # (test_the_leflexitac_s_scene); rotary fingers (the YUBI Gripper, 2026-11-17): open as little as every
+                    # pitch's rules allow, so that the near finger's sensor reads as a face (its review;
+                    # test_the_yubi_gripper_is_drawn_from_its_open_model).
+                    self.assertLess(scene["opening"]["q_mm"], scene["opening"]["limit_mm"])
+                else:
+                    self.assertEqual(scene["opening"]["q_mm"], scene["opening"]["limit_mm"], "the jaws fully open")
                 self.assertEqual(scene["picture"], PICTURES.get(part_id, PICTURE))
+                self.assertNotIn("fingers", scene, "a hand's further fingers are its extra_fingers (one mechanism, 2026-11-17)")
                 meshes = [body["mesh"] for body in scene["bodies"]]
                 if part_id == "makermods-metal":
                     # Since the looks of 2026-11-12: the rail, then the shapes the project drew round it
@@ -1431,9 +1939,56 @@ class SceneTests(LibraryTestCase):
                 else:
                     self.assertNotIn(RAIL, meshes)
                 self.assertNotIn("camera", scene, "the approved homes (Exploded 65, Assembled 57 degrees)")
-                self.assertNotIn("explode", scene, "the approved explode (the rules' gap share)")
+                self.assertEqual(scene.get("explode"), LEFLEXITAC_EXPLODE if part_id == "leflexitac" else None,
+                                 "the approved explode (the rules' gap share; the LeFlexiTac's its bound, with its reason)")
+                self.assertEqual(len(scene.get("extra_fingers", [])), EXTRA_FINGERS.get(part_id, 0), "a hand's further fingers")
+                self.assertEqual(scene.get("checks"), CHECKS_OVERRIDES.get(part_id), "the scene's own checks")
         self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "bodies" / "makermods-metal").iterdir()),
                          sorted(rail_meshes), "the folder holds the scene's meshes and nothing else")
+
+    def test_the_leflexitac_s_scene(self) -> None:
+        # The user's request of 2026-11-16 (the LeFlexiTac, LeRobot's SO-101 gripper with LeFlexiTac's jaws, "角度之类的和其他夹爪
+        # 保持一致"): the rules' camera (no override); the rotary jaw open 39 degrees of the URDF's 100, as far as the
+        # grippers' homes let its sensors read; the other finger the static jaw (the wrist roll's share above z 38 mm of its
+        # file), see-through, its sensor the moving jaw's board turned onto its flat face; the servo and the cradle bodies;
+        # the approach the grasp's line, from the servo's axis to the faces' far ends; the scenes' one explode override, at
+        # its bound, with its reason.
+        scene = _json(LIBRARY / "scenes" / "leflexitac.json")
+        self.assertEqual([(body["mesh"], body["finger"], body.get("look")) for body in scene["bodies"]],
+                         [("bodies/leflexitac/sts3215.stl", None, "servo-black"), ("bodies/leflexitac/wrist-roll.stl", None, "pla-black"),
+                          ("bodies/leflexitac/static-jaw.stl", "mate", "pla-black")])
+        self.assertEqual((scene["mate"]["kind"], scene["mate"]["part"], scene["see_through"], scene["part_look"]), ("turned", False, ["mate"], "pla-black"))
+        self.assertNotIn("camera", scene)
+        self.assertEqual(scene["explode"], LEFLEXITAC_EXPLODE)
+        self.assertEqual(LEFLEXITAC_EXPLODE["gap_share"], library_write.EXPLODE_BOUNDS["gap_share"][1])
+        self.assertIn("for this reason: a rotary jaw's faces are 33 mm apart at most at its hub", scene["about"])
+        self.assertIn("drawn at q 0.6807 rad (39 degrees", scene["about"])
+        self.assertEqual((scene["opening"]["q_mm"], scene["opening"]["limit_mm"]), (59.483, 136.505))
+        # The moving jaw's pad face (x -10.3 of its file, normal -x) 32.4 degrees off the approach's plane across it.
+        self.assertAlmostEqual(math.degrees(math.asin(abs(scene["approach"][0]))), 32.39, places=1)
+
+        def apply(matrix, point):
+            return [math.fsum(matrix[r][c] * point[c] for c in range(3)) + matrix[r][3] for r in range(3)]
+
+        def inverse(matrix):
+            rotation = [[matrix[c][r] for c in range(3)] for r in range(3)]
+            shift = [-math.fsum(rotation[r][c] * matrix[c][3] for c in range(3)) for r in range(3)]
+            return [rotation[r] + [shift[r]] for r in range(3)] + [[0, 0, 0, 1]]
+
+        # The mate takes the moving jaw's face onto the static jaw's: the plane x -7.9 of the wrist roll's file, within its
+        # 28.4 mm width (y within 14.2 mm) and along its 38 to 117.2 mm.
+        wrist = inverse(scene["bodies"][2]["matrix"])
+        for corner in ([-10.3, -22.0, -13.5], [-10.3, -22.0, 13.5], [-10.3, -85.0, -13.5], [-10.3, -85.0, 13.5]):
+            with self.subTest(corner=corner):
+                x, y, z = apply(wrist, apply(scene["mate"]["matrix"], corner))
+                self.assertAlmostEqual(x, -7.9, delta=0.01)
+                self.assertLessEqual(abs(y), 14.2)
+                self.assertTrue(38.0 <= z <= 117.2, z)
+        # The record's numbers keep every rule with no override but the explode's: the stage measured them so.
+        numbers = _json(LIBRARY / "shots" / "manifest.json")["shots"]["leflexitac-2mm"]["stage"]["numbers"]
+        self.assertEqual((numbers["face_tilt_deg"], numbers["near_seen"]), (32.39, 1))
+        self.assertGreaterEqual(numbers["visible_min"], 0.25)
+        self.assertGreaterEqual(numbers["ghost_cover"], 0.5)
 
     def test_the_makermods_body_is_the_project_s_drawing_by_eye(self) -> None:
         # The user's decision of 2026-11-14 ("makermods, yes, you can do it by eye"): the Metal Arm's body drawn round the
@@ -1475,6 +2030,528 @@ class SceneTests(LibraryTestCase):
         self.assertIn("by eye", about)
         self.assertIn("not MakerMods' 3D model or hardware", about)
 
+    def test_the_agilex_piper_is_menagerie_s_finger_on_its_whole_face(self) -> None:
+        # 2026-11-17, the AgileX Piper (the user's request of that day; fpc-int-n-piper): the real finger, menagerie
+        # agilex_piper's link7.stl unchanged (MIT, (c) 2024 RosenYin), not HandUMI's printed replica of its tip; its inner
+        # face grown whole by 'surface' from the tip, inside a border 3 mm above the root (the root is 1 mm longer on one
+        # side and notched by the carriage's tabs: inside it the face is symmetric, so every sensor is centred); four
+        # pitches, 1 to 4 mm, as the other large faces (ARX X5, I2RT YAM); the jaws 70 mm apart (joint7 0..0.035 m, joint8
+        # its mirror), the other finger link8.stl, which is link7.stl turned; the body link6.stl shared out by look.
+        part = self.parts["parts"]["agilex-piper"]
+        self.assertEqual((part["title"], part["maker"], part["mesh"]["sha256"], part["license"]["spdx"], part["license"]["holder"],
+                          part["license"]["change"], part["license"]["source"]),
+                         ("AgileX Piper", "AgileX Robotics", "907dcdd10498a9d2e9317e42f550570a4ca522d1c4ff7b7c8721fd5cb951e481", "MIT", "RosenYin",
+                          "unchanged", "https://github.com/google-deepmind/mujoco_menagerie/blob/fb36886b3023db08c198264e1e9956ab202c3e3b/agilex_piper/assets/link7.stl"))
+        self.assertEqual(hashlib.sha256((LIBRARY / part["license"]["text"]).read_bytes()).hexdigest(),
+                         "e32d78fd3761052ab0b2bb42fef8a7a9ad3f298d315d305333c349d2aff1f134", "menagerie agilex_piper's LICENSE at fb36886")
+        setup = part["setup"]
+        self.assertEqual(([op["preset"] for op in setup["selection"]["ops"]], setup["base"], setup["options"]), (["surface"], "auto", {}))
+        corners = setup["border"]["uv"]
+        self.assertEqual((len(corners), len({u for u, _ in corners}), len({v for _, v in corners})), (4, 2, 2), "a rectangle on the face's axes")
+        self.assertEqual([variant["pitch_mm"] for variant in part["variants"]], [1, 2, 3, 4])
+        for identifier in ("agilex-piper-1mm", "agilex-piper-2mm", "agilex-piper-3mm", "agilex-piper-4mm"):
+            with self.subTest(sensor=identifier):
+                symmetry = json.loads(self.fits[identifier])["reply"]["proposals"][0]["metrics"]["symmetry"]
+                self.assertEqual((symmetry["face"], symmetry["field"], symmetry["field_offset_mm"]), (True, True, 0.0))
+                self.assertLessEqual(symmetry["deviation_mm"], 0.001, "the face inside the border its own mirror image")
+        scene = _json(LIBRARY / "scenes" / "agilex-piper.json")
+        self.assertEqual((scene["approach"], scene["opening"]["q_mm"], scene["opening"]["limit_mm"]), ([0.0, 1.0, 0.0], 35.0, 35.0))
+        self.assertEqual(scene["mate"], {"kind": "turned", "matrix": [[-1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, -1.0, 70.0], [0.0, 0.0, 0.0, 1.0]],
+                                         "part": True}, "the other finger the same part turned, its face 70 mm across the jaws")
+        self.assertEqual([(body["mesh"], body["look"], body["finger"]) for body in scene["bodies"]],
+                         [("bodies/agilex-piper/link6-rail.stl", "rail-ground", None), ("bodies/agilex-piper/link6-plate.stl", "frame-blasted", None),
+                          ("bodies/agilex-piper/link6-can.stl", "anodized-black", None)])
+        self.assertEqual(scene["part_look"], "finger-black")
+        self.assertIn("link8.stl, which is link7.stl turned 180 degrees", scene["about"])
+        # The review of 2026-11-17: the model pinned at the newest commit to touch it (fb36886, 2026-11-02; the other
+        # menagerie grippers' f3b6013 is older), its scene and its NOTICE rows saying so; the cross plate's one guide rail
+        # (one connected piece) as the about names it; the fingers a non-metal (rubber in the gripper's listings), the
+        # plate anodised metal; the face 72.1 mm long in its chart on a finger 76.5 mm long, 20 mm wide at its end and
+        # 56 mm at the root, as the docs give it.
+        self.assertEqual(scene["opening"]["source"], "mujoco_menagerie fb36886, agilex_piper/piper.xml: joint7 range 0 0.035 m")
+        self.assertIn("AgileX Piper at full opening: mujoco_menagerie fb36886, agilex_piper/piper.xml", scene["about"])
+        notice = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        rows = [line for line in notice.splitlines() if line.startswith("| `") and "agilex_piper/" in line]
+        self.assertEqual(len(rows), 5, "the mesh, the licence text and the body's three components")
+        self.assertTrue(all("| mujoco_menagerie `fb36886`, `agilex_piper/" in row for row in rows), rows)
+        self.assertIn("the cross plate with its guide rail and end blocks", scene["about"])
+        self.assertNotIn("rails", scene["about"])
+        corners = {}
+        triangles = _stl_triangles((LIBRARY / "bodies" / "agilex-piper" / "link6-rail.stl").read_bytes())
+        parent = list(range(len(triangles)))
+
+        def root(k: int) -> int:
+            while parent[k] != k:
+                parent[k] = parent[parent[k]]
+                k = parent[k]
+            return k
+
+        for k, triangle in enumerate(triangles):
+            for c in range(3):
+                key = tuple(round(value, 2) for value in triangle[3 * c:3 * c + 3])
+                parent[root(k)] = root(corners.setdefault(key, k))
+        self.assertEqual((len(triangles), len({root(k) for k in range(len(triangles))})), (1034, 1), "one guide rail, one piece")
+        looks = scene["looks"]
+        self.assertEqual((looks["finger-black"]["metalness"], looks["frame-blasted"]["metalness"]), (0, 0.6), "the finger no metal, the plate anodised")
+        look_file = _json(ROOT / "tools" / "library_looks" / "agilex-piper.json")
+        self.assertEqual(look_file["looks"]["finger-black"]["base"], "rubber-black")
+        self.assertIn("non-slip rubber", look_file["looks"]["finger-black"]["evidence"])
+        self.assertIn("The fingers are a matte black that is not metal", scene["about"])
+        selection = json.loads(self.fits["agilex-piper-2mm"])["reply"]["selection"]
+        u = [point[0] for point in selection["outline_uv"]]
+        ends = [[b for a, b in selection["outline_uv"] if abs(a - edge) < 0.01] for edge in (min(u), max(u))]
+        mesh_y = [triangle[c] for triangle in _stl_triangles((LIBRARY / part["mesh"]["file"]).read_bytes()) for c in (1, 4, 7)]
+        v = [point[1] for point in selection["outline_uv"]]
+        self.assertEqual((round(max(u) - min(u), 1), round(1000 * (max(mesh_y) - min(mesh_y)), 1), round(max(ends[1]) - min(ends[1]), 1),
+                          round(max(v) - min(v), 1)), (72.1, 76.5, 20.0, 56.0), "the face's length, the finger's, the face's end, its root")
+
+    def test_the_rebot_is_the_menagerie_gripper_with_its_contact_face_whole(self) -> None:
+        # The user's request of 2026-11-17 (the Seeed reBot DevArm): mujoco_menagerie's seeed_rebot_devarm (MIT), its left
+        # finger the part with the two 1.85 mm pockets of its contact face capped (a laminated sensor bridges them), the
+        # face the file's plane z = 0 whole and the sensor fitted there; the jaws at full opening (50 mm a finger), the
+        # other finger the part turned 180 degrees about the approach axis; the RS-00 actuator the project's own plain
+        # shapes, credited so, in place of the model's 1.03 MB motor.
+        def facets(data: bytes) -> list:
+            count = struct.unpack_from("<I", data, 80)[0]
+            return [struct.unpack_from("<12f", data, 84 + 50 * k)[3:] for k in range(count)]
+
+        part = self.parts["parts"]["seeed-rebot"]
+        data = (LIBRARY / part["mesh"]["file"]).read_bytes()
+        self.assertTrue(data.startswith(b"modified (face pockets capped, m to mm) by FlexiTac-Gen 2026"), data[:80])
+        face, pocket = 0.0, 0
+        for corners in facets(data):
+            a, b, c = corners[0:3], corners[3:6], corners[6:9]
+            n = [(b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]), (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]),
+                 (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])]
+            area = math.sqrt(math.fsum(x * x for x in n)) / 2
+            z = (a[2] + b[2] + c[2]) / 3
+            if area and n[2] / (2 * area) < -0.99:
+                face += area if abs(z) < 0.01 else 0.0
+                pocket += abs(z - 1.85) < 0.05
+        self.assertEqual(len(facets(data)), 5068, "pla_left's 5144 facets, the pockets' 116 out and 40 caps in")
+        self.assertEqual(pocket, 0, "no pocket floor left in the contact face")
+        self.assertAlmostEqual(face, 1440.8, delta=0.5, msg="the contact face whole: its rim and the two caps")
+        fit = _json(LIBRARY / "fits" / "seeed-rebot-2mm.json")["reply"]
+        self.assertEqual((fit["mesh"]["unit"], round(fit["selection"]["area_mm2"], 1), fit["selection"]["normal"]), ("mm", 1440.8, [0.0, 0.0, -1.0]))
+        symmetry = fit["proposals"][0]["metrics"]["symmetry"]
+        self.assertTrue(symmetry["face"] and symmetry["field"], symmetry)
+        scene = _json(LIBRARY / "scenes" / "seeed-rebot.json")
+        self.assertEqual((scene["opening"]["q_mm"], scene["approach"]), (50.0, [0.0, -1.0, 0.0]))
+        self.assertEqual(scene["mate"], {"kind": "turned", "part": True,
+                                         "matrix": [[-1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, -1.0, -100.14677], [0.0, 0.0, 0.0, 1.0]]})
+        for words in ("mujoco_menagerie f3b6013, seeed_rebot_devarm/seeed_rebot_devarm.xml (MIT, Seeed Studio)", "two 1.85 mm pockets capped",
+                      "turned 180 degrees about the approach axis", "The actuator is the project's own drawing, not the model's file"):
+            self.assertIn(words, scene["about"])
+        meshes = [body["mesh"] for body in scene["bodies"]]
+        self.assertFalse([mesh for mesh in meshes if "motor_7" in mesh or "link6" in mesh], "no file of the model's motor or the arm's flange")
+        text = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        drawn = sorted(mesh for mesh in set(meshes) if mesh.startswith("bodies/seeed-rebot/drawn-"))
+        self.assertEqual(drawn, [f"bodies/seeed-rebot/drawn-motor-{name}.stl" for name in ("base", "can", "plugs")])
+        for mesh in drawn:
+            with self.subTest(drawn=mesh):
+                self.assertTrue(library_write.own_body(mesh, (LIBRARY / mesh).read_bytes()), mesh)
+                self.assertIn(f"`{mesh}`", text, "credited as the project's own drawing")
+        self.assertIn("not Seeed Studio's geometry", text)
+        self.assertIn("`seeed_rebot_devarm` (MIT License,\n  Copyright (c) 2026 Seeed Studio", text)
+        # The maker's and the product's names among the trademarks of NOTICE.md's last section.
+        self.assertLessEqual({"Seeed", "reBot"}, set(re.search(r"makers \(([^)]*)\)", " ".join(text.split("## Trademarks", 1)[1].split())).group(1).split(", ")))
+        # The review of 2026-11-17: the part's modified-file note names the upstream finger by the SHA-256 that
+        # tools/library_scenes.py pins, and says what the capped pockets are (the seats of the grip pads); the sources
+        # record Seeed's other grant of the same meshes, CERN-OHL-W-2.0 in its hardware repository at its commit.
+        words = " ".join(text.split())
+        named = re.search(r"`meshes/seeed-rebot\.stl` is not the upstream file \(MIT License\): it is the menagerie's "
+                          r"`seeed_rebot_devarm/assets/pla_left\.STL` \(SHA-256 `([0-9a-f]{64})`\)", words)
+        self.assertIsNotNone(named, "the note names the upstream finger by its SHA-256")
+        # The scene builder is private (the verification of the merge of 2026-11-17: read unasked, it failed the public
+        # copy's suite, the test job its publish waits on): its pin compared where it is present.
+        path = ROOT / "tools" / "library_scenes.py"
+        if path.exists():
+            pinned = re.search(r'"rebot-pla_left": \(f"\{REBOT\}/assets/pla_left\.STL", "([0-9a-f]{64})"\)', path.read_text(encoding="utf-8"))
+            self.assertIsNotNone(pinned, "library_scenes.py pins the menagerie's pla_left.STL")
+            self.assertEqual(named.group(1), pinned.group(1))
+        self.assertIn("The pockets seat the gripper's silicone grip pads (30 x 9 x 2 mm in Seeed's bill of materials)", words)
+        self.assertIn("Seeed Studio also publishes these meshes under the CERN Open Hardware Licence Version 2, Weakly "
+                      "Reciprocal (CERN-OHL-W-2.0), in its hardware repository, `https://github.com/Seeed-Projects/reBot-DevArm` "
+                      "at `eda479d46249e32f8ecc61ebfe8ce49f8a58c19b`", words)
+        # The merge of 2026-11-17 (the lead's decision): that grant's text, reBot-DevArm's LICENSE at that commit, ships
+        # beside the MIT one, named by the part's row.
+        cern = LIBRARY / "licenses" / "seeed-rebot_devarm.txt"
+        self.assertEqual(hashlib.sha256(cern.read_bytes()).hexdigest(), "e258a9c6833bfd17fb90252df8c33e29d13fabc2768508248927824c17878db7")
+        self.assertTrue(cern.read_text(encoding="utf-8").startswith("CERN Open Hardware Licence Version 2 - Weakly Reciprocal\n"))
+        self.assertIn("also CERN-OHL-W-2.0, Seeed Studio, `licenses/seeed-rebot_devarm.txt`", _notice()[part["mesh"]["file"]][2])
+
+    def test_the_rainbow_rby1_is_its_1_2_gripper_whole(self) -> None:
+        # The user's request of 2026-11-17 (the Rainbow RB-Y1 among the grippers to add): MuJoCo Menagerie's
+        # rainbow_robotics_rby1 at f3b6013 (Apache-2.0), its 1.2 model (the lead's decision of 2026-11-17 after the line's
+        # review: the v1.3 model's gripper EE_GR_TF stands 54 mm from the fingers' root to its flange where Rainbow
+        # Robotics' drawing has 92.2 mm, the 1.2 model's EE_BODY 73 mm, 126 x 55 mm at its rail block as the drawing's
+        # 126 x 55, its jaws 100 mm apart as the drawing's stroke): the gripper EE_BODY where the right arm places it,
+        # EE_FINGER_1 on both fingers and the pad EE_FINGER_0 the Library's part, the jaws open 50 mm each, the other
+        # finger the same pad and finger turned about the approach axis; its card the grid's last.
+        part = self.parts["parts"]["rainbow-rby1"]
+        scene = _json(LIBRARY / "scenes" / "rainbow-rby1.json")
+        self.assertEqual((part["title"], part["maker"], part["finger"]), ("Rainbow RB-Y1", "Rainbow Robotics", "gripper finger pad"))
+        self.assertEqual(GRIPPERS[GRIPPERS.index("ufactory-xarm") + 1], "rainbow-rby1", "its card after the xArm Gripper's (the merged grid's order of 2026-11-17)")
+        for words in ("mujoco_menagerie f3b6013", "rainbow_robotics_rby1/rby1m_1.2.xml",
+                      "the 1.2 model, whose gripper is nearer Rainbow Robotics' drawing of it than the v1.3 model's", "EE_BODY.obj",
+                      "EE_FINGER_1.obj", "EE_FINGER_0.obj, is the Library mesh", "the wrist's last link itself not drawn",
+                      "the model leaves ee_finger_r2 unturned"):
+            self.assertIn(words, scene["about"])
+        for words in ("rby1m_1.3.xml", "EE_GR_TF"):
+            self.assertNotIn(words, scene["about"])
+        self.assertEqual((scene["approach"], scene["opening"]["q_mm"], scene["opening"]["limit_mm"]), ([0, 0, -1], 50, 50), "the pad's tip -z of its file")
+        # The mate stands where the model opens ee_finger_r2's frame to (53 mm along -x of the wrist, the sensor finger's
+        # 53 mm along +x), turned 180 degrees about the wrist's axis: the model leaves that frame unturned, its pad facing
+        # away.  The pads' faces 100 mm apart (the stage measures 99.5 mm; 93.5 on the v1.3 gripper).
+        self.assertEqual(scene["mate"], {"kind": "turned", "matrix": [[-1, 0, 0, -106], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]], "part": True})
+        self.assertEqual([(body["mesh"], body["finger"], body["look"]) for body in scene["bodies"]],
+                         [("bodies/rainbow-rby1/ee_body.stl", None, "anodized-black"), ("bodies/rainbow-rby1/ee_finger_1.stl", "sensor", "anodized-black"),
+                          ("bodies/rainbow-rby1/ee_finger_1.stl", "mate", "anodized-black")])
+        # The pad black rubber, as every maker photo shows the fingers, their inner faces too (the review of 2026-11-17:
+        # the model's light grey read as a bright slab on the card): the base look rubber-black, matte as the model's own
+        # pad, and no look of the gripper light; the photos not called the gripper of a version (none says its version).
+        base = _json(ROOT / "tools" / "library_looks" / "base.json")["looks"]
+        self.assertEqual(scene["part_look"], "rubber-black")
+        self.assertEqual(scene["looks"]["rubber-black"], {key: value for key, value in base["rubber-black"].items() if key != "for"})
+        for name, look in scene["looks"].items():
+            self.assertTrue(all(int(look["color"][k:k + 2], 16) < 0x40 for k in (1, 3, 5)), f"the RB-Y1's look {name} black")
+        self.assertNotIn("RB-Y1 v1.3", scene["about"])
+        self.assertNotIn("RB-Y1 1.2", scene["about"])
+        self.assertIn("they do not say which version of the gripper they show", scene["about"])
+        # The face: the pad's contact face (x -3 of its file) but its top strip, facets 34 and 35, from the pad's root
+        # (z -0.5) to the start of its taper (z -10.141), which runs to 1.5 mm under the gripper's rail block (z 1 and up
+        # in the part's frame; 0.5 mm under the v1.3 gripper's rail plate at z 0): with it every sensor's board on the
+        # face would come within 3 mm of the gripper (the rules' clearance), without it the field stands 11 mm or more
+        # clear and the tails leave the strip's straight edge.  The pad is the same file in both models: the fits too.
+        ops = part["setup"]["selection"]["ops"]
+        self.assertEqual(ops, [{"mode": "add", "op": "grow", "preset": "flat", "seed_facet": 38}, {"facets": [34, 35], "mode": "subtract", "op": "facets"}])
+        self.assertEqual((part["setup"]["base"], part["setup"]["border"]), ({"point_xyz": [-3, 0, -10.14]}, None))
+        pad = _stl_triangles((LIBRARY / part["mesh"]["file"]).read_bytes())
+        for k in (34, 35):
+            self.assertTrue(all(abs(x + 3) < 1e-4 for x in pad[k][0::3]) and all(-10.142 < z < -0.49 for z in pad[k][2::3]), f"facet {k} the top strip")
+        self.assertAlmostEqual(min(z for corners in pad for z in corners[2::3]), -60.5, places=4)
+        # The gripper from 1 mm above the pad's frame (its rail block's face) to 74 mm (the boss at its top): 73 mm tall,
+        # where the v1.3 gripper stood 54 mm to its flange's top (66.4 with the bracket in its ring).
+        housing = scene["bodies"][0]["matrix"]
+        heights = [sum(housing[2][a] * corners[3 * j + a] for a in range(3)) + housing[2][3]
+                   for corners in _stl_triangles((LIBRARY / scene["bodies"][0]["mesh"]).read_bytes()) for j in range(3)]
+        self.assertAlmostEqual(min(heights), 1, delta=0.01, msg="the gripper's rail block at z 1 of the part's frame")
+        self.assertAlmostEqual(max(heights), 74, delta=0.01, msg="the gripper's top at z 74")
+        manifest = _json(LIBRARY / "shots" / "manifest.json")["shots"]
+        for identifier in self.entries["parts"]["rainbow-rby1"]["variants"]:
+            with self.subTest(sensor=identifier):
+                numbers = manifest[identifier]["stage"]["numbers"]
+                self.assertGreaterEqual(numbers["clearance_mm"]["bodies"], 11)
+                self.assertEqual(numbers["jaw_gap_mm"], 99.5)
+        # No drawn ring (the review of 2026-11-17 drew one where the v1.3 gripper was open at its top): EE_BODY closes its
+        # own top, a recessed boss 56 mm across, so the look file draws nothing and the part's bodies are the model's
+        # two files alone, 104 368 bytes (1 294 852 with the v1.3 gripper and the ring: the Library's heaviest then).
+        looks = _json(ROOT / "tools" / "library_looks" / "rainbow-rby1.json")
+        self.assertNotIn("drawn", looks)
+        self.assertIn("The model's gripper closes its own top", looks["about"])
+        folder = LIBRARY / "bodies" / "rainbow-rby1"
+        self.assertEqual(sorted(path.name for path in folder.iterdir()), ["ee_body.stl", "ee_finger_1.stl"])
+        self.assertLess(sum(path.stat().st_size for path in folder.iterdir()), 150_000)
+        text = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        self.assertNotIn("drawn-top-ring", text)
+        self.assertIn("`rainbow_robotics_rby1` (Apache\n  License 2.0, Copyright 2024 Rainbow Robotics", text)
+        # Where the 1.2 files came from: the menagerie's bef9f83 (as the v1.3 ones, the review of 2026-11-17), from
+        # Rainbow Robotics' public resources, the RB-Y1 URDF of rby1-sdk among them, whose gripper is EE_BODY too.
+        self.assertIn("its 1.2 files came to the menagerie at `bef9f83`", text)
+        self.assertIn("the 1.2 model's gripper (`assets/EE_BODY.obj`, in `rby1m_1.2.xml`)", text)
+        self.assertNotIn("EE_GR_TF", text)
+        self.assertNotIn("derived from Rainbow Robotics' `rby1-sdk`", text)
+        # (The merge of 2026-11-17: the list one sorted union of every line's names.)
+        self.assertLessEqual({"Rainbow Robotics", "RB-Y1"}, set(re.search(r"makers \(([^)]*)\)", " ".join(text.split("## Trademarks", 1)[1].split())).group(1).split(", ")))
+
+    def test_the_openarm_is_drawn_from_its_open_model(self) -> None:
+        # The user's request of 2026-11-17 (the OpenArm, Enactic): its finger the HandUMI replica of the OpenArm v1 finger,
+        # unchanged; its body openarm_description's own meshes at its pinned commit (Apache-2.0, Enactic, Inc.), each a
+        # NOTICE row with that licence's text; the other finger the same finger turned half a turn about the approach axis
+        # (the URDF's right finger: its visual's yaw pi), both fingers fully open (finger_joint1/2's 44 mm); the makers'
+        # names among the trademarks.  The review of 2026-11-17: the card is titled "OpenArm 1.0" (Enactic's own name for it
+        # since OpenArm 2.0, whose gripper, the pinch gripper, is another), and the scene's about says which gripper it
+        # draws; the replica is Enactic's finger surface, credited with Enactic's licence beside HandUMI's.
+        part = self.parts["parts"]["enactic-openarm"]
+        self.assertEqual((part["title"], part["maker"]), ("OpenArm 1.0", "Enactic"))
+        self.assertIn("after Enactic, Inc.'s OpenArm 1.0 finger", part["license"]["holder"])
+        self.assertEqual(part["mesh"]["sha256"], "b86528931e3abae5cebee5b62e306afb16a5acf36740df52a595cd98ae92ddf7")
+        self.assertEqual((part["license"]["spdx"], part["license"]["text"], part["license"]["change"]), ("Apache-2.0", "licenses/handumi-hw.txt", "unchanged"))
+        self.assertTrue(part["license"]["source"].endswith("/hardware/STL/gripper_tips/OpenArmv1/OpenArm-left.stl"))
+        scene = _json(LIBRARY / "scenes" / "enactic-openarm.json")
+        self.assertEqual(scene["approach"], [1.0, 0.0, 0.0])
+        self.assertEqual((scene["opening"]["q_mm"], scene["opening"]["limit_mm"]), (44.0, 44.0))
+        mate = scene["mate"]
+        self.assertEqual((mate["kind"], mate["part"]), ("turned", True))
+        self.assertEqual([row[:3] for row in mate["matrix"][:3]], [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, -1.0]],
+                         "half a turn about the approach axis (x)")
+        self.assertIn("openarm_description 81fe647", scene["about"])
+        self.assertIn("OpenArm 1.0's parallel gripper (openarm_description's parallel_link end effector", scene["about"])
+        self.assertIn("OpenArm 2.0's gripper is another, its pinch_gripper, not drawn here", scene["about"])
+        # The looks' photo is openarm.dev's og:image of the OpenArm 1.0 (its hero, "Introducing OpenArm 2.0", is 2.0's).
+        self.assertIn("openarm.dev's social-preview photo (its og:image, ogp.webp) of the bimanual OpenArm 1.0", scene["about"])
+        self.assertNotIn("hero", scene["about"])
+        licence = LIBRARY / "licenses" / "openarm_description.txt"
+        self.assertEqual(hashlib.sha256(licence.read_bytes()).hexdigest(), "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4")
+        self.assertIn("Apache License", licence.read_text(encoding="utf-8"))
+        rows = _notice()
+        self.assertIn("the surface of Enactic's finger (openarm_description `81fe647`, `finger.dae`; Apache-2.0, Enactic, Inc., "
+                      "`licenses/openarm_description.txt`)", rows["meshes/enactic-openarm.stl"][2])
+        meshes = sorted({body["mesh"] for body in scene["bodies"]})
+        self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "bodies" / "enactic-openarm").iterdir()), meshes)
+        self.assertEqual({body["finger"] for body in scene["bodies"] if body["mesh"].endswith("/finger-carriage.stl")}, {"sensor", "mate"})
+        for mesh in meshes:
+            with self.subTest(body=mesh):
+                self.assertIn("openarm_description `81fe647`", rows[mesh][1])
+                self.assertIn("Apache-2.0, Enactic, Inc., `licenses/openarm_description.txt`", rows[mesh][2])
+        text = " ".join((LIBRARY / "NOTICE.md").read_text(encoding="utf-8").split())
+        trademarks = text[text.index("## Trademarks"):]
+        for name in ("Enactic", "OpenArm"):
+            self.assertIn(name, trademarks)
+        # The face (the user's correction of 2026-11-17, "openarm你选的面不对，我们可以只选取finger tip那个小圆弧三角的部分"):
+        # the small rounded flat pad at the fingertip alone, where Enactic's 88 mm opening is measured (x 58.8 to 70 mm,
+        # 21.9 mm across, 170 mm2, its normal +z), not the curved cradle behind it (x 2 to 47 mm, 1644 mm2, the first
+        # build's) nor the 30-degree ramp between them; the tails leave across its straight root edge toward the mount.
+        # Symmetric about the finger's mid-plane (y -13.1 mm), so each sensor is centred on it, its field and tails
+        # symmetric (the product rules, tools/library_write.py rules()).  A small face: 1 to 2.5 mm (3 mm leaves 3 rows
+        # of 14 taxels on its 11 mm).
+        self.assertEqual(part["setup"]["selection"], {"ops": [{"mode": "add", "op": "grow", "preset": "surface", "seed_facet": 347}]})
+        self.assertEqual(part["setup"]["base"], {"point_xyz": [58.82, -13.1, -43.35]})
+        self.assertEqual([variant["pitch_mm"] for variant in part["variants"]], [1, 1.5, 2, 2.5])
+        from surface import api, select
+
+        mesh = api.load_mesh({"name": part["mesh"]["name"]}, (LIBRARY / part["mesh"]["file"]).read_bytes())
+        facets = select.apply_operations(mesh, part["setup"]["selection"]["ops"])
+        points = [point for facet in facets for point in mesh.facet_points(facet)]
+        low, high = ([round(f(point[k] for point in points), 2) for k in range(3)] for f in (min, max))
+        self.assertEqual((len(facets), round(sum(mesh.areas[facet] for facet in facets), 1), low, high),
+                         (36, 170.3, [58.82, -24.05, -43.39], [70.0, -2.15, -43.35]))
+        self.assertGreater(min(mesh.normals[facet][2] for facet in facets), 0.99)  # within 6.3 degrees: the strip at its root
+        self.assertAlmostEqual((low[1] + high[1]) / 2, -13.1, places=6)
+        lines = {}
+        for pitch in ("1", "1.5", "2", "2.5"):
+            with self.subTest(pitch=pitch):
+                fitted = _json(LIBRARY / "fits" / f"enactic-openarm-{pitch}mm.json")["reply"]
+                metrics = fitted["proposals"][0]["metrics"]
+                self.assertTrue(metrics["symmetry"]["face"])
+                self.assertTrue(metrics["symmetry"]["field"])
+                self.assertEqual(metrics["symmetry"]["field_offset_mm"], 0)
+                self.assertEqual(metrics["row_bus"]["tail_position"], "centred")
+                self.assertEqual(metrics["row_tail_mm"], metrics["column_tail_mm"])
+                lines[pitch] = (metrics["rows"], metrics["columns"], metrics["taxels"])
+                self.assertLessEqual(max(metrics["field_mm"]), 21.9)
+                self.assertLessEqual(min(metrics["field_mm"]), 11.2)
+        self.assertEqual(lines, {"1": (10, 20, 134), "1.5": (7, 13, 57), "2": (5, 9, 33), "2.5": (4, 7, 22)})
+
+    def test_the_collada_reader_takes_only_metres_and_z_up(self) -> None:
+        # The review of the OpenArm (2026-11-17): the scene builder's Collada reader (tools/library_scenes.py dae_frame(),
+        # run before dae_triangles() reads a triangle) refuses a file whose numbers are not to be read as they stand: a
+        # <unit> other than one metre, an <up_axis> other than Z_UP, or none (Collada's default is Y_UP).  The builder is
+        # private and needs numpy and trimesh, so its stdlib function is read from its source and run here, where present.
+        path = ROOT / "tools" / "library_scenes.py"
+        if not path.exists():
+            return  # the scene builder is private: not in the public copy
+        from xml.etree import ElementTree
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        wanted = [node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "SceneError"
+                  or isinstance(node, ast.FunctionDef) and node.name == "dae_frame"
+                  or isinstance(node, ast.Assign) and [getattr(target, "id", None) for target in node.targets] == ["COLLADA"]]
+        self.assertEqual(len(wanted), 3)
+        namespace = {"ElementTree": ElementTree}
+        exec(compile(ast.Module(wanted, type_ignores=[]), "tools/library_scenes.py", "exec"), namespace)
+        self.assertIn("    root = xml_root(data)\n    dae_frame(root)\n", source, "dae_triangles() checks the file's frame first")
+
+        def collada(asset: str):
+            return ElementTree.fromstring('<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">'
+                                          f"<asset>{asset}</asset></COLLADA>")
+
+        # The OpenArm's three files: meter 1 and Z_UP (and a file without a <unit>: Collada's default, the metre).
+        namespace["dae_frame"](collada('<unit name="meter" meter="1"/><up_axis>Z_UP</up_axis>'))
+        namespace["dae_frame"](collada("<up_axis> Z_UP </up_axis>"))
+        for asset in ('<unit name="millimeter" meter="0.001"/><up_axis>Z_UP</up_axis>',
+                      '<unit name="inch" meter="0.0254"/><up_axis>Z_UP</up_axis>',
+                      '<unit name="meter" meter="1"/><up_axis>Y_UP</up_axis>',
+                      '<unit name="meter" meter="1"/><up_axis>X_UP</up_axis>',
+                      '<unit name="meter" meter="1"/>'):
+            with self.subTest(asset=asset):
+                with self.assertRaises(namespace["SceneError"]):
+                    namespace["dae_frame"](collada(asset))
+
+    def test_the_yubi_gripper_is_drawn_from_its_open_model(self) -> None:
+        # The user's words of 2026-11-17, of the downloaded pad: "这个同样也只做fingertip的三角；名字不要叫genealist, 感觉是 yubi":
+        # the pad is Toyota/yubi-hw's FINGER_PAD_t30_L.stl (CERN-OHL-W-2.0), the card is the YUBI Gripper (never
+        # "Generalist"), its sensor on the pad's fingertip face alone, the whole gripper drawn from the project's files
+        # where its assembly STEP places them, the fingers turned open, the other finger the mirror image.
+        part = self.parts["parts"]["yubi-gripper"]
+        data = (LIBRARY / part["mesh"]["file"]).read_bytes()
+        self.assertEqual((part["title"], part["maker"], part["mesh"]["file"]), ("YUBI Gripper", "Toyota Motor Corporation", "meshes/yubi-gripper.stl"))
+        # The page's line under the title in a visitor's words, as the Franka Hand's (its review of 2026-11-17: not the
+        # maker's file code, "finger pad (t30)").
+        self.assertEqual((part["finger"], self.entries["parts"]["yubi-gripper"]["finger"]), ("gripper finger pad", "gripper finger pad"))
+        self.assertEqual(hashlib.sha256(data).hexdigest(), YUBI_PAD_SHA256, "FINGER_PAD_t30_L.stl as yubi-hw publishes it, unchanged")
+        self.assertTrue(data.startswith(b"stlbn FINGER_PAD_t30_L"), data[:40])
+        self.assertEqual(part["license"], {"change": "unchanged", "holder": "Toyota Motor Corporation", "spdx": "CERN-OHL-W-2.0",
+                                           "text": "licenses/yubi-hw.txt", "source": f"{YUBI_HW}/STL/gripper/FINGER_PAD_t30_L.stl"})
+        # The fingertip's face alone: the flat trapezoid at the pad's tip (two facets, 201.3 mm2, x 0 to 16.7 mm of the
+        # file, 7.0 mm wide at the tip and 17.0 mm at its root), grown from facet 101 with the surface preset; the base
+        # the root edge's middle, the tails toward the mount; four pitches 1 to 2.5 mm at fill 0.5, each centred.
+        self.assertEqual(part["setup"], {"base": {"point_xyz": [16.709156, 20.081618, 4.533682]}, "border": None, "options": {},
+                                         "selection": {"ops": [{"mode": "add", "op": "grow", "preset": "surface", "seed_facet": 101}]}})
+        self.assertEqual([(variant["pitch_mm"], variant["fill"]) for variant in part["variants"]], [(1, 0.5), (1.5, 0.5), (2, 0.5), (2.5, 0.5)])
+        for pitch in ("1", "1.5", "2", "2.5"):
+            with self.subTest(pitch=pitch):
+                reply = _json(LIBRARY / "fits" / f"yubi-gripper-{pitch}mm.json")["reply"]
+                selection = reply["selection"]
+                self.assertEqual((reply["mesh"]["unit"], selection["facets"], selection["kind"], round(selection["area_mm2"], 1)),
+                                 ("mm", [100, 101], "planar", 201.3))
+                self.assertEqual([round(x, 3) for x in selection["normal"]], [-0.097, 0.0, -0.995])
+                self.assertLessEqual(max(point[0] for point in selection["outline_xyz"]), 16.71, "the tip's face, short of the arches")
+                symmetry = reply["proposals"][0]["metrics"]["symmetry"]
+                self.assertTrue(symmetry["face"] and symmetry["field"], symmetry)
+        # The scene: the left finger's pad turned 11 degrees open from the assembly's pose (the approach, the gripper's
+        # axis, 11 degrees off the pad's length about the hinge, its file's y), its opening the tip's chord from closed,
+        # less than its parts allow; the other finger the mirror image, the part's own mesh mirrored (FINGER_PAD_t30_R).
+        scene = _json(LIBRARY / "scenes" / "yubi-gripper.json")
+        approach = scene["approach"]
+        self.assertEqual(approach[1], 0.0)
+        self.assertAlmostEqual(math.degrees(math.atan2(-approach[2], -approach[0])), 11.0, places=6)
+        self.assertEqual((scene["opening"]["q_mm"], scene["opening"]["limit_mm"]), (32.409, 80.812))
+        self.assertEqual((scene["mate"]["kind"], scene["mate"]["part"], scene["picture"]), ("mirror", True, "on both fingertips of the open gripper"))
+        self.assertAlmostEqual(math.degrees(math.acos(scene["mate"]["matrix"][0][0])), 22.0, places=4)
+        # The near finger's sensor read as a face, not a line (the review of 2026-11-17: at 16 degrees open the camera of
+        # the rules' homes stood 3.2 degrees behind the near face's plane in Exploded and 10.2 Assembled, the parallel
+        # grippers 25 and 33): the camera's direction at each home (the rules' elevation above the plane across the
+        # approach, the tilt off the sensor face's normal, from the front) against the near face's normal, the mate's
+        # image of the fit's: 7.9 and 15.0 degrees behind it at 11.  An opening as little as the rules allow: closer, the
+        # 2.5 mm sensor's card falls below card_min_px (19 px at 8 to 10 degrees; the record's numbers keep it).
+        rules = _json(LIBRARY / library_write.SCENES_INDEX)["rules"]
+        normal = _json(LIBRARY / "fits" / "yubi-gripper-2mm.json")["reply"]["selection"]["normal"]
+        dot = lambda u, v: sum(x * y for x, y in zip(u, v))  # noqa: E731
+        unit = lambda u: [x / math.sqrt(dot(u, u)) for x in u]  # noqa: E731
+        a, n = unit(approach), unit(normal)
+        across = unit([x - dot(n, a) * y for x, y in zip(n, a)])
+        side = [a[1] * across[2] - a[2] * across[1], a[2] * across[0] - a[0] * across[2], a[0] * across[1] - a[1] * across[0]]
+        near = [dot(row[:3], n) for row in scene["mate"]["matrix"][:3]]
+        behind = {}
+        for mode, least in (("exploded", 7.5), ("assembled", 14.5)):
+            camera = rules["camera"][mode]
+            up = math.sin(math.radians(camera["elevation_deg"]))
+            along = (math.cos(math.radians(camera["tilt_deg"])) - up * dot(a, n)) / dot(across, n)
+            d = [up * x + along * y + camera["front"] * math.sqrt(1.0 - up * up - along * along) * z for x, y, z in zip(a, across, side)]
+            behind[mode] = -math.degrees(math.asin(dot(d, near)))
+            self.assertGreaterEqual(behind[mode], least, f"{mode}: the near sensor seen {behind[mode]:.1f} degrees off edge-on")
+        self.assertEqual({mode: round(value, 1) for mode, value in behind.items()}, {"exploded": 7.9, "assembled": 15.0})
+        manifest = _json(LIBRARY / "shots" / "manifest.json")["shots"]
+        self.assertEqual([manifest[f"yubi-gripper-{pitch}mm"]["stage"]["numbers"]["card_px"][0] for pitch in ("1", "1.5", "2", "2.5")], [22, 22, 21, 20])
+        meshes = {body["mesh"]: body["finger"] for body in scene["bodies"]}
+        self.assertEqual(sorted(meshes), sorted(f"bodies/yubi-gripper/{name}.stl" for name in (
+            "case", "bracket", "plate", "finger-attachment", "flap", "drawn-servo", "drawn-camera-board", "drawn-camera-lens", "drawn-camera-glass")))
+        self.assertEqual([body["finger"] for body in scene["bodies"] if body["mesh"].endswith(("finger-attachment.stl", "flap.stl"))],
+                         ["sensor", "mate", "sensor", "mate"], "each finger's attachment and flap, the mate's mirrored")
+        self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "bodies" / "yubi-gripper").iterdir()), sorted(meshes))
+        for words in ("yubi-hw dd8bd13 (CERN-OHL-W-2.0)", "STEP/gripper/YUBI Gripper Assy_Dynamixel_ver2.STEP places its parts",
+                      "drawn at 11 degrees open from it", "the least opening at which every pitch keeps the rules",
+                      "this one mirrored across that plane", "the project's plain shapes"):
+            self.assertIn(words, scene["about"])
+        self.assertNotRegex(json.dumps([part, scene, self.entries["parts"]["yubi-gripper"]]), r"(?i)generalist")
+        # NOTICE.md: the source at its commit and the licence's terms kept (each changed body dated and described, the
+        # repository its Source Location), the shapes the project drew credited as its own, the names among the trademarks.
+        text = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        words = " ".join(text.split())
+        self.assertIn("`https://github.com/Toyota/yubi-hw` at `dd8bd13d2fd8e5003057243576f88be333d95fc5`", words)
+        self.assertIn("licensed under CERN-OHL-W-2.0 as its section 3.3(d) requires", words)
+        for mesh in ("case", "bracket-dynamixel", "upper-plate", "finger-attachment", "flap"):
+            with self.subTest(note=mesh):
+                note = re.search(rf"`bodies/yubi-gripper/{mesh}\.stl` is not the upstream file \(CERN-OHL-W-2\.0, section 3\.3\): (.*?)\.(?: |$)", words)
+                self.assertIsNotNone(note)
+                self.assertIn("changed by the FlexiTac-Gen project on 2026-11-17", note.group(1))
+        for mesh in sorted(mesh for mesh in meshes if "/drawn-" in mesh):
+            with self.subTest(drawn=mesh):
+                self.assertTrue(library_write.own_body(mesh, (LIBRARY / mesh).read_bytes()), mesh)
+                self.assertRegex(text, rf"`(?:bodies/yubi-gripper/)?{re.escape(mesh.rpartition('/')[2])}`")
+        self.assertIn("not ROBOTIS's, ELP's or the YUBI project's geometry", words)
+        # (The merge of 2026-11-17: the makers' list one sorted union of every line's names.)
+        tm = " ".join(text.split("## Trademarks", 1)[1].split())
+        self.assertLessEqual({"YUBI", "Toyota"}, set(re.search(r"makers \(([^)]*)\)", tm).group(1).split(", ")))
+        self.assertIn(") and of the parts drawn with them (DYNAMIXEL, ROBOTIS, ELP) are the trademarks", tm)
+        # Drawn not fully open, as the bodies' section says (the review of 2026-11-17).
+        # (The merge of 2026-11-17: one sentence for the LeFlexiTac's and the YUBI Gripper's exceptions.)
+        self.assertIn("(fully open, but the LeFlexiTac's rotary jaw at 39 of its 100 degrees and the YUBI Gripper's rotary fingers as far as its "
+                      "near sensor reads as a face, as their scenes say; on a hand, the whole hand open with a sensor on every finger)", words)
+        # Each body made from yubi-hw's files says in its own header when it was changed (CERN-OHL-W-2.0 section 3.3(b)):
+        # a file fetched alone too (the review of 2026-11-17), the split ones without the decimation's bound.
+        for body in scene["bodies"]:
+            if "/drawn-" not in body["mesh"]:
+                with self.subTest(header=body["mesh"]):
+                    header = (LIBRARY / body["mesh"]).read_bytes()[:80].decode("ascii").rstrip()
+                    self.assertRegex(header, r"^modified \(decimated(?: <= 0\.5 mm)?, 2026-11-17(?:; split)?\) by FlexiTac-Gen 2026, see NOTICE\.md$")
+        licence = (LIBRARY / "licenses" / "yubi-hw.txt").read_bytes()
+        self.assertEqual(hashlib.sha256(licence).hexdigest(), YUBI_LICENCE_SHA256, "yubi-hw's LICENSE at dd8bd13, unchanged")
+        self.assertTrue(licence.startswith(b"Copyright 2026 Toyota Motor Corporation\n\nCERN Open Hardware Licence Version 2 - Weakly Reciprocal"))
+
+    def test_the_leap_hand_has_a_sensor_on_every_finger(self) -> None:
+        # 2026-11-17, the LEAP Hand (the user's words of that day, "先把这几个做出来，看看每个手指都做出来的效果怎么样": a sensor
+        # on every finger; fpc-int-n-leap-hand): MuJoCo Menagerie's leap_hand (MIT, Ananye Agarwal), its white fingertip
+        # (distal.obj's object fingertip_W alone since the review that day: a cut at the flange's plane had taken the
+        # link's six posts into the part) as the part; the sensor on the pad's flat face (26.04 x 13.87 mm, exactly flat:
+        # grown with theta_c 1 degree, symmetric, so every sensor centred), 1 to 3 mm; the index fingertip's stack
+        # exploded, the thumb the mate (the same fingertip turned), see-through, the middle and ring fingertips the part
+        # again (extra_fingers), opaque with their stacks assembled; the hand at the grippers' homes, its card's override.
+        part = self.parts["parts"]["leap-hand"]
+        self.assertEqual((part["title"], part["mesh"]["file"], part["license"]["spdx"], part["license"]["holder"], part["license"]["source"]),
+                         ("LEAP Hand", "meshes/leap-hand.stl", "MIT", "Ananye Agarwal",
+                          "https://github.com/google-deepmind/mujoco_menagerie/blob/f3b6013629c7b94f8ee93fd977b161fa8350f9bc/leap_hand/assets/distal.obj"))
+        self.assertEqual(hashlib.sha256((LIBRARY / part["license"]["text"]).read_bytes()).hexdigest(),
+                         "5a91c3d709c2ee3a71f166b46e3208cebd83c0c7a870746c729b31a01f156984", "menagerie leap_hand's LICENSE at f3b6013")
+        self.assertIn("MIT", (LIBRARY / part["license"]["text"]).read_text(encoding="utf-8") + " MIT")
+        self.assertIn("Permission is hereby granted, free of charge", (LIBRARY / part["license"]["text"]).read_text(encoding="utf-8"))
+        mesh = (LIBRARY / part["mesh"]["file"]).read_bytes()
+        self.assertEqual(mesh[:80].rstrip(b" "), b"modified (split, m to mm) by FlexiTac-Gen 2026, see NOTICE.md")
+        count = struct.unpack_from("<I", mesh, 80)[0]
+        self.assertEqual(count, 1450, "the white fingertip's faces alone (2167 with the link's posts and flange cut along)")
+        ys = [struct.unpack_from("<12f", mesh, 84 + 50 * k)[4 + 3 * j] for k in range(count) for j in range(3)]
+        self.assertEqual((round(min(ys), 3), round(max(ys), 3)), (13.386, 43.386), "the fingertip from its flange to its tip")
+        setup = part["setup"]
+        self.assertEqual((setup["selection"]["ops"], setup["base"], setup["border"], setup["options"]),
+                         ([{"mode": "add", "op": "grow", "preset": "flat", "seed_facet": 1124, "theta_c_deg": 1}], "auto", None, {}))
+        self.assertEqual([(variant["pitch_mm"], variant["fill"]) for variant in part["variants"]], [(1, 0.5), (1.5, 0.5), (2, 0.5), (3, 0.5)])
+        for identifier in ("leap-hand-1mm", "leap-hand-1.5mm", "leap-hand-2mm", "leap-hand-3mm"):
+            with self.subTest(sensor=identifier):
+                metrics = json.loads(self.fits[identifier])["reply"]["proposals"][0]["metrics"]
+                symmetry = metrics["symmetry"]
+                self.assertEqual((symmetry["face"], symmetry["field"], symmetry["field_offset_mm"]), (True, True, 0.0))
+                self.assertLessEqual(symmetry["deviation_mm"], 0.01, "the pad's flat face its own mirror image")
+                self.assertEqual(metrics["row_tail_mm"], metrics["column_tail_mm"])
+        scene = _json(LIBRARY / "scenes" / "leap-hand.json")
+        self.assertEqual((scene["approach"], scene["see_through"], scene["picture"], scene["mate"]["kind"], scene["mate"]["part"]),
+                         ([0.0, 1.0, 0.0], ["mate"], "on every finger of the open hand", "turned", True))
+        self.assertEqual([finger["kind"] for finger in scene["extra_fingers"]], ["turned", "turned"], "the middle and ring fingertips")
+        # The thumb's pad faces the index pad across the gap (the normals opposed within a few degrees), the other two
+        # fingertips beside the index, spread from it (the review of 2026-11-17), their pads facing its way within 25
+        # degrees (16.5 and 23.8).
+        normal = [-1.0, 0.0, 0.0]
+        turn = lambda matrix: [sum(matrix[row][axis] * normal[axis] for axis in range(3)) for row in range(3)]
+        self.assertLess(sum(a * b for a, b in zip(turn(scene["mate"]["matrix"]), normal)), -0.99)
+        for finger in scene["extra_fingers"]:
+            self.assertGreater(sum(a * b for a, b in zip(turn(finger["matrix"]), normal)), math.cos(math.radians(25)))
+        self.assertGreater(scene["opening"]["q_mm"], 50)
+        roles = {}
+        for body in scene["bodies"]:
+            roles.setdefault(body["finger"], set()).add(body["mesh"].rpartition("/")[2].split("-")[0].removesuffix(".stl"))
+        self.assertEqual((roles["sensor"], roles["mate"]), ({"base", "proximal", "medial", "distal"}, {"thumb_proximal", "thumb_distal"}))
+        # Each further finger owns its links (the review of 2026-11-17: its stack is not held apart from them, as the
+        # index's is not from its own; counted, the middle and ring fields were 2.7 mm from their own distal links).
+        self.assertEqual((roles["extra1"], roles["extra2"]), ({"base", "proximal", "medial", "distal"},) * 2)
+        self.assertIn("extra_fingers", scene["about"])
+        self.assertIn("distal.obj's object fingertip_W alone", scene["about"])
+        self.assertEqual(scene["part_look"], "tip-white")
+        # At the grippers' homes (no camera of its own since the review of 2026-11-17), its card held to its override.
+        self.assertNotIn("camera", scene)
+        self.assertEqual(scene["checks"], {"card_min_px": 14})
+        # The stage draws the further fingertips opaque (no finger role: never ghosted with the thumb).
+        self.assertIn("        extraPart.userData.finger = null;\n", (WEB / "cad" / "library_stage.js").read_text(encoding="utf-8"))
+
     def test_one_stack_explodes_and_the_near_finger_is_see_through_in_both_views(self) -> None:
         # The user's decision of 2026-11-06 ("每一个夹爪只用爆炸一个sensor, 靠近外面的finger透明, 夹爪不爆炸; 靠近里面的finger
         # 不透明, 夹爪爆炸"): the committed rules explode the sensor finger's stack alone and ghost the scenes' see-through
@@ -1487,7 +2564,8 @@ class SceneTests(LibraryTestCase):
             with self.subTest(part=part_id):
                 scene = _json(LIBRARY / "scenes" / f"{part_id}.json")
                 self.assertEqual(scene["see_through"], ["mate"])
-                self.assertNotIn("explode", scene)
+                # (The LeFlexiTac's rotary jaw the one override, its bound, since 2026-11-16: test_the_leflexitac_s_scene.)
+                self.assertEqual(scene.get("explode"), LEFLEXITAC_EXPLODE if part_id == "leflexitac" else None)
         # The stage reads both rules with no default (it draws no gripper without them) and ghosts in their modes; the
         # shots tool records and checks the writer's numbers.
         stage = (ROOT / "web" / "cad" / "library_stage.js").read_text(encoding="utf-8")
@@ -1583,7 +2661,8 @@ class SceneTests(LibraryTestCase):
             (lambda scene: scene.update(opening={"q_mm": 41, "limit_mm": 40}), f"{name}: its opening is not {{q_mm, limit_mm, joint, source}} with 0 < q_mm <= limit_mm"),
             (lambda scene: scene.update(picture=" "), f"{name}: its picture (the alt text's words) is empty"),
             (lambda scene: scene.update(see_through=["sensor", "other"]), f"{name}: its see_through ['sensor', 'other'] is not a subset of ['sensor', 'mate']"),
-            (lambda scene: scene.update(cad=True), f"{name} has not the keys {', '.join(library_write.SCENE_KEYS)} (and any of camera, explode, looks, part_look, smooth_deg)"),
+            (lambda scene: scene.update(cad=True), f"{name} has not the keys {', '.join(library_write.SCENE_KEYS)} (and any of camera, explode, looks, part_look, smooth_deg, "
+                                                      "extra_fingers, checks)"),
             (lambda scene: scene["mate"].update(part="yes"), f"{name}: its mate's part is not true or false"),
             (lambda scene: scene["mate"].update(part=False), f"{name}: its mate draws no part and no body is the mate's finger"),
             (lambda scene: scene["bodies"][0].update(finger="left"), f"{name}: body 1's finger 'left' is not sensor, mate or null"),
@@ -1616,10 +2695,47 @@ class SceneTests(LibraryTestCase):
             notice = library / "NOTICE.md"
             notice.write_text(notice.read_text(encoding="utf-8").replace(f"`{mesh}` | tiny `0123456`, body.stl | MIT,", f"`{mesh}` | tiny `0123456`, body.stl | All rights reserved,"), encoding="utf-8")
 
-        self.assertEqual(self.problems(closed), [("widowx-250", f"{name}: body 1: {mesh}'s NOTICE row names no open licence (Apache-2.0, MIT, BSD-3-Clause) with its text: {REBUILD}")])
+        self.assertEqual(self.problems(closed), [("widowx-250", f"{name}: body 1: {mesh}'s NOTICE row names no open licence ({', '.join(library_write.OPEN_LICENCES)}) with its text: {REBUILD}")])
+
+        # (2026-11-16, the LeFlexiTac) NOASSERTION is no licence: a body's row of a source that states none is taken only as
+        # a file of an entry (library_write.PENDING_LICENCES, PERMITTED_LICENCES) with its note, refused from any other
+        # source; (the review of 2026-11-17) with the credit of the open part it was remodelled from, whose "Apache-2.0"
+        # never makes such a row an open one; and (2026-11-17) saying its authors' permission where the entry is permitted
+        # (permission()), never where it is pending.
+        wrist = "LeFlexiTac `b61259f`, `assets/models/Wrist_Roll_08c.stl`"
+        entry = library_write.PERMITTED_LICENCES["TNA001-AI/LeFlexiTac"]
+        credit = library_write.remodelled(entry, "assets/models/Wrist_Roll_08c.stl")
+        self.assertEqual(credit, "remodelled from SO-ARM100 `a758567`, `STL/SO101/Individual/Wrist_Roll_Follower_SO101.stl` "
+                                 "(Apache-2.0, TheRobotStudio, `licenses/so-arm100.txt`)")
+        words = ", " + library_write.permission(entry)
+
+        def unstated(source: str, credited: str = credit, said: str = words):
+            def edit(library: Path) -> None:
+                (library / "licenses" / "leflexitac.txt").write_text("No licence is stated.\n", encoding="utf-8")
+                (library / "licenses" / "so-arm100.txt").write_text("Apache License 2.0.\n", encoding="utf-8")
+                notice = library / "NOTICE.md"
+                notice.write_text(notice.read_text(encoding="utf-8").replace(
+                    f"`{mesh}` | tiny `0123456`, body.stl | MIT, Tiny, `licenses/tiny.txt` |",
+                    f"`{mesh}` | {source} | NOASSERTION, no licence stated{said}, `licenses/leflexitac.txt`{'; ' + credited if credited else ''} |"),
+                    encoding="utf-8")
+            return edit
+
+        refused = [("widowx-250", f"{name}: body 1: {mesh}'s NOTICE row names no open licence ({', '.join(library_write.OPEN_LICENCES)}) with its text: {REBUILD}")]
+        self.assertEqual(self.problems(unstated(wrist)), [])
+        for source, credited, said in (("LeFlexiTac `0000000`, `assets/models/Wrist_Roll_08c.stl`", credit, words), ("tiny `0123456`, body.stl", credit, words),
+                                       (wrist, "", words), (wrist, credit.replace("Wrist_Roll_Follower_SO101", "Moving_Jaw_SO101"), words),
+                                       (wrist, credit, ""), (wrist, credit, words.replace("2026-11-17", "2026-11-18"))):
+            with self.subTest(unstated=source, credited=credited, said=said):
+                self.assertEqual(self.problems(unstated(source, credited, said)), refused)
+        # The entry pending (a fixture): its row taken without the permission's words (a local preview), never with them.
+        pending = dict({key: value for key, value in entry.items() if key not in ("permitted", "by")}, pending="its authors' word")
+        with mock.patch.dict(library_write.PERMITTED_LICENCES, clear=True), \
+                mock.patch.dict(library_write.PENDING_LICENCES, {"TNA001-AI/LeFlexiTac": pending}):
+            self.assertEqual(self.problems(unstated(wrist, credit, "")), [])
+            self.assertEqual(self.problems(unstated(wrist)), refused)
         # Its licence's text gone: every tabled body's row refused (the rail, the project's own, has none).
         self.assertEqual(self.problems(lambda library: (library / "licenses" / "tiny.txt").unlink()),
-                         [(part, f"scenes/{part}.json: body 1: bodies/{part}/body.stl's NOTICE row names no open licence (Apache-2.0, MIT, BSD-3-Clause) "
+                         [(part, f"scenes/{part}.json: body 1: bodies/{part}/body.stl's NOTICE row names no open licence ({', '.join(library_write.OPEN_LICENCES)}) "
                                  f"with its text: {REBUILD}") for part in sorted(library_write.gripper_parts(self.parts)) if part != "makermods-metal"])
         # A file of no scene, in scenes/ or bodies/.
         self.assertEqual(self.problems(lambda library: ((library / "bodies" / "widowx-250" / "old.stl").write_bytes(_stl()),
@@ -1646,6 +2762,139 @@ class SceneTests(LibraryTestCase):
         for edit, problem in cases:
             with self.subTest(problem=problem):
                 self.assertEqual(self.problems(edit, "i2rt-yam"), [("i2rt-yam", f"{problem}: {REBUILD}")])
+
+    def test_a_hand_s_further_fingers_and_its_card_override(self) -> None:
+        # The hands (the user's requests of 2026-11-17, a sensor on every finger: the LEAP Hand since the Allegro Hand and
+        # the Unitree Dex3-1 were removed that day), one mechanism since their merge that day: a scene's extra_fingers,
+        # each a rigid {kind, matrix} whose kind is its determinant's sign, at most EXTRA_FINGERS_MAX (4), opaque and never
+        # see-through, a body of a further finger its own (its finger "extra<k>"); and its checks override, card_min_px alone within
+        # CHECKS_OVERRIDE_BOUNDS, its reason in its about, in a hand's scene alone (one with extra_fingers: no two-finger
+        # gripper may loosen the rule).
+        name = "scenes/i2rt-yam.json"
+        hand = [{"kind": "turned", "matrix": TURNED}]
+        explained = lambda scene, **changes: scene.update(about=scene["about"] + " The reason: a hand framed whole.", **changes)  # noqa: E731
+        self.assertEqual(library_write.EXTRA_FINGERS_MAX, 4)
+        self.assertEqual(library_write.CHECKS_OVERRIDE_BOUNDS, {"card_min_px": (12, 20)})
+        self.assertEqual(self.problems(lambda scene: scene.update(extra_fingers=[{"kind": "turned", "matrix": TURNED}]), "i2rt-yam"), [])
+        self.assertEqual(self.problems(lambda scene: scene.update(extra_fingers=[{"kind": "mirror", "matrix": MIRROR}] * 4), "i2rt-yam"), [])
+        self.assertEqual(self.problems(lambda scene: explained(scene, checks={"card_min_px": 12}, extra_fingers=hand), "i2rt-yam"), [])
+        self.assertEqual(self.problems(lambda scene: explained(scene, checks={"card_min_px": 20}, extra_fingers=hand), "i2rt-yam"), [])
+        shape = f"{name}: its extra_fingers is not a list of 1 to 4 {{kind, matrix}}"
+        override = f"{name}: its checks override {{}} is not {{card_min_px}} within 12 to 20"
+        cases = (
+            (lambda scene: scene.update(extra_fingers=[]), shape),
+            (lambda scene: scene.update(extra_fingers=[{"kind": "turned", "matrix": TURNED}] * 5), shape),
+            (lambda scene: scene.update(extra_fingers=[{"kind": "turned", "matrix": TURNED, "look": "x"}]), shape),
+            (lambda scene: scene.update(extra_fingers={"kind": "turned", "matrix": TURNED}), shape),
+            (lambda scene: scene.update(extra_fingers=[{"kind": "mirror", "matrix": TURNED}]),
+             f"{name}: its extra finger 1 is 'mirror', but its matrix's determinant is +1"),
+            (lambda scene: scene.update(extra_fingers=[{"kind": "turned", "matrix": TURNED}, {"kind": "turned", "matrix": MIRROR}]),
+             f"{name}: its extra finger 2 is 'turned', but its matrix's determinant is -1"),
+            (lambda scene: scene.update(extra_fingers=[{"kind": "turned", "matrix": [[2, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]}]),
+             f"{name}: its extra finger 1's matrix "),
+            # (Never see-through: a line's named further fingers, which see_through could name, not taken at the hands' merge.)
+            (lambda scene: scene.update(extra_fingers=hand, see_through=["mate", "extra1"]),
+             f"{name}: its see_through ['mate', 'extra1'] is not a subset of ['sensor', 'mate']"),
+            (lambda scene: explained(scene, checks={"card_min_px": 11}), override.replace("{}", "{'card_min_px': 11}", 1)),
+            (lambda scene: explained(scene, checks={"card_min_px": 21}), override.replace("{}", "{'card_min_px': 21}", 1)),
+            (lambda scene: explained(scene, checks={"card_min_px": True}), override.replace("{}", "{'card_min_px': True}", 1)),
+            (lambda scene: explained(scene, checks={"clearance_min_mm": 1}), override.replace("{}", "{'clearance_min_mm': 1}", 1)),
+            (lambda scene: explained(scene, checks={}), override),
+            (lambda scene: scene.update(checks={"card_min_px": 14}, extra_fingers=hand), f"{name}: its override (checks) has no reason in its about"),
+            (lambda scene: explained(scene, checks={"card_min_px": 14}), f"{name}: its checks override is a hand's alone (a scene with extra_fingers)"),
+        )
+        for edit, problem in cases:
+            with self.subTest(problem=problem):
+                found = self.problems(edit, "i2rt-yam")
+                self.assertEqual(len(found), 1, found)
+                self.assertEqual(found[0][0], "i2rt-yam")
+                self.assertTrue(found[0][1].startswith(problem), (found, problem))
+        # A body may be a further finger's own (its finger "extra<k>", k one of the scene's extra_fingers: the LEAP Hand's
+        # links), never without further fingers or past their count.
+        owned = lambda count, finger: (lambda scene: (scene.update(extra_fingers=[{"kind": "turned", "matrix": TURNED}] * count) if count else None,  # noqa: E731
+                                                      scene["bodies"][0].update(finger=finger)))
+        self.assertEqual(self.problems(owned(2, "extra2"), "i2rt-yam"), [])
+        for count, finger, words in ((1, "extra2", " or a further finger's (extra1 to extra1)"), (0, "extra1", ""), (2, "extra0", " or a further finger's (extra1 to extra2)")):
+            with self.subTest(count=count, finger=finger):
+                self.assertEqual(self.problems(owned(count, finger), "i2rt-yam"),
+                                 [("i2rt-yam", f"{name}: body 1's finger {finger!r} is not sensor, mate or null{words}: {REBUILD}")])
+        # The stage is held to the rules' checks with the scene's override over them: card_min_px alone.
+        rules = {"checks": {"card_min_px": 20, "clearance_min_mm": 3}}
+        self.assertEqual(library_write.scene_checks(rules), {"card_min_px": 20, "clearance_min_mm": 3})
+        self.assertEqual(library_write.scene_checks(rules, {"card_min_px": 14}), {"card_min_px": 14, "clearance_min_mm": 3})
+        self.assertEqual(library_write.scene_checks(rules, {"clearance_min_mm": 0}), {"card_min_px": 20, "clearance_min_mm": 3})
+        self.assertEqual(rules, {"checks": {"card_min_px": 20, "clearance_min_mm": 3}}, "the rules themselves untouched")
+        # A hand's stage (the reviews of 2026-11-17: the further stacks drawn but never measured): its record's numbers
+        # carry extra_seen exactly when its scene has further fingers, held to near_seen_min; the shots tool refuses what
+        # the writer refuses.
+        checks = APPROVED_RULES["checks"]
+        self.assertEqual(library_write.STAGE_HAND_NUMBERS, ("extra_seen",))
+        keys = f"its stage's numbers are not {', '.join(library_write.STAGE_NUMBERS + library_write.STAGE_HAND_NUMBERS)}"
+        hand_cases = ((dict(NUMBERS, extra_seen=0.5), 1, []), (dict(NUMBERS, extra_seen=1.0), 3, []),
+                      (dict(NUMBERS, extra_seen=0.49), 1, ["extra_seen 0.49 breaks the rule near_seen_min: not >= 0.5"]),
+                      (dict(NUMBERS, extra_seen=None), 1, ["extra_seen (None) or its rule near_seen_min (0.5) is not a number"]),
+                      (NUMBERS, 1, [keys]),
+                      (dict(NUMBERS, extra_seen=1.0), 0, [f"its stage's numbers are not {', '.join(library_write.STAGE_NUMBERS)}"]))
+        for numbers, extras, problems in hand_cases:
+            with self.subTest(extra_seen=numbers.get("extra_seen", "absent"), extras=extras):
+                self.assertEqual(library_write.stage_problems(numbers, checks, ["mate"], ("sensor",), extras), problems)
+                self.assertEqual(SHOTS_TOOL.rule_breaches(numbers, checks, ["mate"], ("sensor",), extras), problems)
+        # The committed hands: each further finger the part turned (the same part, the same board); the card's override
+        # and its reason where the hand framed whole leaves the card's top FPC under the rules' card_min_px (the LEAP Hand's
+        # 14 px).
+        manifest = _json(LIBRARY / "shots" / "manifest.json")["shots"]
+        card_min = _json(LIBRARY / library_write.SCENES_INDEX)["rules"]["checks"]["card_min_px"]
+        for part_id, count in EXTRA_FINGERS.items():
+            scene = _json(LIBRARY / "scenes" / f"{part_id}.json")
+            card = min(manifest[f"{part_id}-2mm"]["stage"]["numbers"]["card_px"])
+            with self.subTest(hand=part_id):
+                self.assertEqual([finger["kind"] for finger in scene["extra_fingers"]], ["turned"] * count)
+                if part_id in CHECKS_OVERRIDES:
+                    self.assertIn(f"The checks override's reason: card_min_px {CHECKS_OVERRIDES[part_id]['card_min_px']} for this hand", scene["about"])
+                    self.assertEqual(card, CHECKS_OVERRIDES[part_id]["card_min_px"], "the card's top FPC as the override's reason gives it")
+                    self.assertLess(card, card_min)
+                else:
+                    self.assertGreaterEqual(card, card_min)
+        # Each hand's records measured its further fingers' stacks (extra_seen) and no other gripper's has it.
+        hands = tuple(f"{part_id}-" for part_id in EXTRA_FINGERS)
+        for identifier, shot in manifest.items():
+            numbers = (shot.get("stage") or {}).get("numbers") or {}
+            with self.subTest(record=identifier):
+                if identifier.startswith(hands):
+                    self.assertGreaterEqual(numbers["extra_seen"], APPROVED_RULES["checks"]["near_seen_min"])
+                else:
+                    self.assertNotIn("extra_seen", numbers)
+        # The shots tool holds a shoot to the same checks (the scene's override over the rules', its further fingers).
+        source = (ROOT / "tools" / "browser" / "library_shots.py").read_text(encoding="utf-8")
+        self.assertIn('broken = rule_breaches(drawn["stage"], library_write.scene_checks(rules, scene.get("checks")), scene["see_through"],', source)
+        self.assertIn('rules.get("explode_stacks"), scene["extras"])', source)
+        self.assertIn('"checks": document.get("checks"),', source)
+        self.assertIn('"extras": len(document["extra_fingers"]) if isinstance(document.get("extra_fingers"), list) else 0}', source)
+        # The stage draws each further finger: the part under its matrix, opaque, a still copy of the stack, framed,
+        # covering as a body, its stack held apart from the exploded one; and measures each further stack: its top FPC in
+        # both modes, its field's clearance to all but its own fingertip and its own links.  (The browser's check:
+        # library_checks part_hands.)
+        stage = (WEB / "cad" / "library_stage.js").read_text(encoding="utf-8")
+        for line in ("const extras = (data.extra_fingers || []).map(finger => Pmm.clone().multiply(m4(finger.matrix)).multiply(Pmm.clone().invert()));",
+                     "for (const extra of extras) sample(positions, extra.clone().multiply(P), 3000, points);",
+                     "for (const extra of extras) sheetPoints(sheet, sheet.assembled, extra, points);",
+                     "const extraPart = new THREE.Mesh(view.part.geometry, partLook);",
+                     "        extraPart.userData.finger = null;\n",
+                     "const others = state.info.extras.map(extra => ({group: stackCopy(extra, true), inverse: extra.clone().invert()}));",
+                     "const extraParts = state.info.extras.map(extra => ({positions: partPositions, index: partIndex, matrix: extra.clone().multiply(P)}));",
+                     "roles.body.push(...extraParts);",
+                     "const copies = [[\"stack2\", mate], ...state.info.extras.map((extra, k) => [`stack${k + 3}`, extra])];",
+                     "const apart = copies.map(([label]) => silhouetteGap(maskOf(label), maskOf(\"stack1\"), W, H)).filter(value => value !== null);",
+                     "&& !(further.has(label) && key === `${label}.top`)) continue;",
+                     "furtherGrids.forEach((grid, k) => { clearance[mode][`stack${k + 3}_body`] = mm(nearestTo(stackPoints[`stack${k + 3}`], grid, CELL_MM, REACH_MM)); });",
+                     "clearance_mm: {bodies: r1(least([\"stack1_body\", \"stack2_body\", ...further.map(label => `${label}_body`)])),",
+                     "...(further.length ? {extra_seen: r3(Math.min(...MODES.flatMap(mode => further.map(label => measures.cover[mode][`${label}.top`].visible))))} : {})};",
+                     "const own = /^extra\\d+$/.test(body.finger || \"\") ? Number(body.finger.slice(5)) : 0;",
+                     "roles[own || !body.finger ? \"body\" : body.finger].push({positions: body.positions, index: null, matrix: body.world, extra: own});",
+                     "if (item !== own && item.extra !== k + 1) worldTriangles(item.positions, item.index, item.matrix, list);"):
+            with self.subTest(line=line[:60]):
+                self.assertIn(line, stage)
+        self.assertNotIn("data.fingers", stage, "one mechanism: no scene key \"fingers\"")
 
     def test_every_gripper_and_only_the_grippers_have_a_scene(self) -> None:
         def unmapped(library: Path) -> None:
@@ -1735,6 +2984,22 @@ class SceneTests(LibraryTestCase):
 
         self.assertEqual(self.problems(named), [("arx-x5", f"{name}: body 1: bodies/arx-x5/xarm_body.stl is a vendor model of the deny-list "
                                                            f"(bodies/arx-x5/xarm_body.stl): never in the Library: {REBUILD}")])
+
+        # Since the user's decision of 2026-11-16 a body may be named after the Menagerie's Robotiq 2F-85, never after
+        # another Robotiq model or the user's own 2F-85 file.
+        def renamed(stem: str):
+            def edit(library: Path) -> None:
+                target = f"bodies/arx-x5/{stem}.stl"
+                (library / mesh).rename(library / target)
+                _edit_scene(library, "arx-x5", lambda scene: scene["bodies"][0].update(mesh=target))
+                (library / "NOTICE.md").write_text((library / "NOTICE.md").read_text(encoding="utf-8").replace(mesh, target), encoding="utf-8")
+            return edit
+
+        self.assertEqual(self.problems(renamed("robotiq-2f-85-base")), [])
+        for stem in ("robotiq-3f-palm", "robotiq-2f-140-base", "2f85_opened-base"):
+            with self.subTest(body=stem):
+                self.assertEqual(self.problems(renamed(stem)), [("arx-x5", f"{name}: body 1: bodies/arx-x5/{stem}.stl is a vendor model of the deny-list "
+                                                                          f"(bodies/arx-x5/{stem}.stl): never in the Library: {REBUILD}")])
         # The private importer's inputs: its asset folders, the recipes, a recipe's key, an absolute path.
         for text, found in (("from asset/arx.stl", "asset/"), ("see outputs/gripper_sensors", "outputs/"), ("tools/gripper_recipes/arx_x5.json", "gripper_recipes"),
                             ("as its recipe says", "recipe"), ("/home/someone/arx.stl", "/home/"), ("C:/arx.stl", "C:/"), ("~/arx.stl", "~/")):
@@ -1745,6 +3010,14 @@ class SceneTests(LibraryTestCase):
                          [("arx-x5", f"{name} names the recipe key 'arx_x5', the private importer's input: {REBUILD}")])
         # Upstream names are no recipe key ("assets/", menagerie's model folders).
         self.assertEqual(self.problems(lambda scene: scene.update(about="menagerie franka_emika_panda/assets/hand.obj, trossen_wxai"), "arx-x5"), [])
+        # 2026-11-17, the AgileX Piper: a part's key as an upstream folder (menagerie's agilex_piper/ for agilex-piper) or
+        # after "-" (its licence text, mujoco_menagerie-agilex_piper.txt) is no recipe key; as a word or a file's stem it is.
+        self.assertEqual(self.problems(lambda scene: scene.update(about="menagerie arx_x5/assets/link6.stl, licenses/mujoco_menagerie-arx_x5.txt"),
+                                       "arx-x5"), [])
+        for text in ("as arx_x5.json says", "arx_x5 / its folder"):
+            with self.subTest(text=text):
+                self.assertEqual(self.problems(lambda scene: scene.update(about=text), "arx-x5"),
+                                 [("arx-x5", f"{name} names the recipe key 'arx_x5', the private importer's input: {REBUILD}")])
 
     # -- the looks (docs/LIBRARY_VIEW.md "The looks"; the amendment of 2026-11-12) ------------------------------------------
 
@@ -1766,7 +3039,7 @@ class SceneTests(LibraryTestCase):
         self.assertEqual(self.problems(self.looked, "franka-hand"), [])
         self.assertEqual(self.problems(lambda scene: scene.update(smooth_deg=35), "franka-hand"), [], "smooth normals alone")
         self.assertEqual(self.problems(lambda scene: scene.update(looks={"pad": self.LOOKS["pad"]}, part_look="pad"), "franka-hand"), [], "the part alone")
-        self.assertEqual(library_write.SCENE_OPTIONAL, ("camera", "explode", "looks", "part_look", "smooth_deg"))
+        self.assertEqual(library_write.SCENE_OPTIONAL, ("camera", "explode", "looks", "part_look", "smooth_deg", "extra_fingers", "checks"))
         self.assertEqual(library_write.BODY_OPTIONAL, ("look",))
         self.assertEqual((library_write.LOOK_KEYS, library_write.LOOK_OPTIONAL), (("color", "metalness", "roughness"), ("clearcoat", "clearcoat_roughness", "env_intensity")))
         look = lambda **changes: (lambda scene: (self.looked(scene), scene["looks"]["shell"].update(changes)))  # noqa: E731
@@ -2569,7 +3842,12 @@ class ShowcasePageTests(LibraryTestCase):
         self.assertEqual(document["sensor"], {"rows": 32, "columns": 12, "pitch_mm": 2, "field_mm": [23, 63]})
         # The tutorial: the address the pad's notice records for its Gerbers.
         self.assertIn(f"`{document['tutorial']['href']}`", (WEB / library_write.SHOWCASE_PAD_NOTICE).read_text(encoding="utf-8"))
-        self.assertIn("tutorial", document["tutorial"]["label"])
+        # The FlexiTac fabrication guide (the user's word of 2026-11-17): the guide's ordering section, the address Gen by
+        # Surface's step 3 links (gen.html's "Ordering and fabrication" row, boards.js GUIDE).
+        self.assertEqual(document["tutorial"]["label"], "FlexiTac fabrication guide")
+        guide = re.search(r'<dt>Ordering and fabrication</dt><dd><a href="([^"]+)"', (WEB / "gen.html").read_text(encoding="utf-8")).group(1)
+        self.assertEqual((document["tutorial"]["href"], guide), (guide, "https://docs.google.com/document/d/1bvz6AL7BUkhj4Dj7n9DFXTjnGIX4-ziN8-smiCKpVZU/"
+                                                                "edit?tab=t.0#heading=h.kk7d14qme9db"))
         # The sources: UFACTORY's 3D model by the owner's decision, the FlexiTac V2 design and its licence, each with
         # its notice, a file of the site.
         self.assertEqual([item["notice"] for item in document["sources"]], ["../vendor/ufactory-g1/NOTICE.md", "../vendor/flexitac-v2/NOTICE.md"])
@@ -2582,6 +3860,11 @@ class ShowcasePageTests(LibraryTestCase):
         self.assertEqual(sorted(path.relative_to(LIBRARY).as_posix() for path in (LIBRARY / "showcase").rglob("*") if path.is_file()), sorted(SHOWCASE_PICTURES))
         self.assertEqual([image[kind]["src"] for kind in ("exploded", "assembled", "card")], list(SHOWCASE_PICTURES))
         self.assertEqual((library_write.SHOWCASE_SHOT_SIZE, library_write.SHOWCASE_CARD_SIZE), ((1280, 1600), (800, 1000)))
+        # The card the Exploded drawing, as every gripper's card (the user's decision of 2026-11-16: "Switch to exploded";
+        # the Assembled one before), the page opening in that view (SHOWCASE_VIEW, PageTests).
+        self.assertEqual(library_write.SHOWCASE_SHOTS["card"], ("showcase/flexitac-g1.card.webp", (800, 1000), "exploded"))
+        self.assertIn('files[kind] = webp(images[mode] if images[mode].size == size else images[mode].resize(size, Image.LANCZOS))',
+                      inspect.getsource(SHOTS_TOOL.showcase_encode))
         for kind in ("exploded", "assembled", "card"):
             with self.subTest(picture=kind):
                 data = (LIBRARY / image[kind]["src"]).read_bytes()
@@ -2806,7 +4089,8 @@ class ShowcasePageTests(LibraryTestCase):
             for relative in ("library", "vendor", "samples"):
                 shutil.copytree(WEB / relative, web / relative)
             library = web / "library"
-            done = "library_write: 58 sensors, all current, each with its picture, 58 with a 3D view"
+            count = len(self.entries["variants"])
+            done = f"library_write: {count} sensors, all current, each with its picture, {count} with a 3D view"
 
             def run(check: bool = True):
                 said = []
@@ -2826,7 +4110,7 @@ class ShowcasePageTests(LibraryTestCase):
             self.assertEqual(run(), (1, [f"stale: scene {SHOWCASE_PICTURES[2]} is not the file {SHOWCASE_FILE} names: {reshoot}",
                                          f"library_write: {library_write.SHOWCASE_STALE}"]))
             self.assertEqual(run(check=False)[1], [f"library_write: scene {SHOWCASE_PICTURES[2]} is not the file {SHOWCASE_FILE} names: {reshoot}",
-                                                   "library_write: 0 fitted, 0 written, 58 sensors, 58 with a 3D view"])
+                                                   f"library_write: 0 fitted, 0 written, {count} sensors, {count} with a 3D view"])
             card.write_bytes(picture)
             # A file no tool writes (here a copy of a vendor mesh in the samples) says its own fix, its removal, and no
             # closing line of a rebuild or a shoot (the review of 2026-11-13: it said to rebuild the showcase).
@@ -3063,6 +4347,31 @@ class ViewTests(LibraryTestCase):
         self.refused(self.GRIPPER, f"its stage breaks a rule of scenes/scenes.json: near_seen is 1.0, with the mate's stack exploding: {fix}",
                      edit=both_exploding)
 
+    def test_a_hands_further_fingers_are_seen(self) -> None:
+        # The reviews of 2026-11-17 of the hands (the Allegro Hand's, removed since: in Exploded the index finger's stack
+        # lay over the middle finger's sensor, and nothing measured it): a hand's record (staging reads its scene's extra_fingers)
+        # keeps extra_seen, the least share of its further stacks' top FPCs seen, Exploded and Assembled, held to
+        # near_seen_min as the mate's still stack; refused below the rule or without the number.  (The rule's own cases:
+        # SceneTests.test_a_hand_s_further_fingers_and_its_card_override.)
+        hand = "leap-hand-2mm"
+        keys = ", ".join(library_write.STAGE_NUMBERS + library_write.STAGE_HAND_NUMBERS)
+
+        def handed(**numbers):
+            def edit(records, library):
+                _edit_scene(library, "leap-hand", lambda scene: scene.update(extra_fingers=[{"kind": "turned", "matrix": TURNED}]))
+                index = _json(library / library_write.SCENES_INDEX)
+                stage = records[hand]["stage"]
+                stage.update(numbers=dict(stage["numbers"], **numbers),
+                             scene_sha256=library_write.scene_sha256((library / "scenes" / "leap-hand.json").read_bytes(), index["rules"]))
+            return edit
+
+        fix = f"re-shoot with tools/browser/library_shots.py --only {hand}"
+        self.assertEqual(self.pictures(identifiers=(hand,), edit=handed(extra_seen=0.9))[1], [])
+        self.refused(hand, f"its stage breaks a rule of scenes/scenes.json: extra_seen 0.3 breaks the rule near_seen_min: not >= 0.5: {fix}",
+                     identifiers=(hand,), edit=handed(extra_seen=0.3))
+        self.refused(hand, f"its stage breaks a rule of scenes/scenes.json: its stage's numbers are not {keys}: {fix}", identifiers=(hand,), edit=handed())
+        self.assertNotIn("extra_seen", _json(LIBRARY / library_write.SHOTS_MANIFEST)["shots"][self.GRIPPER]["stage"]["numbers"])
+
     def test_an_older_view_is_a_warning_only(self) -> None:
         # The Library view's modules changed since the shot (view_sha256): still pictured, its view kept, a warning.
         images, problems, older, views = self.pictures(edit=lambda records, library: records[self.GRIPPER].update(view_sha256="0" * 64))
@@ -3132,12 +4441,33 @@ class ViewTests(LibraryTestCase):
         self.assertEqual(SHOTS_TOOL.record(self.FINGERTIP, self.entries["variants"][self.FINGERTIP], {}, {}, "f" * 64, "photo", part_look="a" * 64)["part_look_sha256"], "a" * 64)
 
 
+    def test_a_card_framed_otherwise_than_its_part_s_is_refused(self) -> None:
+        # The UMI shelf's cards zoomed on the tip (library_write.CARD_FRAMES, 2026-11-16): a UMI sensor's record without
+        # its card's frame, or at another zoom, and a gripper's record with one, refused; a fresh shoot cures each.
+        fix = f"re-shoot with tools/browser/library_shots.py --only {self.FINGERTIP}"
+        self.assertEqual(self.pictures(require_view=True)[1], [])
+        self.refused(self.FINGERTIP, "its card is not framed on the tip as CARD_FRAMES has it (no card_frame of base_px, margins_px, top, window_px, zoom): " + fix,
+                     edit=lambda records, library: records[self.FINGERTIP].pop("card_frame"))
+        self.refused(self.FINGERTIP, f"its card is framed at zoom 2, top 0.06, not CARD_FRAMES's 1.25, 0.06: {fix}",
+                     edit=lambda records, library: records[self.FINGERTIP]["card_frame"].update(zoom=2))
+        self.refused(self.GRIPPER, "its card is framed on the tip, but its part's cards are the whole drawing (CARD_FRAMES): " + fix.replace(self.FINGERTIP, self.GRIPPER),
+                     edit=lambda records, library: records[self.GRIPPER].update(card_frame=records[self.FINGERTIP]["card_frame"]))
+        # The shots tool writes the key only for a framed card.
+        variant = self.entries["variants"][self.FINGERTIP]
+        self.assertNotIn("card_frame", SHOTS_TOOL.record(self.FINGERTIP, variant, {}, {}, "f" * 64, "photo"))
+        self.assertEqual(SHOTS_TOOL.record(self.FINGERTIP, variant, {}, {}, "f" * 64, "photo", card_frame={"zoom": 1.25})["card_frame"], {"zoom": 1.25})
+
+
 class RequestTests(LibraryTestCase):
     def test_every_fit_is_of_the_request_the_page_sends(self) -> None:
-        options = library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8"))
-        rows = {identifier: (part, variant) for identifier, _, part, variant in self.plan}
+        # The options the page sends with each part's selection: the strain limit's 1 % on a doubly curved one (the
+        # CURVED_PARTS, test_a_doubly_curved_face_is_sent_at_the_curved_limit), data-flat's 0.3 % on every other.
+        html = (WEB / "gen.html").read_text(encoding="utf-8")
+        flat, curved = library_write.page_options(html), library_write.page_options(html, curved=True)
+        rows = {identifier: (part_id, part, variant) for identifier, part_id, part, variant in self.plan}
         for identifier, data in self.fits.items():
-            part, variant = rows[identifier]
+            part_id, part, variant = rows[identifier]
+            options = curved if part_id in CURVED_PARTS else flat
             document = json.loads(data.decode("utf-8"))
             request = document["request"]
             with self.subTest(variant=identifier):
@@ -3182,7 +4512,7 @@ class RequestTests(LibraryTestCase):
         self.assertEqual([option.get("value") for option in objective[2]][0], "fixed_pitch")
         self.assertFalse(any("selected" in option for option in objective[2]))
         enabled = set(controls) - {"min_pitch_mm"}
-        for identifier, _, part, variant in self.plan:
+        for identifier, part_id, part, variant in self.plan:
             request = json.loads(self.fits[identifier].decode("utf-8"))["request"]
             options = request["options"]
             with self.subTest(variant=identifier):
@@ -3195,11 +4525,24 @@ class RequestTests(LibraryTestCase):
                         expected = variant[key]
                     elif key in own:
                         expected = own[key]
+                    elif tag == "select" and "data-flat" in attributes and part_id not in CURVED_PARTS:
+                        # The strain limit (the user's choice of 2026-11-17, "1% default on curves"): readOptions sends its
+                        # data-flat 0.3 % on a face that is not doubly curved, every Library face but CURVED_PARTS'
+                        # (library_write.part_options, which runs curved_face on every fit), and its own value, 1 % (the
+                        # select's first, below), on theirs.
+                        expected = float(attributes["data-flat"])
+                    elif tag == "select" and "data-number" in attributes:
+                        # A select of numbers: readOptions sends Number(value).
+                        expected = float([choice.get("value") for choice in choices if "disabled" not in choice][0])
                     elif tag == "select":
                         expected = [choice.get("value") for choice in choices if "disabled" not in choice][0]
                     else:
                         expected = float(attributes["value"])
                     self.assertEqual(value, expected, key)
+                    if tag == "select" and "data-number" in attributes:
+                        self.assertIn(value, [float(choice.get("value")) for choice in choices if "disabled" not in choice], key)
+                        self.assertIsInstance(value, float, key)
+                        continue
                     if tag == "select":
                         self.assertIn(value, [choice.get("value") for choice in choices if "disabled" not in choice], key)
                         continue
@@ -3215,12 +4558,85 @@ class RequestTests(LibraryTestCase):
         found = library_write.controls((WEB / "gen.html").read_text(encoding="utf-8"))
         self.assertEqual(set(found), set(_controls()))
         self.assertEqual(found["row_sides"]["choices"], ["both", "left", "right"], "the disabled 'channel' is never sent")
-        self.assertEqual((found["pitch_mm"]["default"], found["max_rows"]["default"], found["strain_limit"]["default"]), (2, 32, 0.003))
+        self.assertEqual((found["pitch_mm"]["default"], found["max_rows"]["default"]), (2, 32))
+        # The strain limit: 1 % on curved faces by default, Strict 0.3 % the other choice, 0.3 % sent off them (data-flat).
+        self.assertEqual((found["strain_limit"]["default"], found["strain_limit"]["choices"], found["strain_limit"]["flat"]), (0.01, [0.01, 0.003], 0.003))
+        self.assertEqual(library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8"))["strain_limit"], 0.003)
+        # On a doubly curved selection the select's own value (main.js strainLimit), every other option the same.
+        curved = library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8"), curved=True)
+        self.assertEqual(curved, dict(library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8")), strain_limit=0.01))
         for key, value, expected in (("fill", 0.7, True), ("fill", 0.65, True), ("fill", 0.95, True), ("fill", 0.705, False),
                                      ("fill", 0.04, False), ("fill", 0.96, False), ("pitch_mm", 2.5, True), ("pitch_mm", 0.59, False)):
             with self.subTest(option=key, value=value):
                 self.assertEqual(library_write.valid(found[key], value), expected)
         self.assertEqual([library_write.js_string(pitch) for pitch in (1, 1.0, 1.5, 2.5)], ["1", "1", "1.5", "2.5"])
+
+    def test_a_doubly_curved_face_is_sent_at_the_curved_limit(self) -> None:
+        # The page sends its curved strain limit (1 %) with a doubly curved selection and data-flat's 0.3 % with any other
+        # (the user's choice of 2026-11-17, main.js strainLimit after the select).  Until 2026-11-18 no Library face was
+        # doubly curved and the writer refused one; since the user's word that day ("挺好的，这样你就可以把dex3加回去") the
+        # Unitree Dex3-1's fingertip is back, made as the page makes it: a click on the dome (the stretch selection at the
+        # select's own 1 %) and the request at 1 % (library_write.part_options).  The doubly curved faces are CURVED_PARTS
+        # exactly: the Franka Hand's nearly flat pad (a curved chart, 0.002 %) is not one.
+        html = (WEB / "gen.html").read_text(encoding="utf-8")
+        flat, curved = library_write.page_options(html), library_write.page_options(html, curved=True)
+        found = library_write.controls(html)
+        meshes = {part_id: (LIBRARY / part["mesh"]["file"]).read_bytes() for part_id, part in self.parts["parts"].items()}
+        stretched = {part_id: library_write.curved_face(library_write.compose(part, part["variants"][0], flat), meshes[part_id])
+                     for part_id, part in self.parts["parts"].items()}
+        self.assertEqual({part_id for part_id, stretch in stretched.items() if stretch is not None}, CURVED_PARTS)
+        for part_id, part in self.parts["parts"].items():
+            with self.subTest(part=part_id):
+                self.assertIs(library_write.part_options(part, meshes[part_id], flat, curved), curved if part_id in CURVED_PARTS else flat)
+                self.assertIsNone(library_write.stretch_problem(part, found))
+        part = self.parts["parts"]["franka-hand"]
+        self.assertEqual(library_write.compose(part, part["variants"][0], flat)["options"]["strain_limit"], 0.003)
+        # The Dex3-1: its face one click on the dome (grow, the Surface preset, its stretch_budget the select's own 1 %,
+        # as growOp sends it), from the patch's middle (the select reply's centre_facet); a click inside that patch
+        # selects the same 405.1 mm2 patch, its own mirror image, 0.90 % on the part, and a click on the dome's flank
+        # outside it (facet 11794, 8.9 mm off the mid-plane) the widest patch within the budget round itself, smaller and
+        # on its side (select.stretch_region; the review of 2026-11-18).
+        dex3 = self.parts["parts"]["unitree-dex3"]
+        self.assertEqual(dex3["setup"]["selection"], {"ops": [{"mode": "add", "op": "grow", "preset": "surface", "seed_facet": 9267, "stretch_budget": 0.01}]})
+        self.assertEqual((dex3["setup"]["base"], dex3["setup"]["border"], dex3["setup"]["options"]), ("auto", None, {}))
+        self.assertEqual(meshes["unitree-dex3"], (FIXTURES / "unitree-dex3.stl").read_bytes())
+        self.assertAlmostEqual(stretched["unitree-dex3"], 0.009, delta=0.0002)
+        from surface import api
+
+        patches = []
+        for seed in (9267, 10926, 8822, 12640):
+            op = dict(dex3["setup"]["selection"]["ops"][0], seed_facet=seed)
+            selection = api.select_surface({"name": dex3["mesh"]["name"], "selection": {"ops": [op]}}, meshes["unitree-dex3"])["selection"]
+            patches.append((sorted(selection["facets"]), round(selection["area_mm2"], 1), selection["stretch"]["centre_facet"]))
+        self.assertEqual(patches, [patches[0]] * 4)
+        self.assertEqual(patches[0][1:], (405.1, 9267))
+        self.assertNotIn(11794, patches[0][0])
+        op = dict(dex3["setup"]["selection"]["ops"][0], seed_facet=11794)
+        flank = api.select_surface({"name": dex3["mesh"]["name"], "selection": {"ops": [op]}}, meshes["unitree-dex3"])["selection"]
+        self.assertEqual((round(flank["area_mm2"], 1), flank["stretch"]["centre_facet"]), (152.9, 13429))
+        self.assertIn(11794, flank["facets"])
+        # Each of its fits is the page's request at 1 % (the job composes it so), and composed at 0.3 % it is not the
+        # page's: the page would fit again rather than take the shipped reply.
+        for identifier, part_id, part, variant in self.plan:
+            if part_id != "unitree-dex3":
+                continue
+            with self.subTest(variant=identifier):
+                request = json.loads(self.fits[identifier].decode("utf-8"))["request"]
+                self.assertEqual(request["options"]["strain_limit"], 0.01)
+                self.assertNotEqual(_canonical(request), _canonical(library_write.compose(part, variant, flat)))
+        variant = next(variant for variant in dex3["variants"] if variant["pitch_mm"] == 2)
+        identifier, request, reply, broken = library_write._fit_job(("unitree-dex3-2mm", dex3, variant, flat, curved, str(LIBRARY / dex3["mesh"]["file"])))
+        self.assertEqual((identifier, broken), ("unitree-dex3-2mm", []))
+        shipped = json.loads(self.fits["unitree-dex3-2mm"].decode("utf-8"))
+        self.assertEqual((_canonical(request), reply), (_canonical(shipped["request"]), shipped["reply"]))
+        metrics = reply["proposals"][0]["metrics"]
+        self.assertEqual((metrics["rows"], metrics["columns"], metrics["taxels"]), (13, 8, 82))
+        self.assertEqual((metrics["symmetry"]["face"], metrics["symmetry"]["field"]), (True, True))
+        # A stretch_budget other than the select's own is not a click of the page's (stretch_problem, run()).
+        strict = copy.deepcopy(dex3)
+        strict["setup"]["selection"]["ops"][0]["stretch_budget"] = 0.003
+        self.assertEqual(library_write.stretch_problem(strict, found),
+                         "its selection's stretch_budget 0.003 is not the page's 0.01 (main.js growOp: curvedLimit())")
 
     def test_a_control_disabled_in_the_page_is_not_sent(self) -> None:
         # readOptions skips a disabled control; Pitch, Smallest pitch and Row traces are main.js's own to turn on and
@@ -3264,6 +4680,52 @@ class RequestTests(LibraryTestCase):
         board["setup"]["options"] = {**part["setup"]["options"], "containment": "board"}
         self.assertNotIn("row_sides", library_write.compose(board, variant, options)["options"])
         self.assertIn("row_sides", library_write.compose(part, variant, options)["options"])
+
+    def test_every_border_is_one_the_page_fits(self) -> None:
+        # The review of 2026-11-17 of the Allegro Hand (removed since): its border ran clockwise; surface/border.py takes that (the
+        # writer's fit and every check passed) and the page's runFit refused it before fitting ("Not fitted:
+        # E_CLIENT_BORDER", no sensor built at gen.html?part=<id>).  compose() refuses what the page refuses there:
+        # border.js validate() and runFit's own checks, at the page's constants.
+        border = (WEB / "cad" / "border.js").read_text(encoding="utf-8")
+        main = (WEB / "cad" / "main.js").read_text(encoding="utf-8")
+        for line in (f"export const MIN_AREA_MM2 = {library_write.BORDER_MIN_AREA_MM2};", "export const MIN_EDGE_MM = 1e-3;", "const TOUCH_MM = 1e-9;",
+                     'if (area < 0) return fail("The border runs clockwise; it must run counter-clockwise.");'):
+            self.assertIn(line, border)
+        self.assertEqual((library_write.BORDER_MIN_EDGE_MM, library_write.BORDER_TOUCH_MM), (1e-3, 1e-9))
+        for line in (f"const EXIT_MIN_MM = {library_write.BORDER_EXIT_MIN_MM};", f"const BORDER_MAX_VERTICES = {library_write.BORDER_MAX_VERTICES};",
+                     "const check = B.validate(border.uv, s.outline_uv, s.holes_uv || []);", "if (!listedEdges().length) {",
+                     "if (border.uv.length > BORDER_MAX_VERTICES) {"):
+            self.assertIn(line, main)
+        bordered = {part_id: part for part_id, part in self.parts["parts"].items() if part["setup"].get("border")}
+        self.assertEqual(sorted(bordered), ["agilex-piper", "galaxea-r1-lite", "umi-finray"])
+        for part_id, part in bordered.items():
+            with self.subTest(part=part_id):
+                self.assertIsNone(library_write.border_problem(part["setup"]["border"]["uv"]))
+        options = library_write.page_options((WEB / "gen.html").read_text(encoding="utf-8"))
+        part = bordered["agilex-piper"]
+        variant = part["variants"][0]
+        uv = part["setup"]["border"]["uv"]
+        circle = [[round(1000 * math.cos(k * 2 * math.pi / 2049), 6), round(1000 * math.sin(k * 2 * math.pi / 2049), 6)] for k in range(2049)]
+        cases = {
+            "clockwise": ([uv[0], *uv[:0:-1]], "the border runs clockwise; the page wants it counter-clockwise (E_CLIENT_BORDER)"),
+            "crossing": ([[0, 0], [10, 10], [10, 0], [0, 10]], "the border is not a simple polygon: its edges cross or touch"),
+            "folding back": ([[0, 0], [10, 0], [5, 0], [5, 10]], "the border is not a simple polygon: its edges cross or touch"),
+            "a short edge": ([[0, 0], [10, 0], [10, 10], [10, 10.0005], [0, 10]], "border edge 2 is shorter than 0.001 mm"),
+            "a small area": ([[0, 0], [0.5, 0], [0.5, 0.5], [0, 0.5]], "the border's area is under 1 mm2"),
+            "no exit": ([[0, 0], [2.9, 0], [2.9, 2.9], [0, 2.9]], "no edge of the border is 3 mm or longer: the tails have no exit"),
+            "too many corners": (circle, "the border has 2049 corners; the page takes at most 2048"),
+            "two corners": ([[0, 0], [10, 0]], "the border needs at least 3 vertices"),
+            "a string": ([[0, 0], [10, 0], [10, "10"]], "every border vertex must be a pair of finite numbers [u, v]"),
+        }
+        for name, (changed_uv, problem) in cases.items():
+            with self.subTest(case=name):
+                self.assertEqual(library_write.border_problem(changed_uv), problem)
+                changed = copy.deepcopy(part)
+                changed["setup"]["border"] = {"uv": changed_uv}
+                with self.assertRaises(library_write.LibraryError) as raised:
+                    library_write.compose(changed, variant, options)
+                self.assertEqual(str(raised.exception), f"border: {problem}")
+        self.assertIsNone(library_write.border_problem(circle[:2048]))
 
 
 class RuleTests(LibraryTestCase):
@@ -3320,15 +4782,21 @@ class RuleTests(LibraryTestCase):
                 self.assertTrue(messages[0].startswith(rule), messages)
         self.assertEqual(library_write.rules({"ok": True, "proposals": []}), ["a proposal: the fit has none"])
         # A sensor whose tails merely fit a reader (32 x 16: the FlexiTac's 32 and 16 pins) keeps reader none, the reader
-        # recorded beside it.  No sensor of the Library has such tails since the default fill 0.5 (the user's decision of
-        # 2026-11-06: the UMI finger's 1.5 mm sensor, 32 x 16 at fill 0.7, is 32 x 17), so a reply that says so stands in.
+        # recorded beside it.  No sensor of the Library had such tails since the default fill 0.5 (the user's decision of
+        # 2026-11-06: the UMI finger's 1.5 mm sensor, 32 x 16 at fill 0.7, is 32 x 17), so a reply that says so stands in;
+        # since 2026-11-17 the Galaxea R1 Lite's 1 mm sensor is 32 x 16 at fill 0.5, one that has them.
         fitting = copy.deepcopy(reply)
         fitting["proposals"][0]["metrics"]["reader"] = "32x16"
         self.assertEqual(library_write.rules(fitting, build=False), [])
         identifier, part_id, part, variant = next(row for row in self.plan if row[0] == "widowx-250-2mm")
         record = library_write.summary(part_id, part, variant, "fits/widowx-250-2mm.json", json.dumps({"reply": fitting}).encode("utf-8"))
         self.assertEqual((record["reader"], record["fits_reader"]), ("none", "32x16"))
-        self.assertEqual({variant["fits_reader"] for variant in self.entries["variants"].values()}, {None})
+        # Its own fact only (the review of 2026-11-17: the gripper lines built beside it that day may add sensors whose
+        # tails fit too, so the set of them is not pinned): every sensor keeps reader none, a reader that fits is the
+        # FlexiTac's, and the R1 Lite's 1 mm sensor is one.
+        variants = self.entries["variants"].values()
+        self.assertEqual(({variant["reader"] for variant in variants}, {variant["fits_reader"] for variant in variants} - {None}), ({"none"}, {"32x16"}))
+        self.assertEqual(self.entries["variants"]["galaxea-r1-lite-1mm"]["fits_reader"], "32x16")
 
 
 class StalenessTests(LibraryTestCase):
@@ -3467,6 +4935,159 @@ class FamilyTests(LibraryTestCase):
                 self.assertAlmostEqual(high - low, width, delta=0.05, msg="full width above the taper")
 
 
+# The Galaxea R1 Lite (the user's request of 2026-11-17): the R1 Lite's G1 parallel gripper from GalaxeaManipSim at its
+# newest commit, abe7f51, whose LICENSE is Apache-2.0 (Copyright 2025 Galaxea; its README's badge says MIT, the licence
+# file is the grant).  Its finger, left_gripper_finger_link1.STL, is the Library's part unchanged (metres); its contact
+# face is flat (70 mm long, 26.2 mm wide at the base to 8.9 at the tip) with the carriage's notch at its base, so the page's
+# border starts just short of the notch and reaches past the face elsewhere: the taxels on the face beyond the notch,
+# the tails leaving across the border's base edge, over the notch, toward the plate.
+GALAXEA = "galaxea-r1-lite"
+GALAXEA_COMMIT = "abe7f5161eeaa150e6eaffdf443af5df7f23f356"
+GALAXEA_FINGER_SHA256 = "9e486d5bfa8bd512e272bed6e5df92e8f9d12de796ee03139f5b9618b55fa79b"
+GALAXEA_LICENSE_SHA256 = "10db29e13785435bf4fbf7054ee73bbf6801ef4bb4fd32cedea6127d5bae7a16"
+# Its NOTICE beside the LICENSE (the review of 2026-11-17): portions derived from MIT-licensed software, Copyright (c)
+# 2025 Tianxing Chen (RoboTwin), carried byte for byte (Apache-2.0 section 4(d)).
+GALAXEA_NOTICE_SHA256 = "b37c5fab7d2070adec53099acc19c6772a59ebd3bd8681a54401aff5aacf754e"
+# Counter-clockwise since the merge of 2026-11-17 (the hands' border_problem(), the page's border.js validate(), refused the
+# line's clockwise one; its top edge still the first, the base's side 0, and its fits' first proposals the same builds).
+GALAXEA_BORDER = {"uv": [[15, 17.5], [-15, 17.5], [-15, -40], [15, -40]]}
+
+
+class GalaxeaR1LiteTests(LibraryTestCase):
+    def test_its_finger_is_galaxeamanipsims_unchanged_under_its_licence(self) -> None:
+        part = self.parts["parts"][GALAXEA]
+        self.assertEqual((part["title"], part["maker"], part["finger"]), ("Galaxea R1 Lite", "Galaxea Dynamics", "gripper finger"))
+        self.assertEqual(part["license"], {"change": "unchanged", "holder": "Galaxea", "spdx": "Apache-2.0", "text": "licenses/galaxeamanipsim.txt",
+                                           "source": f"https://github.com/OpenGalaxea/GalaxeaManipSim/blob/{GALAXEA_COMMIT}/galaxea_sim/assets/"
+                                                     "r1_lite/meshes/left_gripper_finger_link1.STL"})
+        self.assertEqual(hashlib.sha256((LIBRARY / part["mesh"]["file"]).read_bytes()).hexdigest(), GALAXEA_FINGER_SHA256)
+        self.assertEqual(self.entries["parts"][GALAXEA]["mesh"]["unit"], "m", "the finger's file in metres, the page's Auto unit")
+        licence = (LIBRARY / "licenses" / "galaxeamanipsim.txt").read_bytes()
+        self.assertEqual(hashlib.sha256(licence).hexdigest(), GALAXEA_LICENSE_SHA256)
+        self.assertTrue(licence.startswith(b"Copyright 2025 Galaxea\n") and b"Apache License" in licence and b"Version 2.0" in licence)
+        notice = (LIBRARY / "NOTICE.md").read_text(encoding="utf-8")
+        self.assertIn(f"`{GALAXEA_COMMIT}`, Apache License 2.0, Copyright\n  2025 Galaxea", notice)
+        # The repository's NOTICE carried with its licence, tabled and named in the source's paragraph: the README's MIT
+        # is the MIT of the portions it names, not the grant.
+        carried = (LIBRARY / "licenses" / "galaxeamanipsim-NOTICE.txt").read_bytes()
+        self.assertEqual(hashlib.sha256(carried).hexdigest(), GALAXEA_NOTICE_SHA256)
+        self.assertTrue(carried.startswith(b"NOTICE: Portions of this project are derived from software originally\nlicensed under the MIT License.")
+                        and b"Copyright (c) 2025 Tianxing Chen" in carried)
+        self.assertEqual(_notice()["licenses/galaxeamanipsim-NOTICE.txt"][1:],
+                         (f" GalaxeaManipSim `{GALAXEA_COMMIT[:7]}`, `NOTICE` ", " Apache-2.0 NOTICE, Galaxea (MIT portions, Tianxing Chen) ", " unchanged ",
+                          GALAXEA_NOTICE_SHA256))
+        # The finger's own row names it beside the licence (a text tabled is a text some row names: LicenceTests).
+        self.assertEqual(_notice()[part["mesh"]["file"]][2], " Apache-2.0, Galaxea, `licenses/galaxeamanipsim.txt`, its NOTICE `licenses/galaxeamanipsim-NOTICE.txt` ")
+        source = " ".join(notice.partition("- GalaxeaManipSim, ")[2].partition("\n\n")[0].split())
+        self.assertIn("The repository's `NOTICE`, that portions of it derive from software under the MIT License, Copyright (c) 2025 "
+                      "Tianxing Chen (RoboTwin, which its README credits), is carried unchanged as `licenses/galaxeamanipsim-NOTICE.txt`", source)
+        # The names of the gripper and its maker among the trademarks (the NOTICE's last section); the gripper's own, G1,
+        # since the review of 2026-11-17 (NOTICE.md and the scene call it the R1 Lite's G1 gripper).
+        # (The merge of 2026-11-17: the list one sorted union of every line's names.)
+        trademarks = " ".join(notice.rpartition("## Trademarks")[2].split())
+        self.assertLessEqual({"Galaxea", "R1 Lite", "G1"}, set(re.search(r"makers \(([^)]*)\)", trademarks).group(1).split(", ")))
+
+    def test_its_face_is_the_fingers_contact_face_bordered_short_of_the_notch(self) -> None:
+        from surface import api
+
+        part = self.parts["parts"][GALAXEA]
+        setup = part["setup"]
+        (op,) = setup["selection"]["ops"]
+        self.assertEqual({key: value for key, value in op.items() if key != "seed_facet"}, {"op": "grow", "mode": "add", "preset": "flat"})
+        self.assertEqual((setup["base"], setup["border"], setup["options"]), ("auto", GALAXEA_BORDER, {"rotation": "none"}))
+        mesh = api.load_mesh({"name": part["mesh"]["name"]}, (LIBRARY / part["mesh"]["file"]).read_bytes())
+        # The seed on the contact face: 13.45 mm off the finger's file origin, facing -y (the other finger), 0.45 degrees
+        # off it, as the face is.
+        normal = mesh.normals[op["seed_facet"]]
+        self.assertLess(normal[1], -0.9999)
+        self.assertTrue(all(abs(point[1] + 13.45) < 0.15 for point in mesh.facet_points(op["seed_facet"])))
+        self.assertEqual([(variant["pitch_mm"], variant["fill"]) for variant in part["variants"]], [(1, 0.5), (1.5, 0.5), (2, 0.5), (3, 0.5)])
+        for identifier in self.entries["parts"][GALAXEA]["variants"]:
+            reply = _json(LIBRARY / "fits" / f"{identifier}.json")["reply"]
+            with self.subTest(sensor=identifier):
+                selection = reply["selection"]
+                self.assertEqual(selection["kind"], "planar")
+                self.assertAlmostEqual(selection["area_mm2"], 1048.2, delta=0.5, msg="the whole contact face, its notch out")
+                first = reply["proposals"][0]
+                # The tails leave across the border's base edge (side 0, v 17.5 mm: 0.4 mm short of the notch).
+                self.assertEqual((first["placement"]["base_kind"], first["placement"]["base_side"]), ("border", 0))
+                self.assertEqual(first["placement"]["border"], GALAXEA_BORDER)
+                symmetry = first["metrics"]["symmetry"]
+                self.assertTrue(symmetry["face"] and symmetry["field"] and symmetry["field_offset_mm"] == 0, symmetry)
+                self.assertEqual(library_write.rules(reply, build=False), [])
+
+    def test_its_scene_is_the_open_gripper_turned_about_its_approach(self) -> None:
+        scene = _json(LIBRARY / "scenes" / f"{GALAXEA}.json")
+        self.assertEqual(scene["part_mesh_sha256"], GALAXEA_FINGER_SHA256)
+        self.assertEqual(scene["approach"], [1.0, 0.0, 0.0], "the fingertip's way along the finger's file x")
+        # robot.urdf: each finger 0..0.05 m, both fully open, the faces 100 mm apart.
+        self.assertEqual((scene["opening"]["q_mm"], scene["opening"]["limit_mm"]), (50.0, 50.0))
+        self.assertIn("faces 100 mm apart", scene["about"])
+        self.assertIn(f"GalaxeaManipSim {GALAXEA_COMMIT[:7]}", scene["opening"]["source"])
+        # finger_link2 is finger_link1 turned 180 degrees about x; the joints' origins (36.89, +-13.453, +-0.12059) mm.
+        self.assertEqual(scene["mate"], {"kind": "turned", "part": True,
+                                         "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, -1.0, 0.0, -126.906], [0.0, 0.0, -1.0, -0.24118], [0.0, 0.0, 0.0, 1.0]]})
+        place = [[1.0, 0.0, 0.0, -36.89], [0.0, 1.0, 0.0, -63.453], [0.0, 0.0, 1.0, -0.12059], [0.0, 0.0, 0.0, 1.0]]
+        identity = [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
+        self.assertEqual([(body["mesh"], body["matrix"], body["finger"], body["look"]) for body in scene["bodies"]],
+                         [(f"bodies/{GALAXEA}/gripper-motor.stl", place, None, "can-black"), (f"bodies/{GALAXEA}/gripper-plate.stl", place, None, "plate-black"),
+                          (f"bodies/{GALAXEA}/drawn-carriage-sensor.stl", identity, "sensor", "carriage-black")])
+        self.assertEqual((scene["see_through"], scene["part_look"], scene["smooth_deg"]), (["mate"], "finger-grey", 35))
+        # The looks after Galaxea's G1 product picture: black anodised can and plate, the fingers a grained matt grey,
+        # well lighter than the body and no metal.
+        base = {key: value for key, value in _json(ROOT / "tools" / "library_looks" / "base.json")["looks"]["anodized-black"].items() if key != "for"}
+        self.assertEqual((scene["looks"]["can-black"], scene["looks"]["plate-black"]), (base, base))
+        grey = scene["looks"]["finger-grey"]
+        self.assertEqual((grey["metalness"], grey["color"]), (0, "#6e7074"))
+        rows = _notice()
+        for body in scene["bodies"][:2]:
+            self.assertIn(f"GalaxeaManipSim `{GALAXEA_COMMIT[:7]}`, `galaxea_sim/assets/r1_lite/meshes/left_gripper_link.STL`", rows[body["mesh"]][1])
+
+    def test_its_carriage_is_drawn_black_over_the_sensors_finger(self) -> None:
+        # The review of 2026-11-17: the finger's mesh holds, beside the finger, its carriage (the block on the plate, the
+        # bar in the notch at the face's base and the fillet between them) and its rack under the plate's slot, which
+        # wore the finger's grey (two light strips along the black plate, a grey block at the root), where Galaxea's
+        # pictures show the carriage black.  On the sensor's finger the project's boxes, in the carriage's black, hold
+        # all of the carriage and the rack wherever the plate's 3 mm top (x -36.89 to -39.8 mm) lets the slot show it,
+        # 0.06 mm proud of what they cover; the other finger, always see-through, keeps its ghost as it was.
+        from surface import api
+
+        look = _json(ROOT / "tools" / "library_looks" / f"{GALAXEA}.json")
+        (drawn,) = look["drawn"]
+        self.assertEqual((drawn["name"], drawn["look"], drawn["finger"], "matrix" in drawn), ("carriage-sensor", "carriage-black", "sensor", False))
+        self.assertEqual(look["looks"]["carriage-black"]["base"], "anodized-black")
+        boxes = [shape["box"] for shape in drawn["draw"]]
+        part = self.parts["parts"][GALAXEA]
+        mesh = api.load_mesh({"name": part["mesh"]["name"]}, (LIBRARY / part["mesh"]["file"]).read_bytes())
+        shells = {}
+        for facet, shell in enumerate(mesh.shell):
+            shells.setdefault(shell, set()).update(mesh.facets[facet])
+        by_size = sorted(shells.values(), key=len)
+        self.assertEqual([len(corners) for corners in by_size], [414, 696, 1454], "the carriage, the rack and the finger, welded corners")
+        carriage, rack, finger = ([mesh.vertices[v] for v in corners] for corners in by_size)
+        held = lambda point: any(all(box[0][k] <= point[k] <= box[1][k] for k in range(3)) for box in boxes)
+        self.assertEqual([point for point in carriage if not held(point)], [], "all of the carriage")
+        shown = [point for point in rack if point[0] >= -39.8]
+        self.assertEqual(len(shown), 183)
+        self.assertEqual([point for point in shown if not held(point)], [], "the rack the slot shows")
+        for box in boxes:
+            with self.subTest(box=box):
+                covered = [point for point in carriage + rack if all(box[0][k] <= point[k] <= box[1][k] for k in range(3))]
+                self.assertTrue(covered)
+                # Proud of what it covers on every side (0.06 mm where it shows), never cutting through it.
+                margins = [min(point[k] for point in covered) - box[0][k] for k in range(3)] + [box[1][k] - max(point[k] for point in covered) for k in range(3)]
+                self.assertGreater(min(margins), 0.01)
+        # Never over the finger's contact face beyond the notch: no box reaches the field's border (v 17.5 mm: x -14.09).
+        self.assertLess(max(box[1][0] for box in boxes), -14.09 - 0.5)
+        drawn_file = f"bodies/{GALAXEA}/drawn-carriage-sensor.stl"
+        self.assertTrue(library_write.own_body(drawn_file, (LIBRARY / drawn_file).read_bytes()), "the project's own drawing, no NOTICE row")
+        notice = " ".join((LIBRARY / "NOTICE.md").read_text(encoding="utf-8").split())
+        self.assertIn(f"`{drawn_file}` is not a file of the upstream model", notice)
+        self.assertIn("It is the project's own drawing, not Galaxea's geometry.", notice)
+        self.assertIn("never the finger's grey", look["looks"]["carriage-black"]["evidence"])
+        self.assertNotIn("nylon", look["about"])
+
+
 class PublicTests(unittest.TestCase):
     def test_the_writer_is_public_and_the_importer_private(self) -> None:
         def covered(relative: str) -> bool:
@@ -3513,6 +5134,120 @@ class PublicTests(unittest.TestCase):
                 imported.update(alias.name for alias in node.names if alias.asname is None)
         self.assertEqual({"DENIED_SHA256", "DENIED_NAME"} & assigned, set())
         self.assertLessEqual({"DENIED_SHA256", "DENIED_NAME"}, imported)
+
+    def test_the_menagerie_robotiq_alone_carries_its_name(self) -> None:
+        # The user's decision of 2026-11-16 ("Menagerie model"): MuJoCo Menagerie's robotiq_2f85 (BSD-2-Clause) is the
+        # one Robotiq model the Library shows, under its own name; the user's own 2F-85 file and every other Robotiq model
+        # stay refused, by name and (the files known) by SHA-256.
+        for name in ("robotiq-2f-85", "Robotiq 2F-85", "robotiq-2f-85-1.5mm", "Robotiq 2F-85, 1.5 mm", "meshes/robotiq-2f-85.stl",
+                     "bodies/robotiq-2f-85/base-housing.stl", "licenses/mujoco_menagerie-robotiq_2f85.txt",
+                     "robotiq_2f85/assets/silicone_pad.stl", "ROBOTIQ 2F85"):
+            with self.subTest(allowed=name):
+                self.assertIsNone(library_write.DENIED_NAME.search(name))
+        for name in ("2F85_Opened.stl", "asset/2F85_Opened.stl", "robotiq-2f-85-opened.stl", "2f-85 opened", "ROBOTIQ_AGS-001-XXXX.stl",
+                     "Robotiq 3-Finger Adaptive Gripper", "robotiq_3f", "robotiq-3f", "Robotiq 2F-140", "robotiq-hand-e",
+                     "Robotiq", "robotiq.stl", "bodies/robotiq/base.stl", "xarm", "UFACTORY"):
+            with self.subTest(refused=name):
+                self.assertIsNotNone(library_write.DENIED_NAME.search(name))
+        self.assertEqual(library_write.DENIED_SHA256["b0df0eaca944c7401185ada85d22e3111b477c3484c6fa3fd915fce6d6811aaf"], "Robotiq 2F-85 (2F85_Opened.stl)")
+        self.assertEqual(library_write.DENIED_SHA256["49e96f7fceab20ebcf13b5c8467bf83d70716a846a109ad37818bc06d798f7a7"], "Robotiq 3F (ROBOTIQ_AGS-001-XXXX.stl)")
+        # The part is the Menagerie's silicone pad, byte for byte, under the folder's own licence at the pinned commit.
+        parts = _json(LIBRARY / "parts.json")["parts"]
+        robotiq = [part_id for part_id, part in parts.items() if re.search("robotiq", part_id + part["title"], re.IGNORECASE)]
+        self.assertEqual(robotiq, ["robotiq-2f-85"])
+        part = parts["robotiq-2f-85"]
+        self.assertEqual(part["title"], "Robotiq 2F-85")
+        self.assertEqual(part["license"], {"change": "unchanged", "holder": "ROS-Industrial (MuJoCo Menagerie's robotiq_2f85)",
+                                           "source": "https://github.com/google-deepmind/mujoco_menagerie/blob/f3b6013629c7b94f8ee93fd977b161fa8350f9bc/robotiq_2f85/assets/silicone_pad.stl",
+                                           "spdx": "BSD-2-Clause", "text": "licenses/mujoco_menagerie-robotiq_2f85.txt"})
+        data = (LIBRARY / part["mesh"]["file"]).read_bytes()
+        self.assertEqual(hashlib.sha256(data).hexdigest(), "ca20c0fa61e6d3ce7b04bed25360e048e31dfd88ace04187aa6d9e8f4ca3fd0f")
+        self.assertNotIn(hashlib.sha256(data).hexdigest(), DENIED_SHA256)
+        text = (LIBRARY / part["license"]["text"]).read_text(encoding="utf-8")
+        self.assertTrue(text.startswith("Copyright (c) 2013, ROS-Industrial\nAll rights reserved.\n"), text[:80])
+        self.assertEqual(hashlib.sha256(text.encode("utf-8")).hexdigest(), "3d5edd18d1e22a17666e9bb84270171ed5ac90b192d24e0177fd171708ea2316")
+
+    def test_a_model_under_the_2f85_name_is_one_the_library_pins(self) -> None:
+        # The review of 2026-11-16: since "robotiq" passes before "2F-85", a copy of the user's own 2F85_Opened.stl under
+        # another 80-byte header (another SHA-256) and a 2F-85 name passed both the name and the hash.  Its triangles are
+        # not hashed (the file is never read): a 3D model under web/ whose path names the 2F-85 is one of
+        # MENAGERIE_2F85_MODELS at its SHA-256, and showcase() (so library_write --check and the site build) refuses any
+        # other, whatever its header, folder, case or format.
+        self.assertEqual(library_write.MENAGERIE_2F85_MODELS, MENAGERIE_2F85_MODELS)
+        self.assertEqual((library_write.MENAGERIE_2F85_NAME.pattern, library_write.MENAGERIE_2F85_NAME.flags & re.IGNORECASE, library_write.MODEL_SUFFIXES),
+                         (MENAGERIE_2F85_NAME.pattern, re.IGNORECASE, MODEL_SUFFIXES))
+        parts = _json(LIBRARY / "parts.json")
+        with tempfile.TemporaryDirectory() as folder:
+            web = Path(folder) / "web"
+            for relative in ("library", "vendor", "samples"):
+                shutil.copytree(WEB / relative, web / relative)
+            library = web / "library"
+            self.assertEqual(library_write.showcase(parts, library)[0], [])
+            pad = (library / "bodies" / "robotiq-2f-85" / "pad.stl").read_bytes()
+            mesh = (library / "meshes" / "robotiq-2f-85.stl").read_bytes()
+            for relative, data in (("library/bodies/robotiq-2f-85/pad.stl", b"another header".ljust(80, b" ") + pad[80:]),
+                                   ("samples/Robotiq_2F85_pad.STL", pad),
+                                   ("library/meshes/robotiq-2f-85-opened.obj", b"o pad\n"),
+                                   ("vendor/robotiq 2f-85.stl", mesh)):
+                with self.subTest(file=relative):
+                    target = web / relative
+                    kept = target.read_bytes() if target.exists() else None
+                    target.write_bytes(data)
+                    self.assertIn(f"web/{relative} names the Robotiq 2F-85 but is no file of MuJoCo Menagerie's model at its pinned SHA-256 "
+                                  f"(MENAGERIE_2F85_MODELS; the user's own 2F-85 file is never published): remove it, or pin a body built "
+                                  f"anew from the Menagerie's files there", library_write.showcase(parts, library)[0])
+                    if kept is None:
+                        target.unlink()
+                    else:
+                        target.write_bytes(kept)
+            # Its pictures, fits, art, scene and licence carry the name too, and are no models.
+            self.assertEqual(library_write.showcase(parts, library)[0], [])
+
+    def test_the_leflexitac_s_import_needs_no_scratch_recipe(self) -> None:
+        # The review of 2026-11-17: the LeFlexiTac's recipe was written in a scratch folder only, so the importer could not
+        # be run from the user's tree.  It is the importer's own (LEFLEXITAC_RECIPE), its mesh the Library's copy where the
+        # source tree holds no download (the pinned SHA-256 checked either way), and it gives parts.json's part again.
+        path = ROOT / "tools" / "library_import.py"
+        if not path.exists():
+            return  # the importer is private: not in the public copy
+        spec = importlib.util.spec_from_file_location("library_import", path)
+        module = importlib.util.module_from_spec(spec)
+        kept, searched = sys.dont_write_bytecode, list(sys.path)
+        try:
+            spec.loader.exec_module(module)
+        finally:
+            sys.dont_write_bytecode, sys.path[:] = kept, searched
+        (row,) = [row for row in module.PARTS if row["part"] == "leflexitac"]
+        self.assertIsInstance(row["recipe"], dict)
+        with tempfile.TemporaryDirectory() as folder:
+            document, meshes = module.build(Path(folder), only={"leflexitac"})
+        self.assertEqual(document["parts"], {"leflexitac": _json(LIBRARY / "parts.json")["parts"]["leflexitac"]})
+        self.assertEqual(meshes, {"meshes/leflexitac.stl": (LIBRARY / "meshes" / "leflexitac.stl").read_bytes()})
+
+    def test_the_deny_list_lets_the_xarm_gripper_card_alone_pass(self) -> None:
+        # The user's word of 2026-11-17 ("xarm原装夹爪"): the names of the one xArm Gripper card (Menagerie's
+        # ufactory_xarm7, BSD-3-Clause) pass; every other name the list denied before stays denied, by its xarm or
+        # ufactory and by its robotiq.  The review of 2026-11-17: after the card's id or the model folder only the
+        # Library's own extensions (no ufactory-xarm.g1.stl), and no Robotiq 2F-85 name here, which the Robotiq line's
+        # own test holds (its first line of the list replaces this one's at the merge).
+        passing = ("ufactory-xarm", "xArm Gripper", "XARM GRIPPER", "meshes/ufactory-xarm.stl", "scenes/ufactory-xarm.json",
+                   "bodies/ufactory-xarm/base-shell.stl", "ufactory-xarm-1mm", "ufactory-xarm-1.5mm", "ufactory-xarm-2mm.json",
+                   "ufactory-xarm-3mm.json.gz", "ufactory-xarm-1.5mm.exploded.card.webp", "ufactory-xarm-2mm.exploded.webp",
+                   "ufactory-xarm-1mm.assembled.webp", "mujoco_menagerie-ufactory_xarm7.txt",
+                   "licenses/mujoco_menagerie-ufactory_xarm7.txt",
+                   "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/f3b6013629c7b94f8ee93fd977b161fa8350f9bc/ufactory_xarm7/assets/base_link.stl",
+                   "https://github.com/google-deepmind/mujoco_menagerie/blob/f3b6013629c7b94f8ee93fd977b161fa8350f9bc/ufactory_xarm7/assets/left_finger.stl")
+        denied = ("xarm", "XARM", "ufactory", "UFACTORY", "UFACTORY xArm Gripper", "xarm-gripper", "xarm-gripper.stl",
+                  "xArm Gripper G1", "UFACTORY xArm Gripper G1", "the xArm Gripper", "xArm Gripper ", "xArm Gripper\n",
+                  "ufactory-g1", "vendor/ufactory-g1/body_shell.stl", "ufactory-xarm-g1", "ufactory-xarm-g1.stl", "ufactory-xarm7",
+                  "ufactory-xarm g1", "ufactory-xarm-2mm-g1", "ufactory-xarm-mm", "ufactory-xarm-gripper", "my-ufactory-xarm.stl",
+                  "ufactory-xarm.g1.stl", "ufactory-xarm.gripper_g1.stl", "ufactory-xarm-2mm.g1.webp", "ufactory-xarm.stl.zip",
+                  "ufactory-xarm.exploded.png", "ufactory_xarm7", "ufactory_xarm7.g1.stl", "ufactory_xarm7.txt.stl",
+                  "ufactory_xarm", "ufactory_xarm_gripper", "ufactory_xarm7_g1", "ufactory_xarm6/link1.stl", "xufactory_xarm7", "xarm7",
+                  "ufactory xarm", "xArm Lite 6", "robotiq", "Robotiq 3F", "robotiq_3f")
+        self.assertEqual([name for name in passing if library_write.DENIED_NAME.search(name)], [])
+        self.assertEqual([name for name in denied if not library_write.DENIED_NAME.search(name)], [])
+        self.assertTrue(all(re.search(r"robotiq|xarm|ufactory", name, re.IGNORECASE) for name in denied), "each was denied before")
 
     def test_the_new_files_are_python_3_9(self) -> None:
         # CI runs the suite on 3.9 too: no match, parenthesised context managers or other later syntax.
@@ -3599,8 +5334,10 @@ class PageTests(unittest.TestCase):
         scripts = [(attributes.get("src"), attributes.get("type")) for tag, attributes in self.page.elements if tag == "script"]
         # The generator's addresses of before sent on first (web/forward.js, 2026-11-16: the Library is the first page),
         # the look's choice, in <head> (web/theme.js, 2026-11-06), the header's counts refreshed on the static site
-        # (web/counts.js, the review of 2026-11-16: the first page's counts had stayed the build's), then the page's own.
-        self.assertEqual(scripts, [("static/forward.js", None), ("static/theme.js", None), ("static/counts.js", None), ("static/library.js", None)],
+        # (web/counts.js, the review of 2026-11-16: the first page's counts had stayed the build's), the FlexiTac hardware's
+        # files and the reading boards' rule (web/boards.js, 2026-11-17), then the page's own.
+        self.assertEqual(scripts, [("static/forward.js", None), ("static/theme.js", None), ("static/counts.js", None), ("static/boards.js", None),
+                                   ("static/library.js", None)],
                          "no backend.js, Pyodide or three.js on the Library")
         sheets = [attributes.get("href") for tag, attributes in self.page.elements if tag == "link" and attributes.get("rel") == "stylesheet"]
         self.assertEqual(sheets, ["static/styles.css", "static/theme.css", "static/library.css"])
@@ -4042,13 +5779,14 @@ class PageTests(unittest.TestCase):
         # The writer's data the cards read: each gripper part's default its 2 mm sensor, at four pitches from 1 mm.
         entries = _json(LIBRARY / "entries.json")
         carded = [part for part in entries["order"] if part != "umi-finray" and part not in {f["shelf"] for f in entries["families"].values()}]
-        self.assertEqual(len(carded), 7)
+        self.assertEqual(carded, GRIPPERS, "the grippers' cards in the grid's order (the LeFlexiTac's first, before the Robotiq 2F-85's "
+                         "and the Franka Hand's, 2026-11-16)")
         for part in carded:
             with self.subTest(part=part):
                 record = entries["parts"][part]
                 self.assertEqual(entries["variants"][record["default"]]["pitch_mm"], 2)
                 self.assertEqual(min(entries["variants"][key]["pitch_mm"] for key in record["variants"]), 1)
-        self.assertEqual(len(grid_cards(entries)), 13, "the grippers' seven cards and the UMI shelf's six shapes (its four pitches and "
+        self.assertEqual(len(grid_cards(entries)), len(GRIPPERS) + 6, "the grippers' cards and the UMI shelf's six shapes (its four pitches and "
                          "its Tapered tips card until 2026-11-16)")
 
     def test_the_umi_shelf_is_one_card_per_shape(self) -> None:
@@ -4113,7 +5851,7 @@ class PageTests(unittest.TestCase):
         self.assertEqual((umi["shelf"], umi["card"], umi["default"]), ("Six finger shapes, straight to pointed.", "Straight finger", "umi-finray-2mm"))
         self.assertEqual([(card["title"], card["default"]) for card in entries["families"][TAPERS]["cards"]],
                          [(title, default) for _, title, _, default in TAPER_CARDS])
-        self.assertEqual(grid_cards(entries)[7:], ["umi-finray-2mm"] + [default for *_, default in TAPER_CARDS])
+        self.assertEqual(grid_cards(entries)[len(GRIPPERS):], ["umi-finray-2mm"] + [default for *_, default in TAPER_CARDS])
 
     def test_the_showcase_is_the_grid_s_first_card_and_a_page_of_its_own(self) -> None:
         # The user's request of 2026-11-12 ("在lib最上面一栏放置flexitac+xarm gripper的原始版本的visualization; 这个版本是人手
@@ -4123,7 +5861,7 @@ class PageTests(unittest.TestCase):
         # by Surface, no download of the generator's.  Without showcase.json the Library is the one of before.
         script = self.script
         self.assertIn(f'const SHOWCASE_FORMAT = "{library_write.SHOWCASE_FORMAT}";', script)
-        self.assertIn('const SHOWCASE_VIEW = "assembled";', script)
+        self.assertIn('const SHOWCASE_VIEW = "exploded";', script)
         start = _inner(script, "start")
         self.assertIn("const [index, showcase] = await Promise.all([json(`${BASE}entries.json`), json(`${BASE}showcase.json`).catch(() => null)]);", start)
         self.assertIn("state.showcase = Object.hasOwn(index.variants, showcase?.id) || Object.hasOwn(index.parts, showcase?.id) ? null : showcaseOf(showcase);", start)
@@ -4173,8 +5911,11 @@ class PageTests(unittest.TestCase):
         self.assertIn('el("h2", {className: "lib-detail-title", id: "libDetailTitle", tabindex: "-1"}, whole(data.title)),', page)
         # Its line, then its line of detail (the sensor's size and fingers: the card's line no longer says them, 2026-11-15).
         self.assertIn('el("p", {className: "lib-detail-line"}, keep(data.text)),\n          el("p", {className: "lib-showcase-detail"}, keep(data.detail)),', page)
-        # No generator downloads, no Open in Gen by Surface, no pitch, no facts, no prose of its own.
-        for word in ("lib-open", "?part=", "renderDownloads", "lib-downloads", "lib-facts", "segments(", "lib-detail-note", "api/export", "Gerber ZIP"):
+        # No generator downloads, no Open in Gen by Surface, no pitch, no facts, no prose of its own.  (Since the user's
+        # request of 2026-11-17 the pad's own Gerber ZIPs and reading board in the download pills, from web/boards.js:
+        # tests/test_flexitac_downloads.py.)
+        self.assertIn('el("a", {className: "lib-pill", href, download: file, "data-hardware": kind}, label)', page)
+        for word in ("lib-open", "?part=", "renderDownloads", "data-export", "lib-facts", "segments(", "lib-detail-note", "api/export", "KINDS"):
             with self.subTest(absent=word):
                 self.assertNotIn(word, page)
         self.assertEqual(re.findall(r'"([A-Z][^"]*)"', page), [], "no word of its own (the back link's \"Library\" went with it, 2026-11-15)")
@@ -4646,7 +6387,8 @@ class FirstPageTests(unittest.TestCase):
         # The Library: its page's mark, then forward.js, the first script (before theme.js, which it may leave the
         # page before), no defer; the forwarding page: its mark, the same script, the look's (its background in the
         # visitor's look meanwhile) and a plain link to ./ for a browser without scripts, no header; the generator none.
-        for name, text, mark, scripts in (("index.html", self.library, "library", ["static/forward.js", "static/theme.js", "static/counts.js", "static/library.js"]),
+        for name, text, mark, scripts in (("index.html", self.library, "library", ["static/forward.js", "static/theme.js", "static/counts.js", "static/boards.js",
+                                                                                   "static/library.js"]),
                                           ("library.html", self.forwarding, "forward", ["static/forward.js", "static/theme.js"]),
                                           ("gen.html", self.generator, None, None)):
             with self.subTest(page=name):

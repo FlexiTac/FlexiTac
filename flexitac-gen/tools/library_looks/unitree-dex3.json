@@ -1,0 +1,25 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "unitree-dex3",
+ "about": "drawn after Unitree's product pictures of the Dex3-1 (unitree.com/Dex3-1: the hand upright beside an adult's hand, its sizes marked, and the hand on the G1), 2026-11-17: a hand black all over but for the grey metal blocks of the two fingers' knuckles at the palm's top; the palm a satin black shell; the fingers' and the thumb's first links black anodised aluminium frames, each holding a knurled black pad; the fingertips black rubber with a fingerprint's ridges (the Library's part, its cap drawn as the cap's hull: one mesh, one look).  Not modelled: the palm's knurled pad as a look of its own (the decimated palm keeps no clean edge round it), the screws (the meshes keep their holes), the cables.",
+ "smooth_deg": 35,
+ "part_look": "tip-rubber",
+ "looks": {
+  "tip-rubber": {"base": "rubber-black", "color": "#26272a", "roughness": 0.8, "env_intensity": 2.6, "evidence": "the hero picture: the fingertips are black rubber, #2b2e31 where a ridge is lit and #1a1b1c in the cap's middle, with a fine fingerprint's ridges and a soft sheen along the lit side, no sharp highlight"},
+  "link-anodized": {"base": "anodized-black", "color": "#25262a", "metalness": 0.4, "roughness": 0.55, "env_intensity": 3.0, "evidence": "the hero picture: each finger's frame is black anodised aluminium, #1a1b1c on its broad faces with lit edges and screw heads at #434a59; satin, lighter than the rubber where it faces the light"},
+  "pad-knurled": {"base": "rubber-black", "color": "#2c2d31", "env_intensity": 2.4, "evidence": "the hero picture: the knurled pads of the fingers' first links read #343943 to #3e4451, a matt black with no highlight, lighter than the frames round them (their knurl catches the light)"},
+  "palm-satin": {"base": "plastic-black-satin", "color": "#242528", "env_intensity": 2.6, "evidence": "the hero picture: the palm is a smooth black shell with a broad soft highlight, #454547 to #656566 where it turns to the light and #0f0f10 to #212327 in shadow"},
+  "knuckle-grey": {"base": "anodized-natural", "color": "#8a9198", "metalness": 0.5, "roughness": 0.5, "env_intensity": 1.6, "evidence": "the hero picture: the blocks at the base of the two fingers, at the palm's top, are grey metal, #7c8590 to #919aa5 under the studio's blue light, the one light metal of the hand.  At the homes the proximal links hide most of them: at the base look's metalness 1 with env_intensity 0.9 their slivers read #595c60 on average in the 2 mm Assembled picture (#6e7072 at the 90th percentile), darker than the photo; at metalness 0.5 and 1.6 (the I2RT YAM hub's way; the review of 2026-11-17) #777b7f, #9a9ea4 at the 90th percentile"}
+ },
+ "bodies": {
+  "bodies/unitree-dex3/palm.stl": {"sha256": "941baf1b2bd8eb7420d3fae40f7ba5a1d109aeed65bbf757dca01dc829468e49", "facets_sha256": "852246a408f3447ce724b94648b7c4efa629f6dbf49e931e3e66da2c26aed383", "weld_mm": 0.01, "components": [
+   {"name": "palm-knuckles", "look": "knuckle-grey", "pick": [{"box": [[76.0, -25.0, -50.0], [90.0, 25.0, 50.0]]}]},
+   {"name": "palm-shell", "look": "palm-satin", "pick": "rest"}
+  ]},
+  "bodies/unitree-dex3/proximal.stl": {"sha256": "08708172fca702c5f40cce3ec2bd3344d7c9fa7cf3e639d403e0b648e72124cd", "facets_sha256": "fe839ac205295693bf5d028df518b8e73acf66697bd8c10d2d81e58e92aea0be", "weld_mm": 0.01, "components": [
+   {"name": "proximal-pad", "look": "pad-knurled", "pick": [{"box": [[19.7, -14.7, -9.6], [44.2, -10.0, 10.6]]}]},
+   {"name": "proximal-frame", "look": "link-anodized", "pick": "rest"}
+  ]},
+  "bodies/unitree-dex3/thumb_0.stl": {"sha256": "a3c875844c6ab5cf024c0bb95a36b511269d42e2514eea3f59243904027f4e6b", "look": "link-anodized"}
+ }
+}

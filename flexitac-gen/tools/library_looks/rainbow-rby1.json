@@ -1,0 +1,18 @@
+{
+ "format": "flexitac-library-look/v1",
+ "part": "rainbow-rby1",
+ "about": "drawn after Rainbow Robotics' photos of the RB-Y1 (its product page and media kit, 2026-11-17: the robot cut out from the front and from three-quarters, and the photo of its teleoperation with the gripper in white light; they do not say which version of the gripper they show, and this 1.2 model's gripper stands nearer them than the v1.3 model's, docs/LIBRARY_VIEW.md): the gripper's housing, its rail block and both fingers black, a satin black with soft highlights (#191a1c to #2d2e30 in that photo), drawn as black anodised aluminium; the pad on each finger's inner face, the Library's part, black as every photo shows the fingers (the three-quarter photo's far finger reads #2b2a2a on its inner face, as its near one on its outer), drawn as black rubber, matte as the model's own material of the pad.  The model's gripper closes its own top (a recessed boss 56 mm across, where the wrist's last link, not drawn, stands on it), so the project draws nothing there.  No lettering is drawn.",
+ "smooth_deg": 35,
+ "part_look": "rubber-black",
+ "looks": {},
+ "bodies": {
+  "bodies/rainbow-rby1/ee_body.stl": {
+   "sha256": "870be7d956d2fab630dee864aefa9174ea59b85dcf0342289163256cec1c7241",
+   "look": "anodized-black"
+  },
+  "bodies/rainbow-rby1/ee_finger_1.stl": {
+   "sha256": "ff90e1efe93736fadba19dbe358a53dc7ceb8eee693c6ffb330d4c878e7da12a",
+   "look": "anodized-black"
+  }
+ }
+}
